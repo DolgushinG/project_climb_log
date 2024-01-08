@@ -1,96 +1,125 @@
-<x-guest-layout>
-    <x-auth-card>
-        <x-slot name="logo">
-            <a href="/">
-                <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-            </a>
-        </x-slot>
+@extends('layouts.main_page.app')
+@section('content')
+    @guest
+        <main id="main" class="main">
+            <div class="container">
+                <section
+                        class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
 
-        <!-- Validation Errors -->
-        <x-auth-validation-errors class="mb-4" :errors="$errors" />
+                                <div class="card mb-3">
 
-        <form method="POST" action="{{ route('register') }}">
-            @csrf
+                                    <div class="card-body">
 
-            <!-- Name -->
-            <div>
-                <x-label for="firstname" :value="__('Firstname')" />
+                                        <div class="pt-4 pb-2">
+                                            <h5 class="card-title text-center pb-0 fs-4">Create an Account</h5>
+                                            <p class="text-center small">Enter your personal details to create
+                                                account</p>
+                                        </div>
 
-                <x-input id="firstname" class="block mt-1 w-full" type="text" name="firstname" :value="old('firstname')" required autofocus />
+                                        <form method="POST" action="{{ route('register') }}"
+                                              class="row g-3 needs-validation">
+                                            @csrf
+
+                                            <!-- Name -->
+                                            <div class="col-12">
+                                                <label for="firstname" class="form-label">Ваше Имя</label>
+                                                <input type="text" name="firstname" class="form-control" id="firstname"
+                                                       value="{{old('firstname')}}" required autofocus>
+                                                <div class="invalid-feedback">Пожалуйста введите ваше имя</div>
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="lastname" class="form-label">Ваша Фамилия</label>
+                                                <input type="text" name="lastname" class="form-control" id="lastname"
+                                                       value="{{old('lastname')}}" required autofocus>
+                                                <div class="invalid-feedback">Пожалуйста введите вашу фамилию</div>
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="gender" class="form-label">Пол</label>
+                                                <select class="form-select" name="gender" id="gender" required>
+                                                    <option selected disabled value="">Укажите пол...</option>
+                                                    <option value="male">
+                                                        М
+                                                    </option>
+                                                    <option value="female">
+                                                        Ж
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="year" class="form-label">Год рождения</label>
+                                                <div class="input-group has-validation">
+                                                    <input type="text" name="year" class="form-control" id="year"
+                                                           value="{{old('year')}}" required autofocus>
+                                                    <div class="invalid-feedback">Введите год рождения</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="city" class="form-label">Город</label>
+                                                <div class="input-group has-validation">
+                                                    <input type="text" name="city" class="form-control" id="city"
+                                                           value="{{old('city')}}" required autofocus>
+                                                    <div class="invalid-feedback">Введите город</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="team" class="form-label">Команда</label>
+                                                <div class="input-group has-validation">
+                                                    <input type="text" name="team" class="form-control" id="team"
+                                                           value="{{old('team')}}" required autofocus>
+                                                    <div class="invalid-feedback">Введите команда</div>
+                                                </div>
+                                            </div>
+                                            <!-- Email Address -->
+                                            <div class="col-12">
+                                                <label for="email" class="form-label">Email</label>
+                                                <input type="email" name="email" class="form-control" id="email"
+                                                       value="{{old('email')}}" required autofocus>
+                                                <div class="invalid-feedback">Введите email</div>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <label for="password" class="form-label">Пароль</label>
+                                                <input type="password" name="password" class="form-control"
+                                                       id="password" required>
+                                                <div class="invalid-feedback">Введите пароль</div>
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="password_confirmation" class="form-label">Подтверждение
+                                                    пароля</label>
+                                                <input type="password" name="password_confirmation" class="form-control"
+                                                       id="password_confirmation" required>
+                                                <div class="invalid-feedback">Введите пароль</div>
+                                            </div>
+                                            {{--                                    <div class="col-12">--}}
+                                            {{--                                        <div class="form-check">--}}
+                                            {{--                                            <input class="form-check-input" name="terms" type="checkbox" value="" id="acceptTerms" required>--}}
+                                            {{--                                            <label class="form-check-label" for="acceptTerms">Я подтверждаю с ознакомлением <a href="#">моих </a></label>--}}
+                                            {{--                                            <div class="invalid-feedback">You must agree before submitting.</div>--}}
+                                            {{--                                        </div>--}}
+                                            {{--                                    </div>--}}
+                                            <div class="col-12">
+                                                <button class="btn btn-primary w-100" type="submit">Создать аккаунт
+                                                </button>
+                                            </div>
+                                            <div class="col-12">
+                                                <p class="small mb-0">Уже есть аккаунт <a href="{{ route('login') }}">Войти</a>
+                                                </p>
+                                            </div>
+                                        </form>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
             </div>
-
-            <div>
-                <x-label for="lastname" :value="__('Lastname')" />
-
-                <x-input id="lastname" class="block mt-1 w-full" type="text" name="lastname" :value="old('lastname')" required autofocus />
-            </div>
-
-            <div>
-{{--                <x-label for="gender" :value="__('Gender')" />--}}
-                <select name="gender">
-                    <option value="male">
-                        Male
-                    </option>
-                    <option value="female">
-                        Female
-                    </option>
-                </select>
-{{--                <x-input id="gender" class="block mt-1 w-full" type="text" name="gender" :value="old('gender')" required autofocus />--}}
-            </div>
-
-            <div>
-                <x-label for="year" :value="__('Year')" />
-
-                <x-input id="year" class="block mt-1 w-full" type="text" name="year" :value="old('year')" required autofocus />
-            </div>
-
-            <div>
-                <x-label for="city" :value="__('City')" />
-
-                <x-input id="city" class="block mt-1 w-full" type="text" name="city" :value="old('city')" required autofocus />
-            </div>
-
-            <div>
-                <x-label for="team" :value="__('Team')" />
-
-                <x-input id="team" class="block mt-1 w-full" type="text" name="team" :value="old('team')" required autofocus />
-            </div>
-
-            <!-- Email Address -->
-            <div class="mt-4">
-                <x-label for="email" :value="__('Email')" />
-
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required />
-            </div>
-
-            <!-- Password -->
-            <div class="mt-4">
-                <x-label for="password" :value="__('Password')" />
-
-                <x-input id="password" class="block mt-1 w-full"
-                                type="password"
-                                name="password"
-                                required autocomplete="new-password" />
-            </div>
-
-            <!-- Confirm Password -->
-            <div class="mt-4">
-                <x-label for="password_confirmation" :value="__('Confirm Password')" />
-
-                <x-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required />
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <a class="underline text-sm text-gray-600 hover:text-gray-900" href="{{ route('login') }}">
-                    {{ __('Already registered?') }}
-                </a>
-
-                <x-button class="ml-4">
-                    {{ __('Register') }}
-                </x-button>
-            </div>
-        </form>
-    </x-auth-card>
-</x-guest-layout>
+        </main>
+    @endguest<!-- End #main -->
+@endsection

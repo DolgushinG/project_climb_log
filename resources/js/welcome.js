@@ -15,7 +15,7 @@ $(document).on('click','#btn-participant', function(e) {
     $.ajax({
         type: 'POST',
         url: '/takePart',
-        data: {'set': value, 'event_id': event_id, 'user_id': user_id, 'category': category_value},
+        data: {'number_set': value, 'event_id': event_id, 'user_id': user_id, 'category': category_value},
         success: function(xhr, status, error) {
             // button.removeClass('btn-save-change')
             // button.addClass('btn-edit-change')

@@ -156,26 +156,30 @@ class EventsController extends Controller
 
         $form->display('id')->style('display', 'None');
         $form->hidden('owner_id')->value(Admin::user()->id);
-        $form->date('start_date', 'Дата старта')->placeholder('Дата старта');
-        $form->date('end_date', 'Дата окончания')->placeholder('Дата окончания');
-        $form->time('start_time', 'Время старта')->placeholder('Время старта');
-        $form->time('end_time', 'Время окончания')->placeholder('Время окончания');
-        $form->text('address', 'Адрес')->placeholder('Адрес');
+        $form->date('start_date', 'Дата старта')->placeholder('Дата старта')->required();
+        $form->date('end_date', 'Дата окончания')->placeholder('Дата окончания')->required();
+        $form->time('start_time', 'Время старта')->placeholder('Время старта')->required();
+        $form->time('end_time', 'Время окончания')->placeholder('Время окончания')->required();
+        $form->text('address', 'Адрес')->placeholder('Адрес')->required();
         $form->file('document', 'Прикрепить документ')->placeholder('Прикрепить документ');
-        $form->image('image', 'Афиша')->placeholder('Афиша');
-        $form->text('climbing_gym_name', 'Название скалодрома')->placeholder('Название скалодрома');
-        $form->text('city', 'Город')->placeholder('Город');
-        $form->number('count_routes', 'Кол-во трасс')->placeholder('Кол-во трасс');
-        $form->text('title', 'Название')->placeholder('Введи название');
-        $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название');
-        $form->url('link', 'Ссылка')->placeholder('Ссылка');
+        $form->image('image', 'Афиша')->placeholder('Афиша')->required();
+        $form->text('climbing_gym_name', 'Название скалодрома')->placeholder('Название скалодрома')->required();
+        $form->hidden('climbing_gym_name_eng')->default('1');
+        $form->text('city', 'Город')->placeholder('Город')->required();
+        $form->number('count_routes', 'Кол-во трасс')->placeholder('Кол-во трасс')->required();
+        $form->text('title', 'Название')->placeholder('Введи название')->required();
+        $form->hidden('title_eng')->default('1');;
+        $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
+        $form->url('link', 'Ссылка')->placeholder('Ссылка')->default('http://127.0.0.1:8000/')->required();
 //        $form->textarea('description', 'description');
-        $form->summernote('description', 'Описание')->placeholder('Описание');
-        $form->select('mode', 'Формат')->options([ 1 => '10 лучших трасс', 2 => 'Все трассы']);
+        $form->summernote('description', 'Описание')->placeholder('Описание')->required();
+        $form->select('mode', 'Формат')->options([ 1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
         $form->switch('active', 'Опубликовать сразу?');
 //        $form->display(trans('admin.created_at'));
 //        $form->display(trans('admin.updated_at'));
         $form->saving(function (Form $form) {
+            $form->climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
+            $form->title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
             if (Grades::all()->count() == 0){
                 Event::generation_route(Admin::user()->id, $form->count_routes);
             }

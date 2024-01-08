@@ -15,7 +15,7 @@ class GradesSeeder extends Seeder
     public function run()
     {
         function retry($count) {
-            for($i = 2; $i <= $count; $i++) {
+            for($i = 3; $i <= $count; $i++) {
                 $grades = array(
                     ['owner_id' => $i ,'grade' => '4', 'amount' => 3, 'value' => 100],
                     ['owner_id' => $i ,'grade' => '5', 'amount' => 4, 'value' => 150],
@@ -38,6 +38,6 @@ class GradesSeeder extends Seeder
                 DB::table('grades')->insert($grades);
             }
         }
-        retry(2);
+        retry(1);
     }
 }

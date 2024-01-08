@@ -1,4 +1,4 @@
-@extends('layouts.welcome_page.app')
+@extends('layouts.main_page.app')
 
 @section('content')
     <main id="main" class="main">
@@ -24,58 +24,66 @@
                     </thead>
                     <tbody>
                     @foreach($routes as $route)
-                    <tr>
-                        <th>{{$route->count}}</th>
-                        <th>{{$route->grade}}</th>
-                        <td>
-                            <input type="radio" class="btn-check" data-grade="{{$route->grade}}" name="{{$route->count}}" id="failed-{{$route->count}}" autocomplete="off" checked>
-                            <label class="btn btn-outline-danger" for="failed-{{$route->count}}">Не пролез</label>
-                        </td>
-                        <td>
-                            <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}" class="btn-check" name="{{$route->count}}" id="flash-{{$route->count}}" autocomplete="off">
-                            <label class="btn btn-outline-success" for="flash-{{$route->count}}">FLASH</label>
-                        </td>
-                        <td>
-                            <input type="radio" data-id="all-redpoint" class="btn-check"  data-grade="{{$route->grade}}" name="{{$route->count}}" id="redpoint-{{$route->count}}" autocomplete="off">
-                            <label class="btn btn-outline-danger" for="redpoint-{{$route->count}}">REDPOINT</label>
-                        </td>
-                    </tr>
+                        <tr>
+                            <th>{{$route->count}}</th>
+                            <th>{{$route->grade}}</th>
+                            <td>
+                                <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                       name="{{$route->count}}" id="failed-{{$route->count}}" autocomplete="off"
+                                       checked>
+                                <label class="btn btn-outline-danger" for="failed-{{$route->count}}">Не пролез</label>
+                            </td>
+                            <td>
+                                <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}" class="btn-check"
+                                       name="{{$route->count}}" id="flash-{{$route->count}}" autocomplete="off">
+                                <label class="btn btn-outline-success" for="flash-{{$route->count}}">FLASH</label>
+                            </td>
+                            <td>
+                                <input type="radio" data-id="all-redpoint" class="btn-check"
+                                       data-grade="{{$route->grade}}" name="{{$route->count}}"
+                                       id="redpoint-{{$route->count}}" autocomplete="off">
+                                <label class="btn btn-outline-danger" for="redpoint-{{$route->count}}">REDPOINT</label>
+                            </td>
+                        </tr>
                     @endforeach
                     </tbody>
                 </table>
 
 
-{{--                <div class="container text-center">--}}
-{{--                    <div class="row row-cols-5">--}}
-{{--                        @foreach($routes as $route)--}}
-{{--                        <div class="col"><label class="btn btn-primary">{{$route->count}}</label></div>--}}
-{{--                        <div class="col"><label class="btn btn-success">{{$route->grade}}</label></div>--}}
-{{--                            <div class="col" style="display: block">--}}
-{{--                                <input type="radio" class="btn-check" data-grade="{{$route->grade}}" name="{{$route->count}}" id="failed-{{$route->count}}" autocomplete="off" checked>--}}
-{{--                                <label class="btn btn-outline-danger" for="failed-{{$route->count}}">FAILED</label>--}}
-{{--                            </div>--}}
-{{--                        <div class="col">--}}
-{{--                            <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}" class="btn-check" name="{{$route->count}}" id="flash-{{$route->count}}" autocomplete="off">--}}
-{{--                            <label class="btn btn-outline-success" for="flash-{{$route->count}}">FLASH</label>--}}
-{{--                        </div>--}}
-{{--                        <div class="col">--}}
-{{--                            <input type="radio" class="btn-check"  data-grade="{{$route->grade}}" name="{{$route->count}}" id="redpoint-{{$route->count}}" autocomplete="off">--}}
-{{--                            <label class="btn btn-outline-danger" for="redpoint-{{$route->count}}">REDPOINT</label>--}}
-{{--                        </div>--}}
-{{--                        <div class="col"> <i class="bi bi-emoji-heart-eyes-fill"></i> </div>--}}
-{{--                        @endforeach--}}
-{{--                    </div>--}}
-{{--                </div>--}}
+                {{--                <div class="container text-center">--}}
+                {{--                    <div class="row row-cols-5">--}}
+                {{--                        @foreach($routes as $route)--}}
+                {{--                        <div class="col"><label class="btn btn-primary">{{$route->count}}</label></div>--}}
+                {{--                        <div class="col"><label class="btn btn-success">{{$route->grade}}</label></div>--}}
+                {{--                            <div class="col" style="display: block">--}}
+                {{--                                <input type="radio" class="btn-check" data-grade="{{$route->grade}}" name="{{$route->count}}" id="failed-{{$route->count}}" autocomplete="off" checked>--}}
+                {{--                                <label class="btn btn-outline-danger" for="failed-{{$route->count}}">FAILED</label>--}}
+                {{--                            </div>--}}
+                {{--                        <div class="col">--}}
+                {{--                            <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}" class="btn-check" name="{{$route->count}}" id="flash-{{$route->count}}" autocomplete="off">--}}
+                {{--                            <label class="btn btn-outline-success" for="flash-{{$route->count}}">FLASH</label>--}}
+                {{--                        </div>--}}
+                {{--                        <div class="col">--}}
+                {{--                            <input type="radio" class="btn-check"  data-grade="{{$route->grade}}" name="{{$route->count}}" id="redpoint-{{$route->count}}" autocomplete="off">--}}
+                {{--                            <label class="btn btn-outline-danger" for="redpoint-{{$route->count}}">REDPOINT</label>--}}
+                {{--                        </div>--}}
+                {{--                        <div class="col"> <i class="bi bi-emoji-heart-eyes-fill"></i> </div>--}}
+                {{--                        @endforeach--}}
+                {{--                    </div>--}}
+                {{--                </div>--}}
                 <div id="mobile-fixed" class="btn-container-desktop-fixed">
-                    <button type="button" id="btn-send-result" data-owner-id="{{$event->owner_id}}" data-id="{{$event->id}}" data-user-id="{{Auth()->user()->id}}" class="btn btn-success button-desktop-fixed rounded-pill">Внести</button>
+                    <button type="button" id="btn-send-result" data-owner-id="{{$event->owner_id}}"
+                            data-id="{{$event->id}}" data-user-id="{{Auth()->user()->id}}"
+                            class="btn btn-success button-desktop-fixed rounded-pill">Внести
+                    </button>
                 </div>
-                    <!-- End Table with stripped rows -->
+                <!-- End Table with stripped rows -->
 
             </div>
         </section>
     </main>
     <script>
-        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             $(document).ready(function () {
                 {
                     var mobile = $('#mobile-fixed')
@@ -89,12 +97,12 @@
         }
     </script>
     <script>
-        $(document).on('click','#all-flash', function(e) {
+        $(document).on('click', '#all-flash', function (e) {
             var check = document.querySelector("#all-flash"),
                 radios = document.querySelectorAll("[data-id='all-flash']");
 
             if (check.textContent === "Отметить все FLASH") {
-                for( i = 0; i < radios.length; i++ ) {
+                for (i = 0; i < radios.length; i++) {
                     if (radios[i].checked === false) {
                         radios[i].checked = true;
                         check.textContent = "Сбросить все FLASH"
@@ -102,22 +110,22 @@
                 }//for
                 //If the second radio is checked
             } else {
-                for( i = 0; i < radios.length; i++ ) {
+                for (i = 0; i < radios.length; i++) {
                     //And the elements are radios
                     if (radios[i].checked === true) {
                         radios[i].checked = false;
                         check.textContent = "Отметить все FLASH"
                     }
-                    }//if
-                }//for
+                }//if
+            }//for
             return null
         });
-        $(document).on('click','#all-redpoint', function(e) {
+        $(document).on('click', '#all-redpoint', function (e) {
             var check = document.querySelector("#all-redpoint"),
                 radios = document.querySelectorAll("[data-id='all-redpoint']");
 
             if (check.textContent === "Отметить все REDPOINT") {
-                for( i = 0; i < radios.length; i++ ) {
+                for (i = 0; i < radios.length; i++) {
                     if (radios[i].checked === false) {
                         radios[i].checked = true;
                         check.textContent = "Сбросить все REDPOINT"
@@ -125,7 +133,7 @@
                 }//for
                 //If the second radio is checked
             } else {
-                for( i = 0; i < radios.length; i++ ) {
+                for (i = 0; i < radios.length; i++) {
                     //And the elements are radios
                     if (radios[i].checked === true) {
                         radios[i].checked = false;
@@ -135,7 +143,7 @@
             }//for
             return null
         });
-        $(document).on('click','#btn-send-result', function(e) {
+        $(document).on('click', '#btn-send-result', function (e) {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -152,7 +160,7 @@
                 type: 'POST',
                 url: '/sendResultParticipant',
                 data: {'result': results, 'event_id': event_id, 'user_id': user_id, 'owner_id': owner_id},
-                success: function(xhr, status, error) {
+                success: function (xhr, status, error) {
                     // button.removeClass('btn-save-change')
                     // button.addClass('btn-edit-change')
                     button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
@@ -169,7 +177,7 @@
                         button.css('pointer-events', 'none');
                     }, 6000);
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
                         '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
                     setTimeout(function () {

@@ -25,9 +25,11 @@ class CreateEventsTable extends Migration
             $table->longText('description');
             $table->string('image');
             $table->string('climbing_gym_name');
+            $table->string('climbing_gym_name_eng');
             $table->string('city');
             $table->integer('count_routes');
             $table->string('title');
+            $table->string('title_eng');
             $table->string('subtitle');
             $table->string('link');
             $table->integer('mode');

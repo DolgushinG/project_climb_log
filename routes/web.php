@@ -27,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/getProfileOverview', [App\Http\Controllers\ProfileController::class, 'getTabContentOverview'])->name('getProfileOverview');
     Route::get('/getProfileSetting', [App\Http\Controllers\ProfileController::class, 'getTabContentSetting'])->name('getTabContentSetting');
     Route::get('/getProfileEdit', [App\Http\Controllers\ProfileController::class, 'getTabContentEdit'])->name('getTabContentEdit');
-    Route::get('/getProfileChangePassword', [App\Http\Controllers\ProfileController::class, 'getTabContentChangePassword'])->name('getTabContentChangePassword');
+    Route::get('/getProfileEvents', [App\Http\Controllers\ProfileController::class, 'getTabContentEvents'])->name('getTabContentEvents');
     Route::post('/takePart', [App\Http\Controllers\EventsController::class, 'store'])->name('takePart');
     Route::post('/sendResultParticipant', [App\Http\Controllers\EventsController::class, 'sendResultParticipant'])->name('sendResultParticipant');
     Route::get('/routes/event/{title}', [App\Http\Controllers\EventsController::class, 'listRoutesEvent'])->name('listRoutesEvent');

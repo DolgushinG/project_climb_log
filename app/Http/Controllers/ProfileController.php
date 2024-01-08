@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Event;
+use App\Models\FinalParticipantResult;
+use App\Models\Participant;
 use App\Models\Rating;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -69,13 +72,32 @@ class ProfileController extends Controller
         return view('profile.edit-profile', compact(['user']));
     }
 
-    public function getTabContentChangePassword() {
-        $user = User::find(Auth()->user()->id);
+    public function getTabContentEvents() {
+        $user_id = Auth()->user()->id;
+        FinalParticipantResult::counting_final_place(10);
+        $events_id = Participant::where('user_id', '=', $user_id)->pluck('event_id');
+        $events = Event::whereIn('id', $events_id)->get();
+        foreach ($events as $event){
+            $event['amount_participant'] = Participant::where('event_id', '=', $event->id)->get()->count();
+            if(Participant::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->active){
+                $status = "Внес результаты";
+            }else{
+                $status = "Необходимо добавить результаты";
+            }
+            $user_places = FinalParticipantResult::counting_final_place($event->id);
+            if(empty($user_places)){
+                $user_places_exist = 'Нет результата';
+            } else {
+                $user_places_exist = $user_places[$user_id];
+            }
+            $event['participant_active'] = $status;
+            $event['user_place'] = $user_places_exist;
+        }
 //        $userAndCategories = UserAndCategories::where('user_id','=',$user->id)->distinct()->get('category_id');
 //        $categories = Category::whereIn('id', $userAndCategories)->get();
 //        $notCategories = Category::whereNotIn('id', $userAndCategories)->get();
 //        $grades = Grade::all();
-        return view('profile.change-password', compact(['user']));
+        return view('profile.events', compact(['events']));
     }
     public function editChanges(Request $request) {
         $messages = array(

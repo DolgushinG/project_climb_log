@@ -37,6 +37,9 @@ class ResultParticipant extends Model
         if ($count_route_passed == 0) {
             $count_route_passed = 1;
         }
+//        if($route_id == 19){
+//            dd(sqrt($active_participant / $count_route_passed ));
+//        }
         return sqrt($active_participant / $count_route_passed );
     }
     public function get_value_route($attempt, $value_category, $format) {

@@ -9,10 +9,10 @@ $(document).on('click', '#edit', function () {
     $('#tab-edit').addClass('show active');
     getProfile('Edit');
 });
-$(document).on('click', '#change-password', function () {
+$(document).on('click', '#events', function () {
     deactivateAllTabs();
-    $('#change-password').addClass('show active');
-    getProfile('ChangePassword');
+    $('#events').addClass('show active');
+    getProfile('Events');
 });
 $(document).on('click', '#setting', function () {
     deactivateAllTabs();
@@ -20,7 +20,7 @@ $(document).on('click', '#setting', function () {
     getProfile('Setting');
 });
 function deactivateAllTabs() {
-    $('#tab-overview, #tab-edit, #tab-setting, #tab-change-password').removeClass('show active');
+    $('#tab-overview, #tab-edit, #tab-setting, #tab-events').removeClass('show active');
 }
 function getProfile(tab, id='#tabContent') {
     $.ajaxSetup({

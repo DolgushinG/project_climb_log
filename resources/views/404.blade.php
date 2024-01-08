@@ -1,4 +1,4 @@
-@extends('layouts.main.app')
+@extends('layouts.main_page.app')
 @section('content')
     <!-- Slider Start -->
     <main>

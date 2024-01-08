@@ -20,7 +20,7 @@ $(document).on('click', '#btn-participant', function (e) {
     type: 'POST',
     url: '/takePart',
     data: {
-      'set': value,
+      'number_set': value,
       'event_id': event_id,
       'user_id': user_id,
       'category': category_value

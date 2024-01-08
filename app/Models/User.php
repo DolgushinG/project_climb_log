@@ -68,4 +68,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Participant::class);
     }
+
+    public static function category($category_id)
+    {
+        return ParticipantCategory::find($category_id)->category;
+    }
 }

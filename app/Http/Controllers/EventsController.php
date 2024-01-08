@@ -33,13 +33,15 @@ class EventsController extends Controller
         }
     }
     public function show(Request $request, $climbing_gym, $title){
-        $event = Event::where('title', '=', $title)->where('climbing_gym_name', '=', $climbing_gym)->where('active', '=', 1)->first();
+        $event = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('active', '=', 1)->first();
         $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
-        $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id);
+
         foreach ($sets as $set){
-            $set->free = $set->max_participants - $participants_event->where('set', '=', $set->id)->count();
+            $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('set', '=', $set->number_set)->count();
+            $set->free = $set->max_participants - $participants_event;
             $a = $set->max_participants;
             $b = $set->free;
+
             if ($a === $b) {
                 $percent = 0;
             } elseif ($a < $b) {
@@ -50,6 +52,7 @@ class EventsController extends Controller
                 $percent = $diff / $a * 100;
             }
             $set->procent = intval($percent);
+
         }
         if($event){
             $categories = ParticipantCategory::all();
@@ -60,7 +63,7 @@ class EventsController extends Controller
 
     }
     public function get_participants(Request $request,$climbing_gym, $title){
-        $event = Event::where('title', '=', $title)->first();
+        $event = Event::where('title_eng', '=', $title)->first();
         $participants = array();
         $participant_event = Participant::where('event_id', '=',$event->id)->get();
         $users_id = $participant_event->pluck('user_id')->toArray();
@@ -75,7 +78,7 @@ class EventsController extends Controller
                     'firstname' => $users[$index]['firstname'],
                     'lastname' => $users[$index]['lastname'],
                     'city' => $users[$index]['city'],
-                    'year' => $users[$index]['year'],
+                    'team' => $users[$index]['team'],
                     'set' => $user['set'],
                     'time' => $set->time.' '.trans_choice('somewords.'.$set->day_of_week, 10),
                     'gender' => $users[$index]['gender'],
@@ -89,18 +92,32 @@ class EventsController extends Controller
     }
 
     public function get_final_results(Request $request, $climbing_gym, $title){
-        $event = Event::where('title', '=', $title)->first();
+        $event = Event::where('title_eng', '=', $title)->first();
         $this->refresh_final_points_all_participant($event->id);
-        $final_results = FinalParticipantResult::where('event_id', '=', $event->id)->get()->toArray();
+        $final_results = FinalParticipantResult::where('event_id', '=', $event->id)->orderBy('final_points', 'DESC')->get()->toArray();
+        $user_ids = FinalParticipantResult::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+        $stats = new stdClass();
+        $female_categories = array();
+        $male_categories = array();
+        $stats->male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->get()->count();
+        $stats->female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->get()->count();
+        $categories = ParticipantCategory::all();
+        foreach ($categories as $category){
+            $female_categories[$category->id] = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->where('category', '=', $category->id)->get()->count();
+            $male_categories[$category->id] = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->where('category', '=', $category->id)->get()->count();
+        }
+        $stats->female_categories = $female_categories;
+        $stats->male_categories = $male_categories;
         $result = [];
         foreach ($final_results as $res) {
             $user = User::where('id', '=', $res['user_id'])->first();
             $res['user_name'] = $user->firstname.' '.$user->lastname;
             $res['gender'] = $user->gender;
             $res['city'] = $user->city;
+            $res['category_id'] = $user->category;
             $result[] = $res;
         }
-        return view('event.final_result', compact('event', 'result'));
+        return view('event.final_result', compact('event', 'result',  'categories', 'stats'));
     }
 
     public function store(StoreRequest $request) {
@@ -108,7 +125,7 @@ class EventsController extends Controller
         $participant = new Participant;
         $participant->event_id = $request->event_id;
         $participant->user_id = $request->user_id;
-        $participant->set = $request->set;
+        $participant->set = $request->number_set;
         $participant->owner_id = Event::find($request->event_id)->owner_id;
         $participant->active = 0;
         $participant->save();
@@ -234,14 +251,14 @@ class EventsController extends Controller
                     ->where('user_id', '=', $user)
                     ->where('route_id', '=', $route['route_id'])
                     ->first();
-                $gender = User::gender($user);
-                $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
-                $coefficient = ResultParticipant::get_coefficient($event_id, $route['route_id'], $gender);
-                $value_route = (new \App\Models\ResultParticipant)->get_value_route($user_model->attempt, $value_category, $event->mode);
-                $points += $coefficient + $value_route;
-                $point_route = $coefficient + $value_route;
-                $user_model->points = $point_route;
-                if($user_model->attempt != 0){
+                if($user_model->attempt != 0) {
+                    $gender = User::gender($user);
+                    $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
+                    $coefficient = ResultParticipant::get_coefficient($event_id, $route['route_id'], $gender);
+                    $value_route = (new \App\Models\ResultParticipant)->get_value_route($user_model->attempt, $value_category, $event->mode);
+                    $points += $coefficient + $value_route;
+                    $point_route = $coefficient + $value_route;
+                    $user_model->points = $point_route;
                     $routes_only_passed[] = $user_model;
                 }
             }
@@ -259,6 +276,7 @@ class EventsController extends Controller
             $final_participant_result->final_points = $points;
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $user;
+//            $final_participant_result->user_place = $user;
             $final_participant_result->save();
 
 
@@ -266,10 +284,11 @@ class EventsController extends Controller
 
     }
 
+
     public function listRoutesEvent(Request $request, $title) {
 
 
-        $event = Event::where('title', '=', $title)->first();
+        $event = Event::where('title_eng', '=', $title)->first();
         $grades = Grades::where('owner_id', '=', $event->owner_id)->get();
         $routes = [];
         $main_count = 1;

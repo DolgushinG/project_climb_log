@@ -1077,6 +1077,9 @@ select {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
 }
+.pb-0 {
+  padding-bottom: 0px;
+}
 .pb-1 {
   padding-bottom: 0.25rem;
 }
@@ -1207,10 +1210,6 @@ select {
 .text-green-600 {
   --tw-text-opacity: 1;
   color: rgb(22 163 74 / var(--tw-text-opacity));
-}
-.text-indigo-600 {
-  --tw-text-opacity: 1;
-  color: rgb(79 70 229 / var(--tw-text-opacity));
 }
 .text-indigo-700 {
   --tw-text-opacity: 1;

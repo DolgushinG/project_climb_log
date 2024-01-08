@@ -19,6 +19,7 @@ class CreateFinalParticipantResultTable extends Migration
             $table->integer('event_id');
             $table->integer('user_id');
             $table->float('final_points');
+            $table->integer('user_place');
             $table->timestamps();
         });
     }

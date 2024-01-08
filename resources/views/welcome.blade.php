@@ -1,4 +1,4 @@
-@extends('layouts.welcome_page.app')
+@extends('layouts.main_page.app')
 @section('content')
 
     <!-- Slider Start -->
@@ -16,20 +16,29 @@
                                 @endguest
                                 @auth
                                     @if(\App\Models\User::user_participant($event->id))
-                                        <button href="{{route('takePart')}}" disabled class="btn border-t-neutral-500 rounded-pill">Вы принимаете участие</button>
+                                        <button href="{{route('takePart')}}" disabled
+                                                class="btn border-t-neutral-500 rounded-pill">Вы принимаете участие
+                                        </button>
                                         @if(\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
-                                            <button href="#" class="btn border-t-neutral-500 rounded-pill" disabled >Вы внесли результаты</button>
+                                            <button href="#" class="btn border-t-neutral-500 rounded-pill" disabled>Вы
+                                                внесли результаты
+                                            </button>
                                         @else
-                                            <a href="{{route('listRoutesEvent', $event->title)}}" class="btn btn-success rounded-pill">Внести результаты</a>
+                                            <a href="{{route('listRoutesEvent', $event->title_eng)}}"
+                                               class="btn btn-success rounded-pill">Внести результаты</a>
                                         @endif
 
                                     @else
                                         <div class="form-floating mb-3">
-                                            <select class="form-select" id="floatingSelect" aria-label="Floating label select example" required>
+                                            <select class="form-select" id="floatingSelect"
+                                                    aria-label="Floating label select example" required>
                                                 <option selected disabled value="">Открыть для выбора сета</option>
                                                 @foreach($sets as $set)
                                                     @if($set->free != 0)
-                                                        <option value="{{$set->id}}">Сет {{$set->number_set}} (@lang('somewords.'.$set->day_of_week)) {{$set->time}} (еще мест {{$set->free}})</option>
+                                                        <option value="{{$set->number_set}}">Сет {{$set->number_set}}
+                                                            (@lang('somewords.'.$set->day_of_week)) {{$set->time}} (еще
+                                                            мест {{$set->free}})
+                                                        </option>
                                                     @endif
                                                 @endforeach
                                             </select>
@@ -37,35 +46,46 @@
                                         </div>
                                         @if(!Auth::user()->category)
                                             <div class="form-floating mb-3">
-                                                <select class="form-select" id="floatingSelectCategory" aria-label="Floating label select example" required>
-                                                    <option selected disabled value="">Открыть для выбора категории</option>
+                                                <select class="form-select" id="floatingSelectCategory"
+                                                        aria-label="Floating label select example" required>
+                                                    <option selected disabled value="">Открыть для выбора категории
+                                                    </option>
                                                     @foreach($categories as $category)
-                                                        <option value="{{$category->id}}">{{$category->category}}</option>
+                                                        <option
+                                                            value="{{$category->id}}">{{$category->category}}</option>
                                                     @endforeach
                                                 </select>
                                                 <label for="floatingSelectCategory">Выбирая категорию</label>
                                             </div>
                                         @else
                                             <div class="form-floating mb-3">
-                                                <select class="form-select" id="floatingSelectCategory" aria-label="Floating label select example" required>
-                                                    <option selected disabled value="">Открыть для выбора категории</option>
+                                                <select class="form-select" id="floatingSelectCategory"
+                                                        aria-label="Floating label select example" required>
+                                                    <option selected disabled value="">Открыть для выбора категории
+                                                    </option>
                                                     @foreach($categories as $category)
                                                         @if($category->id == Auth::user()->category)
-                                                            <option selected value="{{$category->id}}">{{$category->category}}</option>
+                                                            <option selected
+                                                                    value="{{$category->id}}">{{$category->category}}</option>
                                                         @else
-                                                            <option value="{{$category->id}}">{{$category->category}}</option>
+                                                            <option
+                                                                value="{{$category->id}}">{{$category->category}}</option>
                                                         @endif
                                                     @endforeach
                                                 </select>
                                                 <label for="floatingSelectCategory">Выбирая категорию</label>
                                             </div>
                                         @endif
-                                        <a id="btn-participant" data-id="{{$event->id}}" data-title="{{$event->title}}" data-user-id="{{Auth()->user()->id}}" class="btn btn-dark rounded-pill" style="display: none">Участвовать</a>
+                                        <a id="btn-participant" data-id="{{$event->id}}"
+                                           data-title="{{$event->title_eng}}" data-user-id="{{Auth()->user()->id}}"
+                                           class="btn btn-dark rounded-pill" style="display: none">Участвовать</a>
 
                                     @endif
                                 @endauth
-                                <a href="{{route('participants', [$event->climbing_gym_name, $event->title])}}" class="btn btn-primary rounded-pill">Список участников</a>
-                                <a href="{{route('final_results',[$event->climbing_gym_name, $event->title])}}" class="btn btn-primary rounded-pill">Предворительные результаты</a>
+                                <a href="{{route('participants', [$event->climbing_gym_name_eng, $event->title_eng])}}"
+                                   class="btn btn-primary rounded-pill">Список участников</a>
+                                <a href="{{route('final_results',[$event->climbing_gym_name_eng, $event->title_eng])}}"
+                                   class="btn btn-primary rounded-pill">Предворительные результаты</a>
 
                             </div>
                         </div>
@@ -95,7 +115,8 @@
                             <div class="info-box card">
                                 <i class="bi bi-clock"></i>
                                 <h3>Старт</h3>
-                                <p>{{$event->start_date}} {{$event->start_time}} - <br>{{$event->end_date}} {{$event->end_time}}</p>
+                                <p>{{$event->start_date}} {{$event->start_time}} -
+                                    <br>{{$event->end_date}} {{$event->end_time}}</p>
                             </div>
                         </div>
                     </div>
@@ -104,17 +125,27 @@
                             <!-- Bordered Tabs Justified -->
                             <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
                                 <li class="nav-item flex-fill" role="presentation">
-                                    <button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab" data-bs-target="#bordered-justified-home" type="button" role="tab" aria-controls="home" aria-selected="true">Сеты</button>
+                                    <button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab"
+                                            data-bs-target="#bordered-justified-home" type="button" role="tab"
+                                            aria-controls="home" aria-selected="true">Сеты
+                                    </button>
                                 </li>
                                 <li class="nav-item flex-fill" role="presentation">
-                                    <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-justified-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Положение</button>
+                                    <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab"
+                                            data-bs-target="#bordered-justified-profile" type="button" role="tab"
+                                            aria-controls="profile" aria-selected="false">Положение
+                                    </button>
                                 </li>
                                 <li class="nav-item flex-fill" role="presentation">
-                                    <button class="nav-link w-100" id="contact-tab" data-bs-toggle="tab" data-bs-target="#bordered-justified-contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Стартовый взнос</button>
+                                    <button class="nav-link w-100" id="contact-tab" data-bs-toggle="tab"
+                                            data-bs-target="#bordered-justified-contact" type="button" role="tab"
+                                            aria-controls="contact" aria-selected="false">Стартовый взнос
+                                    </button>
                                 </li>
                             </ul>
                             <div class="tab-content pt-2" id="borderedTabJustifiedContent">
-                                <div class="tab-pane fade show active" id="bordered-justified-home" role="tabpanel" aria-labelledby="home-tab">
+                                <div class="tab-pane fade show active" id="bordered-justified-home" role="tabpanel"
+                                     aria-labelledby="home-tab">
                                     {{--                                    <div class="card p-4">--}}
                                     {{--                                        <div class="card-body">--}}
                                     <h5 class="card-title">Заполняемость сетов</h5>
@@ -122,24 +153,33 @@
                                     <!-- Progress Bars with labels-->
                                     @foreach($sets as $set)
                                         @if($set->free != 0)
-                                            <label>Сет {{$set->number_set}}-{{$set->time}}(@lang('somewords.'.$set->day_of_week))(Свободно - {{100 - $set->procent}}%)</label>
+                                            <label>Сет {{$set->number_set}}-{{$set->time}}
+                                                (@lang('somewords.'.$set->day_of_week))(Свободно
+                                                - {{100 - $set->procent}}%)</label>
                                             <div class="progress mt-1">
-                                                <div class="progress-bar" role="progressbar" style="width: {{$set->procent}}%" aria-valuenow="{{$set->free}}" aria-valuemin="0" aria-valuemax="{{$set->max_participants}}"></div>
+                                                <div class="progress-bar" role="progressbar"
+                                                     style="width: {{$set->procent}}%" aria-valuenow="{{$set->free}}"
+                                                     aria-valuemin="0" aria-valuemax="{{$set->max_participants}}"></div>
                                             </div>
                                         @else
-                                            <label>Сет {{$set->number_set}}-{{$set->time}}(@lang('somewords.'.$set->day_of_week)) (Полностью забит)</label>
+                                            <label>Сет {{$set->number_set}}-{{$set->time}}
+                                                (@lang('somewords.'.$set->day_of_week)) (Полностью забит)</label>
                                             <div class="progress mt-1">
-                                                <div class="progress-bar" role="progressbar" style="width: {{$set->procent}}%" aria-valuenow="{{$set->free}}" aria-valuemin="0" aria-valuemax="{{$set->max_participants}}"></div>
+                                                <div class="progress-bar" role="progressbar"
+                                                     style="width: {{$set->procent}}%" aria-valuenow="{{$set->free}}"
+                                                     aria-valuemin="0" aria-valuemax="{{$set->max_participants}}"></div>
                                             </div>
                                         @endif
                                     @endforeach
                                     {{--                                        </div>--}}
                                     {{--                                    </div>--}}
                                 </div>
-                                <div class="tab-pane fade" id="bordered-justified-profile" role="tabpanel" aria-labelledby="profile-tab">
+                                <div class="tab-pane fade" id="bordered-justified-profile" role="tabpanel"
+                                     aria-labelledby="profile-tab">
                                     <p>{!! $event->description !!}</p>
                                 </div>
-                                <div class="tab-pane fade" id="bordered-justified-contact" role="tabpanel" aria-labelledby="contact-tab">
+                                <div class="tab-pane fade" id="bordered-justified-contact" role="tabpanel"
+                                     aria-labelledby="contact-tab">
                                     <p>{!! $event->description !!}</p>
                                 </div>
                             </div><!-- End Bordered Tabs Justified -->
