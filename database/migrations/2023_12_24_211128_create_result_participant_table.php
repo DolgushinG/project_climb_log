@@ -20,7 +20,6 @@ class CreateResultParticipantTable extends Migration
             $table->integer('event_id');
             $table->integer('route_id');
             $table->integer('attempt');
-            $table->integer('points');
             $table->timestamps();
         });
     }

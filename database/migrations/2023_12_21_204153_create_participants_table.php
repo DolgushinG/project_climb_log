@@ -19,6 +19,8 @@ class CreateParticipantsTable extends Migration
             $table->integer('event_id');
             $table->integer('set');
             $table->integer('user_id');
+            $table->float('final_points')->nullable();
+            $table->integer('user_place')->nullable();
             $table->boolean('active');
             $table->timestamps();
         });

@@ -73,4 +73,9 @@ class User extends Authenticatable
     {
         return ParticipantCategory::find($category_id)->category;
     }
+
+    public function event()
+    {
+        return $this->belongsToMany(Event::class);
+    }
 }

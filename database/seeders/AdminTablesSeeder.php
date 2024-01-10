@@ -141,14 +141,6 @@ class AdminTablesSeeder extends Seeder
                 [
                     "parent_id" => 0,
                     "order" => 0,
-                    "title" => "Квалификация",
-                    "icon" => "fa-child",
-                    "uri" => "final-result-participants",
-                    "permission" => "owner.final.result.participants"
-                ],
-                [
-                    "parent_id" => 0,
-                    "order" => 0,
                     "title" => "Категории участников",
                     "icon" => "fa-angellist",
                     "uri" => "participants-categories",
@@ -235,12 +227,6 @@ class AdminTablesSeeder extends Seeder
                     "http_path" => "/events*"
                 ],
                 [
-                    "name" => "Final Result Participants",
-                    "slug" => "owner.final.result.participants",
-                    "http_method" => "",
-                    "http_path" => "/final-result-participants"
-                ],
-                [
                     "name" => "Participants",
                     "slug" => "owner.participants",
                     "http_method" => "GET",
@@ -281,6 +267,12 @@ class AdminTablesSeeder extends Seeder
                     "slug" => "owner.event.and.coefficient.route",
                     "http_method" => "GET",
                     "http_path" => "/event-and-coefficient-route"
+                ],
+                [
+                    "name" => "Export",
+                    "slug" => "export",
+                    "http_method" => "",
+                    "http_path" => "/exports*"
                 ]
             ]
         );
@@ -325,10 +317,6 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "role_id" => 1,
-                    "menu_id" => 16
-                ],
-                [
-                    "role_id" => 1,
                     "menu_id" => 17
                 ],
                 [
@@ -357,10 +345,6 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "role_id" => 2,
-                    "menu_id" => 16
-                ],
-                [
-                    "role_id" => 2,
                     "menu_id" => 17
                 ],
                 [
@@ -370,10 +354,6 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 2,
                     "menu_id" => 20
-                ],
-                [
-                    "role_id" => 2,
-                    "menu_id" => 22
                 ]
             ]
         );
@@ -392,10 +372,6 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 2,
                     "permission_id" => 7
-                ],
-                [
-                    "role_id" => 2,
-                    "permission_id" => 8
                 ],
                 [
                     "role_id" => 2,
@@ -420,6 +396,10 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 2,
                     "permission_id" => 14
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 17
                 ]
             ]
         );

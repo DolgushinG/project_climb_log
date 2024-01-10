@@ -94,6 +94,8 @@ class ResultRouteFinalStageController extends Controller
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
+
+
 //        $grid->event_id('event_id');
 //        $grid->owner_id('owner_id');
 //        $grid->user_id('user_id');

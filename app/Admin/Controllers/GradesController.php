@@ -90,12 +90,8 @@ class GradesController extends Controller
             $grid->column('owner_id', 'Владелец скалодрома')->filter();
         }
 //        $grid->id('ID');
-        $grid->column('grade', 'Категория трассы')->editable();
-        $grid->column('amount', 'Кол-во данной категории')->sortable()->editable()->totalRow();
         $grid->column('value', 'Ценность категории')->sortable()->editable();
         $grid->quickCreate(function (Grid\Tools\QuickCreate $create) {
-            $create->text('grade', 'катерия трассы');
-            $create->integer('amount', 'кол-во данной категории');
             $create->integer('value', 'Ценность категории');
         });
 //        $grid->created_at(trans('admin.created_at'));
@@ -104,43 +100,41 @@ class GradesController extends Controller
         return $grid;
     }
 
-    /**
-     * Make a show builder.
-     *
-     * @param mixed $id
-     * @return Show
-     */
-    protected function detail($id)
-    {
-        $show = new Show(Grades::findOrFail($id));
+//    /**
+//     * Make a show builder.
+//     *
+//     * @param mixed $id
+//     * @return Show
+//     */
+//    protected function detail($id)
+//    {
+//        $show = new Show(Grades::findOrFail($id));
+//
+////        $show->id('ID');
+//        $show->field('value', 'Ценность категории');
+////        $show->created_at(trans('admin.created_at'));
+////        $show->updated_at(trans('admin.updated_at'));
+//
+//        return $show;
+//    }
 
-//        $show->id('ID');
-        $show->field('grade', 'Категория трассы');
-        $show->field('amount', 'Кол-во данной категории');
-        $show->field('value', 'Ценность категории');
-//        $show->created_at(trans('admin.created_at'));
-//        $show->updated_at(trans('admin.updated_at'));
-
-        return $show;
-    }
-
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
-    protected function form()
-    {
-        $form = new Form(new Grades);
-
-//        $form->display('ID');
-        $form->hidden('owner_id')->value(Admin::user()->id);
-        $form->text('grade', 'Категория трассы');
-        $form->text('amount', 'Кол-во данной категории');
-        $form->text('value', 'Ценность категории');
-//        $form->display(trans('admin.created_at'));
-//        $form->display(trans('admin.updated_at'));
-
-        return $form;
-    }
+//    /**
+//     * Make a form builder.
+//     *
+//     * @return Form
+//     */
+//    protected function form()
+//    {
+//        $form = new Form(new Grades);
+//
+////        $form->display('ID');
+//        $form->hidden('owner_id')->value(Admin::user()->id);
+//        $form->text('grade', 'Категория трассы');
+//        $form->text('amount', 'Кол-во данной категории');
+//        $form->text('value', 'Ценность категории');
+////        $form->display(trans('admin.created_at'));
+////        $form->display(trans('admin.updated_at'));
+//
+//        return $form;
+//    }
 }

@@ -167,6 +167,10 @@ class EventsController extends Controller
         $form->hidden('climbing_gym_name_eng')->default('1');
         $form->text('city', 'Город')->placeholder('Город')->required();
         $form->number('count_routes', 'Кол-во трасс')->placeholder('Кол-во трасс')->required();
+        $routes = ['5' => 4, '5+' => 3, '6A'  => 5,'6A+'  => 5,'6B'  => 4,
+                  '6B+'  => 4,'6C'  => 4,'6C+'  => 4,'7A'  => 4,'7A+'  => 3,
+                    '7B'  => 3,'7B+'  => 2,'7C'  => 1,'7C+'  => 1,'8A'  => 0];
+        $form->keyValue('grade_and_amount', 'Категория и Кол-во')->value($routes);
         $form->text('title', 'Название')->placeholder('Введи название')->required();
         $form->hidden('title_eng')->default('1');;
         $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
@@ -178,6 +182,7 @@ class EventsController extends Controller
 //        $form->display(trans('admin.created_at'));
 //        $form->display(trans('admin.updated_at'));
         $form->saving(function (Form $form) {
+            dd($form->grade_and_amount);
             $form->climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
             $form->title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
             if (Grades::all()->count() == 0){
@@ -186,4 +191,21 @@ class EventsController extends Controller
         });
         return $form;
     }
+
+
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '5', 'amount' => 4, 'value' => 150],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '5+', 'amount' => 3, 'value' => 200],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '6A', 'amount' => 5, 'value' => 250],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '6A+', 'amount' => 5, 'value' => 300],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '6B', 'amount' => 4, 'value' => 350],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '6B+', 'amount' => 4, 'value' => 400],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '6C', 'amount' => 4, 'value' => 450],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '6C+', 'amount' => 4, 'value' => 500],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '7A', 'amount' => 4, 'value' => 550],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '7A+', 'amount' => 3, 'value' => 600],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '7B', 'amount' => 3, 'value' => 650],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '7B+', 'amount' => 2, 'value' => 700],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '7C', 'amount' => 1, 'value' => 750],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '7C+', 'amount' => 1, 'value' => 800],
+//                ['event_id' => $i ,'owner_id' => $i ,'grade' => '8A', 'amount' => 0, 'value' => 850],
 }

@@ -19,7 +19,7 @@ class ParticipantSeeder extends Seeder
             ['owner_id' => 2,'event_id' => 1, 'user_id' => 2, 'set' => 2, 'active' => 0],
             ['owner_id' => 2,'event_id' => 1, 'user_id' => 3, 'set' => 3, 'active' => 0],
             ['owner_id' => 3,'event_id' => 1, 'user_id' => 4, 'set' => 1, 'active' => 0],
-            ['owner_id' => 3,'event_id' => 1, 'user_id' => 5, 'set' => 2, 'active' => 0],
+            ['owner_id' => 3,'event_id' => 1, 'user_id' => 5, 'set' => 2,  'active' => 0],
             );
         DB::table('participants')->insert($participants);
     }

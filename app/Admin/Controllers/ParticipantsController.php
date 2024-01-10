@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Exports\ParticipantExport;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Http\Controllers\Controller;
@@ -13,6 +14,8 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class  ParticipantsController extends Controller
 {
@@ -30,6 +33,19 @@ class  ParticipantsController extends Controller
             ->header(trans('admin.index'))
             ->description(trans('admin.description'))
             ->body($this->grid());
+//            ->row(function (Row $row) {
+//                $events = Event::where('owner_id', '=', Admin::user()->id)->get();
+//                foreach ($events as $event){
+//                    $row->column(3, $event->title);
+//
+//                    $row->column(8, function (Column $column) {
+//                        $column->row($this->grid(1));
+//                    });
+//                }
+//
+//            });
+//
+
     }
 
     /**
@@ -83,12 +99,86 @@ class  ParticipantsController extends Controller
      */
     protected function grid()
     {
-        $grid = new Grid(new Participant);
+        $grid = new Grid(new Event);
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
-//        $grid->column('progress', 'Сет 1')->default(count(Participant::where('set', '=', 1)->get()->toArray()))->progressBar();
-//        $grid->column('progress', 'Сет 2')->default(count(Participant::where('set', '=', 2)->get()->toArray()))->progressBar();
+//        $grid->export(function ($export) {
+//
+//            // Filename for export, the default is `table name.csv`
+//            $export->filename('Filename.csv');
+//            // Finally, if you want to customize the export content of certain columns, use the `column` method
+//            $export->column('title', function ($value, $original) {
+//                // modify value here, or modify orginal (db) value
+//            });
+//        });
+        $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new ExportToExcel);
+        });
+        $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new ExportToCsv());
+        });
+        $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new ExportToOds());
+        });
+        $grid->disableExport();
+        $grid->disableCreateButton();
+        $grid->disableColumnSelector();
+        $grid->column('title', 'Название')->expand(function ($model) {
+            $headers = ['Участник', 'Пол', 'Город', 'Команда', 'Категория', 'Место', 'Баллы', 'Результаты'];
+
+            $style = ['table-bordered','table-hover', 'table-striped'];
+
+            $options = [
+                'paging' => true,
+                'lengthChange' => true,
+                'searching' => true,
+                'ordering' => true,
+                'info' => true,
+                'autoWidth' => true,
+                'deferRender' => true,
+                'processing' => true,
+//                'scrollX' => true,
+//                'scrollY' => true,
+            ];
+            $users_id = $model->participant()->pluck('user_id')->toArray();
+            $users_point = $model->participant()->pluck('point','user_id')->toArray();
+            $users_active = $model->participant()->where('active', '=',1)->pluck('active','user_id')->toArray();
+            $fields = ['firstname','id', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
+            $users = User::whereIn('id', $users_id)->get();
+            foreach ($users as $index => $user){
+                $users[$index] = collect($user->toArray())->except($fields);
+                $users[$index]['place'] = Participant::counting_final_place($model->id, $user->id);
+                $users[$index]['middlename'] = $user->middlename;
+                $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
+                $users[$index]['city'] = $user->city;
+                $users[$index]['team'] = $user->team;
+                $users[$index]['category'] = User::category($user->category);
+                $users[$index]['point'] = $users_point[$user->id];
+                $users[$index]['active'] = $users_point[$user->id];
+
+                if (isset($users_active[$user->id])){
+                    if ($users_active[$user->id]){
+                        $status = '<i class="fa fa-circle text-success">';
+                        } else {
+                        $status = '<i class="fa fa-circle text-danger">';
+                        }
+                    $users[$index]['active'] = $status;
+                }
+            }
+            return new DataTable($headers, $users->toArray(), $style, $options);
+//            return new Table(['ID', 'Участник', 'Пол', 'Год', 'Город', 'Команда', 'Категория', 'Email'], $users->toArray());
+        });
+        $grid->header(function ($query) {
+            $event_id = $query->where('owner_id', '=', Admin::user()->id)->get()->pluck('id');
+            $users_id = Participant::whereIn('event_id',$event_id)->get()->pluck('user_id');
+            $users_female = User::whereIn('id', $users_id)->where('gender', '=', 'female')->get()->count();
+            $users_male = User::whereIn('id', $users_id)->where('gender', '=', 'male')->get()->count();
+            $gender = array('female' => $users_female, 'male' => $users_male);
+            $doughnut = view('admin.chart.gender', compact('gender'));
+
+            return new Box('Соотношение мужчин и женщин', $doughnut);
+        });
         $grid->filter(function($filter){
 
             // Remove the default id filter
@@ -114,32 +204,43 @@ class  ParticipantsController extends Controller
 
         });
 
+//
 //        $grid->column('user.gender', 'Фильтр по полу')->filter([
 //            'male' => 'Мужчины',
 //            'female' => 'Женщины',
 //        ]);
-//        $participant = Participant::where('owner_id', '=', Admin::user()->id)->pluck('user_id')->toArray();
-//        $users = User::whereIn('id', $participant)->pluck('middlename', 'id');
-//        $grid->id('ID');
-//        $grid->event()->title();
-        $grid->disableCreateButton();
-        $grid->disableActions();
-        $grid->column('set', 'Номер сета');
-        $grid->column('user.year', 'Год рождения');
-        $grid->column('user.firstname', 'Имя');
-        $grid->column('user.lastname', 'Фамилия');
-        $grid->column('user.age', 'Возраст');
-        $grid->column('user.gender', 'Пол');
-        $grid->column('user.city', 'Город');
-        $grid->column('user.team', 'Команда');
-        $grid->column('user.skill', 'Квалификация');
-        $grid->column('user.sports_category', 'Спортивная категория');
-        $grid->column('active', 'Внес результаты')->bool();
+////        $participant = Participant::where('owner_id', '=', Admin::user()->id)->pluck('user_id')->toArray();
+////        $grid->id('ID');
+//        $grid->disableCreateButton();
+//        $grid->disableActions();
+
+
+//        $grid->column('event.title', 'title')->expand(function ($model) {
+//
+//            $comments = $model->events()->get()->map(function ($comment) {
+//                return $comment->only(['id', 'content', 'created_at']);
+//            });
+//
+//            return new Table(['ID', 'content', 'release time'], $comments->toArray());
+//        });
+//        $grid->column('event.title', 'Название соревнования');
+//        $grid->column('set', 'Номер сета');
+//        $grid->column('user.year', 'Год рождения');
+//        $grid->column('user.firstname', 'Имя');
+//        $grid->column('user.lastname', 'Фамилия');
+//        $grid->column('user.age', 'Возраст');
+//        $grid->column('user.gender', 'Пол');
+//        $grid->column('user.city', 'Город');
+//        $grid->column('user.team', 'Команда');
+//        $grid->column('user.skill', 'Квалификация');
+//        $grid->column('user.sports_category', 'Спортивная категория');
+//        $grid->column('active', 'Внес результаты')->bool();
 //        $grid->created_at(trans('admin.created_at'));
 //        $grid->updated_at(trans('admin.updated_at'));
 
         return $grid;
     }
+
 
     /**
      * Make a show builder.
@@ -197,4 +298,20 @@ class  ParticipantsController extends Controller
 
         return $form;
     }
+    public function exportExcel(Request $request)
+    {
+        $response = Excel::download(new ParticipantExport($request->id), 'users-'.__FUNCTION__.'.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($response->getFile());
+    }
+    public function exportCsv(Request $request)
+    {
+        $response = Excel::download(new ParticipantExport($request->id), 'users-'.__FUNCTION__.'.csv', \Maatwebsite\Excel\Excel::CSV);
+        return response()->download($response->getFile());
+    }
+    public function exportOds(Request $request)
+    {
+        $response = Excel::download(new ParticipantExport($request->id), 'users-'.__FUNCTION__.'.ods', \Maatwebsite\Excel\Excel::ODS);
+        return response()->download($response->getFile());
+    }
+
 }

@@ -5,16 +5,23 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0",
+        "php": "^8.0",
+        "composer-runtime-api": "^2",
+        "doctrine/dbal": "^3.7",
         "encore/laravel-admin": "^1.8",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "jxlwqq/data-table": "^1.0",
+        "jxlwqq/material-ui": "^1.0",
+        "laravel-admin-ext/chartjs": "^1.0",
         "laravel-admin-ext/helpers": "2.*",
         "laravel-admin-ext/summernote": "^1.0",
         "laravel/breeze": "1.9.2",
-        "laravel/framework": "^8.75",
+        "laravel/framework": "^8.83.15",
         "laravel/sanctum": "^2.11",
-        "laravel/tinker": "^2.5"
+        "laravel/tinker": "^2.5",
+        "maatwebsite/excel": "^3.1",
+        "psr/simple-cache": "^1.0"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

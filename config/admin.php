@@ -407,16 +407,39 @@ return [
     |
     */
     'extensions' => [
+        'data-table' => [
+            // If the value is set to false, this extension will be disabled
+            'enable' => true,
+            // global options
+            'options' => [
+                'paging' => true,
+                'lengthChange' => true,
+                'searching' => true,
+                'ordering' => true,
+                'info' => true,
+                'language' => 'Russian', // or Chinese
+            ]
+        ],
+        'chartjs' => [
+
+            // Set to `false` if you want to disable this extension
+            'enable' => true,
+        ],
         'summernote' => [
 
             //Set to false if you want to disable this extension
             'enable' => true,
+
 
             // Editor configuration
             'config' => [
                 'lang'   => 'ru-RU',
                 'height' => 500,
             ]
+        ],
+        'material-ui' => [
+            // If the value is set to false, this extension will be disabled
+            'enable' => false
         ]
     ],
 ];

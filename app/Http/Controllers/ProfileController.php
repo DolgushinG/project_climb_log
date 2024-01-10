@@ -2,16 +2,10 @@
 
 namespace App\Http\Controllers;
 use App\Models\Event;
-use App\Models\FinalParticipantResult;
 use App\Models\Participant;
-use App\Models\Rating;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Intervention\Image\Facades\Image;
-use App\Models\Category;
-use App\Models\Grade;
-use App\Models\UserAndCategories;
 
 class ProfileController extends Controller
 {
@@ -24,57 +18,26 @@ class ProfileController extends Controller
     {
         $this->middleware(['auth','verified']);
     }
-//    public function getTabContentSidebar(){
-//        $user = User::find(Auth()->user()->id);
-////        $reviews = Rating::where('user_id', '=', $user->id);
-////        $userAndCategories = UserAndCategories::where('user_id','=',$user->id)->distinct()->get('category_id');
-////        $categories = Category::whereIn('id', $userAndCategories)->get();
-////        $notCategories = Category::whereNotIn('id', $userAndCategories)->get();
-////        $foundReviews = $reviews->count();
-////        $userView = views($user)->count();
-////        $grades = Grade::all();
-//        return view('profile.sidebar', compact(['user']));
-//    }
     public function index() {
         $user = User::find(Auth()->user()->id);
-//        $reviews = Rating::where('user_id', '=', $user->id);
-//        $userAndCategories = UserAndCategories::where('user_id','=',$user->id)->distinct()->get('category_id');
-//
-//        $categories = Category::whereIn('id', $userAndCategories)->get();
-//
-//        $notCategories = Category::whereNotIn('id', $userAndCategories)->get();
-//
-//        $foundReviews = $reviews->count();
-//        $userView = views($user)->count();
-//        $grades = Grade::all();
 
         return view('profile.main', compact(['user']));
     }
     public function getTabContentOverview() {
         $user = User::find(Auth()->user()->id);
-//        $userAndCategories = UserAndCategories::where('user_id','=',$user->id)->distinct()->get('category_id');
-//        $categories = Category::whereIn('id', $userAndCategories)->get();
-//        $notCategories = Category::whereNotIn('id', $userAndCategories)->get();
-//        $grades = Grade::all();
         return view('profile.overview', compact(['user']));
     }
     public function getTabContentSetting() {
         $user = User::find(Auth()->user()->id);
-//        $reviews = Rating::where('user_id', '=', $user->id)->get();
         return view('profile.setting', compact('user'));
     }
     public function getTabContentEdit() {
         $user = User::find(Auth()->user()->id);
-//        $userAndCategories = UserAndCategories::where('user_id','=',$user->id)->distinct()->get('category_id');
-//        $categories = Category::whereIn('id', $userAndCategories)->get();
-//        $notCategories = Category::whereNotIn('id', $userAndCategories)->get();
-//        $grades = Grade::all();
         return view('profile.edit-profile', compact(['user']));
     }
 
     public function getTabContentEvents() {
         $user_id = Auth()->user()->id;
-        FinalParticipantResult::counting_final_place(10);
         $events_id = Participant::where('user_id', '=', $user_id)->pluck('event_id');
         $events = Event::whereIn('id', $events_id)->get();
         foreach ($events as $event){
@@ -84,7 +47,7 @@ class ProfileController extends Controller
             }else{
                 $status = "Необходимо добавить результаты";
             }
-            $user_places = FinalParticipantResult::counting_final_place($event->id);
+            $user_places = Participant::counting_final_place($event->id);
             if(empty($user_places)){
                 $user_places_exist = 'Нет результата';
             } else {
@@ -93,10 +56,6 @@ class ProfileController extends Controller
             $event['participant_active'] = $status;
             $event['user_place'] = $user_places_exist;
         }
-//        $userAndCategories = UserAndCategories::where('user_id','=',$user->id)->distinct()->get('category_id');
-//        $categories = Category::whereIn('id', $userAndCategories)->get();
-//        $notCategories = Category::whereNotIn('id', $userAndCategories)->get();
-//        $grades = Grade::all();
         return view('profile.events', compact(['events']));
     }
     public function editChanges(Request $request) {

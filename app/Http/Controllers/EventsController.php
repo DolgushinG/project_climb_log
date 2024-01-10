@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreRequest;
 use App\Models\Event;
 use App\Models\EventAndCoefficientRoute;
-use App\Models\FinalParticipantResult;
 use App\Models\Grades;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
@@ -94,8 +93,8 @@ class EventsController extends Controller
     public function get_final_results(Request $request, $climbing_gym, $title){
         $event = Event::where('title_eng', '=', $title)->first();
         $this->refresh_final_points_all_participant($event->id);
-        $final_results = FinalParticipantResult::where('event_id', '=', $event->id)->orderBy('final_points', 'DESC')->get()->toArray();
-        $user_ids = FinalParticipantResult::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+        $final_results = Participant::where('event_id', '=', $event->id)->orderBy('final_points', 'DESC')->get()->toArray();
+        $user_ids = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
         $stats = new stdClass();
         $female_categories = array();
         $male_categories = array();
@@ -225,9 +224,9 @@ class EventsController extends Controller
     }
 
     public function insert_final_participant_result($route){
-        $record = FinalParticipantResult::where('event_id', '=', $route['event_id'])->where('user_id', '=', $route['user_id'])->first();
+        $record = Participant::where('event_id', '=', $route['event_id'])->where('user_id', '=', $route['user_id'])->first();
         if ($record === null) {
-            $final_participant_result = new FinalParticipantResult;
+            $final_participant_result = new Participant;
         } else {
             $final_participant_result = $record;
         }
@@ -242,7 +241,7 @@ class EventsController extends Controller
         $routes = ResultParticipant::where('event_id', '=', $event_id)->select('route_id')->distinct()->get()->toArray();
         $event = Event::find($event_id);
         $format = $event->mode;
-        $final_participant = FinalParticipantResult::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
+        $final_participant = Participant::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
         foreach ($final_participant as $user) {
             $points = 0;
             $routes_only_passed = array();
@@ -272,7 +271,7 @@ class EventsController extends Controller
                     $points += $lastElem->points;
                 }
             }
-            $final_participant_result = FinalParticipantResult::where('user_id', '=', $user)->where('event_id', '=', $event_id)->first();
+            $final_participant_result = Participant::where('user_id', '=', $user)->where('event_id', '=', $event_id)->first();
             $final_participant_result->final_points = $points;
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $user;
