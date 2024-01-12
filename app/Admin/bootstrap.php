@@ -30,4 +30,4 @@ Grid::init(function (Grid $grid) {
 });
 
 Encore\Admin\Grid\Column::define('actions', app\Admin\CustomAction\CustomActions::class);
-
+app('view')->prependNamespace('admin', resource_path('views/admin'));

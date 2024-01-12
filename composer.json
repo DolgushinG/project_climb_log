@@ -16,6 +16,7 @@
         "laravel-admin-ext/chartjs": "^1.0",
         "laravel-admin-ext/helpers": "2.*",
         "laravel-admin-ext/summernote": "^1.0",
+        "laravel-admin-extensions/multi-language": "^0.0.6",
         "laravel/breeze": "1.9.2",
         "laravel/framework": "^8.83.15",
         "laravel/sanctum": "^2.11",

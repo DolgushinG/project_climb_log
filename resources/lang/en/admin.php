@@ -8,6 +8,7 @@ return [
     'name'                  => 'Name',
     'username'              => 'Username',
     'password'              => 'Password',
+    'grade'              => 'Категория',
     'password_confirmation' => 'Password confirmation',
     'remember_me'           => 'Remember me',
     'user_setting'          => 'User setting',

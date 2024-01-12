@@ -2,6 +2,12 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\CustomAction\ActionCsv;
+use App\Admin\CustomAction\ActionExcel;
+use App\Admin\CustomAction\ActionOds;
+use App\Exceptions\ExportToCsv;
+use App\Exceptions\ExportToExcel;
+use App\Exceptions\ExportToOds;
 use App\Exports\ParticipantExport;
 use App\Models\Event;
 use App\Models\Participant;
@@ -14,7 +20,9 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
+use Encore\Admin\Widgets\Box;
 use Illuminate\Http\Request;
+use Jxlwqq\DataTable\DataTable;
 use Maatwebsite\Excel\Facades\Excel;
 
 class  ParticipantsController extends Controller
@@ -112,14 +120,13 @@ class  ParticipantsController extends Controller
 //                // modify value here, or modify orginal (db) value
 //            });
 //        });
-        $grid->tools(function (Grid\Tools $tools) {
-            $tools->append(new ExportToExcel);
-        });
-        $grid->tools(function (Grid\Tools $tools) {
-            $tools->append(new ExportToCsv());
-        });
-        $grid->tools(function (Grid\Tools $tools) {
-            $tools->append(new ExportToOds());
+        $grid->actions(function ($actions) {
+            $actions->disableDelete();
+            $actions->disableEdit();
+            $actions->disableView();
+            $actions->append(new ActionExcel($actions->getKey()));
+            $actions->append(new ActionCsv($actions->getKey()));
+            $actions->append(new ActionOds($actions->getKey()));
         });
         $grid->disableExport();
         $grid->disableCreateButton();
@@ -141,9 +148,9 @@ class  ParticipantsController extends Controller
 //                'scrollX' => true,
 //                'scrollY' => true,
             ];
-            $users_id = $model->participant()->pluck('user_id')->toArray();
+            $users_id = $model->participant()->where('owner_id', '=', Admin::user()->id)->pluck('user_id')->toArray();
             $users_point = $model->participant()->pluck('point','user_id')->toArray();
-            $users_active = $model->participant()->where('active', '=',1)->pluck('active','user_id')->toArray();
+            $users_active = $model->participant()->pluck('active','user_id')->toArray();
             $fields = ['firstname','id', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
             $users = User::whereIn('id', $users_id)->get();
             foreach ($users as $index => $user){
@@ -155,13 +162,13 @@ class  ParticipantsController extends Controller
                 $users[$index]['team'] = $user->team;
                 $users[$index]['category'] = User::category($user->category);
                 $users[$index]['point'] = $users_point[$user->id];
-                $users[$index]['active'] = $users_point[$user->id];
+                $users[$index]['active'] = $users_active[$user->id];
 
                 if (isset($users_active[$user->id])){
                     if ($users_active[$user->id]){
-                        $status = '<i class="fa fa-circle text-success">';
+                            $status = '<i class="fa fa-circle text-success">';
                         } else {
-                        $status = '<i class="fa fa-circle text-danger">';
+                            $status = '<i class="fa fa-times-circle text-danger">';
                         }
                     $users[$index]['active'] = $status;
                 }

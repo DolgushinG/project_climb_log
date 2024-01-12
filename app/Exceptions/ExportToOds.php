@@ -2,8 +2,8 @@
 
 namespace App\Exceptions;
 use App\Models\Event;
-use App\Admin\CustomView\Actions\Action;
-use App\Admin\CustomView\Facades\Admin;
+use Encore\Admin\Actions\Action;
+use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
