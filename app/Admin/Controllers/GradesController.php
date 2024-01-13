@@ -89,13 +89,9 @@ class GradesController extends Controller
         } else {
             $grid->column('owner_id', 'Владелец скалодрома')->filter();
         }
-//        $grid->id('ID');
+        $grid->column('grade', 'Ценность категории')->editable();
         $grid->column('value', 'Ценность категории')->sortable()->editable();
-        $grid->quickCreate(function (Grid\Tools\QuickCreate $create) {
-            $create->integer('value', 'Ценность категории');
-        });
-//        $grid->created_at(trans('admin.created_at'));
-//        $grid->updated_at(trans('admin.updated_at'));
+        $grid->column('amount', 'Ценность категории')->editable();
 
         return $grid;
     }

@@ -9,15 +9,22 @@
                                 <div class="table-responsive">
                                     <table class="table">
                                         <thead>
-                                        <tr>
-                                            <th class="text-center" scope="col">Место</th>
-                                            <th scope="col">Название</th>
-                                            <th scope="col">Кол-во Участников</th>
-                                            <th scope="col">Aфиша</th>
-                                            <th scope="col">Статус</th>
-                                        </tr>
+                                        @if(count($events) == 0)
+                                            <div class="event-wrap">
+                                                <h5>Вы не принимали участие ни в каких соревнованиях</h5>
+                                            </div>
+
+                                        @else
+                                            <tr>
+                                                <th class="text-center" scope="col">Место</th>
+                                                <th scope="col">Название</th>
+                                                <th scope="col">Кол-во Участников</th>
+                                                <th scope="col">Aфиша</th>
+                                                <th scope="col">Статус</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
+
                                         @foreach($events as $event)
                                         <tr class="inner-box">
                                             <th scope="row">
@@ -68,6 +75,7 @@
                                             </td>
                                         </tr>
                                         @endforeach
+                                        @endif
                                         </tbody>
                                     </table>
                                 </div>

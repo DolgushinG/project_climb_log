@@ -26,10 +26,9 @@
 </style>
 
 <div class="title">
-    Laravel-admin
+    {{$admin_info->climbing_gym_name}}
 </div>
 <div class="links">
-    <a href="https://github.com/z-song/laravel-admin" target="_blank">Github</a>
-    <a href="http://laravel-admin.org/docs"  target="_blank">Documentation</a>
-    <a href="http://laravel-admin.org/demo"  target="_blank">Demo</a>
+    <a href="{{$admin_info->climbing_gym_link}}" target="_blank">Мой сайт скалодром</a>
+    <a href="{{$admin_info->current_event}}"  target="_blank">Текущие соревнование</a>
 </div>

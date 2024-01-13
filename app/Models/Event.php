@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -41,6 +42,9 @@ class Event extends Model
         DB::table('grades')->insert($grades);
     }
 
+    public static function exist_events($owner_id){
+        return boolval(Event::where('owner_id', '=', $owner_id)->where('active', '=', 1)->first());
+    }
     public function participant()
     {
         return $this->hasOne(Participant::class);

@@ -1,5 +1,6 @@
 <?php
 
+use Encore\Admin\Facades\Admin;
 use Illuminate\Routing\Router;
 
 Admin::routes();
@@ -10,6 +11,7 @@ Route::group([
     'middleware'    => config('admin.route.middleware'),
     'as'            => config('admin.route.prefix') . '.',
 ], function (Router $router) {
+    $router->resource('/auth/users', UserController::class);
 
     $router->get('/', 'HomeController@index')->name('home');
     Route::middleware(['owner'])->group(function ($router) {

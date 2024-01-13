@@ -14,30 +14,24 @@ class GradesSeeder extends Seeder
      */
     public function run()
     {
-        function retry($count) {
-            for($i = 2; $i <= $count; $i++) {
-                $grades = array(
-                    ['owner_id' => $i, 'value' => 100],
-                    ['owner_id' => $i, 'value' => 150],
-                    ['owner_id' => $i, 'value' => 200],
-                    ['owner_id' => $i, 'value' => 250],
-                    ['owner_id' => $i, 'value' => 300],
-                    ['owner_id' => $i, 'value' => 350],
-                    ['owner_id' => $i, 'value' => 400],
-                    ['owner_id' => $i, 'value' => 450],
-                    ['owner_id' => $i, 'value' => 500],
-                    ['owner_id' => $i, 'value' => 550],
-                    ['owner_id' => $i, 'value' => 600],
-                    ['owner_id' => $i, 'value' => 650],
-                    ['owner_id' => $i, 'value' => 700],
-                    ['owner_id' => $i, 'value' => 750],
-                    ['owner_id' => $i, 'value' => 800],
-                    ['owner_id' => $i, 'value' => 850],
-
-                );
-                DB::table('grades')->insert($grades);
-            }
-        }
-        retry(1);
+        $routes = array(
+            array('Категория' => '5', 'Кол-во' => 3, 'Ценность' => 100),
+            array('Категория' => '5+', 'Кол-во' => 3, 'Ценность' => 150),
+            array('Категория' => '6A', 'Кол-во' => 3, 'Ценность' => 200),
+            array('Категория' => '6A+', 'Кол-во' => 3, 'Ценность' => 250),
+            array('Категория' => '6B', 'Кол-во' => 3, 'Ценность' => 300),
+            array('Категория' => '6B+', 'Кол-во' => 2, 'Ценность' => 350),
+            array('Категория' => '6C', 'Кол-во' => 2, 'Ценность' => 400),
+            array('Категория' => '6C+', 'Кол-во' => 2, 'Ценность' => 450),
+            array('Категория' => '7A', 'Кол-во' => 2, 'Ценность' => 500),
+            array('Категория' => '7A+', 'Кол-во' => 2, 'Ценность' => 550),
+            array('Категория' => '7B', 'Кол-во' => 2, 'Ценность' => 600),
+            array('Категория' => '7B+', 'Кол-во' => 1, 'Ценность' => 650),
+            array('Категория' => '7C', 'Кол-во' => 1, 'Ценность' => 700),
+            array('Категория' => '7C+', 'Кол-во' => 1, 'Ценность' => 750),
+            array('Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 800),
+        );
+        $routes_json = json_encode($routes);
+        DB::table('grades')->insert((array)$routes_json);
     }
 }

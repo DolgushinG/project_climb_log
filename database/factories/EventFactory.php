@@ -13,6 +13,24 @@ class EventFactory extends Factory
      */
     public function definition()
     {
+        $routes = array(
+            array('Категория' => '5', 'Кол-во' => 3, 'Ценность' => 100),
+            array('Категория' => '5+', 'Кол-во' => 3, 'Ценность' => 150),
+            array('Категория' => '6A', 'Кол-во' => 3, 'Ценность' => 200),
+            array('Категория' => '6A+', 'Кол-во' => 3, 'Ценность' => 250),
+            array('Категория' => '6B', 'Кол-во' => 3, 'Ценность' => 300),
+            array('Категория' => '6B+', 'Кол-во' => 2, 'Ценность' => 350),
+            array('Категория' => '6C', 'Кол-во' => 2, 'Ценность' => 400),
+            array('Категория' => '6C+', 'Кол-во' => 2, 'Ценность' => 450),
+            array('Категория' => '7A', 'Кол-во' => 2, 'Ценность' => 500),
+            array('Категория' => '7A+', 'Кол-во' => 2, 'Ценность' => 550),
+            array('Категория' => '7B', 'Кол-во' => 2, 'Ценность' => 600),
+            array('Категория' => '7B+', 'Кол-во' => 1, 'Ценность' => 650),
+            array('Категория' => '7C', 'Кол-во' => 1, 'Ценность' => 700),
+            array('Категория' => '7C+', 'Кол-во' => 1, 'Ценность' => 750),
+            array('Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 800),
+        );
+        $routes_json = json_encode($routes);
         return [
             'document' => 'images/0a8453e1f407fec06837f7679235a455.jpg',
             'image' => 'images/0a8453e1f407fec06837f7679235a455.jpg',
@@ -23,6 +41,7 @@ class EventFactory extends Factory
             'end_time' => $this->faker->time(),
             'description' => $this->faker->paragraph(5),
             'address' => $this->faker->address(),
+            'grade_and_amount' => $routes_json,
             'city' => $this->faker->city(),
             'title' => $this->faker->word(),
             'title_eng' => $this->faker->word(),

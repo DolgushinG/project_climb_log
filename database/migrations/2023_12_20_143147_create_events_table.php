@@ -24,6 +24,7 @@ class CreateEventsTable extends Migration
             $table->string('document')->nullable();
             $table->longText('description');
             $table->string('image');
+            $table->json('grade_and_amount');
             $table->string('climbing_gym_name');
             $table->string('climbing_gym_name_eng');
             $table->string('city');

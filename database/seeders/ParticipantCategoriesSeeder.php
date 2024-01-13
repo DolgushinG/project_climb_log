@@ -16,9 +16,9 @@ class ParticipantCategoriesSeeder extends Seeder
     {
         $participants = array(
             ['category' => 'Новички'],
-            ['category' => 'Новички'],
+            ['category' => 'Любители'],
             ['category' => 'Спортсмены'],
         );
-        DB::table('participant_category')->insert($participants);
+        DB::table('participant_categories')->insert($participants);
     }
 }

@@ -71,6 +71,14 @@
 
                     });
                 });
+                // if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+                //     $(document).ready(function () {
+                //         {
+                //             const breakdownButton = document.querySelector('.input-group-addon');
+                //             breakdownButton.style.display = "None";
+                //         }
+                //     });
+                // }
             </script>
             <template class="{{$column}}-tpl">
                 <tr class="has-many-{{$column}}-form fields-group">

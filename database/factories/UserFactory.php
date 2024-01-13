@@ -27,6 +27,7 @@ class UserFactory extends Factory
             'city' => $this->faker->city(),
             'team' => $this->faker->word(),
             'skill' => null,
+            'category' => $this->faker->randomElement([1, 2, 3]),
             'sport_category' => null,
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),

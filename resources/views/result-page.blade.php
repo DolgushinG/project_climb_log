@@ -4,6 +4,9 @@
     <main id="main" class="main">
         <section class="section contact">
             <div class="row">
+                @if(\App\Models\Participant::is_active_participant($event->id, Auth()->user()->id))
+                    <h1> Результат был внесен </h1>
+                @else
                 <h1> Внести результаты </h1>
                 <div>
 
@@ -78,7 +81,7 @@
                     </button>
                 </div>
                 <!-- End Table with stripped rows -->
-
+                @endif
             </div>
         </section>
     </main>
@@ -176,6 +179,10 @@
                         button.attr("disabled", "true");
                         button.css('pointer-events', 'none');
                     }, 6000);
+
+                    setTimeout(function () {
+                        window.location.href = xhr.link;
+                    }, 3000);
                 },
                 error: function (xhr, status, error) {
                     button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +

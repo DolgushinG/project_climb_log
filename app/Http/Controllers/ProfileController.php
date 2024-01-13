@@ -42,19 +42,17 @@ class ProfileController extends Controller
         $events = Event::whereIn('id', $events_id)->get();
         foreach ($events as $event){
             $event['amount_participant'] = Participant::where('event_id', '=', $event->id)->get()->count();
-            if(Participant::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->active){
+            $active = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->active;
+            if($active){
+                $users = Participant::counting_final_place($event->id);
+                $user_place = $users[$user_id];
                 $status = "Внес результаты";
             }else{
                 $status = "Необходимо добавить результаты";
-            }
-            $user_places = Participant::counting_final_place($event->id);
-            if(empty($user_places)){
-                $user_places_exist = 'Нет результата';
-            } else {
-                $user_places_exist = $user_places[$user_id];
+                $user_place = 'Нет результата';
             }
             $event['participant_active'] = $status;
-            $event['user_place'] = $user_places_exist;
+            $event['user_place'] = $user_place;
         }
         return view('profile.events', compact(['events']));
     }

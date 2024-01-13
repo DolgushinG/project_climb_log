@@ -11,6 +11,7 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
+use Encore\Admin\Widgets\Table;
 use Illuminate\Support\MessageBag;
 
 class EventsController extends Controller
@@ -89,21 +90,10 @@ class EventsController extends Controller
         } else {
             $grid->column('owner_id', 'Owner')->editable();
         }
-        $event = new Event;
-        $grid->column('start_date', 'Дата старта')->editable('date');
-        $grid->column('end_date', 'Дата окончания')->editable('date');
-        $grid->column('start_time', 'Время старта')->editable('time');
-        $grid->column('end_time', 'Время окончания')->editable('time');
-        $grid->column('address', 'Адрес')->editable();
-        $grid->column('document', 'Документ');
-        $grid->column('image', 'Афиша')->image($event->image, 100, 100);
-        $grid->column('climbing_gym_name', 'Название скалодрома');
-        $grid->column('city', 'Город')->editable();
-        $grid->column('count_routes', 'Кол-во маршрутов')->editable();
-        $grid->column('title', 'Название')->editable();
-        $grid->column('subtitle', 'Надпись под названием')->editable();
-        $grid->column('link', 'Ссылка')->editable();
-        $grid->column('mode')->editable('select', [1 => '10 лучших трасс', 2 => 'Все трассы']);
+        $grid->column('count_routes', 'Кол-во маршрутов');
+        $grid->column('title', 'Название');
+        $grid->column('subtitle', 'Надпись под названием');
+        $grid->column('link', 'Ссылка')->link();
         $grid->column('active', 'Опубликовать')->switch();
 
         return $grid;
@@ -157,83 +147,96 @@ class EventsController extends Controller
 
         $form->display('id')->style('display', 'None');
         $form->hidden('owner_id')->value(Admin::user()->id);
-
-//        $form->tab('Basic info', function ($form) {
-//
-//            $form->text('username');
-//            $form->email('email');
-//
-//        })->tab('Profile', function ($form) {
-//            $form->image('avatar');
-//            $form->text('address');
-//            $form->mobile('phone');
-//
-//        });
         $form->date('start_date', 'Дата старта')->placeholder('Дата старта')->required();
         $form->date('end_date', 'Дата окончания')->placeholder('Дата окончания')->required();
         $form->time('start_time', 'Время старта')->placeholder('Время старта')->required();
         $form->time('end_time', 'Время окончания')->placeholder('Время окончания')->required();
-        $form->text('address', 'Адрес')->placeholder('Адрес')->required();
+        $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
         $form->file('document', 'Прикрепить документ')->placeholder('Прикрепить документ');
         $form->image('image', 'Афиша')->placeholder('Афиша')->required();
-        $form->text('climbing_gym_name', 'Название скалодрома')->placeholder('Название скалодрома')->required();
+        $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
         $form->hidden('climbing_gym_name_eng')->default('1');
-        $form->text('city', 'Город')->placeholder('Город')->required();
+        $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
         $form->number('count_routes', 'Кол-во трасс по умалчанию 30 трасс **(Кол-во трасс должно совпадать с Категориями и их кол-вом)
         ')->options(['max' => 150, 'min' => 10, 'step' => 1, 'postfix' => ' маршрутов'])->default(30)->placeholder('Кол-во трасс')->required();
-        $routes = [
-            ['Категория' => '5','Кол-во' => 3,'Ценность' => 100],
-            ['Категория' => '5+','Кол-во' => 3,'Ценность' => 150],
-            ['Категория' => '6A','Кол-во' => 3,'Ценность' => 200],
-            ['Категория' => '6A+','Кол-во' => 3,'Ценность' => 250],
-            ['Категория' => '6B','Кол-во' => 3,'Ценность' => 300],
-            ['Категория' => '6B+','Кол-во' => 2,'Ценность' => 350],
-            ['Категория' => '6C','Кол-во' => 2,'Ценность' => 400],
-            ['Категория' => '6C+','Кол-во' => 2,'Ценность' => 450],
-            ['Категория' => '7A','Кол-во' => 2,'Ценность' => 500],
-            ['Категория' => '7A+','Кол-во' => 2,'Ценность' => 550],
-            ['Категория' => '7B','Кол-во' => 2,'Ценность' => 600],
-            ['Категория' => '7B+','Кол-во' => 1,'Ценность' => 650],
-            ['Категория' => '7C','Кол-во' => 1,'Ценность' => 700],
-            ['Категория' => '7C+','Кол-во' => 1,'Ценность' => 750],
-            ['Категория' => '8A','Кол-во' => 0,'Ценность' => 800],
-        ];
-        $form->table('grade_and_amount', 'Категория и Кол-во',function ($table) {
-            $table->text('Категория');
-            $table->text('Кол-во');
-            $table->text('Ценность');
+        $routes = $this->getRoutes();
+        $form->table('grade_and_amount', 'Категория и Кол-во', function ($table) {
+            $grades = $this->getGrades();
+            $table->select('Категория')->options($grades)->readonly();
+            $table->text('Кол-во')->width('50px');
+            $table->text('Ценность')->width('50px');
         })->value($routes);
         $form->text('title', 'Название')->placeholder('Введи название')->required();
         $form->hidden('title_eng')->default('1');;
         $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
-        $form->url('link', 'Ссылка')->placeholder('Ссылка')->default('http://127.0.0.1:8000/')->required();
+        $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
         $form->summernote('description', 'Описание')->placeholder('Описание')->required();
         $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
         $form->switch('active', 'Опубликовать сразу?');
-//        $form->submitted(function (Form $form) {
-//            $form->ignore('grade_and_amount');
-//        });
         $form->saving(function (Form $form) {
-
             $count = 0;
-            foreach ($form->grade_and_amount as $value){
-                $count += intval($value["Кол-во"]);
+            if($form->grade_and_amount){
+                foreach ($form->grade_and_amount as $value){
+                    $count += intval($value["Кол-во"]);
+                }
+                if (intval($form->count_routes) != $count) {
+                    throw new \Exception('Кол-во трасс '.$form->count_routes. ' Категория и Кол-во '.$count.' должны быть одинаковыми');
+                }
+                $climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
+                $title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
+                $form->climbing_gym_name_eng =  $climbing_gym_name_eng;
+                $form->title_eng = $title_eng;
+                $form->link = '/event/'.$climbing_gym_name_eng.'/'.$title_eng;
             }
-            if (intval($form->count_routes) != $count) {
-                throw new \Exception('Кол-во трасс '.$form->count_routes. ' Категория и Кол-во '.$count.' должны быть одинаковыми');
-            }
-            $form->climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
-            $form->title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
+
         });
         $form->saved(function (Form $form) {
-            Event::generation_route(Admin::user()->id, $form->model()->id, $form->grade_and_amount);
-            $success = new MessageBag([
-                'title'   => 'Соревнование успешно создано',
-                'message' => '',
-            ]);
+            if ($form->grade_and_amount){
+                Event::generation_route(Admin::user()->id, $form->model()->id, $form->grade_and_amount);
+                $success = new MessageBag([
+                    'title'   => 'Соревнование успешно создано',
+                    'message' => '',
+                ]);
 
-            return back()->with(compact('success'));
+                return back()->with(compact('success'));
+            }
+            return $form;
         });
         return $form;
+    }
+
+    /**
+     * @return array[]
+     */
+    protected function getGrades(): array
+    {
+        $grades = ['5' => '5', '5+' => '5+','6A' => '6A','6A+' => '6A+', '6B' => '6B', '6B+' => '6B+','6C' => '6C',
+            '6C+' => '6C+','7A' => '7A','7A+' => '7A+','7B' => '7B','7B+' => '7B+','7C' => '7C','7C+' => '7C+','8A' => '8A'];
+        return $grades;
+    }
+
+    /**
+     * @return array[]
+     */
+    protected function getRoutes(): array
+    {
+        $routes = [
+            ['Категория' => '5', 'Кол-во' => 3, 'Ценность' => 100],
+            ['Категория' => '5+', 'Кол-во' => 3, 'Ценность' => 150],
+            ['Категория' => '6A', 'Кол-во' => 3, 'Ценность' => 200],
+            ['Категория' => '6A+', 'Кол-во' => 3, 'Ценность' => 250],
+            ['Категория' => '6B', 'Кол-во' => 3, 'Ценность' => 300],
+            ['Категория' => '6B+', 'Кол-во' => 2, 'Ценность' => 350],
+            ['Категория' => '6C', 'Кол-во' => 2, 'Ценность' => 400],
+            ['Категория' => '6C+', 'Кол-во' => 2, 'Ценность' => 450],
+            ['Категория' => '7A', 'Кол-во' => 2, 'Ценность' => 500],
+            ['Категория' => '7A+', 'Кол-во' => 2, 'Ценность' => 550],
+            ['Категория' => '7B', 'Кол-во' => 2, 'Ценность' => 600],
+            ['Категория' => '7B+', 'Кол-во' => 1, 'Ценность' => 650],
+            ['Категория' => '7C', 'Кол-во' => 1, 'Ценность' => 700],
+            ['Категория' => '7C+', 'Кол-во' => 1, 'Ценность' => 750],
+            ['Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 800],
+        ];
+        return $routes;
     }
 }

@@ -149,7 +149,7 @@ class  ParticipantsController extends Controller
 //                'scrollY' => true,
             ];
             $users_id = $model->participant()->where('owner_id', '=', Admin::user()->id)->pluck('user_id')->toArray();
-            $users_point = $model->participant()->pluck('point','user_id')->toArray();
+            $users_point = $model->participant()->pluck('points','user_id')->toArray();
             $users_active = $model->participant()->pluck('active','user_id')->toArray();
             $fields = ['firstname','id', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
             $users = User::whereIn('id', $users_id)->get();
@@ -161,7 +161,7 @@ class  ParticipantsController extends Controller
                 $users[$index]['city'] = $user->city;
                 $users[$index]['team'] = $user->team;
                 $users[$index]['category'] = User::category($user->category);
-                $users[$index]['point'] = $users_point[$user->id];
+                $users[$index]['points'] = $users_point[$user->id];
                 $users[$index]['active'] = $users_active[$user->id];
 
                 if (isset($users_active[$user->id])){
@@ -182,7 +182,7 @@ class  ParticipantsController extends Controller
             $users_female = User::whereIn('id', $users_id)->where('gender', '=', 'female')->get()->count();
             $users_male = User::whereIn('id', $users_id)->where('gender', '=', 'male')->get()->count();
             $gender = array('female' => $users_female, 'male' => $users_male);
-            $doughnut = view('admin.chart.gender', compact('gender'));
+            $doughnut = view('admin.charts.gender', compact('gender'));
 
             return new Box('Соотношение мужчин и женщин', $doughnut);
         });

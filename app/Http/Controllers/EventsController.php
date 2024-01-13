@@ -11,6 +11,7 @@ use App\Models\ParticipantCategory;
 use App\Models\ResultParticipant;
 use App\Models\Set;
 use App\Models\User;
+use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use stdClass;
@@ -32,28 +33,30 @@ class EventsController extends Controller
         }
     }
     public function show(Request $request, $climbing_gym, $title){
-        $event = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('active', '=', 1)->first();
-        $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
-
-        foreach ($sets as $set){
-            $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('set', '=', $set->number_set)->count();
-            $set->free = $set->max_participants - $participants_event;
-            $a = $set->max_participants;
-            $b = $set->free;
-
-            if ($a === $b) {
-                $percent = 0;
-            } elseif ($a < $b) {
-                $diff = $b - $a;
-                $percent = $diff / $b * 100;
-            } else {
-                $diff = $a - $b;
-                $percent = $diff / $a * 100;
-            }
-            $set->procent = intval($percent);
-
+        if(\Encore\Admin\Facades\Admin::user()){
+            $event = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
+        } else {
+            $event = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('active', '=', 1)->first();
         }
         if($event){
+            $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
+            foreach ($sets as $set){
+                $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('set', '=', $set->number_set)->count();
+                $set->free = $set->max_participants - $participants_event;
+                $a = $set->max_participants;
+                $b = $set->free;
+
+                if ($a === $b) {
+                    $percent = 0;
+                } elseif ($a < $b) {
+                    $diff = $b - $a;
+                    $percent = $diff / $b * 100;
+                } else {
+                    $diff = $a - $b;
+                    $percent = $diff / $a * 100;
+                }
+                $set->procent = intval($percent);
+            }
             $categories = ParticipantCategory::all();
             return view('welcome', compact('event', 'categories', 'sets'));
         } else {
@@ -93,7 +96,7 @@ class EventsController extends Controller
     public function get_final_results(Request $request, $climbing_gym, $title){
         $event = Event::where('title_eng', '=', $title)->first();
         $this->refresh_final_points_all_participant($event->id);
-        $final_results = Participant::where('event_id', '=', $event->id)->orderBy('final_points', 'DESC')->get()->toArray();
+        $final_results = Participant::where('event_id', '=', $event->id)->orderBy('points', 'DESC')->get()->toArray();
         $user_ids = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
         $stats = new stdClass();
         $female_categories = array();
@@ -144,6 +147,10 @@ class EventsController extends Controller
 
     public function sendResultParticipant(Request $request) {
         $user_id = $request->user_id;
+        $participant_active = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
+        if ($participant_active->active){
+            return response()->json(['success' => false, 'message' => 'ошибка внесение результатов'], 422);
+        }
         $gender = strtolower(Auth::user()->gender($user_id));
         $format = Event::find($request->event_id)->mode;
         $data = array();
@@ -217,7 +224,8 @@ class EventsController extends Controller
 
 
         if ($result) {
-            return response()->json(['success' => true, 'message' => 'Успешная внесение результатов'], 201);
+            $event = Event::find($request->event_id);
+            return response()->json(['success' => true, 'message' => 'Успешная внесение результатов', 'link' => $event->link], 201);
         } else {
             return response()->json(['success' => false, 'message' => 'ошибка внесение результатов'], 422);
         }
@@ -230,7 +238,7 @@ class EventsController extends Controller
         } else {
             $final_participant_result = $record;
         }
-        $final_participant_result->final_points = $final_participant_result->final_points + $route['points'];
+        $final_participant_result->points = $final_participant_result->point + $route['points'];
         $final_participant_result->event_id = $route['event_id'];
         $final_participant_result->user_id =$route['user_id'];
         $final_participant_result->owner_id = $route['owner_id'];
@@ -246,10 +254,16 @@ class EventsController extends Controller
             $points = 0;
             $routes_only_passed = array();
             foreach ($routes as $route) {
+
                 $user_model = ResultParticipant::where('event_id', '=', $event_id)
                     ->where('user_id', '=', $user)
                     ->where('route_id', '=', $route['route_id'])
                     ->first();
+                if (isset($user_model->attempt)){
+                    $a = 1;
+                }else {
+                    dd($event_id, $user, $route['route_id']);
+                }
                 if($user_model->attempt != 0) {
                     $gender = User::gender($user);
                     $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
@@ -272,7 +286,7 @@ class EventsController extends Controller
                 }
             }
             $final_participant_result = Participant::where('user_id', '=', $user)->where('event_id', '=', $event_id)->first();
-            $final_participant_result->final_points = $points;
+            $final_participant_result->points = $points;
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $user;
 //            $final_participant_result->user_place = $user;
@@ -285,8 +299,6 @@ class EventsController extends Controller
 
 
     public function listRoutesEvent(Request $request, $title) {
-
-
         $event = Event::where('title_eng', '=', $title)->first();
         $grades = Grades::where('owner_id', '=', $event->owner_id)->get();
         $routes = [];

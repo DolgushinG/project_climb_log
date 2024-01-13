@@ -18,7 +18,7 @@ class Participant extends Model
     }
 
     public static function counting_final_place($event_id, $user_id = null){
-        $all_participant_event = Participant::where('event_id', '=', $event_id)->orderBy('point', 'DESC')->get();
+        $all_participant_event = Participant::where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
         $user_places = array();
         foreach ($all_participant_event as $index => $user){
             $user_places[$user->user_id] = $index+1;
@@ -27,6 +27,7 @@ class Participant extends Model
             return $user_places[$user_id];
         }
         return $user_places;
+
     }
 
     public static function participant_with_result($event_id, $gender)
@@ -36,6 +37,15 @@ class Participant extends Model
             return count(User::whereIn('id', $active_participant)->where('gender', '=', $gender)->get()->toArray());
         } else {
             return 1;
+        }
+    }
+    public static function is_active_participant($event_id, $user_id)
+    {
+        $active_participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->where('active', '=', 1)->first();
+        if ($active_participant) {
+            return true;
+        } else {
+            return false;
         }
     }
 

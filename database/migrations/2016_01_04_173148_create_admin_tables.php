@@ -26,9 +26,12 @@ class CreateAdminTables extends Migration
             $table->string('username', 190)->unique();
             $table->string('password', 60);
             $table->string('name');
-            $table->string('contact_email')->unique();
+            $table->string('contact_email')->nullable();
             $table->string('contact_link')->nullable();
-            $table->string('climbing_gym')->nullable();
+            $table->string('climbing_gym_name')->nullable();
+            $table->string('climbing_gym_link')->nullable();
+            $table->string('address')->nullable();
+            $table->string('city')->nullable();
             $table->string('phone')->nullable();
             $table->string('optional_phone')->nullable();
             $table->string('avatar')->nullable();

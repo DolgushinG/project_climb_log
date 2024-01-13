@@ -57,7 +57,7 @@
                                                             <tr>
                                                                 <td>{{$res['user_name']}}</td>
                                                                 <td>{{$res['city']}}</td>
-                                                                <td>{{$res['final_points']}}</td>
+                                                                <td>{{$res['points']}}</td>
                                                             </tr>
                                                         @endif
                                                 </tbody>
@@ -88,7 +88,7 @@
                                                             <tr>
                                                                 <td>{{$res['user_name']}}</td>
                                                                 <td>{{$res['city']}}</td>
-                                                                <td>{{$res['final_points']}}</td>
+                                                                <td>{{$res['points']}}</td>
                                                             </tr>
                                                         @endif
                                                     @endif
@@ -160,7 +160,7 @@
                                                             <tr>
                                                                 <td>{{$res['user_name']}}</td>
                                                                 <td>{{$res['city']}}</td>
-                                                                <td>{{$res['final_points']}}</td>
+                                                                <td>{{$res['points']}}</td>
                                                             </tr>
                                                         @endif
                                                     @endif
@@ -191,7 +191,7 @@
                                                             <tr>
                                                                 <td>{{$res['user_name']}}</td>
                                                                 <td>{{$res['city']}}</td>
-                                                                <td>{{$res['final_points']}}</td>
+                                                                <td>{{$res['points']}}</td>
                                                             </tr>
                                                         @endif
                                                     @endif

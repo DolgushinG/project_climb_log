@@ -68,18 +68,18 @@ class ParticipantExport implements WithHeadings, FromCollection, WithStyles
 
 
         $users_id = Participant::where('event_id', '=', $this->event_id)->where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->pluck('user_id')->toArray();
-        $users_point = Participant::where('event_id', '=', $this->event_id)->where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->pluck('point','user_id')->toArray();
+        $users_point = Participant::where('event_id', '=', $this->event_id)->where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->pluck('points','user_id')->toArray();
         $fields = ['firstname','id', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
         $users = User::whereIn('id', $users_id)->get();
         foreach ($users as $index => $user){
             $users[$index] = collect($user->toArray())->except($fields);
-            $users[$index]['place'] = Participant::counting_final_place(10, $user->id);
+            $users[$index]['place'] = Participant::counting_final_place($this->event_id, $user->id);
             $users[$index]['middlename'] = $user->middlename;
             $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
             $users[$index]['city'] = $user->city;
             $users[$index]['team'] = $user->team;
             $users[$index]['category'] = User::category($user->category);
-            $users[$index]['point'] = $users_point[$user->id];
+            $users[$index]['points'] = $users_point[$user->id];
         }
         return $users->sortBy('place');
     }
