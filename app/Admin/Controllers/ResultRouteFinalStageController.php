@@ -2,8 +2,11 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\CustomAction\ActionExport;
+use App\Exports\FinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
+use App\Models\ResultFinalStage;
 use App\Models\ResultRouteFinalStage;
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -14,8 +17,9 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Jxlwqq\DataTable\DataTable;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ResultRouteFinalStageController extends Controller
 {
@@ -153,10 +157,17 @@ class ResultRouteFinalStageController extends Controller
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
+        $grid->actions(function ($actions) {
+            $actions->disableDelete();
+            $actions->disableEdit();
+            $actions->disableView();
+            $actions->append(new ActionExport($actions->getKey(), 'final' , 'excel'));
+            $actions->append(new ActionExport($actions->getKey(), 'final', 'csv'));
+            $actions->append(new ActionExport($actions->getKey(), 'final', 'ods'));
+        });
         $grid->disableExport();
         $grid->disableColumnSelector();
         $grid->disableCreateButton();
-        $grid->disableActions();
         $grid->disablePagination();
         $grid->disablePerPageSelector();
         $grid->disableBatchActions();
@@ -170,6 +181,7 @@ class ResultRouteFinalStageController extends Controller
             $users_female = User::whereIn('id', $users_id)->where('gender', '=', 'female')->get();
             $male = self::getUsersSorted($users_male, $fields, $model);
             $female = self::getUsersSorted($users_female, $fields, $model);
+            $final_all_users = array_merge($male, $female);
             $all_users = array_merge($male, $female);
             $options = [
                 'responsive' => true,
@@ -182,7 +194,21 @@ class ResultRouteFinalStageController extends Controller
                 'deferRender' => true,
                 'processing' => true,
             ];
-            return new DataTable($headers, $all_users, $style, $options);
+            foreach ($final_all_users as $index => $user){
+                $fields = ['owner_id', 'event_id', 'user_id'];
+                $final_all_users[$index] = collect($user)->except($fields)->toArray();
+            }
+            foreach ($all_users as $index => $user){
+                $fields = ['gender', 'middlename'];
+                $all_users[$index] = collect($user)->except($fields)->toArray();
+                $final_result_stage = ResultFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
+                $final_result_stage->amount_top = $all_users[$index]['amount_top'];
+                $final_result_stage->amount_try_top = $all_users[$index]['amount_try_top'];
+                $final_result_stage->amount_zone = $all_users[$index]['amount_zone'];
+                $final_result_stage->place = $all_users[$index]['place'];
+                $final_result_stage->save();
+            }
+            return new DataTable($headers, $final_all_users, $style, $options);
         });
         return $grid;
     }
@@ -274,6 +300,9 @@ class ResultRouteFinalStageController extends Controller
             $users[$index] = collect($user->toArray())->except($fields);
             $users[$index]['result'] = $result;
             $users[$index]['place'] = null;
+            $users[$index]['owner_id'] = Admin::user()->id;
+            $users[$index]['user_id'] = $user->id;
+            $users[$index]['event_id'] = $model->id;
             $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
             $users[$index]['amount_top'] = $result['amount_top'];
             $users[$index]['amount_try_top'] = $result['amount_try_top'];
@@ -292,6 +321,20 @@ class ResultRouteFinalStageController extends Controller
         return $users_sorted;
     }
 
-
+    public function exportFinalExcel(Request $request)
+    {
+        $response = Excel::download(new FinalResultExport($request->id), 'final-users-'.__FUNCTION__.'.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($response->getFile());
+    }
+    public function exportFinalCsv(Request $request)
+    {
+        $response = Excel::download(new FinalResultExport($request->id), 'final-users-'.__FUNCTION__.'.csv', \Maatwebsite\Excel\Excel::CSV);
+        return response()->download($response->getFile());
+    }
+    public function exportFinalOds(Request $request)
+    {
+        $response = Excel::download(new FinalResultExport($request->id), 'final-users-'.__FUNCTION__.'.ods', \Maatwebsite\Excel\Excel::ODS);
+        return response()->download($response->getFile());
+    }
 
 }

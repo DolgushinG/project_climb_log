@@ -85,7 +85,7 @@ class AdminTablesSeeder extends Seeder
                 [
                     "parent_id" => 0,
                     "order" => 0,
-                    "title" => "Участники",
+                    "title" => "Квалификация",
                     "icon" => "fa-coffee",
                     "uri" => "participants",
                     "permission" => "owner.participants"
@@ -136,7 +136,7 @@ class AdminTablesSeeder extends Seeder
                     "title" => "Финал",
                     "icon" => "fa-adn",
                     "uri" => "result-route-final-stage",
-                    "permission" => "owner.final.result.participants"
+                    "permission" => "owner.result.route.final.stage"
                 ],
                 [
                     "parent_id" => 0,
@@ -329,6 +329,10 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "role_id" => 1,
+                    "menu_id" => 20
+                ],
+                [
+                    "role_id" => 1,
                     "menu_id" => 22
                 ],
                 [
@@ -342,14 +346,6 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 2,
                     "menu_id" => 15
-                ],
-                [
-                    "role_id" => 2,
-                    "menu_id" => 17
-                ],
-                [
-                    "role_id" => 2,
-                    "menu_id" => 20
                 ]
             ]
         );
@@ -379,19 +375,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "role_id" => 2,
-                    "permission_id" => 11
-                ],
-                [
-                    "role_id" => 2,
                     "permission_id" => 13
-                ],
-                [
-                    "role_id" => 2,
-                    "permission_id" => 14
-                ],
-                [
-                    "role_id" => 2,
-                    "permission_id" => 17
                 ]
             ]
         );

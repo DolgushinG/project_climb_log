@@ -3,12 +3,13 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\CustomAction\ActionCsv;
-use App\Admin\CustomAction\ActionExcel;
+use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionOds;
 use App\Exceptions\ExportToCsv;
 use App\Exceptions\ExportToExcel;
 use App\Exceptions\ExportToOds;
-use App\Exports\ParticipantExport;
+use App\Exports\FinalResultExport;
+use App\Exports\QualificationResultExport;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Http\Controllers\Controller;
@@ -115,9 +116,9 @@ class  ParticipantsController extends Controller
             $actions->disableDelete();
             $actions->disableEdit();
             $actions->disableView();
-            $actions->append(new ActionExcel($actions->getKey()));
-            $actions->append(new ActionCsv($actions->getKey()));
-            $actions->append(new ActionOds($actions->getKey()));
+            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'excel'));
+            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'csv'));
+            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'ods'));
         });
         $grid->disableExport();
         $grid->disableCreateButton();
@@ -295,20 +296,21 @@ class  ParticipantsController extends Controller
 
         return $form;
     }
-    public function exportExcel(Request $request)
+    public function exportQualificationExcel(Request $request)
     {
-        $response = Excel::download(new ParticipantExport($request->id), 'users-'.__FUNCTION__.'.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+        $response = Excel::download(new QualificationResultExport($request->id), 'users-'.__FUNCTION__.'.xlsx', \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($response->getFile());
     }
-    public function exportCsv(Request $request)
+    public function exportQualificationCsv(Request $request)
     {
-        $response = Excel::download(new ParticipantExport($request->id), 'users-'.__FUNCTION__.'.csv', \Maatwebsite\Excel\Excel::CSV);
+        $response = Excel::download(new QualificationResultExport($request->id), 'users-'.__FUNCTION__.'.csv', \Maatwebsite\Excel\Excel::CSV);
         return response()->download($response->getFile());
     }
-    public function exportOds(Request $request)
+    public function exportQualificationOds(Request $request)
     {
-        $response = Excel::download(new ParticipantExport($request->id), 'users-'.__FUNCTION__.'.ods', \Maatwebsite\Excel\Excel::ODS);
+        $response = Excel::download(new QualificationResultExport($request->id), 'users-'.__FUNCTION__.'.ods', \Maatwebsite\Excel\Excel::ODS);
         return response()->download($response->getFile());
     }
+
 
 }

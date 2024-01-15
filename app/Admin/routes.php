@@ -23,9 +23,12 @@ Route::group([
         $router->resource('participants-categories', ParticipantCategoriesController::class);
         $router->resource('sets', SetsController::class);
         $router->resource('event-and-coefficient-route',  EventAndCoefficientsRoutesController::class);
-        $router->get('exports/events/excel/{id}', 'ParticipantsController@exportExcel')->name('exportExcel');
-        $router->get('exports/events/csv/{id}', 'ParticipantsController@exportCsv')->name('exportCsv');
-        $router->get('exports/events/ods/{id}', 'ParticipantsController@exportCsv')->name('exportOds');
+        $router->get('exports/events/excel/qualification/{id}', 'ParticipantsController@exportQualificationExcel')->name('exportQualificationExcel');
+        $router->get('exports/events/csv/qualification/{id}', 'ParticipantsController@exportQualificationCsv')->name('exportQualificationCsv');
+        $router->get('exports/events/ods/qualification/{id}', 'ParticipantsController@exportQualificationOds')->name('exportQualificationOds');
+        $router->get('exports/events/excel/final/{id}', 'ResultRouteFinalStageController@exportFinalExcel')->name('exportFinalExcel');
+        $router->get('exports/events/csv/final/{id}', 'ResultRouteFinalStageController@exportFinalCsv')->name('exportFinalCsv');
+        $router->get('exports/events/ods/final/{id}', 'ResultRouteFinalStageController@exportFinalOds')->name('exportFinalOds');
     });
 
 });

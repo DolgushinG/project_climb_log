@@ -3,6 +3,8 @@
 namespace App\Exports;
 
 use App\Models\Participant;
+use App\Models\ResultFinalStage;
+use App\Models\ResultRouteFinalStage;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -12,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class ParticipantExport implements WithHeadings, FromCollection, WithStyles
+class FinalResultExport implements WithHeadings, FromCollection, WithStyles
 {
 
     public $event_id;
@@ -54,11 +56,11 @@ class ParticipantExport implements WithHeadings, FromCollection, WithStyles
         return [
             'Участник',
             'Пол',
-            'Город',
-            'Команда',
-            'Категория',
             'Место',
-            'Баллы',
+            'Кол-во TOP',
+            'Кол-во попыток на TOP',
+            'Кол-во ZONE',
+            'Кол-во попыток на ZONE',
         ];
     }
 
@@ -68,19 +70,27 @@ class ParticipantExport implements WithHeadings, FromCollection, WithStyles
 
 
         $users_id = Participant::where('event_id', '=', $this->event_id)->where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->pluck('user_id')->toArray();
-        $users_point = Participant::where('event_id', '=', $this->event_id)->where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->pluck('points','user_id')->toArray();
-        $fields = ['firstname','id', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
-        $users = User::whereIn('id', $users_id)->get();
+        $users_male = User::whereIn('id', $users_id)->where('gender', '=', 'male')->get();
+        $users_female = User::whereIn('id', $users_id)->where('gender', '=', 'female')->get();
+        $users_male_final = $this->prepare_export($users_male);
+        $users_female_final = $this->prepare_export($users_female);
+        $usr = array_merge($users_male_final->sortBy('place')->toArray(), $users_female_final->sortBy('place')->toArray());
+        return collect($usr);
+    }
+
+    public function prepare_export($users){
+        $fields = ['firstname','id', 'city', 'team', 'category', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
         foreach ($users as $index => $user){
             $users[$index] = collect($user->toArray())->except($fields);
-            $users[$index]['place'] = Participant::get_places_participant_in_qualification($this->event_id, $user->id, true);
+            $result = ResultFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user->id)->first();
             $users[$index]['middlename'] = $user->middlename;
             $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
-            $users[$index]['city'] = $user->city;
-            $users[$index]['team'] = $user->team;
-            $users[$index]['category'] = User::category($user->category);
-            $users[$index]['points'] = $users_point[$user->id];
+            $users[$index]['place'] = $result->place;
+            $users[$index]['amount_top'] = $result->amount_top;
+            $users[$index]['amount_try_top'] = $result->amount_try_top;
+            $users[$index]['amount_zone'] = $result->amount_zone;
+            $users[$index]['amount_try_zone'] = $result->amount_try_zone;
         }
-        return $users->sortBy('place');
+        return $users;
     }
 }
