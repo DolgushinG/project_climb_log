@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Participant;
+use App\Models\ResultParticipant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -44,7 +45,7 @@ class ProfileController extends Controller
             $event['amount_participant'] = Participant::where('event_id', '=', $event->id)->get()->count();
             $active = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->active;
             if($active){
-                $users = Participant::get_places_participant_in_qualification($event->id);
+                $users = Participant::get_places_participant_in_qualification($event->id, $user_id);
                 $user_place = $users[$user_id];
                 $status = "Внес результаты";
             }else{
@@ -53,6 +54,16 @@ class ProfileController extends Controller
             }
             $event['participant_active'] = $status;
             $event['user_place'] = $user_place;
+            $res_par = ResultParticipant::where('event_id', '=', $event->id)->where('user_id','=',$user_id)->get();
+            $result = array();
+            foreach ($res_par as $res){
+                if (isset($result[$res['grade']])){
+                    $result[$res['grade']] += 1;
+                } else {
+                    $result[$res['grade']] = 1;
+                }
+            }
+            $event['amount_passed_grades'] = json_encode(array_values($result));
         }
         return view('profile.events', compact(['events']));
     }

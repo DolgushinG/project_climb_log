@@ -146,7 +146,7 @@ class  ParticipantsController extends Controller
             $users = User::whereIn('id', $users_id)->get();
             foreach ($users as $index => $user){
                 $users[$index] = collect($user->toArray())->except($fields);
-                $users[$index]['place'] = Participant::get_places_participant_in_qualification($model->id, $user->id);
+                $users[$index]['place'] = Participant::get_places_participant_in_qualification($model->id, $user->id, true);
                 $users[$index]['middlename'] = $user->middlename;
                 $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
                 $users[$index]['city'] = $user->city;

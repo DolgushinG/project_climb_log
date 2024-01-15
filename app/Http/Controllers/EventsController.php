@@ -241,7 +241,7 @@ class EventsController extends Controller
         $final_participant_result->points = $final_participant_result->point + $route['points'];
         $final_participant_result->event_id = $route['event_id'];
         $final_participant_result->user_id = $route['user_id'];
-        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($route['event_id'], $route['user_id']);
+        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($route['event_id'], $route['user_id'], true);
         $final_participant_result->owner_id = $route['owner_id'];
         $final_participant_result->save();
     }
@@ -285,7 +285,7 @@ class EventsController extends Controller
             $final_participant_result->points = $points;
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $user;
-            $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user);
+            $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user, true);
             $final_participant_result->save();
 
 

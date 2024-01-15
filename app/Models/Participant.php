@@ -61,7 +61,7 @@ class Participant extends Model
         # Если не разложились смотрим результаты квалификации
         $new = array();
         foreach ($sorted_try_zone as $res){
-            $res['place'] = Participant::get_places_participant_in_qualification($event_id, $res['result']['user_id']);
+            $res['place'] = Participant::get_places_participant_in_qualification($event_id, $res['result']['user_id'], true);
             $new[] = $res;
         }
         usort($new, function($a, $b) {
@@ -70,7 +70,7 @@ class Participant extends Model
         return $new;
     }
 
-    public static function get_places_participant_in_qualification($event_id, $user_id = null){
+    public static function get_places_participant_in_qualification($event_id, $user_id, $get_user = false){
         $gender = User::gender($user_id);
         $users_id = User::where('gender', '=', $gender)->pluck('id');
         $all_participant_event = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
@@ -78,7 +78,7 @@ class Participant extends Model
         foreach ($all_participant_event as $index => $user){
             $user_places[$user->user_id] = $index+1;
         }
-        if ($user_id){
+        if ($get_user){
             return $user_places[$user_id];
         }
         return $user_places;
