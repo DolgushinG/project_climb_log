@@ -44,7 +44,7 @@ class ProfileController extends Controller
             $event['amount_participant'] = Participant::where('event_id', '=', $event->id)->get()->count();
             $active = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->active;
             if($active){
-                $users = Participant::counting_final_place($event->id);
+                $users = Participant::get_places_participant_in_qualification($event->id);
                 $user_place = $users[$user_id];
                 $status = "Внес результаты";
             }else{

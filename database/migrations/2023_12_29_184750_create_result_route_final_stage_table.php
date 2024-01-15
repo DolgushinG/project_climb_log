@@ -20,7 +20,9 @@ class CreateResultRouteFinalStageTable extends Migration
             $table->integer('user_id');
             $table->integer('final_route_id');
             $table->integer('amount_try_top');
+            $table->integer('amount_top');
             $table->integer('amount_try_zone');
+            $table->integer('amount_zone');
             $table->timestamps();
         });
     }

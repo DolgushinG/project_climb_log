@@ -3,8 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use stdClass;
 
 class ResultRouteFinalStage extends Model
 {
     protected $table = 'result_route_final_stage';
+
+
+    public static function merge_result_user_in_final_stage($result){
+        $final_result = array('user_id' => null, 'event_id' => null, 'amount_top' => null,'amount_try_top' => null, 'amount_zone' => null, 'amount_try_zone' => null);
+        foreach ($result as $res)
+        {
+            $final_result['user_id'] = $res->user_id;
+            $final_result['event_id'] = $res->event_id;
+            $final_result['amount_try_top'] += $res->amount_try_top;
+            $final_result['amount_top'] += $res->amount_top;
+            $final_result['amount_try_zone'] += $res->amount_try_zone;
+            $final_result['amount_zone'] += $res->amount_zone;
+        }
+
+        return $final_result;
+    }
+
 }

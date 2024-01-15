@@ -73,7 +73,7 @@ class ParticipantExport implements WithHeadings, FromCollection, WithStyles
         $users = User::whereIn('id', $users_id)->get();
         foreach ($users as $index => $user){
             $users[$index] = collect($user->toArray())->except($fields);
-            $users[$index]['place'] = Participant::counting_final_place($this->event_id, $user->id);
+            $users[$index]['place'] = Participant::get_places_participant_in_qualification($this->event_id, $user->id);
             $users[$index]['middlename'] = $user->middlename;
             $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
             $users[$index]['city'] = $user->city;

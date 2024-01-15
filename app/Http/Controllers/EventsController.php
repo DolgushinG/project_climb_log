@@ -197,7 +197,7 @@ class EventsController extends Controller
             # Варианты форматов подсчета баллов
             $value_category = Grades::where('grade','=',$route['grade'])->where('owner_id','=', $request->owner_id)->first()->value;
             $value_route = (new \App\Models\ResultParticipant)->get_value_route($route['attempt'], $value_category, $format);
-            $route['points'] = $coefficient + $value_route;
+            $route['points'] = $coefficient * $value_route;
             # Формат все трассы считаем сразу
             if($format == 2) {
                 $this->insert_final_participant_result($route);
@@ -240,7 +240,8 @@ class EventsController extends Controller
         }
         $final_participant_result->points = $final_participant_result->point + $route['points'];
         $final_participant_result->event_id = $route['event_id'];
-        $final_participant_result->user_id =$route['user_id'];
+        $final_participant_result->user_id = $route['user_id'];
+        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($route['event_id'], $route['user_id']);
         $final_participant_result->owner_id = $route['owner_id'];
         $final_participant_result->save();
     }
@@ -259,11 +260,6 @@ class EventsController extends Controller
                     ->where('user_id', '=', $user)
                     ->where('route_id', '=', $route['route_id'])
                     ->first();
-                if (isset($user_model->attempt)){
-                    $a = 1;
-                }else {
-                    dd($event_id, $user, $route['route_id']);
-                }
                 if($user_model->attempt != 0) {
                     $gender = User::gender($user);
                     $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
@@ -289,7 +285,7 @@ class EventsController extends Controller
             $final_participant_result->points = $points;
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $user;
-//            $final_participant_result->user_place = $user;
+            $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user);
             $final_participant_result->save();
 
 

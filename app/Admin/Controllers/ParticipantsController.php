@@ -111,15 +111,6 @@ class  ParticipantsController extends Controller
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
-//        $grid->export(function ($export) {
-//
-//            // Filename for export, the default is `table name.csv`
-//            $export->filename('Filename.csv');
-//            // Finally, if you want to customize the export content of certain columns, use the `column` method
-//            $export->column('title', function ($value, $original) {
-//                // modify value here, or modify orginal (db) value
-//            });
-//        });
         $grid->actions(function ($actions) {
             $actions->disableDelete();
             $actions->disableEdit();
@@ -155,7 +146,7 @@ class  ParticipantsController extends Controller
             $users = User::whereIn('id', $users_id)->get();
             foreach ($users as $index => $user){
                 $users[$index] = collect($user->toArray())->except($fields);
-                $users[$index]['place'] = Participant::counting_final_place($model->id, $user->id);
+                $users[$index]['place'] = Participant::get_places_participant_in_qualification($model->id, $user->id);
                 $users[$index]['middlename'] = $user->middlename;
                 $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
                 $users[$index]['city'] = $user->city;
@@ -174,7 +165,6 @@ class  ParticipantsController extends Controller
                 }
             }
             return new DataTable($headers, $users->toArray(), $style, $options);
-//            return new Table(['ID', 'Участник', 'Пол', 'Год', 'Город', 'Команда', 'Категория', 'Email'], $users->toArray());
         });
         $grid->header(function ($query) {
             $event_id = $query->where('owner_id', '=', Admin::user()->id)->get()->pluck('id');
