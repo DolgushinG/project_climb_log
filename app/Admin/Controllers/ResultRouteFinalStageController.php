@@ -103,7 +103,31 @@ class ResultRouteFinalStageController extends Controller
         $grid->disableExport();
         $grid->disableColumnSelector();
         $grid->disableCreateButton();
+        $grid->filter(function($filter){
+            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+            $ev = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck( 'title', 'id');
+            $participant = Participant::where('event_id', '=', $event->id)->pluck('user_id');
+            $users_middlename = User::whereIn('id', $participant)->pluck('middlename','id');
+            $users_gender = User::whereIn('id', $participant)->pluck('gender','id');
+            // Remove the default id filter
+            $filter->disableIdFilter();
 
+            // Add a column filter
+            $filter->in('event.id', 'Соревнование')->checkbox(
+                $ev
+            );
+
+            $filter->in('user.id', 'Участник')->checkbox(
+                $users_middlename
+            );
+
+//            // Add a column filter
+            $filter->in('user.gender', 'Пол')->checkbox([
+                'male'    => 'Мужчина',
+                'female'    => 'Женщина',
+            ]);
+
+        });
         $grid->quickCreate(function (Grid\Tools\QuickCreate $create)  {
             $events = Event::where('active', '=', 1)->pluck('title','id');
             $create->select('event_id','Соревнование')->options($events);

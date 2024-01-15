@@ -9,6 +9,15 @@ class ResultRouteFinalStage extends Model
 {
     protected $table = 'result_route_final_stage';
 
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public static function merge_result_user_in_final_stage($result){
         $final_result = array('user_id' => null, 'event_id' => null, 'amount_top' => null,'amount_try_top' => null, 'amount_zone' => null, 'amount_try_zone' => null);

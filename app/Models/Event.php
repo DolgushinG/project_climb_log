@@ -50,6 +50,11 @@ class Event extends Model
         return $this->hasOne(Participant::class);
     }
 
+    public function result_final_stage()
+    {
+        return $this->hasOne(ResultRouteFinalStage::class);
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class);
