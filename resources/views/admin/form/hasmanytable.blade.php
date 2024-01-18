@@ -56,6 +56,10 @@
             </table>
             <script>
                 const breakdownButton = document.querySelectorAll('.Кол-во');
+                let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {
+                    return currentSum + currentNumber
+                }, 0)
+                document.getElementById('count_routes_label').textContent = results
                 breakdownButton.forEach(function(btn) {
                     btn.addEventListener('input', function() {
                         let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {

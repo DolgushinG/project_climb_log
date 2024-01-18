@@ -69,9 +69,8 @@ class FinalResultExport implements WithHeadings, FromCollection, WithStyles
         HeadingRowFormatter::default('none');
 
 
-        $users_id = Participant::where('event_id', '=', $this->event_id)->where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->pluck('user_id')->toArray();
-        $users_male = User::whereIn('id', $users_id)->where('gender', '=', 'male')->get();
-        $users_female = User::whereIn('id', $users_id)->where('gender', '=', 'female')->get();
+        $users_male = Participant::better_participants($this->event_id, 'male', 10);
+        $users_female = Participant::better_participants($this->event_id, 'female', 10);
         $users_male_final = $this->prepare_export($users_male);
         $users_female_final = $this->prepare_export($users_female);
         $usr = array_merge($users_male_final->sortBy('place')->toArray(), $users_female_final->sortBy('place')->toArray());

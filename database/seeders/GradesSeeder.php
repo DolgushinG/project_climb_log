@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Event;
+use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -29,9 +31,10 @@ class GradesSeeder extends Seeder
             array('Категория' => '7B+', 'Кол-во' => 1, 'Ценность' => 650),
             array('Категория' => '7C', 'Кол-во' => 1, 'Ценность' => 700),
             array('Категория' => '7C+', 'Кол-во' => 1, 'Ценность' => 750),
-            array('Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 800),
         );
-        $routes_json = json_encode($routes);
-        DB::table('grades')->insert((array)$routes_json);
+
+        Event::generation_route(2, 1, $routes);
+        Event::generation_route(3, 2, $routes);
+
     }
 }

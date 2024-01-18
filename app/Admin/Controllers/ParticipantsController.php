@@ -151,7 +151,8 @@ class  ParticipantsController extends Controller
             foreach ($users as $index => $user){
                 $users[$index] = collect($user->toArray())->except($fields);
                 $users[$index]['middlename'] = $user->middlename;
-                $users[$index]['place'] = Participant::get_places_participant_in_qualification($model->id, $user->id, true);
+                $place = Participant::get_places_participant_in_qualification($model->id, $user->id, true);
+                $users[$index]['place'] = $place;
                 $users[$index]['number_set'] = 'Сет '.$users_number_set[$user->id];
                 $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
                 $users[$index]['city'] = $user->city;
@@ -159,6 +160,10 @@ class  ParticipantsController extends Controller
                 $users[$index]['category'] = User::category($user->category);
                 $users[$index]['points'] = $users_point[$user->id];
                 $users[$index]['active'] = $users_active[$user->id];
+
+                $participant_update = Participant::where('event_id', '=', $model->id)->where('user_id', '=', $user->id)->first();
+                $participant_update->user_place = $place;
+                $participant_update->save();
 
                 if (isset($users_active[$user->id])){
                     if ($users_active[$user->id]){

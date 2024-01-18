@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
+use App\Models\ResultParticipant;
 use App\Models\ResultRouteFinalStage;
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -175,10 +176,9 @@ class ResultRouteFinalStageController extends Controller
         $grid->column('title', 'Соревнование')->expand(function ($model) {
             $headers = ['Участник', 'Пол', 'Место с учетом квалы', 'Кол-во топ','Кол-во попыток на топ','Кол-во зон', 'Кол-во попыток на зону', ];
             $style = ['table-bordered','table-hover', 'table-striped'];
-            $users_id = $model->participant()->where('owner_id', '=', Admin::user()->id)->pluck('user_id')->toArray();
+            $users_male = Participant::better_participants($model->id, 'male', 10);
+            $users_female = Participant::better_participants($model->id, 'female', 10);
             $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
-            $users_male = User::whereIn('id', $users_id)->where('gender', '=', 'male')->get();
-            $users_female = User::whereIn('id', $users_id)->where('gender', '=', 'female')->get();
             $male = self::getUsersSorted($users_male, $fields, $model);
             $female = self::getUsersSorted($users_female, $fields, $model);
             $final_all_users = array_merge($male, $female);
@@ -201,7 +201,12 @@ class ResultRouteFinalStageController extends Controller
             foreach ($all_users as $index => $user){
                 $fields = ['gender', 'middlename'];
                 $all_users[$index] = collect($user)->except($fields)->toArray();
+
                 $final_result_stage = ResultFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
+                if(!$final_result_stage){
+                    $final_result_stage = new ResultFinalStage;
+                }
+
                 $final_result_stage->amount_top = $all_users[$index]['amount_top'];
                 $final_result_stage->amount_try_top = $all_users[$index]['amount_try_top'];
                 $final_result_stage->amount_zone = $all_users[$index]['amount_zone'];
@@ -316,6 +321,12 @@ class ResultRouteFinalStageController extends Controller
             $fields = ['result'];
             $users_sorted[$index] = collect($user)->except($fields)->toArray();
             $result = ResultFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
+            if (!$result){
+                $result = new ResultFinalStage;
+            }
+            $result->event_id = $users_sorted[$index]['event_id'];
+            $result->user_id = $users_sorted[$index]['user_id'];
+            $result->owner_id = $users_sorted[$index]['owner_id'];
             $result->amount_top = $users_sorted[$index]['amount_top'];
             $result->amount_try_top = $users_sorted[$index]['amount_try_top'];
             $result->amount_zone = $users_sorted[$index]['amount_zone'];

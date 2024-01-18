@@ -160,12 +160,14 @@ class EventsController extends Controller
         $form->number('count_routes', 'Кол-во трасс по умалчанию 30 трасс **(Кол-во трасс должно совпадать с Категориями и их кол-вом)
         ')->options(['max' => 150, 'min' => 10, 'step' => 1, 'postfix' => ' маршрутов'])->default(30)->placeholder('Кол-во трасс')->required();
         $routes = $this->getRoutes();
+
         $form->table('grade_and_amount', 'Категория и Кол-во', function ($table) {
             $grades = $this->getGrades();
             $table->select('Категория')->options($grades)->readonly();
             $table->text('Кол-во')->width('50px');
             $table->text('Ценность')->width('50px');
         })->value($routes);
+
         $form->text('title', 'Название')->placeholder('Введи название')->required();
         $form->hidden('title_eng')->default('1');;
         $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();

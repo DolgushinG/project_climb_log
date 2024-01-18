@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Participant;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,14 +14,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-         \App\Models\User::factory(10)->create();
-         \App\Models\Event::factory(2)->create();
+        \App\Models\Event::factory()->count(1)->withOwnerId(2)->create();
+        \App\Models\Event::factory()->count(1)->withOwnerId(3)->create();
         $this->call([
-            GradesSeeder::class,
-            ParticipantSeeder::class,
             AdminTablesSeeder::class,
-            ParticipantCategoriesSeeder::class,
+            AdminRoleAndUsersSeeder::class,
+            UserSeeder::class,
             SetsSeeder::class,
+            ParticipantCategoriesSeeder::class,
+            ParticipantSeeder::class,
+            GradesSeeder::class,
+            ResultParticipantSeeder::class,
+            ResultFinalStageSeeder::class,
         ]);
     }
 }
