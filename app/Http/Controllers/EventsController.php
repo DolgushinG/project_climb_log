@@ -41,7 +41,7 @@ class EventsController extends Controller
         if($event){
             $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
             foreach ($sets as $set){
-                $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('set', '=', $set->number_set)->count();
+                $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set', '=', $set->number_set)->count();
                 $set->free = $set->max_participants - $participants_event;
                 $a = $set->max_participants;
                 $b = $set->free;
@@ -75,13 +75,13 @@ class EventsController extends Controller
         $index = 0;
         foreach($users_event as $set => $user) {
             if ($index <= count($users)) {
-                $set = $sets->where('number_set', '=', $user['set'])->where('owner_id', '=',$event->owner_id)->first();
+                $set = $sets->where('number_set', '=', $user['number_set'])->where('owner_id', '=',$event->owner_id)->first();
                 $participants[] = array(
                     'firstname' => $users[$index]['firstname'],
                     'lastname' => $users[$index]['lastname'],
                     'city' => $users[$index]['city'],
                     'team' => $users[$index]['team'],
-                    'set' => $user['set'],
+                    'number_set' => $user['number_set'],
                     'time' => $set->time.' '.trans_choice('somewords.'.$set->day_of_week, 10),
                     'gender' => $users[$index]['gender'],
                     'category_id' => $users[$index]['category'],
@@ -127,7 +127,7 @@ class EventsController extends Controller
         $participant = new Participant;
         $participant->event_id = $request->event_id;
         $participant->user_id = $request->user_id;
-        $participant->set = $request->number_set;
+        $participant->number_set = $request->number_set;
         $participant->owner_id = Event::find($request->event_id)->owner_id;
         $participant->active = 0;
         $participant->save();

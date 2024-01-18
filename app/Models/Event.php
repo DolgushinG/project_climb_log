@@ -55,7 +55,7 @@ class Event extends Model
         return $this->hasOne(ResultRouteFinalStage::class);
     }
 
-    public function users()
+    public function user()
     {
         return $this->belongsToMany(User::class);
     }

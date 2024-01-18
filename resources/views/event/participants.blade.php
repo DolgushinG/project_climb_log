@@ -49,7 +49,7 @@
                                                         @if($participant['category_id'] == $category->id)
                                                             <tr>
                                                                 <td>{{$participant['firstname']}} {{$participant['lastname']}}</td>
-                                                                <td>{{$participant['set']}} ({{$participant['time']}})
+                                                                <td>{{$participant['number_set']}} ({{$participant['time']}})
                                                                 </td>
                                                                 <td>{{$participant['city']}}</td>
                                                                 <td>{{$participant['team']}}</td>
@@ -78,7 +78,7 @@
                                                         @if($participant['category_id'] == $category->id)
                                                             <tr>
                                                                 <td>{{$participant['firstname']}} {{$participant['lastname']}}</td>
-                                                                <td>{{$participant['set']}} ({{$participant['time']}})
+                                                                <td>{{$participant['number_set']}} ({{$participant['time']}})
                                                                 </td>
                                                                 <td>{{$participant['city']}}</td>
                                                                 <td>{{$participant['team']}}</td>
@@ -143,7 +143,7 @@
                                                         @if($participant['category_id'] == $category->id)
                                                             <tr>
                                                                 <td>{{$participant['firstname']}} {{$participant['lastname']}}</td>
-                                                                <td>{{$participant['set']}} ({{$participant['time']}})
+                                                                <td>{{$participant['number_set']}} ({{$participant['time']}})
                                                                 </td>
                                                                 <td>{{$participant['city']}}</td>
                                                                 <td>{{$participant['team']}}</td>
@@ -172,7 +172,7 @@
                                                         @if($participant['category_id'] == $category->id)
                                                             <tr>
                                                                 <td>{{$participant['firstname']}} {{$participant['lastname']}}</td>
-                                                                <td>{{$participant['set']}} ({{$participant['time']}})
+                                                                <td>{{$participant['number_set']}} ({{$participant['time']}})
                                                                 </td>
                                                                 <td>{{$participant['city']}}</td>
                                                                 <td>{{$participant['team']}}</td>

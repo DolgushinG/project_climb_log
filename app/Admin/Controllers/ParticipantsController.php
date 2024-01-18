@@ -13,6 +13,8 @@ use App\Exports\QualificationResultExport;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Http\Controllers\Controller;
+use App\Models\ParticipantCategory;
+use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -124,7 +126,7 @@ class  ParticipantsController extends Controller
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->column('title', 'Название')->expand(function ($model) {
-            $headers = ['Участник', 'Пол', 'Город', 'Команда', 'Категория', 'Место', 'Баллы', 'Результаты'];
+            $headers = ['Участник','Пол','Город','Команда','Категория','Место','Сет','Баллы', 'Результаты'];
 
             $style = ['table-bordered','table-hover', 'table-striped'];
 
@@ -143,12 +145,14 @@ class  ParticipantsController extends Controller
             $users_id = $model->participant()->where('owner_id', '=', Admin::user()->id)->pluck('user_id')->toArray();
             $users_point = $model->participant()->pluck('points','user_id')->toArray();
             $users_active = $model->participant()->pluck('active','user_id')->toArray();
+            $users_number_set = $model->participant()->pluck('number_set','user_id')->toArray();
             $fields = ['firstname','id', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
             $users = User::whereIn('id', $users_id)->get();
             foreach ($users as $index => $user){
                 $users[$index] = collect($user->toArray())->except($fields);
-                $users[$index]['place'] = Participant::get_places_participant_in_qualification($model->id, $user->id, true);
                 $users[$index]['middlename'] = $user->middlename;
+                $users[$index]['place'] = Participant::get_places_participant_in_qualification($model->id, $user->id, true);
+                $users[$index]['number_set'] = 'Сет '.$users_number_set[$user->id];
                 $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
                 $users[$index]['city'] = $user->city;
                 $users[$index]['team'] = $user->team;
@@ -178,28 +182,16 @@ class  ParticipantsController extends Controller
             return new Box('Соотношение мужчин и женщин', $doughnut);
         });
         $grid->filter(function($filter){
-
+            $user_categories = ParticipantCategory::all()->pluck('category', 'id');
+            $sets = Set::where('owner_id', '=', Admin::user()->id)->get()->sortBy('number_set')->pluck('number_set', 'id');
             // Remove the default id filter
             $filter->disableIdFilter();
-
-            // Add a column filter
-            $filter->in('user.gender', 'Пол')->checkbox([
-                'male'    => 'Мужчина',
-                'female'    => 'Женщина',
-            ]);
-
-            // Add a column filter
-            $filter->in('set', 'Номер сета')->checkbox([
-                1    => 'Первый сет',
-                2    => 'Второй сет',
-            ]);
 
             // Add a column filter
             $filter->in('active', 'Внесли результат')->checkbox([
                 1    => 'Те кто внес',
                 0    => 'Не внесли',
             ]);
-
         });
 
 //
@@ -252,7 +244,7 @@ class  ParticipantsController extends Controller
 
         $show->id('ID');
         $show->event_id('event_id');
-        $show->set('set');
+        $show->number_set('number_set');
         $show->firstname('firstname');
         $show->lastname('lastname');
         $show->year('year');
@@ -280,7 +272,7 @@ class  ParticipantsController extends Controller
         $form->display('ID');
         $form->hidden('owner_id')->value(Admin::user()->id);
         $form->text('event_id');
-        $form->text('set', 'set');
+        $form->text('number_set', 'number_set');
         $form->text('firstname', 'firstname');
         $form->text('lastname', 'lastname');
         $form->text('gender', 'gender');

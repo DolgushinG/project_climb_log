@@ -30,7 +30,6 @@ class ResultRouteFinalStage extends Model
             $final_result['amount_try_zone'] += $res->amount_try_zone;
             $final_result['amount_zone'] += $res->amount_zone;
         }
-
         return $final_result;
     }
 

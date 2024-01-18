@@ -17,7 +17,7 @@ class CreateParticipantsTable extends Migration
             $table->increments('id');
             $table->integer('owner_id');
             $table->integer('event_id');
-            $table->integer('set');
+            $table->integer('number_set');
             $table->integer('user_id');
             $table->float('points')->nullable();
             $table->integer('user_place')->nullable();

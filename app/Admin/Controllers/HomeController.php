@@ -76,7 +76,7 @@ class HomeController extends Controller
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->latest()->first();
         $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
         foreach ($sets as $set){
-            $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('set', '=', $set->number_set)->count();
+            $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set', '=', $set->number_set)->count();
             $set->free = $set->max_participants - $participants_event;
             $a = $set->max_participants;
             $b = $set->free;

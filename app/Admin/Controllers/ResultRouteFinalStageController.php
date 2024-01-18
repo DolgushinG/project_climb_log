@@ -6,6 +6,7 @@ use App\Admin\CustomAction\ActionExport;
 use App\Exports\FinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
+use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
 use App\Models\ResultRouteFinalStage;
 use App\Http\Controllers\Controller;
@@ -112,7 +113,6 @@ class ResultRouteFinalStageController extends Controller
             $ev = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck( 'title', 'id');
             $participant = Participant::where('event_id', '=', $event->id)->pluck('user_id');
             $users_middlename = User::whereIn('id', $participant)->pluck('middlename','id');
-            $users_gender = User::whereIn('id', $participant)->pluck('gender','id');
             // Remove the default id filter
             $filter->disableIdFilter();
 
@@ -251,6 +251,8 @@ class ResultRouteFinalStageController extends Controller
         $form->text('final_route_id', 'final_route_id');
         $form->text('amount_try_top', 'amount_try_top');
         $form->text('amount_try_zone', 'amount_try_zone');
+        $form->hidden('amount_zone', 'amount_try_zone');
+        $form->hidden('amount_top', 'amount_try_zone');
         $form->display(trans('admin.created_at'));
         $form->display(trans('admin.updated_at'));
 
@@ -313,11 +315,14 @@ class ResultRouteFinalStageController extends Controller
         foreach ($users_sorted as $index => $user){
             $fields = ['result'];
             $users_sorted[$index] = collect($user)->except($fields)->toArray();
-            $users_sorted[$index]['place'] = $index+1;
+            $result = ResultFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
+            $result->amount_top = $users_sorted[$index]['amount_top'];
+            $result->amount_try_top = $users_sorted[$index]['amount_try_top'];
+            $result->amount_zone = $users_sorted[$index]['amount_zone'];
+            $result->amount_try_zone = $users_sorted[$index]['amount_try_zone'];
+            $result->place = $users_sorted[$index]['place'];
+            $result->save();
         }
-        usort($users_sorted, function($a, $b) {
-            return $a['place'] <=> $b['place'];
-        });
         return $users_sorted;
     }
 
