@@ -98,7 +98,6 @@ class EventsController extends Controller
     public function get_final_results(Request $request, $climbing_gym, $title){
         $event = Event::where('title_eng', '=', $title)->first();
         $final_results = Participant::where('event_id', '=', $event->id)->orderBy('points', 'DESC')->get()->toArray();
-        dd($final_results);
         $user_ids = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
         $stats = new stdClass();
         $female_categories = array();

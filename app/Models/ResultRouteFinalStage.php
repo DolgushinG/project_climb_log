@@ -33,4 +33,16 @@ class ResultRouteFinalStage extends Model
         return $final_result;
     }
 
+    public static function count_route_in_final_stage($event_id, $toArrayString = false){
+
+        $count_routes = ResultRouteFinalStage::where('event_id', '=', $event_id)->distinct()->get('final_route_id')->count();
+        if($toArrayString){
+            $routes = [];
+            for($i = 1; $i <= $count_routes; $i++){
+                $routes[] =  $i.' трасса финала';
+            }
+            return $routes;
+        }
+        return $count_routes;
+    }
 }

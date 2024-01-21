@@ -61,7 +61,7 @@ class User extends Authenticatable
     }
 
     public static function gender($id){
-        return User::find($id)->gender;
+        return trans_choice('somewords.'.User::find($id)->gender, 10);
     }
 
     public function participant()

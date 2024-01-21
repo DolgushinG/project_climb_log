@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\CustomAction\ActionExport;
+use App\Exports\FinalAndQualificationResultExport;
 use App\Exports\FinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
