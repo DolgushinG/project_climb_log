@@ -3,7 +3,6 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\CustomAction\ActionExport;
-use App\Exports\FinalAndQualificationResultExport;
 use App\Exports\FinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
@@ -340,18 +339,27 @@ class ResultRouteFinalStageController extends Controller
 
     public function exportFinalExcel(Request $request)
     {
-        $response = Excel::download(new FinalResultExport($request->id), 'final-users-'.__FUNCTION__.'.xlsx', \Maatwebsite\Excel\Excel::XLSX);
-        return response()->download($response->getFile());
+        $file_name = 'Результаты финалов.xlsx';
+        $result = Excel::download(new FinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
     }
     public function exportFinalCsv(Request $request)
     {
-        $response = Excel::download(new FinalResultExport($request->id), 'final-users-'.__FUNCTION__.'.csv', \Maatwebsite\Excel\Excel::CSV);
-        return response()->download($response->getFile());
+        $file_name = 'Результаты финалов.csv';
+        $result = Excel::download(new FinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::CSV);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/csv',
+        ]);
     }
     public function exportFinalOds(Request $request)
     {
-        $response = Excel::download(new FinalResultExport($request->id), 'final-users-'.__FUNCTION__.'.ods', \Maatwebsite\Excel\Excel::ODS);
-        return response()->download($response->getFile());
+        $file_name = 'Результаты финалов.ods';
+        $result = Excel::download(new FinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::ODS);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/ods',
+        ]);
     }
 
 }

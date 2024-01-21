@@ -4,10 +4,11 @@ namespace App\Exports;
 
 use App\Exports\Sheets\Results;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Events\BeforeExport;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class FinalResultExport implements WithMultipleSheets, WithStyles
+class FinalResultExport implements WithMultipleSheets
 {
 
     public $event_id;
@@ -16,19 +17,6 @@ class FinalResultExport implements WithMultipleSheets, WithStyles
         $this->event_id = $event_id;
     }
 
-    public function styles(Worksheet $sheet)
-    {
-        return [
-            // Style the first row as bold text.
-            1    => ['font' => ['bold' => true]],
-
-//            // Styling a specific cell by coordinate.
-            'B2' => ['font' => ['italic' => true]],
-//
-//            // Styling an entire column.
-            'C'  => ['font' => ['size' => 16]],
-        ];
-    }
 
     /**, WithMultipleSheets
      * @return array
@@ -42,4 +30,6 @@ class FinalResultExport implements WithMultipleSheets, WithStyles
         }
         return $sheets;
     }
+
+    
 }
