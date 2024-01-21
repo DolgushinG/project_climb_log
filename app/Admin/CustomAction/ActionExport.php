@@ -19,7 +19,6 @@ class ActionExport extends RowAction
 
     protected function script($name, $format)
     {
-
         switch ($name){
             case 'final':
                 switch ($format) {
@@ -45,8 +44,6 @@ class ActionExport extends RowAction
                         });
                         SCRIPT;
                 }
-                break;
-
             case 'qualification':
                 switch ($format) {
                     case 'excel':
@@ -68,6 +65,30 @@ class ActionExport extends RowAction
                         $('.qualification-ods').on('click', function () {
                             let id = this.getAttribute('data-id');
                             document.location = 'exports/events/ods/qualification/' + id
+                        });
+                        SCRIPT;
+                }
+            case 'all':
+                switch ($format) {
+                    case 'excel':
+                        return <<<SCRIPT
+                        $('.qualification-excel').on('click', function () {
+                            let id = this.getAttribute('data-id');
+                            document.location = 'exports/events/excel/all/' + id
+                        });
+                    SCRIPT;
+                    case 'csv':
+                        return <<<SCRIPT
+                        $('.qualification-csv').on('click', function () {
+                            let id = this.getAttribute('data-id');
+                            document.location = 'exports/events/csv/all/' + id
+                        });
+                        SCRIPT;
+                    case 'ods':
+                        return <<<SCRIPT
+                        $('.qualification-ods').on('click', function () {
+                            let id = this.getAttribute('data-id');
+                            document.location = 'exports/events/ods/all/' + id
                         });
                         SCRIPT;
                 }

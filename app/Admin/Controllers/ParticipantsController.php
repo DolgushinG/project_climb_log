@@ -295,18 +295,27 @@ class  ParticipantsController extends Controller
     }
     public function exportQualificationExcel(Request $request)
     {
-        $response = Excel::download(new QualificationResultExport($request->id), 'users-'.__FUNCTION__.'.xlsx', \Maatwebsite\Excel\Excel::XLSX);
-        return response()->download($response->getFile());
+        $file_name = 'Результаты квалификации.xlsx';
+        $result = Excel::download(new QualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
     }
     public function exportQualificationCsv(Request $request)
     {
-        $response = Excel::download(new QualificationResultExport($request->id), 'users-'.__FUNCTION__.'.csv', \Maatwebsite\Excel\Excel::CSV);
-        return response()->download($response->getFile());
+        $file_name = 'Результаты квалификации.csv';
+        $result = Excel::download(new QualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::CSV);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/csv',
+        ]);
     }
     public function exportQualificationOds(Request $request)
     {
-        $response = Excel::download(new QualificationResultExport($request->id), 'users-'.__FUNCTION__.'.ods', \Maatwebsite\Excel\Excel::ODS);
-        return response()->download($response->getFile());
+        $file_name = 'Результаты квалификации.ods';
+        $result = Excel::download(new QualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::ODS);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/ods',
+        ]);
     }
 
 

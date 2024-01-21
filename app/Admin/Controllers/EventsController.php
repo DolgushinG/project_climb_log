@@ -2,6 +2,9 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\CustomAction\ActionExport;
+use App\Exports\FinalAndQualificationResultExport;
+use App\Exports\QualificationResultExport;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
 use App\Models\Grades;
@@ -12,7 +15,9 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Table;
+use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EventsController extends Controller
 {
@@ -90,6 +95,11 @@ class EventsController extends Controller
         } else {
             $grid->column('owner_id', 'Owner')->editable();
         }
+        $grid->actions(function ($actions) {
+            $actions->append(new ActionExport($actions->getKey(), 'all', 'excel'));
+            $actions->append(new ActionExport($actions->getKey(), 'all', 'csv'));
+            $actions->append(new ActionExport($actions->getKey(), 'all', 'ods'));
+        });
         $grid->column('count_routes', 'Кол-во маршрутов');
         $grid->column('title', 'Название');
         $grid->column('subtitle', 'Надпись под названием');
@@ -240,5 +250,30 @@ class EventsController extends Controller
             ['Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 800],
         ];
         return $routes;
+    }
+
+    public function exportAllExcel(Request $request)
+    {
+        $file_name = 'Полные результаты.xlsx';
+        $result = Excel::download(new FinalAndQualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
+    }
+    public function exportAllnCsv(Request $request)
+    {
+        $file_name = 'Полные результаты.csv';
+        $result = Excel::download(new FinalAndQualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::CSV);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/csv',
+        ]);
+    }
+    public function exportAllOds(Request $request)
+    {
+        $file_name = 'Полные результаты.ods';
+        $result = Excel::download(new FinalAndQualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::ODS);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/ods',
+        ]);
     }
 }
