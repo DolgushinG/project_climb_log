@@ -70,8 +70,9 @@ class User extends Authenticatable
     }
 
     public static function category($category_id)
-    {
-        return ParticipantCategory::find($category_id)->category;
+    {   if($category_id){
+            return ParticipantCategory::findOrFail($category_id)->category;
+        }
     }
 
     public function event()

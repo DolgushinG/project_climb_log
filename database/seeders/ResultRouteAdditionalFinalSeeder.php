@@ -2,15 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Event;
 use App\Models\Participant;
-use App\Models\ResultParticipant;
-use App\Models\User;
-use Encore\Admin\Facades\Admin;
+use App\Models\ResultFinalStage;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class ResultFinalStageSeeder extends Seeder
+class ResultRouteAdditionalFinalSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -19,11 +16,11 @@ class ResultFinalStageSeeder extends Seeder
      */
     public function run()
     {
-        function prepare_with_owner($owner_id, $event_id)
+        function prepare_data_result_route_passed_with_owner($owner_id, $event_id)
         {
 
-            $result_female = Participant::better_participants($event_id, 'female', 10)->toArray();
-            $result_male = Participant::better_participants($event_id, 'male', 10)->toArray();
+            $result_female = ResultFinalStage::better_of_participants_final_stage($event_id, 'female', 6)->toArray();
+            $result_male = ResultFinalStage::better_of_participants_final_stage($event_id, 'male', 6)->toArray();
             $final_users = array_merge($result_female, $result_male);
             $result = array();
             foreach ($final_users as $user) {
@@ -48,9 +45,9 @@ class ResultFinalStageSeeder extends Seeder
                     $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $user['id'], 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
                 }
             }
-            DB::table('result_route_final_stage')->insert($result);
+            DB::table('result_route_additional_final_stage')->insert($result);
         }
-        prepare_with_owner(2, 1);
-        prepare_with_owner(3, 2);
+        prepare_data_result_route_passed_with_owner(2, 1);
+        prepare_data_result_route_passed_with_owner(3, 2);
     }
 }

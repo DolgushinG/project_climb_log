@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Participant;
+use App\Models\ParticipantCategory;
 use App\Models\ResultParticipant;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -34,7 +35,8 @@ class ProfileController extends Controller
     }
     public function getTabContentEdit() {
         $user = User::find(Auth()->user()->id);
-        return view('profile.edit-profile', compact(['user']));
+        $categories = ParticipantCategory::all();
+        return view('profile.edit-profile', compact(['user', 'categories']));
     }
 
     public function getTabContentEvents() {

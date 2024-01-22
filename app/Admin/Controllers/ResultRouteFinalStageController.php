@@ -185,7 +185,6 @@ class ResultRouteFinalStageController extends Controller
             $female = self::getUsersSorted($users_female, $fields, $model, 'final');
             $final_all_users = array_merge($male, $female);
             $all_users = array_merge($male, $female);
-
             foreach ($final_all_users as $index => $user){
                 $fields = ['owner_id', 'event_id', 'user_id'];
                 $final_all_users[$index] = collect($user)->except($fields)->toArray();
@@ -198,7 +197,6 @@ class ResultRouteFinalStageController extends Controller
                 if(!$final_result_stage){
                     $final_result_stage = new ResultFinalStage;
                 }
-
                 $final_result_stage->amount_top = $all_users[$index]['amount_top'];
                 $final_result_stage->amount_try_top = $all_users[$index]['amount_try_top'];
                 $final_result_stage->amount_zone = $all_users[$index]['amount_zone'];
@@ -317,7 +315,7 @@ class ResultRouteFinalStageController extends Controller
                     ->get();
             }
             $result = ResultRouteFinalStage::merge_result_user_in_final_stage($result_user);
-            if($result['amount_top'] && $result['amount_try_top'] && $result['amount_zone'] && $result['amount_try_zone']){
+            if($result['amount_top'] != null && $result['amount_try_top'] != null && $result['amount_zone'] != null && $result['amount_try_zone'] != null){
                 $users_with_result[$index] = collect($user->toArray())->except($fields);
                 $users_with_result[$index]['result'] = $result;
                 $users_with_result[$index]['place'] = null;
@@ -332,7 +330,6 @@ class ResultRouteFinalStageController extends Controller
             }
 
         }
-
         $users_sorted = Participant::counting_final_place($model->id, $users_with_result);
 
         foreach ($users_sorted as $index => $user){

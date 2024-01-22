@@ -14,8 +14,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        \App\Models\Event::factory()->count(1)->withOwnerId(2)->create();
-        \App\Models\Event::factory()->count(1)->withOwnerId(3)->create();
+        for($i = 2;$i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
+            \App\Models\Event::factory()->count(1)->withOwnerId($i)->create();
+        }
+
         $this->call([
             AdminTablesSeeder::class,
             AdminRoleAndUsersSeeder::class,
@@ -26,6 +28,7 @@ class DatabaseSeeder extends Seeder
             GradesSeeder::class,
             ResultParticipantSeeder::class,
             ResultFinalStageSeeder::class,
+            ResultRouteAdditionalFinalSeeder::class,
         ]);
     }
 }

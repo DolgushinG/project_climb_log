@@ -23,7 +23,7 @@ class EventFactory extends Factory
             ['Категория' => '6A+', 'Кол-во' => 3, 'Ценность' => 250],
             ['Категория' => '6B', 'Кол-во' => 3, 'Ценность' => 300],
             ['Категория' => '6B+', 'Кол-во' => 3, 'Ценность' => 350],
-            ['Категория' => '6C', 'Кол-во' => 1, 'Ценность' => 400],
+            ['Категория' => '6C', 'Кол-во' => 2, 'Ценность' => 400],
             ['Категория' => '6C+', 'Кол-во' => 1, 'Ценность' => 450],
             ['Категория' => '7A', 'Кол-во' => 1, 'Ценность' => 500],
             ['Категория' => '7A+', 'Кол-во' => 1, 'Ценность' => 550],
@@ -33,25 +33,66 @@ class EventFactory extends Factory
             ['Категория' => '7C+', 'Кол-во' => 1, 'Ценность' => 750],
             ['Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 800],
         ];
+
+
+        $cities = array(
+            "Москва",
+            "Санкт-Петербург",
+            "Новосибирск",
+            "Екатеринбург",
+            "Нижний Новгород",
+            "Казань",
+            "Челябинск",
+            "Омск",
+            "Самара",
+            "Ростов-на-Дону",
+            "Уфа",
+            "Красноярск",
+            "Пермь",
+            "Воронеж",
+            "Волгоград"
+        );
+
+
+        $climbingGyms = array(
+            "АльпикаМайкоп",
+            "Большой стон",
+            "Красный камень",
+            "Скалодром КубГУ",
+            "ГрандВолна",
+            "Спелеоклуб Гора",
+            "Ревуцкие стены",
+            "Скалодром Вертикаль",
+            "Рисованный Камень",
+            "ЛазерМаяк",
+            "Скалодром ОККБ-БПЛА",
+            "Столбы",
+            "Спелеоцентр Сибирь",
+            "Точка Кипения",
+            "Башни Пскова"
+        );
+
+
+
+
         return [
-            'document' => 'images/0a8453e1f407fec06837f7679235a455.jpg',
-            'image' => 'images/0a8453e1f407fec06837f7679235a455.jpg',
+            'image' => $this->faker->randomElement(['images/20231115_cea82537af86871a32344dcd5c6a23ba.jpeg','images/vT94mFyT9xU.jpg']),
             'active' => true,
             'start_date' => $this->faker->date(),
             'end_date' => $this->faker->date(),
             'start_time' => $this->faker->time(),
             'end_time' => $this->faker->time(),
-            'description' => $this->faker->paragraph(5),
+            'description' => $this->faker->paragraph(20),
             'address' => $this->faker->address(),
             'grade_and_amount' => $routes,
-            'city' => $this->faker->city(),
+            'city' => $this->faker->randomElement($cities),
             'title' => $this->faker->word(),
             'title_eng' => $this->faker->word(),
             'subtitle' => $this->faker->word(),
-            'climbing_gym_name' => $this->faker->word(),
+            'climbing_gym_name' => $this->faker->randomElement($climbingGyms),
             'climbing_gym_name_eng' => $this->faker->word(),
             'link' => $this->faker->url(),
-            'count_routes' => 50,
+            'count_routes' => 30,
             'mode' => $this->faker->randomElement([1, 2]),
         ];
     }

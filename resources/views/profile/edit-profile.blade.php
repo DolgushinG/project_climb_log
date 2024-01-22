@@ -2,7 +2,7 @@
 
     <!-- Profile Edit Form -->
     <form>
-
+        @csrf
         <div class="row mb-3">
             <label for="firstname" class="col-md-4 col-lg-3 col-form-label">Имя</label>
             <div class="col-md-8 col-lg-9">
@@ -33,7 +33,20 @@
         <div class="row mb-3">
             <label for="category" class="col-md-4 col-lg-3 col-form-label">Категория в соревнованиях</label>
             <div class="col-md-8 col-lg-9">
-                <input name="category" type="text" class="form-control" id="category" value="{{\App\Models\User::category($user->category)}}">
+                <select class="form-select" name="gender" id="gender" required>
+                    @if($user->category)
+                        @foreach($categories as $index => $category)
+                            <option selected value="{{$index}}">{{$category->category}}</option>
+                        @endforeach
+                    @else
+                        <option selected disabled value="">Выберите категорию...</option>
+                        @foreach($categories as $index => $category)
+                            <option value="{{$index}}">
+                                {{$category->category}}
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
             </div>
         </div>
 
