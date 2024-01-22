@@ -19,7 +19,8 @@ Route::group([
         $router->resource('participants', ParticipantsController::class);
         $router->resource('grades', GradesController::class);
         $router->resource('formats', FormatsController::class);
-        $router->resource('result-route-final-stage', ResultRouteFinalStageController::class);
+        $router->resource('final-stage', ResultRouteFinalStageController::class);
+        $router->resource('additional-final-stage', ResultRouteAdditionalFinalStageController::class);
         $router->resource('participants-categories', ParticipantCategoriesController::class);
         $router->resource('sets', SetsController::class);
         $router->resource('event-and-coefficient-route',  EventAndCoefficientsRoutesController::class);
@@ -29,6 +30,9 @@ Route::group([
         $router->get('exports/events/excel/final/{id}', 'ResultRouteFinalStageController@exportFinalExcel')->name('exportFinalExcel');
         $router->get('exports/events/csv/final/{id}', 'ResultRouteFinalStageController@exportFinalCsv')->name('exportFinalCsv');
         $router->get('exports/events/ods/final/{id}', 'ResultRouteFinalStageController@exportFinalOds')->name('exportFinalOds');
+        $router->get('exports/events/excel/additional-final/{id}', 'ResultRouteAdditionalFinalStageController@exportAdditionalFinalExcel')->name('exportAdditionalFinalExcel');
+        $router->get('exports/events/csv/additional-final/{id}', 'ResultRouteAdditionalFinalStageController@exportAdditionalFinalCsv')->name('exportAdditionalFinalCsv');
+        $router->get('exports/events/ods/additional-final/{id}', 'ResultRouteAdditionalFinalStageController@exportAdditionalFinalOds')->name('exportAdditionalFinalOds');
         $router->get('exports/events/excel/all/{id}', 'EventsController@exportAllExcel')->name('exportAllExcel');
         $router->get('exports/events/csv/all/{id}', 'EventsController@exportAllCsv')->name('exportAllCsv');
         $router->get('exports/events/ods/all/{id}', 'EventsController@exportAllOds')->name('exportAllOds');

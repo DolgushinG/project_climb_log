@@ -19,7 +19,7 @@ class Participant extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public static function counting_final_place($event_id, $result_final){
+    public static function counting_final_place($event_id, $result_final, $type='final'){
         // Сортировка по amount_top в убывающем порядке, затем по amount_try_top в возрастающем порядке,
         // затем по amount_zone в убывающем порядке, затем по amount_try_zone в возрастающем порядке
         usort($result_final, function ($a, $b) {
@@ -45,14 +45,21 @@ class Participant extends Model
         $duplicate_arrays = array_reduce($duplicate_groups, 'array_merge', []);
         $user_places = array();
         foreach ($duplicate_arrays as $index => $d_array){
-            $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], true);
+            if($type == 'additionalFinal'){
+                $place = Participant::get_place_participant_in_final($event_id, $d_array['user_id']);
+            } else {
+                $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], true);
+            }
             $index_user_final_in_res = self::findIndexByUserId($result_final, $d_array['user_id']);
-            $user_places[] = array('user_id' => $d_array['user_id'], 'qualification_place' => $place, 'index' => $index_user_final_in_res);
+            $user_places[] = array('user_id' => $d_array['user_id'], 'place' => $place, 'index' => $index_user_final_in_res);
+
         }
         usort($user_places, function ($a, $b) {
-            return $a['qualification_place'] <=> $b['qualification_place'];
+            return $a['place'] <=> $b['place'];
         });
-        foreach ($user_places as $index => $user_place){
+
+        # Расставляем места
+        foreach ($user_places as $user_place){
             $result_final[$user_place['index']]['place'] = $user_place['index'] + 1;
         }
         // Расставляем места в зависимости от результатов квалификации
@@ -72,6 +79,9 @@ class Participant extends Model
         return -1; // Если не найдено
     }
 
+    public static function get_place_participant_in_final($event_id, $user_id){
+        return ResultFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->get()->place;
+    }
     public static function get_places_participant_in_qualification($event_id, $user_id, $get_place_user = false){
         $user = User::find($user_id);
         $users_id = User::where('gender', '=', $user->gender)->where('category', '=', $user->category)->pluck('id');

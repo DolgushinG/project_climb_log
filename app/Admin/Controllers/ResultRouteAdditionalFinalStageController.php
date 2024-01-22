@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\CustomAction\ActionExport;
+use App\Exports\AdditionalFinalResultExport;
 use App\Exports\FinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
@@ -25,7 +26,7 @@ use Illuminate\Http\Request;
 use Jxlwqq\DataTable\DataTable;
 use Maatwebsite\Excel\Facades\Excel;
 
-class ResultRouteFinalStageController extends Controller
+class ResultRouteAdditionalFinalStageController extends Controller
 {
     use HasResourceActions;
 
@@ -98,14 +99,15 @@ class ResultRouteFinalStageController extends Controller
     protected function grid()
     {
 
-        $grid = new Grid(new ResultRouteFinalStage);
+        $grid = new Grid(new ResultRouteAdditionalFinalStage);
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
-
         }
-        $grid->column('event_id','Соревнование')->select(Event::where('owner_id', '=', Admin::user()->id)->pluck('title','id')->toArray());
+        $events_title = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck('title','id')->toArray();
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        $grid->column('event_id','Соревнование')->select($events_title);
         $grid->column('final_route_id', __('Номер маршрута'))->editable();
-        $grid->column('user_id', __('Участник'))->select($this->getUsers()->toArray());
+        $grid->column('user_id', __('Участник'))->select($this->getUsersAdditionalFinal($event->id));
         $grid->column('amount_try_top', __('Кол-во попыток на топ'))->editable();
         $grid->column('amount_try_zone', __('Кол-во попыток на зону'))->editable();
         $grid->disableExport();
@@ -114,8 +116,8 @@ class ResultRouteFinalStageController extends Controller
         $grid->filter(function($filter){
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
             $ev = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck( 'title', 'id');
-            $male_users_middlename = Participant::better_participants($event->id, 'male', 10)->pluck('middlename','id')->toArray();
-            $female_users_middlename = Participant::better_participants($event->id, 'female', 10)->pluck('middlename','id')->toArray();
+            $male_users_middlename = ResultFinalStage::better_of_participants_final_stage($event->id, 'male', 6)->pluck('middlename','id')->toArray();
+            $female_users_middlename = ResultFinalStage::better_of_participants_final_stage($event->id, 'female', 6)->pluck('middlename','id')->toArray();
             $new = $male_users_middlename + $female_users_middlename;
             // Remove the default id filter
             $filter->disableIdFilter();
@@ -138,10 +140,11 @@ class ResultRouteFinalStageController extends Controller
         });
         $grid->quickCreate(function (Grid\Tools\QuickCreate $create)  {
             $events = Event::where('active', '=', 1)->where('owner_id', '=', Admin::user()->id)->pluck('title','id');
+            $event = Event::where('active', '=', 1)->where('owner_id', '=', Admin::user()->id)->first();
             $create->select('event_id','Соревнование')->options($events);
             $create->integer('owner_id', Admin::user()->id)->default(Admin::user()->id)->style('display', 'None');
             $create->integer('final_route_id', 'Номер маршрута');
-            $create->select('user_id', 'Участники')->options($this->getUsers()->toArray());
+            $create->select('user_id', 'Участники')->options($this->getUsersAdditionalFinal($event->id));
             $create->integer('amount_try_top', 'Кол-во попыток на топ');
             $create->integer('amount_try_zone', 'Кол-во попыток на зону');
         });
@@ -164,9 +167,9 @@ class ResultRouteFinalStageController extends Controller
             $actions->disableDelete();
             $actions->disableEdit();
             $actions->disableView();
-            $actions->append(new ActionExport($actions->getKey(), 'final' , 'excel'));
-            $actions->append(new ActionExport($actions->getKey(), 'final', 'csv'));
-            $actions->append(new ActionExport($actions->getKey(), 'final', 'ods'));
+            $actions->append(new ActionExport($actions->getKey(), 'additional-final' , 'excel'));
+            $actions->append(new ActionExport($actions->getKey(), 'additional-final', 'csv'));
+            $actions->append(new ActionExport($actions->getKey(), 'additional-final', 'ods'));
         });
         $grid->disableExport();
         $grid->disableColumnSelector();
@@ -178,11 +181,11 @@ class ResultRouteFinalStageController extends Controller
         $grid->column('title', 'Соревнование')->expand(function ($model) {
             $headers = ['Участник', 'Пол', 'Место с учетом квалы', 'Кол-во топ','Кол-во попыток на топ','Кол-во зон', 'Кол-во попыток на зону', ];
             $style = ['table-bordered','table-hover', 'table-striped'];
-            $users_male = Participant::better_participants($model->id, 'male', 10);
-            $users_female = Participant::better_participants($model->id, 'female', 10);
+            $users_male = ResultFinalStage::better_of_participants_final_stage($model->id, 'male', 6);
+            $users_female = ResultFinalStage::better_of_participants_final_stage($model->id, 'female', 6);
             $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
-            $male = self::getUsersSorted($users_male, $fields, $model, 'final');
-            $female = self::getUsersSorted($users_female, $fields, $model, 'final');
+            $male = ResultRouteFinalStageController::getUsersSorted($users_male, $fields, $model, 'additionalFinal');
+            $female = ResultRouteFinalStageController::getUsersSorted($users_female, $fields, $model, 'additionalFinal');
             $final_all_users = array_merge($male, $female);
             $all_users = array_merge($male, $female);
 
@@ -194,11 +197,10 @@ class ResultRouteFinalStageController extends Controller
                 $fields = ['gender', 'middlename'];
                 $all_users[$index] = collect($user)->except($fields)->toArray();
 
-                $final_result_stage = ResultFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
+                $final_result_stage = ResultAdditionalFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
                 if(!$final_result_stage){
-                    $final_result_stage = new ResultFinalStage;
+                    $final_result_stage = new ResultAdditionalFinalStage;
                 }
-
                 $final_result_stage->amount_top = $all_users[$index]['amount_top'];
                 $final_result_stage->amount_try_top = $all_users[$index]['amount_try_top'];
                 $final_result_stage->amount_zone = $all_users[$index]['amount_zone'];
@@ -229,7 +231,7 @@ class ResultRouteFinalStageController extends Controller
      */
     protected function detail($id)
     {
-        $show = new Show(ResultRouteFinalStage::findOrFail($id));
+        $show = new Show(ResultRouteAdditionalFinalStage::findOrFail($id));
 
         $show->id('ID');
         $show->event_id('event_id');
@@ -250,7 +252,7 @@ class ResultRouteFinalStageController extends Controller
      */
     protected function form()
     {
-        $form = new Form(new ResultRouteFinalStage);
+        $form = new Form(new ResultRouteAdditionalFinalStage);
 
         $form->display('ID');
         $form->hidden('owner_id')->value(Admin::user()->id);
@@ -279,109 +281,35 @@ class ResultRouteFinalStageController extends Controller
         return $form;
     }
 
-    /**
-     * @return object
-     */
-    protected function getUsers(): object
+    protected function getUsersAdditionalFinal($event_id)
     {
-        $participant = Participant::where('owner_id', '=', Admin::user()->id)
-            ->where('active', '=', 1)
-            ->pluck('user_id')->toArray();
-        return User::whereIn('id', $participant)->pluck('middlename', 'id');
+        $participants_male = ResultFinalStage::better_of_participants_final_stage($event_id, 'male', 6);
+        $participants_female = ResultFinalStage::better_of_participants_final_stage($event_id, 'female', 6);
+        $new = $participants_female->merge($participants_male);
+        return User::whereIn('id', $new->pluck('id'))->pluck('middlename', 'id')->toArray();
     }
 
-    /**
-     * @param $users
-     * @param $fields
-     * @param $model
-     * @param $type
-     * @return array
-     */
-    public static function getUsersSorted($users, $fields, $model, $type): array
+
+    public function exportAdditionalFinalExcel(Request $request)
     {
-        if (count($users->toArray()) == 0){
-            return [];
-        }
-        $users_with_result = [];
-        foreach ($users as $index => $user){
-            if($type == 'final'){
-                $result_user = ResultRouteFinalStage::where('owner_id', '=', Admin::user()->id)
-                    ->where('event_id', '=', $model->id)
-                    ->where('user_id', '=', $user->id)
-                    ->get();
-            } else {
-                # additional final stage
-                $result_user = ResultRouteAdditionalFinalStage::where('owner_id', '=', Admin::user()->id)
-                    ->where('event_id', '=', $model->id)
-                    ->where('user_id', '=', $user->id)
-                    ->get();
-            }
-            $result = ResultRouteFinalStage::merge_result_user_in_final_stage($result_user);
-            if($result['amount_top'] && $result['amount_try_top'] && $result['amount_zone'] && $result['amount_try_zone']){
-                $users_with_result[$index] = collect($user->toArray())->except($fields);
-                $users_with_result[$index]['result'] = $result;
-                $users_with_result[$index]['place'] = null;
-                $users_with_result[$index]['owner_id'] = Admin::user()->id;
-                $users_with_result[$index]['user_id'] = $user->id;
-                $users_with_result[$index]['event_id'] = $model->id;
-                $users_with_result[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
-                $users_with_result[$index]['amount_top'] = $result['amount_top'];
-                $users_with_result[$index]['amount_try_top'] = $result['amount_try_top'];
-                $users_with_result[$index]['amount_zone'] = $result['amount_zone'];
-                $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
-            }
-
-        }
-
-        $users_sorted = Participant::counting_final_place($model->id, $users_with_result);
-
-        foreach ($users_sorted as $index => $user){
-            $fields = ['result'];
-            $users_sorted[$index] = collect($user)->except($fields)->toArray();
-            if($type == 'final'){
-                $result = ResultFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
-                if (!$result){
-                    $result = new ResultFinalStage;
-                }
-            } else {
-                $result = ResultAdditionalFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
-                if (!$result){
-                    $result = new ResultAdditionalFinalStage;
-                }
-            }
-            $result->event_id = $users_sorted[$index]['event_id'];
-            $result->user_id = $users_sorted[$index]['user_id'];
-            $result->owner_id = $users_sorted[$index]['owner_id'];
-            $result->amount_top = $users_sorted[$index]['amount_top'];
-            $result->amount_try_top = $users_sorted[$index]['amount_try_top'];
-            $result->amount_zone = $users_sorted[$index]['amount_zone'];
-            $result->amount_try_zone = $users_sorted[$index]['amount_try_zone'];
-            $result->place = $users_sorted[$index]['place'];
-            $result->save();
-        }
-        return $users_sorted;
-    }
-
-    public function exportFinalExcel(Request $request)
-    {
-        $file_name = 'Результаты финалов.xlsx';
-        $result = Excel::download(new FinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        $file_name = 'Результаты дополнительного финала.xlsx';
+        $result = Excel::download(new AdditionalFinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);
     }
-    public function exportFinalCsv(Request $request)
+    public function exportAdditionalFinalCsv(Request $request)
     {
-        $file_name = 'Результаты финалов.csv';
-        $result = Excel::download(new FinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::CSV);
+        $file_name = 'Результаты дополнительного финала.csv';
+        $result = Excel::download(new AdditionalFinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::CSV);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/csv',
         ]);
     }
-    public function exportFinalOds(Request $request)
+    public function exportAdditionalFinalOds(Request $request)
     {
-        $file_name = 'Результаты финалов.ods';
-        $result = Excel::download(new FinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::ODS);
+        $file_name = 'Результаты дополнительного финала.ods';
+        $result = Excel::download(new AdditionalFinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::ODS);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/ods',
         ]);

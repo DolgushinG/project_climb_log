@@ -9,4 +9,5 @@ return [
     'grade' => 'Мужчины',
     'Final' => 'Финал',
     'Qualification' => 'Квалификация',
+    'AdditionalFinal' => 'Дополнительный Финал',
 ];

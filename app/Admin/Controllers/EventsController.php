@@ -96,10 +96,13 @@ class EventsController extends Controller
             $grid->column('owner_id', 'Owner')->editable();
         }
         $grid->actions(function ($actions) {
+            $actions->disableView();
             $actions->append(new ActionExport($actions->getKey(), 'all', 'excel'));
             $actions->append(new ActionExport($actions->getKey(), 'all', 'csv'));
             $actions->append(new ActionExport($actions->getKey(), 'all', 'ods'));
         });
+        $grid->disableExport();
+//        $grid->disableColumnSelector();
         $grid->column('count_routes', 'Кол-во маршрутов');
         $grid->column('title', 'Название');
         $grid->column('subtitle', 'Надпись под названием');
@@ -110,43 +113,6 @@ class EventsController extends Controller
     }
 
     /**
-     * Make a show builder.
-     *
-     * @param mixed $id
-     * @return Show
-     */
-    protected function detail($id)
-    {
-
-        $show = new Show(Event::findOrFail($id));
-        $show->id('ID');
-        $show->date('date');
-        $show->datetime('datetime');
-        $show->time('time');
-        $show->location('location');
-        $show->document('document');
-        $show->image('image');
-        $show->climbing_gym_name('climbing_gym_name');
-        $show->city('city');
-        $show->count_routes('count_routes');
-        $show->title('title');
-        $show->subtitle('subtitle');
-        $show->link('link');
-        $show->sponsor_image_1('sponsor_image_1');
-        $show->sponsor_image_2('sponsor_image_2');
-        $show->sponsor_image_3('sponsor_image_3');
-        $show->sponsor_link_1('sponsor_link_1');
-        $show->sponsor_link_2('sponsor_link_2');
-        $show->sponsor_link_3('sponsor_link_3');
-        $show->description('description');
-        $show->mode('mode');
-        $show->active('active');
-        $show->created_at(trans('admin.created_at'));
-        $show->updated_at(trans('admin.updated_at'));
-        return $show;
-    }
-
-    /**
      * Make a form builder.
      *
      * @return Form
@@ -154,6 +120,33 @@ class EventsController extends Controller
     protected function form()
     {
         $form = new Form(new Event);
+        $form->tools(function (Form\Tools $tools) {
+
+            // Disable `List` btn.
+            $tools->disableList();
+
+            // Disable `Delete` btn.
+            $tools->disableDelete();
+
+            // Disable `Veiw` btn.
+            $tools->disableView();
+        });
+
+        $form->footer(function ($footer) {
+
+            // disable reset btn
+            $footer->disableReset();
+
+            // disable `View` checkbox
+            $footer->disableViewCheck();
+
+            // disable `Continue editing` checkbox
+            $footer->disableEditingCheck();
+
+            // disable `Continue Creating` checkbox
+            $footer->disableCreatingCheck();
+
+        });
 
         $form->display('id')->style('display', 'None');
         $form->hidden('owner_id')->value(Admin::user()->id);

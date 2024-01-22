@@ -7,7 +7,7 @@ class CustomActions extends \Encore\Admin\Grid\Displayers\Actions
     {
         return <<<EOT
 <a href="{$this->getResource()}/{$this->getKey()}/edit" class="btn btn-xs btn-default">
-    <i class="fa fa-edit"></i> Изменить
+    <i class="fa fa-edit"></i>
 </a>&nbsp;
 EOT;
     }
@@ -18,7 +18,7 @@ EOT;
 
         return <<<EOT
 <a href="javascript:void(0);" data-id="{$this->getKey()}" class="grid-row-delete btn btn-xs btn-danger">
-    <i class="fa fa-trash"></i> Удалить
+    <i class="fa fa-trash"></i>
 </a>
 EOT;
     }
