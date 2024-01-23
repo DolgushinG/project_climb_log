@@ -3,7 +3,7 @@
         <div class="d-flex align-items-center justify-content-between">
             <a href="{{route('main')}}" class="logo d-flex align-items-center">
                 <img src="{{asset('storage/img/logo.png')}}" alt="">
-                <span class="d-none d-lg-block">Climb log</span>
+                <span class="d-none d-lg-block">Climb Events</span>
             </a>
 {{--            <i class="bi bi-list toggle-sidebar-btn"></i>--}}
         </div><!-- End Logo -->

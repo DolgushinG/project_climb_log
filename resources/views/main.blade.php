@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.1/dist/css/bootstrap.min.css">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.1/dist/js/bootstrap.bundle.min.js"></script>
         <section class="section error-404 min-vh-100 d-flex flex-column align-items-center justify-content-center">
-            <h1>Climb log</h1>
+            <h1>Climbing Events</h1>
             <h2>Регистрация и подсчет скалолазных соревнований</h2>
 
             <div class="row">

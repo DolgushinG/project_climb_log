@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Climb Log - Регистрация и подсчет соревнований</title>
+    <title>Climb Events - Регистрация и подсчет соревнований</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
     <script src="{{asset('plugins/jquery/jquery.min.js')}}"></script>

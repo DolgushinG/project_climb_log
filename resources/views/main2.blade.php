@@ -14,8 +14,8 @@
                         <div class="text-center">
                             <ul class="col container-filter portfolioFilte list-unstyled mb-0" id="filter">
                                 <li><a class="categories active" data-filter="*">Все</a></li>
-                                @foreach($active_cities as $active_city)
-                                    <li><a class="categories" data-filter=".{{str_replace(' ', '_',$active_city)}}">{{$active_city}}</a></li>
+                                @foreach($cities as $city)
+                                    <li><a class="categories" data-filter=".{{str_replace(' ', '_',$city['name'])}}">{{$city['name']}} <span class="badge bg-dark-light rounded-pill">{{$city['count_event']}}</span></a></li>
                                 @endforeach
                             </ul>
                         </div>
@@ -90,7 +90,7 @@
         }
 
         .item-box .item-mask {
-            background: none repeat scroll 0 0 rgba(32, 151, 192, 0.3);
+            background: none repeat scroll 0 0 rgba(71, 73, 77, 0.19);
             position: absolute;
             transition: all 0.5s ease-in-out 0s;
             -moz-transition: all 0.5s ease-in-out 0s;

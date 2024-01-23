@@ -16,9 +16,13 @@ class Controller extends BaseController
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     public function main() {
-        $active_cities = Event::where('active', '=', 1)->pluck('city')->toArray();
+        $active_cities = Event::where('active', '=', 1)->distinct()->pluck('city')->toArray();
+        $cities = [];
+        foreach ($active_cities as $city){
+            $count = Event::where('active', '=', 1)->where('city', '=', $city)->get()->count();
+            $cities[] = array('name' => $city, 'count_event' => $count);
+        }
         $events = Event::where('active', '=', 1)->get();
-
-        return view('main2', compact(['events', 'active_cities']));
+        return view('main2', compact(['events', 'cities']));
     }
 }
