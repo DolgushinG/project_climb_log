@@ -2,7 +2,9 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\ResultRouteFinalStage\BatchResult;
 use App\Admin\CustomAction\ActionExport;
+use App\Exceptions\ExportToExcel;
 use App\Exports\FinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
@@ -41,8 +43,8 @@ class ResultRouteFinalStageController extends Controller
             ->header(trans('admin.index'))
             ->description(trans('admin.description'))
             ->row(function(Row $row) {
-                $row->column(10, $this->grid2());
-                $row->column(10, $this->grid());
+                $row->column(6, $this->grid2());
+                $row->column(6, $this->grid());
             });
     }
 
@@ -103,7 +105,9 @@ class ResultRouteFinalStageController extends Controller
             $grid->model()->where('owner_id', '=', Admin::user()->id);
 
         }
-        $grid->column('event_id','Соревнование')->select(Event::where('owner_id', '=', Admin::user()->id)->pluck('title','id')->toArray());
+        $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new BatchResult);
+        });
         $grid->column('final_route_id', __('Номер маршрута'))->editable();
         $grid->column('user_id', __('Участник'))->select($this->getUsers()->toArray());
         $grid->column('amount_try_top', __('Кол-во попыток на топ'))->editable();
@@ -136,15 +140,15 @@ class ResultRouteFinalStageController extends Controller
             ]);
 
         });
-        $grid->quickCreate(function (Grid\Tools\QuickCreate $create)  {
-            $events = Event::where('active', '=', 1)->where('owner_id', '=', Admin::user()->id)->pluck('title','id');
-            $create->select('event_id','Соревнование')->options($events);
-            $create->integer('owner_id', Admin::user()->id)->default(Admin::user()->id)->style('display', 'None');
-            $create->integer('final_route_id', 'Номер маршрута');
-            $create->select('user_id', 'Участники')->options($this->getUsers()->toArray());
-            $create->integer('amount_try_top', 'Кол-во попыток на топ');
-            $create->integer('amount_try_zone', 'Кол-во попыток на зону');
-        });
+//        $grid->quickCreate(function (Grid\Tools\QuickCreate $create)  {
+//            $events = Event::where('active', '=', 1)->where('owner_id', '=', Admin::user()->id)->pluck('title','id');
+//            $create->select('event_id','Соревнование')->options($events);
+//            $create->integer('owner_id', Admin::user()->id)->default(Admin::user()->id)->style('display', 'None');
+//            $create->integer('final_route_id', 'Номер маршрута');
+//            $create->select('user_id', 'Участники')->options($this->getUsers()->toArray());
+//            $create->integer('amount_try_top', 'Кол-во попыток на топ');
+//            $create->integer('amount_try_zone', 'Кол-во попыток на зону');
+//        });
         return $grid;
     }
 
@@ -160,6 +164,7 @@ class ResultRouteFinalStageController extends Controller
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
+
         $grid->actions(function ($actions) {
             $actions->disableDelete();
             $actions->disableEdit();

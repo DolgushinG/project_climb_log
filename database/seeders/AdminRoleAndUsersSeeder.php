@@ -63,7 +63,6 @@ class AdminRoleAndUsersSeeder extends Seeder
             array('role_id' => '2','user_id' => '2','created_at' => NULL,'updated_at' => NULL),
             array('role_id' => '2','user_id' => '3','created_at' => NULL,'updated_at' => NULL)
         );
-//        dd($admin_users);
         \Illuminate\Support\Facades\DB::table('admin_users')->insert($admin_users);
         \Illuminate\Support\Facades\DB::table('admin_role_users')->insert($admin_role_users);
         \Illuminate\Support\Facades\DB::table('admin_user_permissions')->insert($admin_user_permissions);
