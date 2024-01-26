@@ -5,13 +5,14 @@ namespace Database\Seeders;
 use App\Admin\Controllers\ParticipantsController;
 use App\Models\Event;
 use App\Models\Participant;
+use Database\Factories\EventFactory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class ParticipantSeeder extends Seeder
 {
 
-    const USERS = 120;
+    const USERS = 80;
     /**
      * Run the database seeds.
      *
@@ -27,7 +28,8 @@ class ParticipantSeeder extends Seeder
             }
             DB::table('participants')->insert($participants);
         }
-        prepare_participant_with_owner(2, 1, self::USERS);
-        prepare_participant_with_owner(3, 2, self::USERS);
+        for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
+            prepare_participant_with_owner($i, $i, self::USERS);
+        }
     }
 }

@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class FinalAndQualificationResultExport implements WithMultipleSheets
+class AllResultExport implements WithMultipleSheets
 {
 
     public $event_id;
@@ -31,10 +31,10 @@ class FinalAndQualificationResultExport implements WithMultipleSheets
             }
         }
         foreach ($genders as $gender) {
-            $sheets[] = new Results($this->event_id, 'Final', $gender);
+            $sheets[] = new Results($this->event_id, 'SemiFinal', $gender);
         }
         foreach ($genders as $gender) {
-            $sheets[] = new Results($this->event_id, 'AdditionalFinal', $gender);
+            $sheets[] = new Results($this->event_id, 'Final', $gender);
         }
         return $sheets;
     }

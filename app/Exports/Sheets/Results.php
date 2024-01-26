@@ -4,10 +4,9 @@ namespace App\Exports\Sheets;
 
 use App\Models\Event;
 use App\Models\ResultParticipant;
-use App\Models\ResultRouteAdditionalFinalStage;
 use App\Models\ResultRouteFinalStage;
+use App\Models\ResultRouteSemiFinalStage;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
@@ -17,7 +16,6 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Sheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHeadings, ShouldAutoSize, WithEvents, WithStyles
@@ -100,24 +98,6 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
     {
 
         switch ($this->type){
-            case 'AdditionalFinal':
-                $final = [
-                    'Место',
-                    'Участник(Фамилия Имя)',
-                    'Сумма TOP',
-                    'Сумма попыток на TOP',
-                    'Сумма ZONE',
-                    'Сумма попыток на ZONE',
-                ];
-                $count = ResultRouteAdditionalFinalStage::count_route_in_additional_final_stage($this->event_id);
-                for($i = 0; $i <= $count; $i++){
-                    $final[] = 'TOP';
-                    $final[] = 'Попытки на TOP';
-                    $final[] = 'ZONE';
-                    $final[] = 'Попытки на ZONE';
-                }
-
-                return $final;
             case 'Final':
                 $final = [
                     'Место',
@@ -128,6 +108,24 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     'Сумма попыток на ZONE',
                 ];
                 $count = ResultRouteFinalStage::count_route_in_final_stage($this->event_id);
+                for($i = 0; $i <= $count; $i++){
+                    $final[] = 'TOP';
+                    $final[] = 'Попытки на TOP';
+                    $final[] = 'ZONE';
+                    $final[] = 'Попытки на ZONE';
+                }
+
+                return $final;
+            case 'SemiFinal':
+                $final = [
+                    'Место',
+                    'Участник(Фамилия Имя)',
+                    'Сумма TOP',
+                    'Сумма попыток на TOP',
+                    'Сумма ZONE',
+                    'Сумма попыток на ZONE',
+                ];
+                $count = ResultRouteSemiFinalStage::count_route_in_semifinal_stage($this->event_id);
                 for($i = 0; $i <= $count; $i++){
                     $final[] = 'TOP';
                     $final[] = 'Попытки на TOP';
@@ -159,11 +157,11 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
      */
     public function collection()
     {
+        if($this->type == 'SemiFinal'){
+            return self::get_final('result_semifinal_stage');
+        }
         if($this->type == 'Final'){
             return self::get_final('result_final_stage');
-        }
-        if($this->type == 'AdditionalFinal'){
-            return self::get_final('result_additional_final_stage');
         }
         if($this->type == 'Qualification'){
             return self::get_qualification();
@@ -231,7 +229,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             )
             ->where('gender', '=', $this->gender)->get()->sortBy('place')->toArray();
         foreach ($users as $index => $user){
-            $final_result = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+            $final_result = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
             foreach ($final_result as $result){
                 $users[$index]['amount_top_'.$result->final_route_id] = $result->amount_top;
                 $users[$index]['amount_try_top_'.$result->final_route_id] = $result->amount_try_top;

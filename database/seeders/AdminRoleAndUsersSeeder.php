@@ -2,13 +2,14 @@
 
 namespace Database\Seeders;
 
+use Database\Factories\EventFactory;
 use DB;
 use Illuminate\Database\Seeder;
 
 class AdminRoleAndUsersSeeder extends Seeder
 {
 
-    const COUNT_EVENTS = 16;
+    const COUNT_EVENTS = 5;
     /**
      * Run the database seeds.
      *
@@ -16,18 +17,18 @@ class AdminRoleAndUsersSeeder extends Seeder
      */
     public function run()
     {
-        $admin_users = [array('id' => '1','username' => 'admin','password' => '$2y$10$eWsiQ1nirz.qRxKAVTie3O7Y8qzIFG493dhnB5KbkQSJNMRAQPEeq','name' => 'admin','contact_email' => NULL,'contact_link' => NULL,'climbing_gym_name' => NULL,'climbing_gym_link' => NULL,'address' => NULL,'city' => NULL,'phone' => NULL,'optional_phone' => NULL,'avatar' => NULL,'remember_token' => NULL,'created_at' => '2024-01-18 07:56:42','updated_at' => '2024-01-18 07:56:42'),];
-        for($i = 2; $i <= self::COUNT_EVENTS; $i++){
+        $admin_users = [array('id' => '100','username' => 'admin','password' => '$2y$10$eWsiQ1nirz.qRxKAVTie3O7Y8qzIFG493dhnB5KbkQSJNMRAQPEeq','name' => 'admin','contact_email' => NULL,'contact_link' => NULL,'climbing_gym_name' => NULL,'climbing_gym_link' => NULL,'address' => NULL,'city' => NULL,'phone' => NULL,'optional_phone' => NULL,'avatar' => NULL,'remember_token' => NULL,'created_at' => '2024-01-18 07:56:42','updated_at' => '2024-01-18 07:56:42'),];
+        for($i = 1; $i <= self::COUNT_EVENTS; $i++){
             $admin_users[] = array('id' => $i,
                 'username' => 'admin'.$i,
                 'password' => '$2y$10$eWsiQ1nirz.qRxKAVTie3O7Y8qzIFG493dhnB5KbkQSJNMRAQPEeq',
                 'name' => 'admin'.$i,
                 'contact_email' => NULL,
                 'contact_link' => NULL,
-                'climbing_gym_name' => NULL,
-                'climbing_gym_link' => NULL,
-                'address' => NULL,
-                'city' => NULL,
+                'climbing_gym_name' => (new EventFactory)->climbingGyms[$i],
+                'climbing_gym_link' => 'http://skolodrom.ru',
+                'address' => 'Дом улица фонарь',
+                'city' => (new EventFactory)->cities[$i],
                 'phone' => NULL,
                 'optional_phone' => NULL,
                 'avatar' => NULL,

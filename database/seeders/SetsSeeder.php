@@ -27,7 +27,8 @@ class SetsSeeder extends Seeder
             );
             DB::table('sets')->insert($sets);
         }
-        prepare_sets(2);
-        prepare_sets(3);
+        for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
+            prepare_sets($i);
+        }
     }
 }

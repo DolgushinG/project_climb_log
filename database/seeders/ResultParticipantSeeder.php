@@ -12,11 +12,11 @@ class ResultParticipantSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * @return void
      */
     public function run()
     {
-        function prepare_result_participant($owner_id, $event_id){
+        function prepare_result_participant($owner_id, $event_id)
+        {
             $count_user = ParticipantSeeder::USERS;
             for ($i = 1; $i <= $count_user; $i++){
                 $result_participant = array(
@@ -54,7 +54,8 @@ class ResultParticipantSeeder extends Seeder
             }
             Event::refresh_final_points_all_participant($event_id);
         }
-        prepare_result_participant(2, 1);
-        prepare_result_participant(3, 2);
+        for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
+            prepare_result_participant($i, $i);
+        }
     }
 }

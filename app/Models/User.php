@@ -82,7 +82,7 @@ class User extends Authenticatable
 
     public function result_final_stage()
     {
-        return $this->hasOne(ResultRouteFinalStage::class);
+        return $this->hasOne(ResultRouteSemiFinalStage::class);
     }
 
 

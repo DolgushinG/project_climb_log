@@ -133,10 +133,10 @@ class AdminTablesSeeder extends Seeder
                 [
                     "parent_id" => 0,
                     "order" => 0,
-                    "title" => "Финал",
+                    "title" => "Полуфинал",
                     "icon" => "fa-adn",
-                    "uri" => "/final-stage",
-                    "permission" => "owner.result.route.final.stage"
+                    "uri" => "/semifinal-stage",
+                    "permission" => "owner.result.route.semifinal.stage"
                 ],
                 [
                     "parent_id" => 0,
@@ -181,10 +181,10 @@ class AdminTablesSeeder extends Seeder
                 [
                     "parent_id" => 0,
                     "order" => 0,
-                    "title" => "Дополнительный Финал",
+                    "title" => "Финал",
                     "icon" => "fa-cogs",
-                    "uri" => "additional-final-stage",
-                    "permission" => "owner.result.route.additional.final.stage"
+                    "uri" => "final-stage",
+                    "permission" => "owner.result.route.final.stage"
                 ]
             ]
         );
@@ -247,10 +247,10 @@ class AdminTablesSeeder extends Seeder
                     "http_path" => "/participants-categories"
                 ],
                 [
-                    "name" => "Result Route Final Stage",
-                    "slug" => "owner.result.route.final.stage",
+                    "name" => "Result Route SemiFinal Stage",
+                    "slug" => "owner.result.route.semifinal.stage",
                     "http_method" => "",
-                    "http_path" => "/final-stage*"
+                    "http_path" => "/semifinal-stage*"
                 ],
                 [
                     "name" => "Grades",
@@ -283,10 +283,10 @@ class AdminTablesSeeder extends Seeder
                     "http_path" => "/exports*"
                 ],
                 [
-                    "name" => "Result Route Additional Final Stage",
-                    "slug" => "owner.result.route.additional.final.stage",
+                    "name" => "Result Route Final Stage",
+                    "slug" => "owner.result.route.final.stage",
                     "http_method" => "",
-                    "http_path" => "/additional-final-stage*"
+                    "http_path" => "/final-stage*"
                 ]
             ]
         );

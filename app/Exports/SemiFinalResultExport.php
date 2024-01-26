@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Events\BeforeExport;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class AdditionalFinalResultExport implements WithMultipleSheets
+class SemiFinalResultExport implements WithMultipleSheets
 {
 
     public $event_id;
@@ -26,7 +26,7 @@ class AdditionalFinalResultExport implements WithMultipleSheets
         $sheets = [];
         $genders = ['male', 'female'];
         foreach ($genders as $gender) {
-            $sheets[] = new Results($this->event_id, 'AdditionalFinal', $gender);
+            $sheets[] = new Results($this->event_id, 'SemiFinal', $gender);
         }
         return $sheets;
     }

@@ -8,6 +8,48 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class EventFactory extends Factory
 {
 
+    public $cities = array(
+        "Новосибирск",
+        "Екатеринбург",
+        "Москва",
+        "Санкт-Петербург",
+        "Нижний Новгород",
+        "Казань",
+        "Челябинск",
+        "Омск",
+        "Самара",
+        "Ростов-на-Дону",
+        "Уфа",
+        "Красноярск",
+        "Пермь",
+        "Воронеж",
+        "Волгоград",
+        "Тула",
+        "Екатеринбург"
+    );
+
+
+    public $climbingGyms = array(
+        "АльпикаМайкоп",
+        "Большой стон",
+        "Красный камень",
+        "Скалодром КубГУ",
+        "ГрандВолна",
+        "Спелеоклуб Гора",
+        "Ревуцкие стены",
+        "Скалодром Вертикаль",
+        "Рисованный Камень",
+        "ЛазерМаяк",
+        "Скалодром ОККБ-БПЛА",
+        "Столбы",
+        "Спелеоцентр Сибирь",
+        "Точка Кипения",
+        "Башни Пскова",
+        "Climb lab",
+        "Bigwall",
+        "Северная стена"
+    );
+
     protected $model = Event::class;
     /**
      * Define the model's default state.
@@ -35,44 +77,6 @@ class EventFactory extends Factory
         ];
 
 
-        $cities = array(
-            "Москва",
-            "Санкт-Петербург",
-            "Новосибирск",
-            "Екатеринбург",
-            "Нижний Новгород",
-            "Казань",
-            "Челябинск",
-            "Омск",
-            "Самара",
-            "Ростов-на-Дону",
-            "Уфа",
-            "Красноярск",
-            "Пермь",
-            "Воронеж",
-            "Волгоград"
-        );
-
-
-        $climbingGyms = array(
-            "АльпикаМайкоп",
-            "Большой стон",
-            "Красный камень",
-            "Скалодром КубГУ",
-            "ГрандВолна",
-            "Спелеоклуб Гора",
-            "Ревуцкие стены",
-            "Скалодром Вертикаль",
-            "Рисованный Камень",
-            "ЛазерМаяк",
-            "Скалодром ОККБ-БПЛА",
-            "Столбы",
-            "Спелеоцентр Сибирь",
-            "Точка Кипения",
-            "Башни Пскова"
-        );
-
-
 
 
         return [
@@ -85,13 +89,12 @@ class EventFactory extends Factory
             'description' => $this->faker->paragraph(20),
             'address' => $this->faker->address(),
             'grade_and_amount' => $routes,
-            'city' => $this->faker->randomElement($cities),
             'title' => $this->faker->word(),
             'title_eng' => $this->faker->word(),
             'subtitle' => $this->faker->word(),
-            'climbing_gym_name' => $this->faker->randomElement($climbingGyms),
-            'climbing_gym_name_eng' => $this->faker->word(),
             'link' => $this->faker->url(),
+            'amount_routes_in_semifinal' => $this->faker->randomElement([4,5]),
+            'amount_routes_in_final' => 4,
             'count_routes' => 30,
             'mode' => $this->faker->randomElement([1, 2]),
         ];
@@ -102,4 +105,25 @@ class EventFactory extends Factory
             'owner_id' => $owner_id,
         ]);
     }
+    public function withSemiFinal($is_semifinal)
+    {
+        return $this->state([
+            'is_semifinal' => $is_semifinal,
+        ]);
+    }
+    public function withClimbingGym($index)
+    {
+        return $this->state([
+            'climbing_gym_name' => $this->climbingGyms[$index],
+            'climbing_gym_name_eng' => (new \App\Models\Event)->translate_to_eng($this->climbingGyms[$index]),
+        ]);
+    }
+
+    public function withCity($index)
+    {
+        return $this->state([
+            'city' => $this->cities[$index],
+        ]);
+    }
+
 }

@@ -20,35 +20,10 @@ class ActionExport extends RowAction
     protected function script($name, $format)
     {
         switch ($name){
-            case 'additional-final':
-                switch ($format) {
-                    case 'excel':
-                        return <<<SCRIPT
-                        $('.additional-final-excel').on('click', function () {
-                            let id = this.getAttribute('data-id');
-                            document.location = 'exports/events/excel/additional-final/' + id
-                        });
-                        SCRIPT;
-                    case 'csv':
-                        return <<<SCRIPT
-                        $('.additional-final-csv').on('click', function () {
-                            let id = this.getAttribute('data-id');
-                            document.location = 'exports/events/csv/additional-final/' + id
-                        });
-                        SCRIPT;
-                    case 'ods':
-                        return <<<SCRIPT
-                        $('.additional-final-ods').on('click', function () {
-                            let id = this.getAttribute('data-id');
-                            document.location = 'exports/events/ods/additional-final/' + id
-                        });
-                        SCRIPT;
-                }
-                break;
             case 'final':
                 switch ($format) {
                     case 'excel':
-                          return <<<SCRIPT
+                        return <<<SCRIPT
                         $('.final-excel').on('click', function () {
                             let id = this.getAttribute('data-id');
                             document.location = 'exports/events/excel/final/' + id
@@ -66,6 +41,31 @@ class ActionExport extends RowAction
                         $('.final-ods').on('click', function () {
                             let id = this.getAttribute('data-id');
                             document.location = 'exports/events/ods/final/' + id
+                        });
+                        SCRIPT;
+                }
+                break;
+            case 'semifinal':
+                switch ($format) {
+                    case 'excel':
+                          return <<<SCRIPT
+                        $('.semifinal-excel').on('click', function () {
+                            let id = this.getAttribute('data-id');
+                            document.location = 'exports/events/excel/semifinal/' + id
+                        });
+                        SCRIPT;
+                    case 'csv':
+                        return <<<SCRIPT
+                        $('.semifinal-csv').on('click', function () {
+                            let id = this.getAttribute('data-id');
+                            document.location = 'exports/events/csv/semifinal/' + id
+                        });
+                        SCRIPT;
+                    case 'ods':
+                        return <<<SCRIPT
+                        $('.semifinal-ods').on('click', function () {
+                            let id = this.getAttribute('data-id');
+                            document.location = 'exports/events/ods/semifinal/' + id
                         });
                         SCRIPT;
                 }

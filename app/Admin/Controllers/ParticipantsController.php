@@ -8,7 +8,7 @@ use App\Admin\CustomAction\ActionOds;
 use App\Exceptions\ExportToCsv;
 use App\Exceptions\ExportToExcel;
 use App\Exceptions\ExportToOds;
-use App\Exports\FinalResultExport;
+use App\Exports\SemiFinalResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
 use App\Models\Participant;

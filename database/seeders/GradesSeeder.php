@@ -32,9 +32,10 @@ class GradesSeeder extends Seeder
             array('Категория' => '7C', 'Кол-во' => 1, 'Ценность' => 700),
             array('Категория' => '7C+', 'Кол-во' => 1, 'Ценность' => 750),
         );
+        for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
+            Event::generation_route($i, $i, $routes);
+        }
 
-        Event::generation_route(2, 1, $routes);
-        Event::generation_route(3, 2, $routes);
 
     }
 }

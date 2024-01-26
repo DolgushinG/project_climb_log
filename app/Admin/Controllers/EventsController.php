@@ -3,7 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\CustomAction\ActionExport;
-use App\Exports\FinalAndQualificationResultExport;
+use App\Exports\AllResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
@@ -176,6 +176,18 @@ class EventsController extends Controller
         $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
         $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
         $form->summernote('description', 'Описание')->placeholder('Описание')->required();
+        $form->radio('settings','Настройка финалов')
+            ->options([
+                1 =>'С полуфиналом',
+                0 =>'Без полуфинала',
+            ])->when(1, function (Form $form) {
+                $form->hidden('is_semifinal')->value(1);
+                $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->value(5);
+                $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
+            })->when(2, function (Form $form) {
+                $form->hidden('is_semifinal')->value(0);
+                $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
+            });
         $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
         $form->switch('active', 'Опубликовать сразу?');
         $form->saving(function (Form $form) {
@@ -248,7 +260,7 @@ class EventsController extends Controller
     public function exportAllExcel(Request $request)
     {
         $file_name = 'Полные результаты.xlsx';
-        $result = Excel::download(new FinalAndQualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        $result = Excel::download(new AllResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);
@@ -256,7 +268,7 @@ class EventsController extends Controller
     public function exportAllnCsv(Request $request)
     {
         $file_name = 'Полные результаты.csv';
-        $result = Excel::download(new FinalAndQualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::CSV);
+        $result = Excel::download(new AllResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::CSV);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/csv',
         ]);
@@ -264,7 +276,7 @@ class EventsController extends Controller
     public function exportAllOds(Request $request)
     {
         $file_name = 'Полные результаты.ods';
-        $result = Excel::download(new FinalAndQualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::ODS);
+        $result = Excel::download(new AllResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::ODS);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/ods',
         ]);

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateResultAdditionalFinalStageTable extends Migration
+class CreateResultRouteSemiFinalStageTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,16 @@ class CreateResultAdditionalFinalStageTable extends Migration
      */
     public function up()
     {
-        Schema::create('result_additional_final_stage', function (Blueprint $table) {
+        Schema::create('result_route_semifinal_stage', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('owner_id');
             $table->integer('event_id');
-            $table->integer('place');
             $table->integer('user_id');
-            $table->integer('amount_top');
+            $table->integer('final_route_id');
             $table->integer('amount_try_top');
-            $table->integer('amount_zone');
+            $table->integer('amount_top');
             $table->integer('amount_try_zone');
+            $table->integer('amount_zone');
             $table->timestamps();
         });
     }
@@ -34,6 +34,6 @@ class CreateResultAdditionalFinalStageTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('result_additional_final_stage');
+        Schema::dropIfExists('result_route_semifinal_stage');
     }
 }

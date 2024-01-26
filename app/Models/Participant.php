@@ -45,7 +45,7 @@ class Participant extends Model
         $duplicate_arrays = array_reduce($duplicate_groups, 'array_merge', []);
         $user_places = array();
         foreach ($duplicate_arrays as $index => $d_array){
-            if($type == 'additionalFinal'){
+            if($type == 'Final'){
                 $place = Participant::get_place_participant_in_final($event_id, $d_array['user_id']);
             } else {
                 $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], true);
@@ -80,7 +80,7 @@ class Participant extends Model
     }
 
     public static function get_place_participant_in_final($event_id, $user_id){
-        return ResultFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->get()->place;
+        return ResultSemiFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->get()->place;
     }
     public static function get_places_participant_in_qualification($event_id, $user_id, $get_place_user = false){
         $user = User::find($user_id);
@@ -118,6 +118,10 @@ class Participant extends Model
     public static function better_participants($event_id, $gender, $amount_better){
         $participant_users_id = Participant::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
         $users_id = User::whereIn('id', $participant_users_id)->where('gender', '=', $gender)->where('category', '=', 3)->pluck('id');
+//        if($event_id == 2) {
+//
+//            dd(User::whereIn('id', $participant_users_id)->where('category', '=', 3)->get()->toArray());
+//        }
         $participant_sort_id = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->take($amount_better)->sortByDesc('points')->pluck('user_id');
         return User::whereIn('id', $participant_sort_id)->get();
     }

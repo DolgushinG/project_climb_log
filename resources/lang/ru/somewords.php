@@ -7,7 +7,7 @@ return [
     'female' => 'Женщины',
     'male' => 'Мужчины',
     'grade' => 'Мужчины',
-    'Final' => 'Финал',
+    'SemiFinal' => 'Полуфинал',
     'Qualification' => 'Квалификация',
-    'AdditionalFinal' => 'Дополнительный Финал',
+    'Final' => 'Финал',
 ];

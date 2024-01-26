@@ -17,12 +17,12 @@ class CreateResultFinalStageTable extends Migration
             $table->increments('id');
             $table->integer('owner_id');
             $table->integer('event_id');
+            $table->integer('place');
             $table->integer('user_id');
             $table->integer('amount_top');
             $table->integer('amount_try_top');
             $table->integer('amount_zone');
             $table->integer('amount_try_zone');
-            $table->string('place');
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\ResultFinalStage;
+use App\Models\ResultSemiFinalStage;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Form;
