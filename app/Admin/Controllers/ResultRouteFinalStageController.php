@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
+use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
 use App\Admin\CustomAction\ActionExport;
 use App\Exports\FinalResultExport;
 use App\Models\Event;
@@ -39,8 +40,15 @@ class ResultRouteFinalStageController extends Controller
             ->header(trans('admin.index'))
             ->description(trans('admin.description'))
             ->row(function(Row $row) {
-                $row->column(10, $this->grid2());
-                $row->column(10, $this->grid());
+                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+                if($event) {
+                    $row->column(10, $this->grid2());
+                    $row->column(10, $this->grid());
+                } else {
+                    $row->column(10, $this->grid2());
+                    $row->column(10, $this->grid3());
+                }
+
             });
     }
 
@@ -100,6 +108,9 @@ class ResultRouteFinalStageController extends Controller
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
+        $grid->model()->where(function ($query) {
+            $query->has('event.result_semifinal_stage');
+        });
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchResultFinal);
         });
@@ -186,14 +197,16 @@ class ResultRouteFinalStageController extends Controller
             if($model->is_semifinal){
                 $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($model->id, 'male', 6);
                 $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($model->id, 'female', 6);
+                $type = 'final';
             } else {
                 $users_male = Participant::better_participants($model->id, 'male', 6);
                 $users_female = Participant::better_participants($model->id, 'female', 6);
+                $type = 'semifinal';
             }
-
             $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
-            $male = ResultRouteSemiFinalStageController::getUsersSorted($users_male, $fields, $model, 'final');
-            $female = ResultRouteSemiFinalStageController::getUsersSorted($users_female, $fields, $model, 'final');
+            $male = ResultRouteSemiFinalStageController::getUsersSorted($users_male, $fields, $model, $type, Admin::user()->id);
+            $female = ResultRouteSemiFinalStageController::getUsersSorted($users_female, $fields, $model, $type, Admin::user()->id);
+//            dd($male);
             $final_all_users = array_merge($male, $female);
             $all_users = array_merge($male, $female);
             foreach ($final_all_users as $index => $user){
@@ -218,6 +231,7 @@ class ResultRouteFinalStageController extends Controller
                 $final_result_stage->place = $all_users[$index]['place'];
                 $final_result_stage->save();
             }
+//            dd($final_all_users);
             $options = [
                 'responsive' => true,
                 'paging' => true,
@@ -231,6 +245,34 @@ class ResultRouteFinalStageController extends Controller
             ];
             return new DataTable($headers, $final_all_users, $style, $options);
         });
+        $grid->column('active', 'Статус')->using([0 => 'Не активно', 1 => 'Активно'])->display(function ($title, $column) {
+            If ($this->active == 0) {
+                return $column->label('default');
+            } else {
+                return $column->label('success');
+            }
+        });
+
+        return $grid;
+    }
+
+    /**
+     * Make a grid builder.
+     *
+     * @return Grid
+     */
+    protected function grid3()
+    {
+        $grid = new Grid(new Event);
+        $grid->disableExport();
+        $grid->disableColumnSelector();
+        $grid->disableCreateButton();
+        $grid->disablePagination();
+        $grid->disablePerPageSelector();
+        $grid->disableBatchActions();
+        $grid->disableFilter();
+        $grid->disableActions();
+        $grid->setTitle('Нет активных соревнований');
         return $grid;
     }
 
@@ -272,8 +314,8 @@ class ResultRouteFinalStageController extends Controller
         $form->text('final_route_id', 'final_route_id');
         $form->text('amount_try_top', 'amount_try_top');
         $form->text('amount_try_zone', 'amount_try_zone');
-        $form->hidden('amount_zone', 'amount_try_zone');
-        $form->hidden('amount_top', 'amount_try_zone');
+        $form->hidden('amount_zone', 'amount_zone');
+        $form->hidden('amount_top', 'amount_top');
         $form->display(trans('admin.created_at'));
         $form->display(trans('admin.updated_at'));
 

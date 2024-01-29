@@ -4,11 +4,12 @@ namespace App\Admin\Actions\ResultRouteFinalStage;
 
 use App\Models\Event;
 use App\Models\ResultSemiFinalStage;
+use Encore\Admin\Actions\Action;
 use Encore\Admin\Actions\BatchAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class BatchResultFinal extends BatchAction
+class BatchResultFinal extends Action
 {
     public $name = 'Внести результат финала';
 
@@ -46,28 +47,20 @@ class BatchResultFinal extends BatchAction
 
     public function form()
     {
-        $type = [
-            1 => 'Advertising',
-            2 => 'Illegal',
-            3 => 'Fishing',
-        ];
-
-        $this->checkbox('type', 'type')->options($type);
-        $this->textarea('reason', 'reason')->rules('required');
-//        $this->modalSmall();
-//        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
-//            ->where('active', '=', 1)->first();
-//        $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', 6);
-//        $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', 6);
-//        $merged_users = $users_male->merge($users_female);
-//        $result = $merged_users->pluck( 'middlename','id');
-//        $this->select('user_id', 'Участник')->options($result);
-//        $this->hidden('event_id', '')->value($event->id);
-//        for($i = 1; $i <= $event->amount_routes_in_final; $i++){
-//            $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
-//            $this->integer('amount_try_top_'.$i, 'Попытки на топ')->value($i);
-//            $this->integer('amount_try_zone_'.$i, 'Попытки на зону')->value($i);
-//        }
+        $this->modalSmall();
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
+            ->where('active', '=', 1)->first();
+        $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', 6);
+        $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', 6);
+        $merged_users = $users_male->merge($users_female);
+        $result = $merged_users->pluck( 'middlename','id');
+        $this->select('user_id', 'Участник')->options($result);
+        $this->hidden('event_id', '')->value($event->id);
+        for($i = 1; $i <= $event->amount_routes_in_final; $i++){
+            $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
+            $this->integer('amount_try_top_'.$i, 'Попытки на топ')->value($i);
+            $this->integer('amount_try_zone_'.$i, 'Попытки на зону')->value($i);
+        }
 
     }
 

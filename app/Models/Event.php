@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Admin\Controllers\ResultRouteSemiFinalStageController;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -50,9 +51,14 @@ class Event extends Model
         return $this->hasOne(Participant::class);
     }
 
-    public function result_final_stage()
+    public function result_semifinal_stage()
     {
         return $this->hasOne(ResultRouteSemiFinalStage::class);
+    }
+
+    public function result_final_stage()
+    {
+        return $this->hasOne(ResultRouteFinalStage::class);
     }
 
     public function user()
@@ -118,53 +124,22 @@ class Event extends Model
         }
 
     }
-    public static function refresh_final_points_all_participant_in_semifinal($event_id) {
-    $routes = ResultRouteSemiFinalStage::where('event_id', '=', $event_id)->select('route_id')->distinct()->get()->toArray();
-    $event = Event::find($event_id);
-    $format = $event->mode;
-    $final_participant = ResultRouteSemiFinalStage::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
-    foreach ($final_participant as $user) {
-        $points = 0;
-        $routes_only_passed = array();
-        foreach ($routes as $route) {
-
-            $user_model = ResultRouteSemiFinalStage::where('event_id', '=', $event_id)
-                ->where('user_id', '=', $user)
-                ->where('route_id', '=', $route['route_id'])
-                ->first();
-            if($user_model->attempt != 0) {
-                $gender = User::gender($user);
-                $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
-                $coefficient = ResultParticipant::get_coefficient($event_id, $route['route_id'], $gender);
-                $value_route = (new \App\Models\ResultParticipant)->get_value_route($user_model->attempt, $value_category, $event->mode);
-                $points += $coefficient + $value_route;
-                $point_route = $coefficient + $value_route;
-                $user_model->points = $point_route;
-                $routes_only_passed[] = $user_model;
-            }
-        }
-        if($format == 1){
-            $points = 0;
-            usort($routes_only_passed, function($a, $b) {
-                return $a['points'] <=> $b['points'];
-            });
-            $lastElems = array_slice($routes_only_passed, -10, 10);
-            foreach ($lastElems as $lastElem) {
-                $points += $lastElem->points;
-            }
-        }
-        $final_participant_result = Participant::where('user_id', '=', $user)->where('event_id', '=', $event_id)->first();
-        $final_participant_result->points = $points;
-        $final_participant_result->event_id = $event_id;
-        $final_participant_result->user_id = $user;
-        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user, true);
-        $final_participant_result->save();
-
-
+    public static function refresh_final_points_all_participant_in_semifinal($event_id, $owner_id) {
+        $event = Event::find($event_id);
+        $result_female = Participant::better_participants($event_id, 'female', 10);
+        $result_male = Participant::better_participants($event_id, 'male', 10);
+        $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
+        ResultRouteSemiFinalStageController::getUsersSorted($result_female, $fields, $event, 'semifinal', $owner_id);
+        ResultRouteSemiFinalStageController::getUsersSorted($result_male, $fields, $event, 'semifinal', $owner_id);
     }
-
-}
-
+    public static function refresh_final_points_all_participant_in_final($event_id, $owner_id){
+        $event = Event::find($event_id);
+        $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', 6);
+        $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', 6);
+        $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
+        ResultRouteSemiFinalStageController::getUsersSorted($users_female, $fields, $event, 'final', $owner_id);
+        ResultRouteSemiFinalStageController::getUsersSorted($users_male, $fields, $event, 'final', $owner_id);
+    }
 
 
 }

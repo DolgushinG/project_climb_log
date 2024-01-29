@@ -43,10 +43,11 @@ class Participant extends Model
 
 // Преобразование групп в одномерный массив
         $duplicate_arrays = array_reduce($duplicate_groups, 'array_merge', []);
+
         $user_places = array();
         foreach ($duplicate_arrays as $index => $d_array){
             if($type == 'Final'){
-                $place = Participant::get_place_participant_in_final($event_id, $d_array['user_id']);
+                $place = Participant::get_place_participant_in_semifinal($event_id, $d_array['user_id']);
             } else {
                 $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], true);
             }
@@ -54,20 +55,24 @@ class Participant extends Model
             $user_places[] = array('user_id' => $d_array['user_id'], 'place' => $place, 'index' => $index_user_final_in_res);
 
         }
+
         usort($user_places, function ($a, $b) {
             return $a['place'] <=> $b['place'];
         });
-
         # Расставляем места
-        foreach ($user_places as $user_place){
-            $result_final[$user_place['index']]['place'] = $user_place['index'] + 1;
+        foreach ($user_places as $index => $user_place){
+            $result_final[$user_place['index']]['place'] = $index + 1;
         }
+
         // Расставляем места в зависимости от результатов квалификации
         foreach ($result_final as $index => $result){
             if (!$result['place']){
                 $result_final[$index]['place'] = $index+1;
             }
         }
+        usort($result_final, function ($a, $b) {
+            return $a['place'] <=> $b['place'];
+        });
        return $result_final;
     }
     public static function findIndexByUserId($array, $userId) {
@@ -79,7 +84,7 @@ class Participant extends Model
         return -1; // Если не найдено
     }
 
-    public static function get_place_participant_in_final($event_id, $user_id){
+    public static function get_place_participant_in_semifinal($event_id, $user_id){
         return ResultSemiFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->get()->place;
     }
     public static function get_places_participant_in_qualification($event_id, $user_id, $get_place_user = false){
@@ -118,10 +123,6 @@ class Participant extends Model
     public static function better_participants($event_id, $gender, $amount_better){
         $participant_users_id = Participant::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
         $users_id = User::whereIn('id', $participant_users_id)->where('gender', '=', $gender)->where('category', '=', 3)->pluck('id');
-//        if($event_id == 2) {
-//
-//            dd(User::whereIn('id', $participant_users_id)->where('category', '=', 3)->get()->toArray());
-//        }
         $participant_sort_id = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->take($amount_better)->sortByDesc('points')->pluck('user_id');
         return User::whereIn('id', $participant_sort_id)->get();
     }

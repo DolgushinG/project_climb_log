@@ -176,6 +176,13 @@ class  ParticipantsController extends Controller
             }
             return new DataTable($headers, $users->toArray(), $style, $options);
         });
+        $grid->column('active', 'Статус')->using([0 => 'Не активно', 1 => 'Активно'])->display(function ($title, $column) {
+            If ($this->active == 0) {
+                return $column->label('default');
+            } else {
+                return $column->label('success');
+            }
+        });
         $grid->header(function ($query) {
             $event_id = $query->where('owner_id', '=', Admin::user()->id)->get()->pluck('id');
             $users_id = Participant::whereIn('event_id',$event_id)->get()->pluck('user_id');
@@ -236,6 +243,25 @@ class  ParticipantsController extends Controller
         return $grid;
     }
 
+    /**
+     * Make a grid builder.
+     *
+     * @return Grid
+     */
+    protected function grid3()
+    {
+        $grid = new Grid(new Event);
+        $grid->disableExport();
+        $grid->disableColumnSelector();
+        $grid->disableCreateButton();
+        $grid->disablePagination();
+        $grid->disablePerPageSelector();
+        $grid->disableBatchActions();
+        $grid->disableFilter();
+        $grid->disableActions();
+        $grid->setTitle('Нет активных соревнований');
+        return $grid;
+    }
 
     /**
      * Make a show builder.

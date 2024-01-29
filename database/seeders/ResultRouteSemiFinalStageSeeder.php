@@ -28,9 +28,6 @@ class ResultRouteSemiFinalStageSeeder extends Seeder
                 $result_male = Participant::better_participants($event_id, 'male', 10)->toArray();
                 $final_users = array_merge($result_female, $result_male);
                 $result = array();
-//                if($owner_id == 3) {
-//                    dd($result_female, $event_id);
-//                }
                 foreach ($final_users as $user) {
                     for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
                         $amount_zone = rand(0, 1);
@@ -59,7 +56,8 @@ class ResultRouteSemiFinalStageSeeder extends Seeder
         }
         for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
             prepare_with_owner($i, $i);
+            Event::refresh_final_points_all_participant_in_semifinal($i, $i);
         }
-//        Event::refresh_final_points_all_participant_in_semifinal();
+
     }
 }

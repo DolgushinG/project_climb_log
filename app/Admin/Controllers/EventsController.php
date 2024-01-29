@@ -107,6 +107,7 @@ class EventsController extends Controller
         $grid->column('title', 'Название');
         $grid->column('subtitle', 'Надпись под названием');
         $grid->column('link', 'Ссылка')->link();
+
         $grid->column('active', 'Опубликовать')->switch();
 
         return $grid;
@@ -176,7 +177,7 @@ class EventsController extends Controller
         $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
         $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
         $form->summernote('description', 'Описание')->placeholder('Описание')->required();
-        $form->radio('settings','Настройка финалов')
+        $form->radio('is_semifinal','Настройка финалов')
             ->options([
                 1 =>'С полуфиналом',
                 0 =>'Без полуфинала',
@@ -184,13 +185,22 @@ class EventsController extends Controller
                 $form->hidden('is_semifinal')->value(1);
                 $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->value(5);
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
-            })->when(2, function (Form $form) {
+            })->when(0, function (Form $form) {
                 $form->hidden('is_semifinal')->value(0);
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
             });
         $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
         $form->switch('active', 'Опубликовать сразу?');
+//        $form->submitted(function (Form $form) {
+//            $form->ignore('settings');
+//        });
         $form->saving(function (Form $form) {
+            if ($form->active === "1") {
+                $count = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->get();
+                if($count->isNotEmpty()){
+                    throw new \Exception('Только одно соревнование может быть активно');
+                }
+            }
             $count = 0;
             if($form->grade_and_amount){
                 foreach ($form->grade_and_amount as $value){

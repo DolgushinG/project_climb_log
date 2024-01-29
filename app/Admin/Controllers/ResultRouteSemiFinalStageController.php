@@ -28,6 +28,7 @@ class ResultRouteSemiFinalStageController extends Controller
 {
     use HasResourceActions;
 
+
     /**
      * Index interface.
      *
@@ -40,8 +41,14 @@ class ResultRouteSemiFinalStageController extends Controller
             ->header(trans('admin.index'))
             ->description(trans('admin.description'))
             ->row(function(Row $row) {
-                $row->column(6, $this->grid2());
-                $row->column(6, $this->grid());
+                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+                if($event) {
+                    $row->column(6, $this->grid2());
+                    $row->column(6, $this->grid());
+                } else {
+                    $row->column(6, $this->grid2());
+                    $row->column(6, $this->grid3());
+                }
             });
     }
 
@@ -96,12 +103,15 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     protected function grid()
     {
-
         $grid = new Grid(new ResultRouteSemiFinalStage);
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
 
         }
+        $grid->model()->where(function ($query) {
+            $query->has('event.result_final_stage');
+        });
+        $grid->column('event_id', __('Номер маршрута'))->editable();
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchResultSemiFinal);
         });
@@ -135,17 +145,7 @@ class ResultRouteSemiFinalStageController extends Controller
                 'male'    => 'Мужчина',
                 'female'    => 'Женщина',
             ]);
-
         });
-//        $grid->quickCreate(function (Grid\Tools\QuickCreate $create)  {
-//            $events = Event::where('active', '=', 1)->where('owner_id', '=', Admin::user()->id)->pluck('title','id');
-//            $create->select('event_id','Соревнование')->options($events);
-//            $create->integer('owner_id', Admin::user()->id)->default(Admin::user()->id)->style('display', 'None');
-//            $create->integer('final_route_id', 'Номер маршрута');
-//            $create->select('user_id', 'Участники')->options($this->getUsers()->toArray());
-//            $create->integer('amount_try_top', 'Кол-во попыток на топ');
-//            $create->integer('amount_try_zone', 'Кол-во попыток на зону');
-//        });
         return $grid;
     }
 
@@ -159,10 +159,9 @@ class ResultRouteSemiFinalStageController extends Controller
     {
         $grid = new Grid(new Event);
         if (!Admin::user()->isAdministrator()){
-            $grid->model()->where('owner_id', '=', Admin::user()->id);
+            $grid->model()->where('owner_id', '=', Admin::user()->id)->where('is_semifinal', '=', '1');
         }
-
-        $grid->actions(function ($actions) {
+        $grid->actions(function ($actions){
             $actions->disableDelete();
             $actions->disableEdit();
             $actions->disableView();
@@ -182,22 +181,21 @@ class ResultRouteSemiFinalStageController extends Controller
             $style = ['table-bordered','table-hover', 'table-striped'];
             $users_male = Participant::better_participants($model->id, 'male', 10);
             $users_female = Participant::better_participants($model->id, 'female', 10);
-            $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
-
-            $male = self::getUsersSorted($users_male, $fields, $model, 'semifinal');
-            $female = self::getUsersSorted($users_female, $fields, $model, 'semifinal');
+            $fields = ['firstname', 'id', 'category', 'active', 'team', 'city', 'email', 'year', 'lastname', 'skill', 'sport_category', 'email_verified_at', 'created_at', 'updated_at'];
+            $male = self::getUsersSorted($users_male, $fields, $model, 'semifinal', Admin::user()->id);
+            $female = self::getUsersSorted($users_female, $fields, $model, 'semifinal', Admin::user()->id);
             $final_all_users = array_merge($male, $female);
             $all_users = array_merge($male, $female);
-            foreach ($final_all_users as $index => $user){
+            foreach ($final_all_users as $index => $user) {
                 $fields = ['owner_id', 'event_id', 'user_id'];
                 $final_all_users[$index] = collect($user)->except($fields)->toArray();
             }
 
-            foreach ($all_users as $index => $user){
+            foreach ($all_users as $index => $user) {
                 $fields = ['gender', 'middlename'];
                 $all_users[$index] = collect($user)->except($fields)->toArray();
                 $final_result_stage = ResultSemiFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
-                if(!$final_result_stage){
+                if (!$final_result_stage) {
                     $final_result_stage = new ResultSemiFinalStage;
                 }
                 $final_result_stage->owner_id = $all_users[$index]['owner_id'];
@@ -210,7 +208,6 @@ class ResultRouteSemiFinalStageController extends Controller
                 $final_result_stage->place = $all_users[$index]['place'];
                 $final_result_stage->save();
             }
-
             $options = [
                 'responsive' => true,
                 'paging' => true,
@@ -224,6 +221,33 @@ class ResultRouteSemiFinalStageController extends Controller
             ];
             return new DataTable($headers, $final_all_users, $style, $options);
         });
+        $grid->column('active', 'Статус')->using([0 => 'Не активно', 1 => 'Активно'])->display(function ($title, $column) {
+            If ($this->active == 0) {
+                return $column->label('default');
+            } else {
+                return $column->label('success');
+            }
+        });
+        return $grid;
+    }
+
+    /**
+     * Make a grid builder.
+     *
+     * @return Grid
+     */
+    protected function grid3()
+    {
+        $grid = new Grid(new Event);
+        $grid->disableExport();
+        $grid->disableColumnSelector();
+        $grid->disableCreateButton();
+        $grid->disablePagination();
+        $grid->disablePerPageSelector();
+        $grid->disableBatchActions();
+        $grid->disableFilter();
+        $grid->disableActions();
+        $grid->setTitle('Нет активных соревнований');
         return $grid;
     }
 
@@ -269,7 +293,6 @@ class ResultRouteSemiFinalStageController extends Controller
         $form->hidden('amount_top', 'amount_try_zone');
         $form->display(trans('admin.created_at'));
         $form->display(trans('admin.updated_at'));
-
         $form->saving(function (Form $form) {
             if($form->amount_try_top > 0){
                 $form->amount_top  = 1;
@@ -303,7 +326,7 @@ class ResultRouteSemiFinalStageController extends Controller
      * @param $type
      * @return array
      */
-    public static function getUsersSorted($users, $fields, $model, $type): array
+    public static function getUsersSorted($users, $fields, $model, $type, $owner_id): array
     {
         if (count($users->toArray()) == 0){
             return [];
@@ -311,24 +334,31 @@ class ResultRouteSemiFinalStageController extends Controller
         $users_with_result = [];
         foreach ($users as $index => $user){
             if($type == 'final'){
-                $result_user = ResultRouteFinalStage::where('owner_id', '=', Admin::user()->id)
+                $result_user = ResultRouteFinalStage::where('owner_id', '=', $owner_id)
                     ->where('event_id', '=', $model->id)
                     ->where('user_id', '=', $user->id)
                     ->get();
+//                if($user->id == 45){
+//                    dd($result_user);
+//                }
+//                dd(112);
             } else {
-                $result_user = ResultRouteSemiFinalStage::where('owner_id', '=', Admin::user()->id)
+                $result_user = ResultRouteSemiFinalStage::where('owner_id', '=', $owner_id)
                     ->where('event_id', '=', $model->id)
                     ->where('user_id', '=', $user->id)
                     ->get();
+//                dd(2);
             }
-
+//            if($user->id == 50){
+//                dd($result_user);
+//            }
             $result = ResultRouteSemiFinalStage::merge_result_user_in_semifinal_stage($result_user);
 
-            if($result['amount_top'] != null && $result['amount_try_top'] != null && $result['amount_zone'] != null && $result['amount_try_zone'] != null){
+            if($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null){
                 $users_with_result[$index] = collect($user->toArray())->except($fields);
                 $users_with_result[$index]['result'] = $result;
                 $users_with_result[$index]['place'] = null;
-                $users_with_result[$index]['owner_id'] = Admin::user()->id;
+                $users_with_result[$index]['owner_id'] = $owner_id;
                 $users_with_result[$index]['user_id'] = $user->id;
                 $users_with_result[$index]['event_id'] = $model->id;
                 $users_with_result[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
@@ -339,7 +369,12 @@ class ResultRouteSemiFinalStageController extends Controller
             }
 
         }
-        $users_sorted = Participant::counting_final_place($model->id, $users_with_result);
+//        if($user->id == 45){
+//            dd($users_with_result);
+//        }
+        $users_sorted = Participant::counting_final_place($model->id, $users_with_result, $type);
+//        dd($users_sorted);
+        ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user){
             $fields = ['result'];
             $users_sorted[$index] = collect($user)->except($fields)->toArray();

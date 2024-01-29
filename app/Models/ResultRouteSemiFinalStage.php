@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Model;
 use stdClass;
 
@@ -11,7 +12,7 @@ class ResultRouteSemiFinalStage extends Model
 
     public function event()
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class)->where('active', '=', 1);
     }
 
     public function user()

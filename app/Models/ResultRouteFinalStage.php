@@ -8,6 +8,11 @@ class ResultRouteFinalStage extends Model
 {
     protected $table = 'result_route_final_stage';
 
+    public function event()
+    {
+        return $this->belongsTo(Event::class)->where('active', '=', 1);
+    }
+
     public static function count_route_in_final_stage($event_id, $toArrayString = false){
         $count_routes = ResultRouteFinalStage::where('event_id', '=', $event_id)->distinct()->get('final_route_id')->count();
         if($toArrayString){

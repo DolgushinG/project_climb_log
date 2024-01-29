@@ -60,6 +60,7 @@ class ResultRouteFinalSeeder extends Seeder
         }
         for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
             prepare_data_result_route_passed_with_owner($i, $i);
+            Event::refresh_final_points_all_participant_in_final($i, $i);
         }
 
     }
