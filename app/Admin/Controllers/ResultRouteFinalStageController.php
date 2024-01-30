@@ -109,11 +109,12 @@ class ResultRouteFinalStageController extends Controller
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
         $grid->model()->where(function ($query) {
-            $query->has('event.result_semifinal_stage');
+            $query->has('event.result_final_stage');
         });
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchResultFinal);
         });
+
         $events_title = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck('title','id')->toArray();
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         $grid->column('event_id','Соревнование')->select($events_title);
@@ -124,25 +125,19 @@ class ResultRouteFinalStageController extends Controller
         $grid->disableExport();
         $grid->disableColumnSelector();
         $grid->disableCreateButton();
-
         $grid->filter(function($filter){
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
             $ev = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck( 'title', 'id');
             $male_users_middlename = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', 6)->pluck('middlename','id')->toArray();
             $female_users_middlename = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', 6)->pluck('middlename','id')->toArray();
             $new = $male_users_middlename + $female_users_middlename;
-            // Remove the default id filter
             $filter->disableIdFilter();
-
-            // Add a column filter
             $filter->in('event.id', 'Соревнование')->checkbox(
                 $ev
             );
-
             $filter->in('user.id', 'Участник')->checkbox(
                 $new
             );
-
 //            // Add a column filter
             $filter->in('user.gender', 'Пол')->checkbox([
                 'male'    => 'Мужчина',
@@ -150,16 +145,6 @@ class ResultRouteFinalStageController extends Controller
             ]);
 
         });
-//        $grid->quickCreate(function (Grid\Tools\QuickCreate $create)  {
-//            $events = Event::where('active', '=', 1)->where('owner_id', '=', Admin::user()->id)->pluck('title','id');
-//            $event = Event::where('active', '=', 1)->where('owner_id', '=', Admin::user()->id)->first();
-//            $create->select('event_id','Соревнование')->options($events);
-//            $create->integer('owner_id', Admin::user()->id)->default(Admin::user()->id)->style('display', 'None');
-//            $create->integer('final_route_id', 'Номер маршрута');
-//            $create->select('user_id', 'Участники')->options($this->getUsersFinal($event->id));
-//            $create->integer('amount_try_top', 'Кол-во попыток на топ');
-//            $create->integer('amount_try_zone', 'Кол-во попыток на зону');
-//        });
         return $grid;
     }
 

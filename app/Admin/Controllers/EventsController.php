@@ -190,15 +190,13 @@ class EventsController extends Controller
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
             });
         $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
+//        $form->switch('active', 'Опубликовать сразу?');
         $form->switch('active', 'Опубликовать сразу?');
-//        $form->submitted(function (Form $form) {
-//            $form->ignore('settings');
-//        });
         $form->saving(function (Form $form) {
-            if ($form->active === "1") {
+            if ($form->active === "1" || $form->active === "on") {
                 $count = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->get();
                 if($count->isNotEmpty()){
-                    throw new \Exception('Только одно соревнование может быть активно');
+                    throw new \Exception('Только одно соревнование может быть опубликовано');
                 }
             }
             $count = 0;

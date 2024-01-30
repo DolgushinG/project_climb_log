@@ -144,6 +144,7 @@ return [
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',
+            'active_event' => 'У вас уже есть опубликованное соревнования',
         ],
     ],
 

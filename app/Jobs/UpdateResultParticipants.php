@@ -46,7 +46,6 @@ class UpdateResultParticipants implements ShouldQueue
             $points = 0;
             $routes_only_passed = array();
             foreach ($routes as $route) {
-
                 $user_model = ResultParticipant::where('event_id', '=', $this->event_id)
                     ->where('user_id', '=', $user)
                     ->where('route_id', '=', $route['route_id'])

@@ -59,7 +59,7 @@ class AdminRoleAndUsersSeeder extends Seeder
             array('user_id' => '3','permission_id' => '16','created_at' => NULL,'updated_at' => NULL)
         );
         $admin_role_users = array(
-            array('role_id' => '1','user_id' => '1','created_at' => NULL,'updated_at' => NULL),
+            array('role_id' => '1','user_id' => '100','created_at' => NULL,'updated_at' => NULL),
             array('role_id' => '2','user_id' => '1','created_at' => NULL,'updated_at' => NULL),
             array('role_id' => '2','user_id' => '2','created_at' => NULL,'updated_at' => NULL),
             array('role_id' => '2','user_id' => '3','created_at' => NULL,'updated_at' => NULL)

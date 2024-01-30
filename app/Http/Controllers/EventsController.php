@@ -149,7 +149,7 @@ class EventsController extends Controller
     public function sendResultParticipant(Request $request) {
         $user_id = $request->user_id;
         $participant_active = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
-        if ($participant_active->active){
+        if (!$participant_active){
             return response()->json(['success' => false, 'message' => 'ошибка внесение результатов'], 422);
         }
         $gender = strtolower(Auth::user()->gender($user_id));
@@ -254,7 +254,7 @@ class EventsController extends Controller
 
     public function listRoutesEvent(Request $request, $title) {
         $event = Event::where('title_eng', '=', $title)->first();
-        $grades = Grades::where('owner_id', '=', $event->owner_id)->get();
+        $grades = Grades::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
         $routes = [];
         $main_count = 1;
         foreach ($grades as $route){
