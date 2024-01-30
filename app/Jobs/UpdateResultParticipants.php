@@ -51,7 +51,7 @@ class UpdateResultParticipants implements ShouldQueue
                     ->where('route_id', '=', $route['route_id'])
                     ->first();
                 if ($user_model->attempt != 0) {
-                    $gender = User::gender($user);
+                    $gender = User::find($user)->gender;
                     $value_category = Grades::where('grade', '=', $user_model->grade)->where('owner_id', '=', $event->owner_id)->first()->value;
                     $coefficient = ResultParticipant::get_coefficient($this->event_id, $route['route_id'], $gender);
                     $value_route = (new \App\Models\ResultParticipant)->get_value_route($user_model->attempt, $value_category, $event->mode);

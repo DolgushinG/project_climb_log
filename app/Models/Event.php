@@ -87,13 +87,13 @@ class Event extends Model
             $points = 0;
             $routes_only_passed = array();
             foreach ($routes as $route) {
-
                 $user_model = ResultParticipant::where('event_id', '=', $event_id)
                     ->where('user_id', '=', $user)
                     ->where('route_id', '=', $route['route_id'])
                     ->first();
+                $gender = User::find($user)->gender;
+                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route['route_id'], $event->owner_id, $gender);
                 if($user_model->attempt != 0) {
-                    $gender = User::gender($user);
                     $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
                     $coefficient = ResultParticipant::get_coefficient($event_id, $route['route_id'], $gender);
                     $value_route = (new \App\Models\ResultParticipant)->get_value_route($user_model->attempt, $value_category, $event->mode);
@@ -102,6 +102,7 @@ class Event extends Model
                     $user_model->points = $point_route;
                     $routes_only_passed[] = $user_model;
                 }
+
             }
             if($format == 1){
                 $points = 0;

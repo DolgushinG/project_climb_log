@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminTablesSeeder::class,
             AdminRoleAndUsersSeeder::class,
+            FormatsSeeder::class,
             UserSeeder::class,
             SetsSeeder::class,
             ParticipantCategoriesSeeder::class,

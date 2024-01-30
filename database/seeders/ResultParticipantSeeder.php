@@ -52,10 +52,11 @@ class ResultParticipantSeeder extends Seeder
                     array('owner_id' => $owner_id,'user_id' => $i,'event_id' => $event_id,'route_id' => 30,'attempt' => rand(0,2),'grade' => '7C+'));
                 DB::table('result_participant')->insert($result_participant);
             }
-            Event::refresh_final_points_all_participant($event_id);
         }
         for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
             prepare_result_participant($i, $i);
+            Event::refresh_final_points_all_participant($i);
         }
+
     }
 }

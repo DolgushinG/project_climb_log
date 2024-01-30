@@ -152,7 +152,7 @@ class EventsController extends Controller
         if (!$participant_active){
             return response()->json(['success' => false, 'message' => 'ошибка внесение результатов'], 422);
         }
-        $gender = strtolower(Auth::user()->gender($user_id));
+        $gender = User::find($user_id)->gender;
         $format = Event::find($request->event_id)->mode;
         $data = array();
         foreach ($request->result as $result) {
@@ -176,22 +176,7 @@ class EventsController extends Controller
         $final_data = array();
         $final_data_only_passed_route = array();
         foreach ($data as $route){
-            $record = EventAndCoefficientRoute::where('event_id', '=', $route['event_id'])->where('route_id', '=', $route['route_id'])->first();
-            if ($record === null) {
-                $event_and_coefficient_route = new EventAndCoefficientRoute;
-            } else {
-                $event_and_coefficient_route = $record;
-            }
-            $coefficient = ResultParticipant::get_coefficient(intval($route['event_id']), intval($route['route_id']), $gender);
-            $event_and_coefficient_route->event_id = $route['event_id'];
-            $event_and_coefficient_route->route_id = $route['route_id'];
-            $event_and_coefficient_route->owner_id = $route['owner_id'];
-            if($gender === 'male') {
-                $event_and_coefficient_route->coefficient_male = $coefficient;
-            } else {
-                $event_and_coefficient_route->coefficient_female = $coefficient;
-            }
-            $event_and_coefficient_route->save();
+            (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
 
             $coefficient = ResultParticipant::get_coefficient($route['event_id'], $route['route_id'], $gender);
             #
