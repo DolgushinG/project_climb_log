@@ -8,14 +8,18 @@
     <div class="{{$viewClass['label']}}"><h4 class="pull-right">{{ $label }}</h4></div>
     <div class="{{$viewClass['field']}}">
         <div class="col-sm-12">
-            <label id="count_routes_label" class="form-control">30</label>
+            <label id="count_routes_label" class="form-control"></label>
         </div>
         <div id="has-many-{{$column}}" style="margin-top: 15px;">
             <table class="table table-has-many has-many-{{$column}}">
                 <thead>
                 <tr>
                     @foreach($headers as $header)
+                        @if($header === " remove ")
+                            <th></th>
+                        @else
                         <th>{{ $header }}</th>
+                        @endif
                     @endforeach
 
                     <th class="hidden"></th>
@@ -41,16 +45,16 @@
                             <td>{!! $field->setLabelClass(['hidden'])->setWidth(12, 0)->render() !!}</td>
                         @endforeach
 
-                        <td class="hidden">{!! $hidden !!}</td>
+{{--                        <td class="hidden">{!! $hidden !!}</td>--}}
 
-                        @if($options['allowDelete'])
-                            <td class="form-group">
-                                <div>
-                                    <div class="remove btn btn-warning btn-sm pull-right"><i
-                                            class="fa fa-trash">&nbsp;</i>{{ trans('admin.remove') }}</div>
-                                </div>
-                            </td>
-                        @endif
+{{--                        @if($options['allowDelete'])--}}
+{{--                            <td class="form-group">--}}
+{{--                                <div>--}}
+{{--                                    <div class="remove btn btn-warning btn-sm pull-right"><i--}}
+{{--                                            class="fa fa-trash">&nbsp;</i>{{ trans('admin.remove') }}</div>--}}
+{{--                                </div>--}}
+{{--                            </td>--}}
+{{--                        @endif--}}
                     </tr>
                 @endforeach
                 </tbody>
@@ -99,14 +103,14 @@
                 </tr>
             </template>
 
-            @if($options['allowCreate'])
-                <div class="form-group">
-                    <div class="{{$viewClass['field']}}">
-                        <div class="add btn btn-success btn-sm"><i class="fa fa-save"></i>&nbsp;{{ trans('admin.new') }}
-                        </div>
-                    </div>
-                </div>
-            @endif
+{{--            @if($options['allowCreate'])--}}
+{{--                <div class="form-group">--}}
+{{--                    <div class="{{$viewClass['field']}}">--}}
+{{--                        <div class="add btn btn-success btn-sm"><i class="fa fa-save"></i>&nbsp;{{ trans('admin.new') }}--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+{{--                </div>--}}
+{{--            @endif--}}
         </div>
     </div>
 </div>

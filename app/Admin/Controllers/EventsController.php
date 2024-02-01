@@ -172,7 +172,7 @@ class EventsController extends Controller
             $table->select('Категория')->options($grades)->readonly();
             $table->text('Кол-во')->width('50px');
             $table->text('Ценность')->width('50px');
-
+            $table->disableButton();
         })->value($routes);
 
         $form->text('title', 'Название')->placeholder('Введи название')->required();
