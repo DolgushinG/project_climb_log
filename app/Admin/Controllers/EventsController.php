@@ -7,7 +7,9 @@ use App\Exports\AllResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
+use App\Models\Format;
 use App\Models\Grades;
+use App\Models\ParticipantCategory;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -165,15 +167,16 @@ class EventsController extends Controller
         ')->options(['max' => 150, 'min' => 10, 'step' => 1, 'postfix' => ' маршрутов'])->default(30)->placeholder('Кол-во трасс')->required();
         $routes = $this->getRoutes();
 
-        $form->table('grade_and_amount', 'Категория и Кол-во', function ($table) {
+        $form->tablecustom('grade_and_amount', '', function ($table) {
             $grades = $this->getGrades();
             $table->select('Категория')->options($grades)->readonly();
             $table->text('Кол-во')->width('50px');
             $table->text('Ценность')->width('50px');
+
         })->value($routes);
 
         $form->text('title', 'Название')->placeholder('Введи название')->required();
-        $form->hidden('title_eng')->default('1');;
+        $form->hidden('title_eng')->default('1');
         $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
         $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
         $form->summernote('description', 'Описание')->placeholder('Описание')->required();
@@ -189,10 +192,31 @@ class EventsController extends Controller
                 $form->hidden('is_semifinal')->value(0);
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
             });
-        $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
+        $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
+            ->options([1 => 'Ручной перевод по необходимости',2 => 'Настройка авто перевода в другую категорию'])->when(1, function (Form $form) {
+            })->when(2, function (Form $form) {
+                $form->table('transfer_to_next_category', 'Категория и Кол-во', function ($table) {
+                    $categories = ParticipantCategory::all()->pluck( 'category', 'id');
+                    $table->select('Категория участника')->options($categories)->readonly();
+                    $table->select('От какой категории будет перевод')->options($this->getGrades())->width('50px');
+                    $table->number('Кол-во трасс для перевода')->width('50px');
+                })->value([
+                    ['Категория участника' => '1', 'От какой категории будет перевод' => '6C', 'Кол-во трасс для перевода' => 2],
+                    ['Категория участника' => '2', 'От какой категории будет перевод' => '7B', 'Кол-во трасс для перевода' => 2],
+                ]);
+            });
+
+        $formats = Format::all()->pluck('format', 'id');
+        $form->radio('mode','Настройка формата')
+            ->options($formats)->when(1, function (Form $form) {
+                $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
+            })->when(2, function (Form $form) {
+            });
+//        $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
 //        $form->switch('active', 'Опубликовать сразу?');
         $form->switch('active', 'Опубликовать сразу?');
         $form->saving(function (Form $form) {
+            dd($form);
             if ($form->active === "1" || $form->active === "on") {
                 $count = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->get();
                 if($count->isNotEmpty()){

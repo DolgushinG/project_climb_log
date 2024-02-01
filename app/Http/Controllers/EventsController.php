@@ -106,18 +106,21 @@ class EventsController extends Controller
         $stats->female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->get()->count();
         $categories = ParticipantCategory::all();
         foreach ($categories as $category){
-            $female_categories[$category->id] = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->where('category', '=', $category->id)->get()->count();
-            $male_categories[$category->id] = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->where('category', '=', $category->id)->get()->count();
+            $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
+            $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
+            $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('category_id', '=', $category->id)->get()->count();
+            $male_categories[$category->id] = Participant::whereIn('user_id', $user_male)->where('category_id', '=', $category->id)->get()->count();
         }
         $stats->female_categories = $female_categories;
         $stats->male_categories = $male_categories;
         $result = [];
         foreach ($final_results as $res) {
             $user = User::where('id', '=', $res['user_id'])->first();
+            $participant = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $res['user_id'])->first();
             $res['user_name'] = $user->firstname.' '.$user->lastname;
             $res['gender'] = $user->gender;
             $res['city'] = $user->city;
-            $res['category_id'] = $user->category;
+            $res['category_id'] = $participant->category_id;
             $result[] = $res;
         }
         return view('event.final_result', compact('event', 'result',  'categories', 'stats'));
@@ -129,6 +132,7 @@ class EventsController extends Controller
         $participant->event_id = $request->event_id;
         $participant->user_id = $request->user_id;
         $participant->number_set = $request->number_set;
+        $participant->category_id = $request->category;
         $participant->owner_id = Event::find($request->event_id)->owner_id;
         $participant->active = 0;
         $participant->save();
@@ -221,17 +225,17 @@ class EventsController extends Controller
     }
 
     public function insert_final_participant_result($route){
-        $record = Participant::where('event_id', '=', $route['event_id'])->where('user_id', '=', $route['user_id'])->first();
-        if ($record === null) {
-            $final_participant_result = new Participant;
-        } else {
-            $final_participant_result = $record;
-        }
+        $final_participant_result = Participant::where('event_id', '=', $route['event_id'])->where('user_id', '=', $route['user_id'])->first();
+//        if ($record === null) {
+//            $final_participant_result = new Participant;
+//        } else {
+//            $final_participant_result = $record;
+//        }
         $final_participant_result->points = $final_participant_result->point + $route['points'];
-        $final_participant_result->event_id = $route['event_id'];
-        $final_participant_result->user_id = $route['user_id'];
+//        $final_participant_result->event_id = $route['event_id'];
+//        $final_participant_result->user_id = $route['user_id'];
         $final_participant_result->user_place = Participant::get_places_participant_in_qualification($route['event_id'], $route['user_id'], true);
-        $final_participant_result->owner_id = $route['owner_id'];
+//        $final_participant_result->owner_id = $route['owner_id'];
         $final_participant_result->save();
     }
 

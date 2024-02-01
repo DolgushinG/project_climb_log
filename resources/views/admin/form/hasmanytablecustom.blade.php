@@ -7,6 +7,9 @@
 <div class="row">
     <div class="{{$viewClass['label']}}"><h4 class="pull-right">{{ $label }}</h4></div>
     <div class="{{$viewClass['field']}}">
+        <div class="col-sm-12">
+            <label id="count_routes_label" class="form-control">30</label>
+        </div>
         <div id="has-many-{{$column}}" style="margin-top: 15px;">
             <table class="table table-has-many has-many-{{$column}}">
                 <thead>
@@ -52,6 +55,36 @@
                 @endforeach
                 </tbody>
             </table>
+            <script>
+                const breakdownButton = document.querySelectorAll('.Кол-во');
+                let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {
+                    return currentSum + currentNumber
+                }, 0)
+                document.getElementById('count_routes_label').textContent = results
+                breakdownButton.forEach(function (btn) {
+                    btn.addEventListener('input', function () {
+                        let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {
+                            return currentSum + currentNumber
+                        }, 0)
+                        let count_routes = document.querySelector('#count_routes').value
+                        if (Number(count_routes) !== results) {
+                            document.getElementById('count_routes_label').style.background = 'red';
+                        } else {
+                            document.getElementById('count_routes_label').style.background = 'white';
+                        }
+                        document.getElementById('count_routes_label').textContent = results;
+
+                    });
+                });
+                // if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+                //     $(document).ready(function () {
+                //         {
+                //             const breakdownButton = document.querySelector('.input-group-addon');
+                //             breakdownButton.style.display = "None";
+                //         }
+                //     });
+                // }
+            </script>
             <template class="{{$column}}-tpl">
                 <tr class="has-many-{{$column}}-form fields-group">
 

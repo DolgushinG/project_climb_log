@@ -122,8 +122,9 @@ class Participant extends Model
 
     public static function better_participants($event_id, $gender, $amount_better){
         $participant_users_id = Participant::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
-        $users_id = User::whereIn('id', $participant_users_id)->where('gender', '=', $gender)->where('category', '=', 3)->pluck('id');
-        $participant_sort_id = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->take($amount_better)->sortByDesc('points')->pluck('user_id');
+        $users_id = User::whereIn('id', $participant_users_id)->where('gender', '=', $gender)->pluck('id');
+//        $users_id = User::whereIn('id', $participant_users_id)->where('gender', '=', $gender)->where('category', '=', 3)->pluck('id');
+        $participant_sort_id = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->sortByDesc('points')->take($amount_better)->pluck('user_id');
         return User::whereIn('id', $participant_sort_id)->get();
     }
 

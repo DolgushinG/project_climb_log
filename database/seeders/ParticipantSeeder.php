@@ -24,7 +24,7 @@ class ParticipantSeeder extends Seeder
         {
             $participants = array();
             for ($i = 1; $i <= $users; $i++) {
-                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $i, 'number_set' => rand(1, 6), 'active' => 1);
+                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'category_id' => $i, 'user_id' => $i, 'number_set' => rand(1, 6), 'active' => 1);
             }
             DB::table('participants')->insert($participants);
         }

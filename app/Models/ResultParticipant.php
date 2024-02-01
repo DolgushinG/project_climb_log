@@ -50,6 +50,34 @@ class ResultParticipant extends Model
         }
     }
 
+    public static function get_increase_category($user_model, $start_category){
+
+        $categories_for_icrease = array();
+        $categories = ['6A+','6B','6B+','6C', '6C+', '7A', '7A+', '7B', '7C', '7C+', '8A', '8A+', '8B+', '8C', '8C+', '9A'];
+
+        for($i = array_search($start_category, $categories);$i < count($categories);$i++){
+            $categories_for_icrease[] = $categories[$i];
+        }
+        $user = User::find($user_model->user_id);
+        switch ($user->category){
+            case "1":
+                if(in_array($user_model->grade, $categories_for_icrease)){
+                    if($user_model->attempt == 1 || $user_model->attempt == 2){
+                        $user->category = 2;
+                        $user->save();
+                    }
+                }
+                break;
+            case "2":
+                if(in_array($user_model->grade, $categories_for_icrease)){
+                    if($user_model->attempt == 1 || $user_model->attempt == 2){
+                        $user->category = 3;
+                        $user->save();
+                    }
+                }
+        }
+    }
+
     public static function participant_with_result($user_id, $event_id) {
         return 0 < count(ResultParticipant::where('event_id', '=', $event_id)
             ->where('user_id', '=', $user_id)

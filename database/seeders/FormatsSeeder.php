@@ -15,7 +15,7 @@ class FormatsSeeder extends Seeder
     public function run()
     {
         $formats = array(
-            ['format' => '10 лучших'],
+            ['format' => 'N лучших'],
             ['format' => 'Все трассы'],
         );
         DB::table('formats')->insert($formats);

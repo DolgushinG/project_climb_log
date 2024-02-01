@@ -92,6 +92,8 @@ class Event extends Model
                     ->where('route_id', '=', $route['route_id'])
                     ->first();
                 $gender = User::find($user)->gender;
+                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user)->get();
+                (new \App\Models\ResultParticipant)->get_increase_category($user_model, $participant->category);
                 (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route['route_id'], $event->owner_id, $gender);
                 if($user_model->attempt != 0) {
                     $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;

@@ -55,7 +55,7 @@
                                                             value="{{$category->id}}">{{$category->category}}</option>
                                                     @endforeach
                                                 </select>
-                                                <label for="floatingSelectCategory">Выбирая категорию</label>
+                                                <label for="floatingSelectCategory">Выбрать категорию</label>
                                             </div>
                                         @else
                                             <div class="form-floating mb-3">
@@ -73,7 +73,7 @@
                                                         @endif
                                                     @endforeach
                                                 </select>
-                                                <label for="floatingSelectCategory">Выбирая категорию</label>
+                                                <label for="floatingSelectCategory">Выбрать категорию</label>
                                             </div>
                                         @endif
                                         <a id="btn-participant" data-id="{{$event->id}}"
