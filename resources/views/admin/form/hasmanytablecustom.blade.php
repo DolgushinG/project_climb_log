@@ -8,7 +8,7 @@
     <div class="{{$viewClass['label']}}"><h4 class="pull-right">{{ $label }}</h4></div>
     <div class="{{$viewClass['field']}}">
         <div class="col-sm-12">
-            <label id="count_routes_label" class="form-control"></label>
+            <label id="count_routes_label" class="form-control">30</label>
         </div>
         <div id="has-many-{{$column}}" style="margin-top: 15px;">
             <table class="table table-has-many has-many-{{$column}}">
@@ -61,10 +61,6 @@
             </table>
             <script>
                 const breakdownButton = document.querySelectorAll('.Кол-во');
-                let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {
-                    return currentSum + currentNumber
-                }, 0)
-                document.getElementById('count_routes_label').textContent = results
                 breakdownButton.forEach(function (btn) {
                     btn.addEventListener('input', function () {
                         let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {
@@ -77,9 +73,9 @@
                             document.getElementById('count_routes_label').style.background = 'white';
                         }
                         document.getElementById('count_routes_label').textContent = results;
-
                     });
                 });
+
                 // if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
                 //     $(document).ready(function () {
                 //         {

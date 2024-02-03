@@ -192,20 +192,29 @@ class EventsController extends Controller
                 $form->hidden('is_semifinal')->value(0);
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
             });
+        $form->list('categories')->value(['Новички', 'Общий зачет'])->rules('required|min:2');
+
         $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
             ->options([1 => 'Ручной перевод по необходимости',2 => 'Настройка авто перевода в другую категорию'])->when(1, function (Form $form) {
             })->when(2, function (Form $form) {
+//                $form->table('transfer_to_next_category', 'Категория и Кол-во', function ($table) {
+//                    $categories = ParticipantCategory::all()->pluck( 'category', 'id');
+//                    $table->select('Категория участника')->options($categories)->readonly();
+//                    $table->select('От какой категории будет перевод')->options($this->getGrades())->width('30px');
+//                    $table->number('Кол-во трасс для перевода')->width('50px');
+//                })->value([
+//                    ['Категория участника' => '1', 'От какой категории будет перевод' => '6C', 'Кол-во трасс для перевода' => 2],
+//                    ['Категория участника' => '2', 'От какой категории будет перевод' => '7B', 'Кол-во трасс для перевода' => 2],
+//                ]);
                 $form->table('transfer_to_next_category', 'Категория и Кол-во', function ($table) {
                     $categories = ParticipantCategory::all()->pluck( 'category', 'id');
-                    $table->select('Категория участника')->options($categories)->readonly();
-                    $table->select('От какой категории будет перевод')->options($this->getGrades())->width('50px');
+                    $table->select('Категория участника')->options(['1'])->readonly();
+                    $table->select('От какой категории будет перевод')->options($this->getGrades())->width('30px');
                     $table->number('Кол-во трасс для перевода')->width('50px');
                 })->value([
                     ['Категория участника' => '1', 'От какой категории будет перевод' => '6C', 'Кол-во трасс для перевода' => 2],
-                    ['Категория участника' => '2', 'От какой категории будет перевод' => '7B', 'Кол-во трасс для перевода' => 2],
                 ]);
-            });
-
+            })->value(1);
         $formats = Format::all()->pluck('format', 'id');
         $form->radio('mode','Настройка формата')
             ->options($formats)->when(1, function (Form $form) {
@@ -215,8 +224,11 @@ class EventsController extends Controller
 //        $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
 //        $form->switch('active', 'Опубликовать сразу?');
         $form->switch('active', 'Опубликовать сразу?');
+        $form->submitted(function (Form $form) {
+            dd($form->categories);
+            $form->ignore('choice_transfer');
+        });
         $form->saving(function (Form $form) {
-            dd($form);
             if ($form->active === "1" || $form->active === "on") {
                 $count = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->get();
                 if($count->isNotEmpty()){

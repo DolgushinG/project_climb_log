@@ -24,7 +24,7 @@
                 </thead>
                 <tbody class="has-many-{{$column}}-forms">
                 @foreach($forms as $pk => $form)
-                    <tr class="has-many-{{$column}}-form fields-group count_routes_input">
+                    <tr class="has-many-{{$column}}-form fields-group">
 
                             <?php $hidden = ''; ?>
 
@@ -52,6 +52,7 @@
                 @endforeach
                 </tbody>
             </table>
+
             <template class="{{$column}}-tpl">
                 <tr class="has-many-{{$column}}-form fields-group">
 
@@ -80,3 +81,71 @@
 
 <hr style="margin-top: 0px;">
 
+<script>
+    const categories = [...document.querySelectorAll('input[name="categories[values][]"]')].map(input => input.value);
+    let inputs_for_categories = document.querySelector('.transfer_to_next_category.Категория.участника')
+
+    for(var i = 0; i < categories.length; i++) {
+        inputs_for_categories[i].text = categories[i]
+    }
+    let category = document.querySelectorAll('tbody[class="list-categories-table"]')
+    category.forEach(function (category) {
+        category.addEventListener('input', function () {
+            const categories = [...document.querySelectorAll('input[name="categories[values][]"]')].map(input => input.value);
+            let inputs_for_categories = document.querySelector('.transfer_to_next_category.Категория.участника')
+            Array.from(inputs_for_categories).forEach((option) => {
+                inputs_for_categories.removeChild(option)
+            })
+            for (var i = 0; i < categories.length; i++){
+                var opt = document.createElement('option');
+                opt.value = i;
+                opt.innerHTML = categories[i];
+                inputs_for_categories.appendChild(opt);
+            }
+        });
+    });
+    const radios = document.querySelectorAll('#choice_transfer');
+    radios.forEach(function (radio) {
+        radio.addEventListener('click', function () {
+            const categories = [...document.querySelectorAll('input[name="categories[values][]"]')].map(input => input.value);
+            let inputs_for_categories = document.querySelector('.transfer_to_next_category.Категория.участника')
+            Array.from(inputs_for_categories).forEach((option) => {
+                inputs_for_categories.removeChild(option)
+            })
+            for (var i = 0; i < categories.length; i++){
+                var opt = document.createElement('option');
+                opt.value = i;
+                opt.innerHTML = categories[i];
+                inputs_for_categories.appendChild(opt);
+            }
+        });
+    });
+    // let checkbox_choice_transfer = document.querySelector('input[name="choice_transfer"][value="2"]')
+    // checkbox_choice_transfer.addEventListener('click', function() {
+    //     console.log(111);
+    // });
+    // checkbox_choice_transfer.addEventListener('change', function() {
+    //     console.log(111);
+    // });
+    // checkbox_choice_transfer.addEventListener('input', function() {
+    //     console.log(111);
+    // });
+    // checkbox_choice_transfer.addEventListener('change', function () {
+    //     console.log(2222)
+    //    if(checkbox_choice_transfer.checked === true){
+    //        const categories = [...document.querySelectorAll('input[name="categories[values][]"]')].map(input => input.value);
+    //        let inputs_for_categories = document.querySelector('.transfer_to_next_category.Категория.участника')
+    //        for(var i = 0; i < categories.length; i++) {
+    //            inputs_for_categories[i].text = categories[i]
+    //        }
+    //    }
+    // })
+    // if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+    //     $(document).ready(function () {
+    //         {
+    //             const breakdownButton = document.querySelector('.input-group-addon');
+    //             breakdownButton.style.display = "None";
+    //         }
+    //     });
+    // }
+</script>

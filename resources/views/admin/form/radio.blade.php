@@ -11,7 +11,9 @@
             {!! $inline ? '<span class="icheck">' : '<div class="radio icheck">'  !!}
 
                 <label @if($inline)class="radio-inline"@endif>
+                    <div id="{{$name}}">
                     <input type="radio" name="{{$name}}" value="{{$option}}" class="minimal {{$class}}" {{ ($option == old($column, $value)) || ($value === null && in_array($label, $checked)) ?'checked':'' }} {!! $attributes !!} />&nbsp;{{$label}}&nbsp;&nbsp;
+                    </div>
                 </label>
 
             {!! $inline ? '</span>' :  '</div>' !!}
@@ -22,3 +24,4 @@
 
     </div>
 </div>
+

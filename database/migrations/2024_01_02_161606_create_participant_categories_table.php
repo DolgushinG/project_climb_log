@@ -15,6 +15,8 @@ class CreateParticipantCategoriesTable extends Migration
     {
         Schema::create('participant_categories', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('owner_id');
+            $table->integer('event_id');
             $table->string('category');
             $table->timestamps();
         });

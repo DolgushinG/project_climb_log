@@ -34,10 +34,12 @@ class CreateEventsTable extends Migration
             $table->string('subtitle');
             $table->string('link');
             $table->integer('is_semifinal');
+            $table->integer('categories');
             $table->integer('amount_routes_in_final');
             $table->integer('amount_routes_in_semifinal')->nullable();
             $table->json('transfer_to_next_category')->nullable();
             $table->integer('mode');
+            $table->integer('mode_amount_routes')->nullable();
             $table->boolean('active');
             $table->timestamps();
         });

@@ -15,6 +15,7 @@ class Event extends Model
 
     protected $casts = [
         'grade_and_amount' =>'json',
+        'transfer_to_next_category' =>'json',
     ];
     /**
      * The attributes that are mass assignable.
@@ -86,14 +87,35 @@ class Event extends Model
         foreach ($final_participant as $user) {
             $points = 0;
             $routes_only_passed = array();
+            $gender = User::find($user)->gender;
+            $user_and_increase_category = array();
             foreach ($routes as $route) {
                 $user_model = ResultParticipant::where('event_id', '=', $event_id)
                     ->where('user_id', '=', $user)
                     ->where('route_id', '=', $route['route_id'])
                     ->first();
-                $gender = User::find($user)->gender;
-                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user)->get();
-                (new \App\Models\ResultParticipant)->get_increase_category($user_model, $participant->category);
+                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_model->user_id)->first();
+                if($participant->category_id == "1"){
+                    $transfer_to_next_category = $event->transfer_to_next_category[0];
+                }
+                if($participant->category_id == "2"){
+                    $transfer_to_next_category = $event->transfer_to_next_category[1];
+                }
+
+                $is_increase_category = (new \App\Models\ResultParticipant)->get_increase_category($user_model, $transfer_to_next_category);
+
+                # Если предыдущий метод вернул массив с user_id и тем что участник пролез категорию после которой нужно переводить в другую
+                # Сохраняем их в масссив и ждем вхождение больше 1 или 2 раза для перевода
+                if($is_increase_category){
+                    if($user_and_increase_category != []){
+                        foreach ($user_and_increase_category as $index => $user){
+                            $user_and_increase_category['amount_pass_route_for_increase'] += 1;
+                        }
+                    } else {
+                        $user_and_increase_category = array('user_id' => $is_increase_category['user_id'],
+                            'next_category' => $is_increase_category['next_category'], 'amount_pass_route_for_increase' => 1);
+                    }
+                }
                 (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route['route_id'], $event->owner_id, $gender);
                 if($user_model->attempt != 0) {
                     $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
@@ -106,6 +128,15 @@ class Event extends Model
                 }
 
             }
+
+            if(isset($user_and_increase_category['amount_pass_route_for_increase'])){
+                if($user_and_increase_category['amount_pass_route_for_increase'] >= $transfer_to_next_category["Кол-во трасс для перевода"]){
+                    $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_and_increase_category['user_id'])->first();
+                    $participant->category_id = $user_and_increase_category['next_category'];
+                    $participant->save();
+                }
+            }
+            # Производим повырешение категории в рамках условий
             if($format == 1){
                 $points = 0;
                 usort($routes_only_passed, function($a, $b) {
@@ -122,10 +153,7 @@ class Event extends Model
             $final_participant_result->user_id = $user;
             $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user, true);
             $final_participant_result->save();
-
-
         }
-
     }
     public static function refresh_final_points_all_participant_in_semifinal($event_id, $owner_id) {
         $event = Event::find($event_id);

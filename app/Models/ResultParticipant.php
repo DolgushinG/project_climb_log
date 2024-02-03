@@ -50,32 +50,46 @@ class ResultParticipant extends Model
         }
     }
 
-    public static function get_increase_category($user_model, $start_category){
+    public static function get_increase_category($user_model, $format_transfer_category){
 
-        $categories_for_icrease = array();
+        $categories_for_increase = array();
         $categories = ['6A+','6B','6B+','6C', '6C+', '7A', '7A+', '7B', '7C', '7C+', '8A', '8A+', '8B+', '8C', '8C+', '9A'];
+        for($i = array_search($format_transfer_category["От какой категории будет перевод"], $categories);$i < count($categories);$i++){
+            $categories_for_increase[] = $categories[$i];
+        }
 
-        for($i = array_search($start_category, $categories);$i < count($categories);$i++){
-            $categories_for_icrease[] = $categories[$i];
-        }
-        $user = User::find($user_model->user_id);
-        switch ($user->category){
-            case "1":
-                if(in_array($user_model->grade, $categories_for_icrease)){
-                    if($user_model->attempt == 1 || $user_model->attempt == 2){
-                        $user->category = 2;
-                        $user->save();
+        switch ($format_transfer_category["Категория участника"]){
+                case "1":
+//                    if($user_model->grade == "6C"){
+//                        if($user_model->attempt == 1 || $user_model->attempt == 2){
+//                            dd(11);
+//                        }
+//                    }
+                    if(in_array($user_model->grade, $categories_for_increase)){
+
+                        if($user_model->attempt == 1 || $user_model->attempt == 2){
+                            return array('user_id' => $user_model->user_id, 'increase_category' => true, 'next_category' => "2");
+                        } else {
+                            return null;
+                        }
+
+                        }
+                    break;
+                case "2":
+//                    if($user_model->grade == "6C"){
+//                        if($user_model->attempt == 1 || $user_model->attempt == 2){
+//                            dd($user_model);
+//                        }
+//                    }
+                    if(in_array($user_model->grade, $categories_for_increase)){
+
+                        if($user_model->attempt == 1 || $user_model->attempt == 2){
+                            return array('user_id' => $user_model->user_id, 'increase_category' => true, 'next_category' => "3");
+                        } else {
+                            return null;
+                        }
                     }
-                }
-                break;
-            case "2":
-                if(in_array($user_model->grade, $categories_for_icrease)){
-                    if($user_model->attempt == 1 || $user_model->attempt == 2){
-                        $user->category = 3;
-                        $user->save();
-                    }
-                }
-        }
+            }
     }
 
     public static function participant_with_result($user_id, $event_id) {

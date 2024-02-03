@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
+use App\Models\Participant;
 use App\Models\ResultParticipant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -21,7 +22,7 @@ class ResultParticipantSeeder extends Seeder
             $count_user = ParticipantSeeder::USERS;
             for ($i = 1; $i <= $count_user; $i++){
 
-                $user_category = User::find($i)->category;
+                $user_category = Participant::where('user_id', '=', $i)->first()->category_id;
                 #Новички
                 if($user_category == "1"){
                     $route_pass_category_2 = 0;
