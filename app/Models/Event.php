@@ -16,6 +16,7 @@ class Event extends Model
     protected $casts = [
         'grade_and_amount' =>'json',
         'transfer_to_next_category' =>'json',
+        'categories' =>'json',
     ];
     /**
      * The attributes that are mass assignable.

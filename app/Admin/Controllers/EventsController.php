@@ -122,7 +122,9 @@ class EventsController extends Controller
      */
     protected function form()
     {
+
         $form = new Form(new Event);
+
         $form->tools(function (Form\Tools $tools) {
 
             // Disable `List` btn.
@@ -159,7 +161,7 @@ class EventsController extends Controller
         $form->time('end_time', 'Время окончания')->placeholder('Время окончания')->required();
         $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
         $form->file('document', 'Прикрепить документ')->placeholder('Прикрепить документ');
-        $form->image('image', 'Афиша')->placeholder('Афиша')->required();
+        $form->image('image', 'Афиша')->value('images/dada')->placeholder('Афиша')->required();
         $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
         $form->hidden('climbing_gym_name_eng')->default('1');
         $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
@@ -189,45 +191,30 @@ class EventsController extends Controller
                 $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->value(5);
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
             })->when(0, function (Form $form) {
-                $form->hidden('is_semifinal')->value(0);
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
-            });
-        $form->list('categories')->value(['Новички', 'Общий зачет'])->rules('required|min:2');
+                $form->hidden('is_semifinal')->value(0);
+            })->value(0)->required();
+        $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
 
         $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
             ->options([1 => 'Ручной перевод по необходимости',2 => 'Настройка авто перевода в другую категорию'])->when(1, function (Form $form) {
             })->when(2, function (Form $form) {
-//                $form->table('transfer_to_next_category', 'Категория и Кол-во', function ($table) {
-//                    $categories = ParticipantCategory::all()->pluck( 'category', 'id');
-//                    $table->select('Категория участника')->options($categories)->readonly();
-//                    $table->select('От какой категории будет перевод')->options($this->getGrades())->width('30px');
-//                    $table->number('Кол-во трасс для перевода')->width('50px');
-//                })->value([
-//                    ['Категория участника' => '1', 'От какой категории будет перевод' => '6C', 'Кол-во трасс для перевода' => 2],
-//                    ['Категория участника' => '2', 'От какой категории будет перевод' => '7B', 'Кол-во трасс для перевода' => 2],
-//                ]);
-                $form->table('transfer_to_next_category', 'Категория и Кол-во', function ($table) {
-                    $categories = ParticipantCategory::all()->pluck( 'category', 'id');
-                    $table->select('Категория участника')->options(['1'])->readonly();
+                $form->table('transfer_to_next_category', '', function ($table) use ($form){
+                    $table->select('Категория участника')->options($form->model()->categories)->readonly();
+                    $table->select('В какую категорию переводить')->options($form->model()->categories)->readonly();
                     $table->select('От какой категории будет перевод')->options($this->getGrades())->width('30px');
                     $table->number('Кол-во трасс для перевода')->width('50px');
-                })->value([
-                    ['Категория участника' => '1', 'От какой категории будет перевод' => '6C', 'Кол-во трасс для перевода' => 2],
-                ]);
-            })->value(1);
+                });
+            })->required();
         $formats = Format::all()->pluck('format', 'id');
         $form->radio('mode','Настройка формата')
             ->options($formats)->when(1, function (Form $form) {
                 $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
             })->when(2, function (Form $form) {
-            });
+            })->required();
 //        $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
 //        $form->switch('active', 'Опубликовать сразу?');
         $form->switch('active', 'Опубликовать сразу?');
-        $form->submitted(function (Form $form) {
-            dd($form->categories);
-            $form->ignore('choice_transfer');
-        });
         $form->saving(function (Form $form) {
             if ($form->active === "1" || $form->active === "on") {
                 $count = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->get();
