@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Admin\Controllers\ParticipantsController;
 use App\Models\Event;
 use App\Models\Participant;
+use App\Models\User;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,8 @@ class ParticipantSeeder extends Seeder
         {
             $participants = array();
             for ($i = 1; $i <= $users; $i++) {
-                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'category_id' => $i, 'user_id' => $i, 'number_set' => rand(1, 6), 'active' => 1);
+                $category_id = User::find($i)->category;
+                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'category_id' => $category_id, 'user_id' => $i, 'number_set' => rand(1, 6), 'active' => 1);
             }
             DB::table('participants')->insert($participants);
         }

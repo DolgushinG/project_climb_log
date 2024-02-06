@@ -95,28 +95,24 @@ class Event extends Model
                     ->where('user_id', '=', $user)
                     ->where('route_id', '=', $route['route_id'])
                     ->first();
-                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_model->user_id)->first();
-                if($participant->category_id == "1"){
-                    $transfer_to_next_category = $event->transfer_to_next_category[0];
-                }
-                if($participant->category_id == "2"){
-                    $transfer_to_next_category = $event->transfer_to_next_category[1];
-                }
 
-                $is_increase_category = (new \App\Models\ResultParticipant)->get_increase_category($user_model, $transfer_to_next_category);
 
                 # Если предыдущий метод вернул массив с user_id и тем что участник пролез категорию после которой нужно переводить в другую
                 # Сохраняем их в масссив и ждем вхождение больше 1 или 2 раза для перевода
-                if($is_increase_category){
-                    if($user_and_increase_category != []){
-                        foreach ($user_and_increase_category as $index => $user){
-                            $user_and_increase_category['amount_pass_route_for_increase'] += 1;
-                        }
-                    } else {
-                        $user_and_increase_category = array('user_id' => $is_increase_category['user_id'],
-                            'next_category' => $is_increase_category['next_category'], 'amount_pass_route_for_increase' => 1);
-                    }
-                }
+//                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_model->user_id)->first();
+//                foreach ($event->transfer_to_next_category as $value){
+//                    $is_increase_category = (new \App\Models\ResultParticipant)->get_increase_category($user_model, $value);
+//                    if($is_increase_category){
+//                        if($user_and_increase_category != []){
+//                            foreach ($user_and_increase_category as $index => $user){
+//                                $user_and_increase_category['amount_pass_route_for_increase'] += 1;
+//                            }
+//                        } else {
+//                            $user_and_increase_category = array('user_id' => $is_increase_category['user_id'],
+//                                'next_category' => $is_increase_category['next_category'], 'amount_pass_route_for_increase' => 1);
+//                        }
+//                    }
+//                }
                 (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route['route_id'], $event->owner_id, $gender);
                 if($user_model->attempt != 0) {
                     $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;

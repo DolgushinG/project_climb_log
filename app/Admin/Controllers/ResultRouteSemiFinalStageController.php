@@ -109,7 +109,7 @@ class ResultRouteSemiFinalStageController extends Controller
 
         }
         $grid->model()->where(function ($query) {
-            $query->has('event.result_final_stage');
+            $query->has('event.result_semifinal_stage');
         });
         $grid->column('event_id', __('Номер маршрута'))->editable();
         $grid->tools(function (Grid\Tools $tools) {

@@ -237,7 +237,7 @@ class AdminTablesSeeder extends Seeder
                 [
                     "name" => "Participants",
                     "slug" => "owner.participants",
-                    "http_method" => "GET",
+                    "http_method" => "GET,POST,PUT,PATCH,OPTIONS",
                     "http_path" => "/participants"
                 ],
                 [
@@ -385,7 +385,19 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "role_id" => 2,
+                    "permission_id" => 3
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 4
+                ],
+                [
+                    "role_id" => 2,
                     "permission_id" => 7
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 8
                 ],
                 [
                     "role_id" => 2,
@@ -398,6 +410,10 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 2,
                     "permission_id" => 13
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 15
                 ],
                 [
                     "role_id" => 2,

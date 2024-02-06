@@ -77,10 +77,10 @@ class EventFactory extends Factory
             ['Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 800],
         ];
 
-        $transfer_to_text_category = [
-            ['Категория участника' => '1', 'От какой категории будет перевод' => '6C', 'Кол-во трасс для перевода' => 2],
-            ['Категория участника' => '2', 'От какой категории будет перевод' => '7B', 'Кол-во трасс для перевода' => 2],
-        ];
+//        $transfer_to_text_category = [
+//            ['Категория участника' => '0', 'Кол-во трасс для перевода'=> '2','В какую категорию переводить' => '1', 'От какой категории будет перевод'=> '6C'],
+//            ['Категория участника' => '1', 'Кол-во трасс для перевода'=> '2','В какую категорию переводить' => '2', 'От какой категории будет перевод'=> '7B'],
+//        ];
 
 
 
@@ -100,7 +100,8 @@ class EventFactory extends Factory
             'link' => $this->faker->url(),
             'amount_routes_in_semifinal' => $this->faker->randomElement([4,5]),
             'amount_routes_in_final' => 4,
-            'transfer_to_next_category' => $transfer_to_text_category,
+            'categories' => $this->faker->randomElement([['Новичок', 'Общий зачет'], ['Новичок', 'Любители', 'Спортсмены']]),
+//            'transfer_to_next_category' => $transfer_to_text_category,
             'count_routes' => 30,
             'mode' => $this->faker->randomElement([1, 2]),
         ];

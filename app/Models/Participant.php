@@ -101,9 +101,15 @@ class Participant extends Model
         return $user_places;
     }
 
-    public static function participant_with_result($event_id, $gender)
+    public static function participant_with_result($event_id, $gender, $category_id=null)
     {
-        $active_participant = Participant::where('event_id', '=', $event_id)->where('active', '=', 1)->pluck('user_id')->toArray();
+
+        if($category_id){
+            $active_participant = Participant::where('event_id', '=', $event_id)->where('category_id', '=', $category_id)->where('active', '=', 1)->pluck('user_id')->toArray();
+        } else {
+            $active_participant = Participant::where('event_id', '=', $event_id)->where('active', '=', 1)->pluck('user_id')->toArray();
+        }
+
         if ($active_participant) {
             return count(User::whereIn('id', $active_participant)->where('gender', '=', $gender)->get()->toArray());
         } else {

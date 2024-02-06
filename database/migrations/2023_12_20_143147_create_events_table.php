@@ -35,7 +35,7 @@ class CreateEventsTable extends Migration
             $table->string('link');
             $table->integer('is_semifinal');
             $table->json('categories');
-            $table->integer('choice_transfer');
+            $table->integer('choice_transfer')->nullable();
             $table->integer('amount_routes_in_final');
             $table->integer('amount_routes_in_semifinal')->nullable();
             $table->json('transfer_to_next_category')->nullable();

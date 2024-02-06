@@ -2,9 +2,7 @@
 
 namespace App\Admin\Controllers;
 
-use App\Admin\CustomAction\ActionCsv;
 use App\Admin\CustomAction\ActionExport;
-use App\Admin\CustomAction\ActionOds;
 use App\Exceptions\ExportToCsv;
 use App\Exceptions\ExportToExcel;
 use App\Exceptions\ExportToOds;
@@ -43,20 +41,18 @@ class  ParticipantsController extends Controller
         return $content
             ->header(trans('admin.index'))
             ->description(trans('admin.description'))
-            ->body($this->grid());
-//            ->row(function (Row $row) {
-//                $events = Event::where('owner_id', '=', Admin::user()->id)->get();
-//                foreach ($events as $event){
-//                    $row->column(3, $event->title);
-//
-//                    $row->column(8, function (Column $column) {
-//                        $column->row($this->grid(1));
-//                    });
-//                }
-//
-//            });
-//
+            ->row(function(Row $row) {
+                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+                if($event) {
+                    $row->column(10, $this->grid());
+                    $row->column(10, $this->grid2());
 
+                } else {
+                    $row->column(10, $this->grid2());
+                    $row->column(10, $this->grid3());
+                }
+
+            });
     }
 
     /**
@@ -114,6 +110,10 @@ class  ParticipantsController extends Controller
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
+//        $grid->model()->where(function ($query) {
+//            $query->has('participant.event');
+//        });
+
         $grid->actions(function ($actions) {
             $actions->disableDelete();
             $actions->disableEdit();
@@ -125,22 +125,25 @@ class  ParticipantsController extends Controller
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
+        $grid->disablePagination();
+        $grid->disablePerPageSelector();
+        $grid->disableBatchActions();
+        $grid->disableFilter();
         $grid->column('title', 'Название')->expand(function ($model) {
             $headers = ['Участник','Пол','Город','Команда','Категория','Место','Сет','Баллы', 'Результаты'];
 
             $style = ['table-bordered','table-hover', 'table-striped'];
 
             $options = [
+                'responsive' => true,
                 'paging' => true,
                 'lengthChange' => true,
                 'searching' => true,
-                'ordering' => true,
+                'ordering' => false,
                 'info' => true,
                 'autoWidth' => true,
                 'deferRender' => true,
                 'processing' => true,
-//                'scrollX' => true,
-//                'scrollY' => true,
             ];
             $users_id = $model->participant()->where('owner_id', '=', Admin::user()->id)->pluck('user_id')->toArray();
             $users_point = $model->participant()->pluck('points','user_id')->toArray();
@@ -206,43 +209,36 @@ class  ParticipantsController extends Controller
             ]);
         });
 
-//
-//        $grid->column('user.gender', 'Фильтр по полу')->filter([
-//            'male' => 'Мужчины',
-//            'female' => 'Женщины',
-//        ]);
-////        $participant = Participant::where('owner_id', '=', Admin::user()->id)->pluck('user_id')->toArray();
-////        $grid->id('ID');
-//        $grid->disableCreateButton();
-//        $grid->disableActions();
-
-
-//        $grid->column('event.title', 'title')->expand(function ($model) {
-//
-//            $comments = $model->events()->get()->map(function ($comment) {
-//                return $comment->only(['id', 'content', 'created_at']);
-//            });
-//
-//            return new Table(['ID', 'content', 'release time'], $comments->toArray());
-//        });
-//        $grid->column('event.title', 'Название соревнования');
-//        $grid->column('set', 'Номер сета');
-//        $grid->column('user.year', 'Год рождения');
-//        $grid->column('user.firstname', 'Имя');
-//        $grid->column('user.lastname', 'Фамилия');
-//        $grid->column('user.age', 'Возраст');
-//        $grid->column('user.gender', 'Пол');
-//        $grid->column('user.city', 'Город');
-//        $grid->column('user.team', 'Команда');
-//        $grid->column('user.skill', 'Квалификация');
-//        $grid->column('user.sports_category', 'Спортивная категория');
-//        $grid->column('active', 'Внес результаты')->bool();
-//        $grid->created_at(trans('admin.created_at'));
-//        $grid->updated_at(trans('admin.updated_at'));
-
         return $grid;
     }
 
+
+    /**
+     * Make a grid builder.
+     *
+     * @return Grid
+     */
+    protected function grid2()
+    {
+        $grid = new Grid(new Participant);
+        if (!Admin::user()->isAdministrator()){
+            $grid->model()->where('owner_id', '=', Admin::user()->id);
+        }
+        $grid->model()->where(function ($query) {
+            $query->has('event.participant');
+        });
+        $grid->disableExport();
+        $grid->disableCreateButton();
+        $grid->disableColumnSelector();
+        $event_id = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first()->id;
+        $grid->column('user_id', __('Участник'))->select($this->getUsers($event_id)->toArray());;
+        $grid->column('category_id', 'Категория')->select($this->getUserCategory()->toArray());
+        $grid->column('number_set', 'Номер сета')->editable();
+        $grid->column('user_place', 'Место в квалификации');
+        $grid->column('points', 'Баллы');
+
+        return $grid;
+    }
     /**
      * Make a grid builder.
      *
@@ -344,5 +340,20 @@ class  ParticipantsController extends Controller
         ]);
     }
 
+    protected function getUsers($event_id)
+    {
+        $participant = Participant::where('owner_id', '=', Admin::user()->id)
+            ->where('event_id', '=', $event_id)
+            ->where('active', '=', 1)
+            ->pluck('user_id')->toArray();
+        return User::whereIn('id', $participant)->pluck('middlename', 'id');
+    }
+    protected function getUserCategory()
+    {
+        $participant = Participant::where('owner_id', '=', Admin::user()->id)
+            ->where('active', '=', 1)
+            ->pluck('category_id')->toArray();
+        return ParticipantCategory::whereIn('id', $participant)->pluck('category', 'id');
+    }
 
 }

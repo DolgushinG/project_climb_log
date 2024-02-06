@@ -169,8 +169,8 @@ class ResultRouteFinalStageController extends Controller
             $actions->append(new ActionExport($actions->getKey(), 'final', 'ods'));
         });
         $grid->disableExport();
-        $grid->disableColumnSelector();
         $grid->disableCreateButton();
+        $grid->disableColumnSelector();
         $grid->disablePagination();
         $grid->disablePerPageSelector();
         $grid->disableBatchActions();

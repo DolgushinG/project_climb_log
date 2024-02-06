@@ -22,18 +22,33 @@ class ResultParticipant extends Model
 
     protected $table = 'result_participant';
 
-    private static function counting_result($event_id, $route_id)
+    private static function counting_result($event_id, $route_id, $category_id=null)
     {
-        return count(ResultParticipant::where('event_id', '=', $event_id)
-            ->where('route_id', '=', $route_id)
-            ->whereNotIn('attempt',[0])
-            ->get()
-            ->toArray());
+        if($category_id){
+            return count(ResultParticipant::where('event_id', '=', $event_id)
+                ->where('route_id', '=', $route_id)
+                ->where('category_id', '=', $category_id)
+                ->whereNotIn('attempt',[0])
+                ->get()
+                ->toArray());
+        } else {
+            return count(ResultParticipant::where('event_id', '=', $event_id)
+                ->where('route_id', '=', $route_id)
+                ->whereNotIn('attempt',[0])
+                ->get()
+                ->toArray());
+        }
+
     }
 
-    public static function get_coefficient($event_id, $route_id, $gender){
-        $active_participant = Participant::participant_with_result($event_id, $gender);
-        $count_route_passed = self::counting_result($event_id, $route_id);
+    public static function get_coefficient($event_id, $route_id, $gender, $category_id=null){
+        if($category_id){
+            $active_participant = Participant::participant_with_result($event_id, $gender, $category_id);
+            $count_route_passed = self::counting_result($event_id, $route_id, $category_id);
+        } else {
+            $active_participant = Participant::participant_with_result($event_id, $gender);
+            $count_route_passed = self::counting_result($event_id, $route_id);
+        }
         if ($count_route_passed == 0) {
             $count_route_passed = 1;
         }
@@ -54,9 +69,10 @@ class ResultParticipant extends Model
 
         $categories_for_increase = array();
         $categories = ['6A+','6B','6B+','6C', '6C+', '7A', '7A+', '7B', '7C', '7C+', '8A', '8A+', '8B+', '8C', '8C+', '9A'];
-        for($i = array_search($format_transfer_category["От какой категории будет перевод"], $categories);$i < count($categories);$i++){
+        for($i = array_search($format_transfer_category["От какой категории будет перевод"], $categories); $i < count($categories);$i++){
             $categories_for_increase[] = $categories[$i];
         }
+//        ['Категория участника' => '0', 'Кол-во трасс для перевода'=> '2','В какую категорию переводить' => '1', 'От какой категории будет перевод'=> '6C'],
 
         switch ($format_transfer_category["Категория участника"]){
                 case "1":
@@ -68,6 +84,7 @@ class ResultParticipant extends Model
                     if(in_array($user_model->grade, $categories_for_increase)){
 
                         if($user_model->attempt == 1 || $user_model->attempt == 2){
+
                             return array('user_id' => $user_model->user_id, 'increase_category' => true, 'next_category' => "2");
                         } else {
                             return null;
