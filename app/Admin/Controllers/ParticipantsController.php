@@ -3,6 +3,8 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\CustomAction\ActionExport;
+use App\Admin\Extensions\Popover;
+use App\Admin\Extensions\Tools\UserGender;
 use App\Exceptions\ExportToCsv;
 use App\Exceptions\ExportToExcel;
 use App\Exceptions\ExportToOds;
@@ -12,12 +14,14 @@ use App\Models\Event;
 use App\Models\Participant;
 use App\Http\Controllers\Controller;
 use App\Models\ParticipantCategory;
+use App\Models\ResultSemiFinalStage;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
+use Encore\Admin\Grid\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
@@ -44,11 +48,10 @@ class  ParticipantsController extends Controller
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($event) {
-                    $row->column(10, $this->grid());
+                    $row->column(10, $this->grid4());
                     $row->column(10, $this->grid2());
-
                 } else {
-                    $row->column(10, $this->grid2());
+                    $row->column(10, $this->grid());
                     $row->column(10, $this->grid3());
                 }
 
@@ -110,9 +113,6 @@ class  ParticipantsController extends Controller
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
-//        $grid->model()->where(function ($query) {
-//            $query->has('participant.event');
-//        });
 
         $grid->actions(function ($actions) {
             $actions->disableDelete();
@@ -139,7 +139,7 @@ class  ParticipantsController extends Controller
                 'paging' => true,
                 'lengthChange' => true,
                 'searching' => true,
-                'ordering' => false,
+                'ordering' => true,
                 'info' => true,
                 'autoWidth' => true,
                 'deferRender' => true,
@@ -176,6 +176,7 @@ class  ParticipantsController extends Controller
                         }
                     $users[$index]['active'] = $status;
                 }
+//
             }
             return new DataTable($headers, $users->toArray(), $style, $options);
         });
@@ -196,13 +197,9 @@ class  ParticipantsController extends Controller
 
             return new Box('Соотношение мужчин и женщин', $doughnut);
         });
-        $grid->filter(function($filter){
-            $user_categories = ParticipantCategory::all()->pluck('category', 'id');
-            $sets = Set::where('owner_id', '=', Admin::user()->id)->get()->sortBy('number_set')->pluck('number_set', 'id');
-            // Remove the default id filter
-            $filter->disableIdFilter();
 
-            // Add a column filter
+        $grid->filter(function($filter){
+            $filter->disableIdFilter();
             $filter->in('active', 'Внесли результат')->checkbox([
                 1    => 'Те кто внес',
                 0    => 'Не внесли',
@@ -231,12 +228,32 @@ class  ParticipantsController extends Controller
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $event_id = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first()->id;
-        $grid->column('user_id', __('Участник'))->select($this->getUsers($event_id)->toArray());;
+
+        $grid->column('user.middlename', __('Участник'));
+        $grid->column('user.gender', __('Пол'))->display(function ($gender) {
+            return trans_choice('somewords.'.$gender, 10);
+        })->editable();
         $grid->column('category_id', 'Категория')->select($this->getUserCategory()->toArray());
         $grid->column('number_set', 'Номер сета')->editable();
-        $grid->column('user_place', 'Место в квалификации');
-        $grid->column('points', 'Баллы');
+        $grid->column('user_place', 'Место в квалификации')->sortable();
+        $grid->column('points', 'Баллы')->sortable();
+        $grid->column('active', 'Статус')->using([0 => 'Не внес', 1 => 'Внес'])->display(function ($title, $column) {
+            If ($this->active == 0) {
+                return $column->label('default');
+            } else {
+                return $column->label('success');
+            }
+        });
+        $grid->filter(function($filter){
+            $filter->disableIdFilter();
+            $filter->in('user.gender', 'Пол')->checkbox([
+                'male'    => 'Мужчина',
+                'female'    => 'Женщина',
+            ]);
+            $filter->in('number_set', 'Номер сета')->checkbox(Set::where('owner_id', '=', Admin::user()->id)->pluck('id', 'number_set'));
+            $filter->in('category_id', 'Категория')->checkbox($this->getUserCategory()->toArray());
 
+        });
         return $grid;
     }
     /**
@@ -256,6 +273,43 @@ class  ParticipantsController extends Controller
         $grid->disableFilter();
         $grid->disableActions();
         $grid->setTitle('Нет активных соревнований');
+        return $grid;
+    }
+
+    /**
+     * Make a grid builder.
+     *
+     * @return Grid
+     */
+    protected function grid4()
+    {
+        $grid = new Grid(new Event);
+        if (!Admin::user()->isAdministrator()){
+            $grid->model()->where('owner_id', '=', Admin::user()->id);
+        }
+        $grid->actions(function ($actions) {
+            $actions->disableDelete();
+            $actions->disableEdit();
+            $actions->disableView();
+            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'excel'));
+            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'csv'));
+            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'ods'));
+        });
+        $grid->disableExport();
+        $grid->disableCreateButton();
+        $grid->disableColumnSelector();
+        $grid->disablePagination();
+        $grid->disablePerPageSelector();
+        $grid->disableBatchActions();
+        $grid->disableFilter();
+        $grid->column('title', 'Название');
+        $grid->column('active', 'Статус')->using([0 => 'Не активно', 1 => 'Активно'])->display(function ($title, $column) {
+            If ($this->active == 0) {
+                return $column->label('default');
+            } else {
+                return $column->label('success');
+            }
+        });
         return $grid;
     }
 
