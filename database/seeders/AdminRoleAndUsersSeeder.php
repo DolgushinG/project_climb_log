@@ -37,6 +37,16 @@ class AdminRoleAndUsersSeeder extends Seeder
                 'updated_at' => NULL);
         }
         $admin_user_permissions = array(
+            array('user_id' => '1','permission_id' => '2','created_at' => NULL,'updated_at' => NULL),
+            array('user_id' => '1','permission_id' => '3','created_at' => NULL,'updated_at' => NULL),
+            array('user_id' => '1','permission_id' => '4','created_at' => NULL,'updated_at' => NULL),
+            array('user_id' => '1','permission_id' => '7','created_at' => NULL,'updated_at' => NULL),
+            array('user_id' => '1','permission_id' => '8','created_at' => NULL,'updated_at' => NULL),
+            array('user_id' => '1','permission_id' => '9','created_at' => NULL,'updated_at' => NULL),
+            array('user_id' => '1','permission_id' => '10','created_at' => NULL,'updated_at' => NULL),
+            array('user_id' => '1','permission_id' => '13','created_at' => NULL,'updated_at' => NULL),
+            array('user_id' => '1','permission_id' => '15','created_at' => NULL,'updated_at' => NULL),
+            array('user_id' => '1','permission_id' => '16','created_at' => NULL,'updated_at' => NULL),
             array('user_id' => '2','permission_id' => '2','created_at' => NULL,'updated_at' => NULL),
             array('user_id' => '2','permission_id' => '3','created_at' => NULL,'updated_at' => NULL),
             array('user_id' => '2','permission_id' => '4','created_at' => NULL,'updated_at' => NULL),
