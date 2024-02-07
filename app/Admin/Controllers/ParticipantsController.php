@@ -2,6 +2,8 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\ResultQualification\BatchResultQualification;
+use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\Extensions\Popover;
 use App\Admin\Extensions\Tools\UserGender;
@@ -48,7 +50,7 @@ class  ParticipantsController extends Controller
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($event) {
-                    $row->column(10, $this->grid4());
+//                    $row->column(10, $this->grid4());
                     $row->column(10, $this->grid2());
                 } else {
                     $row->column(10, $this->grid());
@@ -227,8 +229,9 @@ class  ParticipantsController extends Controller
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
-        $event_id = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first()->id;
-
+        $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new BatchResultQualification);
+        });
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
@@ -250,7 +253,7 @@ class  ParticipantsController extends Controller
                 'male'    => 'Мужчина',
                 'female'    => 'Женщина',
             ]);
-            $filter->in('number_set', 'Номер сета')->checkbox(Set::where('owner_id', '=', Admin::user()->id)->pluck('id', 'number_set'));
+//            $filter->in('number_set', 'Номер сета')->checkbox(Set::where('owner_id', '=', Admin::user()->id)->pluck('number_set'));
             $filter->in('category_id', 'Категория')->checkbox($this->getUserCategory()->toArray());
 
         });

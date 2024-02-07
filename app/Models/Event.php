@@ -89,14 +89,12 @@ class Event extends Model
             $points = 0;
             $routes_only_passed = array();
             $gender = User::find($user)->gender;
-            $user_and_increase_category = array();
+//            $user_and_increase_category = array();
             foreach ($routes as $route) {
                 $user_model = ResultParticipant::where('event_id', '=', $event_id)
                     ->where('user_id', '=', $user)
                     ->where('route_id', '=', $route['route_id'])
                     ->first();
-
-
                 # Если предыдущий метод вернул массив с user_id и тем что участник пролез категорию после которой нужно переводить в другую
                 # Сохраняем их в масссив и ждем вхождение больше 1 или 2 раза для перевода
 //                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_model->user_id)->first();
@@ -113,6 +111,14 @@ class Event extends Model
 //                        }
 //                    }
 //                }
+//                if(isset($user_and_increase_category['amount_pass_route_for_increase'])){
+//                    if($user_and_increase_category['amount_pass_route_for_increase'] >= $transfer_to_next_category["Кол-во трасс для перевода"]){
+//                        $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_and_increase_category['user_id'])->first();
+//                        $participant->category_id = $user_and_increase_category['next_category'];
+//                        $participant->save();
+//                    }
+//                }
+//                # Производим повырешение категории в рамках условий
                 (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route['route_id'], $event->owner_id, $gender);
                 if($user_model->attempt != 0) {
                     $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
@@ -125,15 +131,6 @@ class Event extends Model
                 }
 
             }
-
-            if(isset($user_and_increase_category['amount_pass_route_for_increase'])){
-                if($user_and_increase_category['amount_pass_route_for_increase'] >= $transfer_to_next_category["Кол-во трасс для перевода"]){
-                    $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_and_increase_category['user_id'])->first();
-                    $participant->category_id = $user_and_increase_category['next_category'];
-                    $participant->save();
-                }
-            }
-            # Производим повырешение категории в рамках условий
             if($format == 1){
                 $points = 0;
                 usort($routes_only_passed, function($a, $b) {
@@ -144,13 +141,20 @@ class Event extends Model
                     $points += $lastElem->points;
                 }
             }
+
             $final_participant_result = Participant::where('user_id', '=', $user)->where('event_id', '=', $event_id)->first();
             $final_participant_result->points = $points;
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $user;
-            $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user, true);
             $final_participant_result->save();
         }
+        foreach ($final_participant as $user) {
+            $place = Participant::get_places_participant_in_qualification($event_id, $user, true);
+            $final_participant_result = Participant::where('user_id', '=', $user)->where('event_id', '=', $event_id)->first();
+            $final_participant_result->user_place = $place;
+            $final_participant_result->save();
+        }
+
     }
     public static function refresh_final_points_all_participant_in_semifinal($event_id, $owner_id) {
         $event = Event::find($event_id);
@@ -162,8 +166,13 @@ class Event extends Model
     }
     public static function refresh_final_points_all_participant_in_final($event_id, $owner_id){
         $event = Event::find($event_id);
-        $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', 6);
-        $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', 6);
+        if($event->is_semifinal){
+            $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', 6);
+            $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', 6);
+        } else {
+            $users_female = Participant::better_participants($event_id, 'female', 6);
+            $users_male = Participant::better_participants($event_id, 'male', 6);
+        }
         $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
         ResultRouteSemiFinalStageController::getUsersSorted($users_female, $fields, $event, 'final', $owner_id);
         ResultRouteSemiFinalStageController::getUsersSorted($users_male, $fields, $event, 'final', $owner_id);

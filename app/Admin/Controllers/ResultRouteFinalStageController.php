@@ -178,20 +178,19 @@ class ResultRouteFinalStageController extends Controller
         $grid->column('title', 'Соревнование')->expand(function ($model) {
             $headers = ['Участник', 'Пол', 'Место с учетом квалы', 'Кол-во топ','Кол-во попыток на топ','Кол-во зон', 'Кол-во попыток на зону', ];
             $style = ['table-bordered','table-hover', 'table-striped'];
-
             if($model->is_semifinal){
                 $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($model->id, 'male', 6);
                 $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($model->id, 'female', 6);
-                $type = 'final';
+
+                $type = 'semifinal';
             } else {
                 $users_male = Participant::better_participants($model->id, 'male', 6);
                 $users_female = Participant::better_participants($model->id, 'female', 6);
-                $type = 'semifinal';
+                $type = 'final';
             }
             $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
             $male = ResultRouteSemiFinalStageController::getUsersSorted($users_male, $fields, $model, $type, Admin::user()->id);
             $female = ResultRouteSemiFinalStageController::getUsersSorted($users_female, $fields, $model, $type, Admin::user()->id);
-//            dd($male);
             $final_all_users = array_merge($male, $female);
             $all_users = array_merge($male, $female);
             foreach ($final_all_users as $index => $user){

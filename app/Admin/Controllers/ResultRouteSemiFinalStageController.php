@@ -338,22 +338,13 @@ class ResultRouteSemiFinalStageController extends Controller
                     ->where('event_id', '=', $model->id)
                     ->where('user_id', '=', $user->id)
                     ->get();
-//                if($user->id == 45){
-//                    dd($result_user);
-//                }
-//                dd(112);
             } else {
                 $result_user = ResultRouteSemiFinalStage::where('owner_id', '=', $owner_id)
                     ->where('event_id', '=', $model->id)
                     ->where('user_id', '=', $user->id)
                     ->get();
-//                dd(2);
             }
-//            if($user->id == 50){
-//                dd($result_user);
-//            }
             $result = ResultRouteSemiFinalStage::merge_result_user_in_semifinal_stage($result_user);
-
             if($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null){
                 $users_with_result[$index] = collect($user->toArray())->except($fields);
                 $users_with_result[$index]['result'] = $result;
@@ -373,7 +364,6 @@ class ResultRouteSemiFinalStageController extends Controller
 //            dd($users_with_result);
 //        }
         $users_sorted = Participant::counting_final_place($model->id, $users_with_result, $type);
-//        dd($users_sorted);
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user){
             $fields = ['result'];

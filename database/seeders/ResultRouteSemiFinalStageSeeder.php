@@ -56,7 +56,10 @@ class ResultRouteSemiFinalStageSeeder extends Seeder
         }
         for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
             prepare_with_owner($i, $i);
-            Event::refresh_final_points_all_participant_in_semifinal($i, $i);
+            $event = Event::find($i);
+            if($event->is_semifinal){
+                Event::refresh_final_points_all_participant_in_semifinal($i, $i);
+            }
         }
 
     }

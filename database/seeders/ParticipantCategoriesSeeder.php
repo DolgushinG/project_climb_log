@@ -17,11 +17,11 @@ class ParticipantCategoriesSeeder extends Seeder
     {
 
         for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
-            $participants = array(
-                ['owner_id' => $i,'event_id' => $i,'category' => 'Новички'],
-                ['owner_id' => $i,'event_id' => $i,'category' => 'Любители'],
-                ['owner_id' => $i,'event_id' => $i,'category' => 'Спортсмены'],
-            );
+            $event_categories = Event::find($i)->categories;
+            $participants = array();
+            foreach ($event_categories as $category){
+                $participants[] = ['owner_id' => $i,'event_id' => $i,'category' => $category];
+            }
             DB::table('participant_categories')->insert($participants);
         }
 

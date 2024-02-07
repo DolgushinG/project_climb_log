@@ -3,6 +3,7 @@
 namespace App\Exports\Sheets;
 
 use App\Models\Event;
+use App\Models\Participant;
 use App\Models\ResultParticipant;
 use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteSemiFinalStage;
@@ -138,7 +139,10 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     'Место',
                     'Участник(Фамилия Имя)',
                     'Баллы',
-                    'Сет'
+                    'Сет',
+                    'Кол-во пройденных трасс',
+                    'Кол-во FLASH',
+                    'Кол-во REDPOINT'
                 ];
                 $count = Event::find($this->event_id)->count_routes;
                 for($i = 1; $i <= $count; $i++){
@@ -200,11 +204,25 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             ->where('gender', '=', $this->gender)->get()->sortBy('user_place')->toArray();
         foreach ($users as $index => $user){
             $qualification_result = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+            $amount_passed_flash = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 1)->get()->count();
+            $amount_passed_redpoint = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 2)->get()->count();
+            $amount_passed_routes = $amount_passed_flash+$amount_passed_redpoint;
+            $place = Participant::get_places_participant_in_qualification($this->event_id, $user['id'], true);
+            $users[$index]['user_place'] = $place;
+            $users[$index]['amount_passed_routes'] = $amount_passed_routes;
+            $users[$index]['amount_passed_flash'] = $amount_passed_flash;
+            $users[$index]['amount_passed_redpoint'] = $amount_passed_redpoint;
             foreach ($qualification_result as $result){
-                if ($result->attempt == 1){
-                    $attempt = 'F';
-                } else {
-                    $attempt = 'R';
+                switch ($result->attempt){
+                    case 1:
+                        $attempt = 'F';
+                        break;
+                    case 2:
+                        $attempt = 'R';
+
+                        break;
+                    case 0:
+                        $attempt = '-';
                 }
                 $users[$index]['route_result_'.$result->route_id] = $attempt;
             }

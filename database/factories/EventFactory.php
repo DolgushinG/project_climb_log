@@ -82,8 +82,6 @@ class EventFactory extends Factory
 //            ['Категория участника' => '1', 'Кол-во трасс для перевода'=> '2','В какую категорию переводить' => '2', 'От какой категории будет перевод'=> '7B'],
 //        ];
 
-
-
         return [
             'image' => $this->faker->randomElement(['images/20231115_cea82537af86871a32344dcd5c6a23ba.jpeg','images/vT94mFyT9xU.jpg']),
             'active' => true,
@@ -104,6 +102,7 @@ class EventFactory extends Factory
 //            'transfer_to_next_category' => $transfer_to_text_category,
             'count_routes' => 30,
             'mode' => $this->faker->randomElement([1, 2]),
+            'mode_amount_routes' => 15,
         ];
     }
     public function withOwnerId($owner_id)
