@@ -49,7 +49,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
 
     public function startCell(): string
     {
-        if($this->type == 'Qualification'){
+        if ($this->type == 'Qualification'){
             return 'A1';
         } else {
             return 'A2';
@@ -193,7 +193,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         $users = User::query()
             ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
             ->where('participants.event_id', '=', $this->event_id)
-            ->where('users.category', '=', $this->category->id)
+            ->where('participants.category_id', '=', $this->category->id)
             ->select(
                 'users.id',
                 'participants.user_place',
@@ -228,7 +228,11 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             }
             $users[$index] = collect($users[$index])->except('id');
         }
-        return collect($users);
+        $users_need_sorted = collect($users)->toArray();
+        usort($users_need_sorted, function ($a, $b) {
+            return $a['user_place'] <=> $b['user_place'];
+        });
+        return collect($users_need_sorted);
 
     }
 
@@ -247,7 +251,11 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             )
             ->where('gender', '=', $this->gender)->get()->sortBy('place')->toArray();
         foreach ($users as $index => $user){
-            $final_result = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+            if($table == 'result_final_stage'){
+                $final_result = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+            } else {
+                $final_result = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+            }
             foreach ($final_result as $result){
                 $users[$index]['amount_top_'.$result->final_route_id] = $result->amount_top;
                 $users[$index]['amount_try_top_'.$result->final_route_id] = $result->amount_try_top;

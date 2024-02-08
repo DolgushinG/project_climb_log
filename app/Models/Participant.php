@@ -89,8 +89,9 @@ class Participant extends Model
     }
     public static function get_places_participant_in_qualification($event_id, $user_id, $get_place_user = false){
         $user = User::find($user_id);
-        $users_id = User::where('gender', '=', $user->gender)->where('category', '=', $user->category)->pluck('id');
-        $all_participant_event = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
+        $category_id = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first()->category_id;
+        $users_id = User::where('gender', '=', $user->gender)->pluck('id');
+        $all_participant_event = Participant::whereIn('user_id', $users_id)->where('category_id', '=', $category_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
         $user_places = array();
         foreach ($all_participant_event as $index => $user){
             $user_places[$user->user_id] = $index+1;

@@ -55,8 +55,8 @@ class UpdateResultParticipants implements ShouldQueue
                     $value_category = Grades::where('grade', '=', $user_model->grade)->where('owner_id', '=', $event->owner_id)->first()->value;
                     $coefficient = ResultParticipant::get_coefficient($this->event_id, $route['route_id'], $gender);
                     $value_route = (new \App\Models\ResultParticipant)->get_value_route($user_model->attempt, $value_category, $event->mode);
-                    $points += $coefficient + $value_route;
-                    $point_route = $coefficient + $value_route;
+                    $points += $coefficient * $value_route;
+                    $point_route = $coefficient * $value_route;
                     $user_model->points = $point_route;
                     $routes_only_passed[] = $user_model;
                 }

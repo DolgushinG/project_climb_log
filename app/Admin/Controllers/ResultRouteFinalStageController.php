@@ -119,7 +119,11 @@ class ResultRouteFinalStageController extends Controller
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         $grid->column('event_id','Соревнование')->select($events_title);
         $grid->column('final_route_id', __('Номер маршрута'))->editable();
-        $grid->column('user_id', __('Участник'))->select($this->getUsersFinal($event->id));
+        if($event->is_semifinal){
+            $grid->column('user_id', __('Участник'))->select($this->getUsersFinal($event->id));
+        } else {
+            $grid->column('user_id', __('Участник'))->select($this->getUsersPartipants($event->id));
+        }
         $grid->column('amount_try_top', __('Кол-во попыток на топ'))->editable();
         $grid->column('amount_try_zone', __('Кол-во попыток на зону'))->editable();
         $grid->disableExport();
@@ -128,8 +132,13 @@ class ResultRouteFinalStageController extends Controller
         $grid->filter(function($filter){
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
             $ev = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck( 'title', 'id');
-            $male_users_middlename = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', 6)->pluck('middlename','id')->toArray();
-            $female_users_middlename = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', 6)->pluck('middlename','id')->toArray();
+            if($event->is_semifinal){
+                $male_users_middlename = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', 6)->pluck('middlename','id')->toArray();
+                $female_users_middlename = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', 6)->pluck('middlename','id')->toArray();
+            } else {
+                $male_users_middlename = Participant::better_participants($event->id, 'male', 6)->pluck('middlename','id')->toArray();
+                $female_users_middlename = Participant::better_participants($event->id, 'female', 6)->pluck('middlename','id')->toArray();
+            }
             $new = $male_users_middlename + $female_users_middlename;
             $filter->disableIdFilter();
             $filter->in('event.id', 'Соревнование')->checkbox(
@@ -322,6 +331,13 @@ class ResultRouteFinalStageController extends Controller
     {
         $participants_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', 6);
         $participants_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', 6);
+        $new = $participants_female->merge($participants_male);
+        return User::whereIn('id', $new->pluck('id'))->pluck('middlename', 'id')->toArray();
+    }
+    protected function getUsersPartipants($event_id)
+    {
+        $participants_male = Participant::better_participants($event_id, 'male', 6);
+        $participants_female = Participant::better_participants($event_id, 'female', 6);
         $new = $participants_female->merge($participants_male);
         return User::whereIn('id', $new->pluck('id'))->pluck('middlename', 'id')->toArray();
     }

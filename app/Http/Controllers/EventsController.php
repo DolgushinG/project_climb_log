@@ -104,12 +104,13 @@ class EventsController extends Controller
         $male_categories = array();
         $stats->male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->get()->count();
         $stats->female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->get()->count();
-        $categories = ParticipantCategory::all();
+        $categories = ParticipantCategory::where('event_id', $event->id)->get();
+
         foreach ($categories as $category){
             $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
             $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
             $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('category_id', '=', $category->id)->get()->count();
-            $male_categories[$category->id] = Participant::whereIn('user_id', $user_male)->where('category_id', '=', $category->id)->get()->count();
+            $male_categories[$category->id] = Participant::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
         }
         $stats->female_categories = $female_categories;
         $stats->male_categories = $male_categories;
