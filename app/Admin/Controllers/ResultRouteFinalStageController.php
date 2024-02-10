@@ -203,11 +203,11 @@ class ResultRouteFinalStageController extends Controller
             $final_all_users = array_merge($male, $female);
             $all_users = array_merge($male, $female);
             foreach ($final_all_users as $index => $user){
-                $fields = ['owner_id', 'event_id', 'user_id'];
+                $fields = ['owner_id', 'event_id', 'user_id', 'avatar','telegram_id','nickname_telegram'];
                 $final_all_users[$index] = collect($user)->except($fields)->toArray();
             }
             foreach ($all_users as $index => $user){
-                $fields = ['gender', 'middlename'];
+                $fields = ['gender', 'middlename', 'avatar','telegram_id','nickname_telegram'];
                 $all_users[$index] = collect($user)->except($fields)->toArray();
 
                 $final_result_stage = ResultFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();

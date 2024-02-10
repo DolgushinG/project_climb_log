@@ -14,7 +14,11 @@
             <li class="nav-item dropdown pe-3">
 
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                    <img src="https://eu.ui-avatars.com/api/?name={{Auth()->user()->middlename}}&background=random&color=050202&font-size=0.33&size=150" alt="Profile" class="rounded-circle">
+                    @if(Auth()->user()->avatar)
+                        <img src="{{Auth()->user()->avatar}}" alt="Profile" class="rounded-circle">
+                    @else
+                        <img src="https://eu.ui-avatars.com/api/?name={{Auth()->user()->middlename}}&background=random&color=050202&font-size=0.33&size=150" alt="Profile" class="rounded-circle">
+                    @endif
                     <span class="d-none d-md-block dropdown-toggle ps-2">{{Auth()->user()->middlename}}</span>
                 </a><!-- End Profile Iamge Icon -->
 

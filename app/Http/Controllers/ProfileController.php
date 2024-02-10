@@ -35,8 +35,7 @@ class ProfileController extends Controller
     }
     public function getTabContentEdit() {
         $user = User::find(Auth()->user()->id);
-        $categories = ParticipantCategory::all();
-        return view('profile.edit-profile', compact(['user', 'categories']));
+        return view('profile.edit-profile', compact(['user']));
     }
 
     public function getTabContentEvents() {
@@ -71,69 +70,23 @@ class ProfileController extends Controller
     }
     public function editChanges(Request $request) {
         $messages = array(
-            'city.string' => 'Поле город нужно вводить только текст',
-            'city.required' => 'Поле город обязательно для заполнения',
-            'name.required' => 'Поле имя обязательно для заполнения',
-            'salaryHour.required' => 'Поле оплата за час обязательно для заполнения',
-            'salaryHour.numeric' => 'Поле оплата за час нужно вводить только цифры',
-            'salaryRouteBouldering.numeric' => 'Поле оплата за трассу боулдеринг нужно вводить только цифры',
-            'categories.required' => 'Укажите область накрутки, должна быть хотя бы одна область',
-            'salaryRouteRope.numeric' => 'Поле оплата за трассу трудность нужно вводить только цифры',
-            'contact.required' => 'Поле контакт для связи обязательно для заполнения',
+            'firstname.string' => 'Поле Имя нужно вводить только текст',
+            'lastname.string' => 'Поле Фамилия нужно вводить только текст',
         );
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'city_name' => 'required|string',
-            'contact' => 'required',
-            'salaryHour' => 'nullable|numeric',
-            'salaryRouteBouldering' => 'numeric|nullable',
-            'salaryRouteRope' => 'numeric|nullable',
-            'categories' => 'required',
+            'firstname' => 'string',
+            'lastname' => 'string',
         ],$messages);
         if ($validator->fails())
         {
             return response()->json(['error' => true,'message'=>$validator->errors()->all()],422);
         }
         $user = User::find(Auth()->user()->id);
-        $user->name = $request->name;
-        $user->description = $request->description;
-        $user->exp_level = $request->exp_level;
-        $user->educational_requirements = $request->educational_requirements;
-        $user->exp_local = $request->exp_local;
-        $user->exp_national = $request->exp_national;
-        $user->exp_international = $request->exp_international;
-        $user->salary_hour = $request->salaryHour;
-        $user->salary_route_rope = $request->salaryRouteRope;
-        $user->salary_route_bouldering = $request->salaryRouteBouldering;
-        $user->company = $request->company;
-        $user->grade = $request->grade;
-        $user->active_status = intval($request->active);
-        $user->other_city = intval($request->otherCity);
-        $user->city_name = $request->city_name;
-        $user->all_time = intval($request->allTime);
-        $user->telegram = $request->telegram;
-        $user->instagram = $request->instagram;
-        $user->contact = $request->contact;
-        $not = [];
-        foreach ($request->categories as $id => $x){
-            $not[] = $id;
-        }
-        $notCategories = Category::whereNotIn('id', $not)->get();
-        foreach($notCategories as $notCategory){
-            $match = UserAndCategories::where('user_id','=',$user->id)->where('category_id','=',$notCategory->id)->get()->count();
-            if($match) {
-                UserAndCategories::where('user_id','=',$user->id)->where('category_id','=',$notCategory->id)->delete();
-            }
-        }
-        foreach($request->categories as $id => $x){
-            $userAndCategory = new UserAndCategories;
-            $UserAndCategories = UserAndCategories::where('user_id','=',$user->id)->where('category_id','=',$id)->get()->count();
-            if ($UserAndCategories === 0) {
-                $userAndCategory->user_id = $user->id;
-                $userAndCategory->category_id = $id;
-                $userAndCategory->save();
-            }
-        }
+        $user->firstname = $request->firstname;
+        $user->lastname = $request->lastname;
+        $user->city = $request->city;
+        $user->gender = $request->gender;
+        $user->team = $request->team;
         if ($user->save()) {
             return response()->json(['success' => true, 'message' => 'Успешно сохранено'], 200);
         } else {

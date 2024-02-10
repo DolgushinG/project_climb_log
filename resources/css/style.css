@@ -36,6 +36,25 @@
 .button-desktop-fixed{
     width: 33%;
 }
+.btn-edit-change{
+    background-color: green!important;
+    color: white!important;
+    margin-top: 32px;
+    width: 100%;
+    font-family: inherit;
+}
+
+.btn-failed-change{
+    background-color: rgba(169, 0, 0, 0.92) !important;
+    color: white!important;
+    margin-top: 32px;
+    width: 100%;
+    font-family: inherit;
+}
+.btn-save-change:hover{
+    background-color: #0054a8;
+
+}
 
 body {
   font-family: "Open Sans", sans-serif;

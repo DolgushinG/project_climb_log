@@ -13,15 +13,15 @@
 
                     <div class="card">
                         <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
-                            @if ($user->photo === null)
+                            @if ($user->avatar === null)
                                 <img
                                     src="https://eu.ui-avatars.com/api/?name={{ $user->middlename }}&background=random&color=050202&font-size=0.33&size=150"
                                     alt="Profile" class="rounded-circle">
                             @else
-                                <img src="storage/{{$user->photo}}" alt="user avatar">
+                                <img src="{{$user->avatar}}" class="rounded-circle" alt="user avatar">
                             @endif
                             <h2>{{$user->middlename}}</h2>
-                            <h3>{{$user->city}}</h3>
+                            <h3>{{$user->city}} </h3>
                             @if ($user->team === null)
                                 <h3>Команда не указана</h3>
                             @else

@@ -29,6 +29,13 @@ class User extends Authenticatable
         'team',
         'email',
         'password',
+        'avatar',
+        'telegram_id',
+        'yandex_id',
+        'vk_id',
+        'nickname_telegram',
+        'nickname_yandex',
+        'nickname_vk',
     ];
 
     /**

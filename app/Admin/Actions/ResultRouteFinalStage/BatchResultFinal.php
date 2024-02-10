@@ -3,6 +3,7 @@
 namespace App\Admin\Actions\ResultRouteFinalStage;
 
 use App\Models\Event;
+use App\Models\Participant;
 use App\Models\ResultSemiFinalStage;
 use Encore\Admin\Actions\Action;
 use Encore\Admin\Actions\BatchAction;
@@ -50,16 +51,21 @@ class BatchResultFinal extends Action
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', 6);
-        $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', 6);
+        if($event->is_semifinal){
+            $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', 6);
+            $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', 6);
+        } else {
+            $users_male = Participant::better_participants($event->id, 'male', 6);
+            $users_female = Participant::better_participants($event->id, 'female', 6);
+        }
         $merged_users = $users_male->merge($users_female);
         $result = $merged_users->pluck( 'middlename','id');
         $this->select('user_id', 'Участник')->options($result);
         $this->hidden('event_id', '')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_final; $i++){
             $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
-            $this->integer('amount_try_top_'.$i, 'Попытки на топ')->value($i);
-            $this->integer('amount_try_zone_'.$i, 'Попытки на зону')->value($i);
+            $this->integer('amount_try_top_'.$i, 'Попытки на топ');
+            $this->integer('amount_try_zone_'.$i, 'Попытки на зону');
         }
 
     }

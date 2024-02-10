@@ -37,51 +37,50 @@ function getProfile(tab, id='#tabContent') {
     });
 }
 //
-// $(document).ready(function () {
-//     $.ajaxSetup({
-//         headers: {
-//             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-//         }
-//     });
-//     $(document).on('click', '#saveChanges', function (e) {
-//         let btn_saveChanges = $('#saveChanges')
-//         let data = $("#editForm").serialize();
-//         e.preventDefault();
-//         let tab = 'Edit';
-//         $.ajax({
-//             type: 'POST',
-//             url: 'editChanges',
-//             data: data,
-//             success: function (data) {
-//                 btn_saveChanges.removeClass('btn-save-change')
-//                 btn_saveChanges.addClass('btn-edit-change')
-//                 btn_saveChanges.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-//                     '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
-//                 setTimeout(function () {
-//                     btn_saveChanges.text(data.message)
-//                 }, 3000);
-//                 setTimeout(function () {
-//                     getProfile('Sidebar', '#sidebar');
-//                     getProfile(tab);
-//                 }, 4000);
-//             },
-//             error: function (xhr, status, error) {
-//                 btn_saveChanges.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-//                     '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
-//                 setTimeout(function () {
-//                     btn_saveChanges.removeClass('btn-save-change')
-//                     btn_saveChanges.addClass('btn-failed-change')
-//                     btn_saveChanges.text(xhr.responseJSON.message[0])
-//                 }, 3000);
-//                 setTimeout(function () {
-//                     btn_saveChanges.removeClass('btn-failed-change')
-//                     btn_saveChanges.addClass('btn-save-change')
-//                     btn_saveChanges.text('Cохранить')
-//                 }, 6000);
-//             }
-//         });
-//     });
-// });
+$(document).ready(function () {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $(document).on('click', '#saveChanges', function (e) {
+        let btn_saveChanges = $('#saveChanges')
+        let data = $("#editForm").serialize();
+        e.preventDefault();
+        let tab = 'Overview';
+        $.ajax({
+            type: 'POST',
+            url: 'editChanges',
+            data: data,
+            success: function (data) {
+                btn_saveChanges.removeClass('btn-save-change')
+                btn_saveChanges.addClass('btn-edit-change')
+                btn_saveChanges.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+                    '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+                setTimeout(function () {
+                    btn_saveChanges.text(data.message)
+                }, 3000);
+                setTimeout(function () {
+                    getProfile(tab);
+                }, 4000);
+            },
+            error: function (xhr, status, error) {
+                btn_saveChanges.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+                    '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+                setTimeout(function () {
+                    btn_saveChanges.removeClass('btn-save-change')
+                    btn_saveChanges.addClass('btn-failed-change')
+                    btn_saveChanges.text(xhr.responseJSON.message[0])
+                }, 3000);
+                setTimeout(function () {
+                    btn_saveChanges.removeClass('btn-failed-change')
+                    btn_saveChanges.addClass('btn-save-change')
+                    btn_saveChanges.text('Cохранить')
+                }, 6000);
+            }
+        });
+    });
+});
 // var $modal = $('#modal');
 // var image = document.getElementById('image');
 // var cropper;

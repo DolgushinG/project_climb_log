@@ -184,7 +184,6 @@ class EventsController extends Controller
             (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
 
             $coefficient = ResultParticipant::get_coefficient($route['event_id'], $route['route_id'], $gender);
-            #
             # Варианты форматов подсчета баллов
             $value_category = Grades::where('grade','=',$route['grade'])->where('owner_id','=', $request->owner_id)->first()->value;
             $value_route = (new \App\Models\ResultParticipant)->get_value_route($route['attempt'], $value_category, $format);
@@ -212,9 +211,6 @@ class EventsController extends Controller
             $final_data[$index] = collect($data)->except('points')->toArray();
         }
         $result = ResultParticipant::insert($final_data);
-        $participant = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
-        $participant->active = 1;
-        $participant->save();
 
         UpdateResultParticipants::dispatch($request->event_id);
         if ($result) {

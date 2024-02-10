@@ -61,6 +61,9 @@ class UpdateResultParticipants implements ShouldQueue
                     $routes_only_passed[] = $user_model;
                 }
             }
+            if($user == 123){
+               dd($routes_only_passed);
+            }
             if ($format == 1) {
                 $points = 0;
                 usort($routes_only_passed, function ($a, $b) {
@@ -77,6 +80,10 @@ class UpdateResultParticipants implements ShouldQueue
             $final_participant_result->user_id = $user;
             $final_participant_result->user_place = Participant::get_places_participant_in_qualification($this->event_id, $user, true);
             $final_participant_result->save();
+
+            $participant = Participant::where('user_id', '=', $user)->where('event_id', '=', $this->event_id)->first();
+            $participant->active = 1;
+            $participant->save();
         }
     }
 }

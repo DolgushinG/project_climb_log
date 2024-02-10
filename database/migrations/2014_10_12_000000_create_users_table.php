@@ -15,19 +15,26 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('firstname');
+            $table->string('firstname')->nullable();
             $table->string('middlename');
-            $table->string('lastname');
-            $table->string('gender');
-            $table->string('year');
-            $table->string('city');
-            $table->string('team');
+            $table->string('lastname')->nullable();
+            $table->string('avatar')->nullable();
+            $table->string('gender')->nullable();
+            $table->string('year')->nullable();
+            $table->string('city')->nullable();
+            $table->string('team')->nullable();
+            $table->unsignedBigInteger('telegram_id')->nullable();
+            $table->unsignedBigInteger('vk_id')->nullable();
+            $table->unsignedBigInteger('yandex_id')->nullable();
+            $table->string('nickname_telegram')->nullable();
+            $table->string('nickname_yandex')->nullable();
+            $table->string('nickname_vk')->nullable();
             $table->string('category')->nullable();
             $table->string('skill')->nullable();
             $table->string('sport_category')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
