@@ -1,8 +1,5 @@
 @extends('layouts.main_page.app')
 @section('content')
-    <script src="https://unpkg.com/@vkid/sdk@latest/dist-sdk/umd/index.js"></script>
-    <script src="https://yastatic.net/s3/passport-sdk/autofill/v1/sdk-suggest-with-polyfills-latest.js"></script>
-    <script src="https://yastatic.net/s3/passport-sdk/autofill/v1/sdk-suggest-token-with-polyfills-latest.js"></script>
     @guest
         <main id="main" class="main">
             <div class="container">

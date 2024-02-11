@@ -29,6 +29,18 @@
                                         @endif
 
                                     @else
+                                        @if(!Auth::user()->gender)
+                                            <div class="form-floating mb-3">
+                                                <select class="form-select" id="floatingSelectGender"
+                                                        aria-label="Floating label select example" required>
+                                                    <option selected disabled value="">Отметить пол
+                                                    </option>
+                                                        <option value="male">M</option>
+                                                        <option value="female">Ж</option>
+                                                </select>
+                                                <label for="floatingSelectGender">Отметить пол</label>
+                                            </div>
+                                        @endif
                                         <div class="form-floating mb-3">
                                             <select class="form-select" id="floatingSelect"
                                                     aria-label="Floating label select example" required>

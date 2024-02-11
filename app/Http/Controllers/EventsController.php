@@ -128,7 +128,6 @@ class EventsController extends Controller
     }
 
     public function store(StoreRequest $request) {
-
         $participant = new Participant;
         $participant->event_id = $request->event_id;
         $participant->user_id = $request->user_id;
@@ -141,6 +140,7 @@ class EventsController extends Controller
         if($request->category){
             $user = User::find($request->user_id);
             $user->category = $request->category;
+            $user->gender = $request->gender;
             $user->save();
         }
 

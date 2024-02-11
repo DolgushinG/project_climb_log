@@ -3,7 +3,7 @@
         <div class="d-flex align-items-center justify-content-between">
             <a href="{{route('main')}}" class="logo d-flex align-items-center">
                 <img src="{{asset('storage/img/logo.png')}}" alt="">
-                <span class="d-none d-lg-block">Climb Events</span>
+                <span class="d-none d-lg-block">Climbing Events</span>
             </a>
 {{--            <i class="bi bi-list toggle-sidebar-btn"></i>--}}
         </div><!-- End Logo -->
@@ -47,11 +47,10 @@
                     </li>
                     <li>
                     @if(Auth::check())
-                            <i class="fa fa-user"></i>
-                            <a class="dropdown-item d-flex align-items-center" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('frm-logout').submit();">Выйти</a>
-                            <form id="frm-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                {{ csrf_field() }}
-                            </form>
+                        <a class="dropdown-item d-flex align-items-center" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('frm-logout').submit();">Выйти</a>
+                        <form id="frm-logout" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            {{ csrf_field() }}
+                        </form>
                     @endif
                     </li>
 

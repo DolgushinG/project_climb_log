@@ -7,6 +7,7 @@ $(document).on('click','#btn-participant', function(e) {
 
     var value = document.getElementById("floatingSelect").value
     var category_value = document.getElementById("floatingSelectCategory").value
+    var gender_value = document.getElementById("floatingSelectGender").value
     let button = $('#btn-participant')
     let event_id = document.getElementById('btn-participant').getAttribute('data-id')
     let event_title = document.getElementById('btn-participant').getAttribute('data-title')
@@ -15,7 +16,7 @@ $(document).on('click','#btn-participant', function(e) {
     $.ajax({
         type: 'POST',
         url: '/takePart',
-        data: {'number_set': value, 'event_id': event_id, 'user_id': user_id, 'category': category_value},
+        data: {'number_set': value, 'event_id': event_id, 'user_id': user_id, 'category': category_value, 'gender': gender_value},
         success: function(xhr, status, error) {
             // button.removeClass('btn-save-change')
             // button.addClass('btn-edit-change')

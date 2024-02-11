@@ -12,10 +12,12 @@
         <div class="col-lg-3 col-md-4 label">Город</div>
         <div class="col-lg-9 col-md-8">{{$user->city}}</div>
     </div>
+    @if($user->gender ?? null)
     <div class="row">
         <div class="col-lg-3 col-md-4 label">Пол</div>
         <div class="col-lg-9 col-md-8">@lang('somewords.'.$user->gender)</div>
     </div>
+    @endif
     @if(!$user->telegram_id)
     <div class="row">
         <div class="col-lg-3 col-md-4 label">Email</div>
