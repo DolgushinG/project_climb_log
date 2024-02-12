@@ -17,8 +17,13 @@
                                             <h5 class="card-title text-center pb-0 fs-4">Войти в аккаунт</h5>
                                             <p class="text-center small">Каждый сервис это уникальный аккаунт </p>
                                         </div>
-                                        <div class="col-12" style="text-align: center">
-                                            {!! Socialite::driver('telegram')->getButton() !!}
+                                        <div class="pt-4 pb-2">
+                                            <div class="col-12" style="text-align: center">
+                                                <a href="/auth/telegram/redirect" class="btn btn-primary w-100" type="button">
+                                                    <i class="fa fa-telegram" aria-hidden="true"></i> Войти через Telegram
+                                                </a>
+    {{--                                            {!! Socialite::driver('telegram')->getButton() !!}--}}
+                                            </div>
                                         </div>
                                         <div class="col-12">
                                             <a href="/auth/vkontakte/redirect" class="btn btn-primary w-100" type="button">

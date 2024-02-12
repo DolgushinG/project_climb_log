@@ -91,13 +91,13 @@ class EventsController extends Controller
             }
             $index++;
         }
-        $categories = ParticipantCategory::all();
+        $categories = ParticipantCategory::all()->toArray();
         return view('event.participants', compact('event', 'participants', 'categories'));
     }
 
     public function get_final_results(Request $request, $climbing_gym, $title){
         $event = Event::where('title_eng', '=', $title)->first();
-        $final_results = Participant::where('event_id', '=', $event->id)->orderBy('points', 'DESC')->get()->toArray();
+        $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
         $user_ids = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
         $stats = new stdClass();
         $female_categories = array();
@@ -124,7 +124,8 @@ class EventsController extends Controller
             $res['category_id'] = $participant->category_id;
             $result[] = $res;
         }
-        return view('event.final_result', compact('event', 'result',  'categories', 'stats'));
+        $categories = $categories->toArray();
+        return view('event.final_result', compact(['event', 'result',  'categories', 'stats']));
     }
 
     public function store(StoreRequest $request) {

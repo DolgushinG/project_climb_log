@@ -55,13 +55,16 @@ class Participant extends Model
             $user_places[] = array('user_id' => $d_array['user_id'], 'place' => $place, 'index' => $index_user_final_in_res);
 
         }
-
+//        dd($user_places, $result_final);
         usort($user_places, function ($a, $b) {
             return $a['place'] <=> $b['place'];
         });
+//        dd($user_places);
         # Расставляем места
         foreach ($user_places as $index => $user_place){
-            $result_final[$user_place['index']]['place'] = $index + 1;
+//            dd($result_final, $user_place['index'], $index);
+            $result_final[$user_place['index']]['place'] = $user_place['index'] + 1;
+//            dd($result_final[$user_place['index']]['place']);
         }
 
         // Расставляем места в зависимости от результатов квалификации
@@ -70,9 +73,11 @@ class Participant extends Model
                 $result_final[$index]['place'] = $index+1;
             }
         }
+//        dd($result_final);
         usort($result_final, function ($a, $b) {
             return $a['place'] <=> $b['place'];
         });
+
        return $result_final;
     }
     public static function findIndexByUserId($array, $userId) {

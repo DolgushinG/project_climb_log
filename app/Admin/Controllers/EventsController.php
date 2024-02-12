@@ -103,6 +103,7 @@ class EventsController extends Controller
             $actions->append(new ActionExport($actions->getKey(), 'all', 'csv'));
             $actions->append(new ActionExport($actions->getKey(), 'all', 'ods'));
         });
+        $grid->disableFilter();
         $grid->disableExport();
 //        $grid->disableColumnSelector();
         $grid->column('count_routes', 'Кол-во маршрутов');
@@ -196,16 +197,16 @@ class EventsController extends Controller
             })->value(0)->required();
         $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
 
-        $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
-            ->options([1 => 'Ручной перевод по необходимости',2 => 'Настройка авто перевода в другую категорию'])->when(1, function (Form $form) {
-            })->when(2, function (Form $form) {
-                $form->table('transfer_to_next_category', '', function ($table) use ($form){
-                    $table->select('Категория участника')->options($form->model()->categories)->readonly();
-                    $table->select('В какую категорию переводить')->options($form->model()->categories)->readonly();
-                    $table->select('От какой категории будет перевод')->options($this->getGrades())->width('30px');
-                    $table->number('Кол-во трасс для перевода')->width('50px');
-                });
-            })->required();
+//        $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
+//            ->options([1 => 'Ручной перевод по необходимости',2 => 'Настройка авто перевода в другую категорию'])->when(1, function (Form $form) {
+//            })->when(2, function (Form $form) {
+//                $form->table('transfer_to_next_category', '', function ($table) use ($form){
+//                    $table->select('Категория участника')->options($form->model()->categories)->readonly();
+//                    $table->select('В какую категорию переводить')->options($form->model()->categories)->readonly();
+//                    $table->select('От какой категории будет перевод')->options($this->getGrades())->width('30px');
+//                    $table->number('Кол-во трасс для перевода')->width('50px');
+//                });
+//            })->required();
         $formats = Format::all()->pluck('format', 'id');
         $form->radio('mode','Настройка формата')
             ->options($formats)->when(1, function (Form $form) {

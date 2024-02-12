@@ -33,9 +33,6 @@ class User extends Authenticatable
         'telegram_id',
         'yandex_id',
         'vk_id',
-        'nickname_telegram',
-        'nickname_yandex',
-        'nickname_vk',
     ];
 
     /**

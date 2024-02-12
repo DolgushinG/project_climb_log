@@ -43,11 +43,11 @@ class ResultRouteSemiFinalStageController extends Controller
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($event) {
-                    $row->column(6, $this->grid2());
-                    $row->column(6, $this->grid());
+                    $row->column(10, $this->grid2());
+                    $row->column(10, $this->grid());
                 } else {
-                    $row->column(6, $this->grid2());
-                    $row->column(6, $this->grid3());
+                    $row->column(10, $this->grid2());
+                    $row->column(10, $this->grid3());
                 }
             });
     }
@@ -111,7 +111,6 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.result_semifinal_stage');
         });
-        $grid->column('event_id', __('Номер маршрута'))->editable();
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchResultSemiFinal);
         });
@@ -181,18 +180,21 @@ class ResultRouteSemiFinalStageController extends Controller
             $style = ['table-bordered','table-hover', 'table-striped'];
             $users_male = Participant::better_participants($model->id, 'male', 10);
             $users_female = Participant::better_participants($model->id, 'female', 10);
-            $fields = ['firstname', 'id', 'category', 'active', 'team', 'city', 'email', 'year', 'lastname', 'skill', 'sport_category', 'email_verified_at', 'created_at', 'updated_at'];
+            $fields = ['firstname',
+                'id', 'category', 'avatar','active', 'team', 'city',
+                'email', 'year', 'lastname', 'skill', 'sport_category', 'email_verified_at', 'created_at', 'updated_at',
+                'telegram_id','yandex_id','vk_id'];
             $male = self::getUsersSorted($users_male, $fields, $model, 'semifinal', Admin::user()->id);
             $female = self::getUsersSorted($users_female, $fields, $model, 'semifinal', Admin::user()->id);
             $final_all_users = array_merge($male, $female);
             $all_users = array_merge($male, $female);
             foreach ($final_all_users as $index => $user) {
-                $fields = ['owner_id', 'event_id', 'user_id'];
+                $fields = ['owner_id', 'event_id','avatar', 'user_id','telegram_id','yandex_id','vk_id'];
                 $final_all_users[$index] = collect($user)->except($fields)->toArray();
             }
 
             foreach ($all_users as $index => $user) {
-                $fields = ['gender', 'middlename'];
+                $fields = ['gender', 'middlename','avatar','telegram_id','yandex_id','vk_id'];
                 $all_users[$index] = collect($user)->except($fields)->toArray();
                 $final_result_stage = ResultSemiFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
                 if (!$final_result_stage) {
@@ -363,6 +365,7 @@ class ResultRouteSemiFinalStageController extends Controller
 //        if($user->id == 45){
 //            dd($users_with_result);
 //        }
+//        dd($users_with_result);
         $users_sorted = Participant::counting_final_place($model->id, $users_with_result, $type);
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user){
