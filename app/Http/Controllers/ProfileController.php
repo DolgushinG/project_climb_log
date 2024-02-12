@@ -1,12 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Http\Requests\ProfilePasswordRequest;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultParticipant;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
@@ -91,6 +94,33 @@ class ProfileController extends Controller
             return response()->json(['success' => true, 'message' => 'Успешно сохранено'], 200);
         } else {
             return response()->json(['success' => false, 'message' => 'Ошибка сохранения'], 422);
+        }
+    }
+
+    public function changePassword(Request $request)
+    {
+        $messages = array(
+            'old_password.required' => 'Поле пароль обязательно для заполнения',
+            'new_password.required' => 'Поле новый пароль обязательно для заполнения',
+            'new_password.confirmed' => 'Поле новый пароль и подтверждение пароля должны совпадать',
+            'new_password.min:8' => 'Минимальная длина пароля 8 сивмолов',
+        );
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required',
+            'new_password' => 'required|min:8',
+        ],$messages);
+        if ($validator->fails())
+        {
+            return response()->json(['error' => true,'message'=>$validator->errors()->all()],422);
+        }
+        $currentPass = Auth::user()->password;
+        if (Hash::check($request->get('old_password'), $currentPass)) {
+            $user = User::find(Auth::id());
+            $user->password = Hash::make($request->get('new_password'));
+            $user->save();
+            return response()->json(['success' => true, 'message' => 'Ваш пароль успешно изменен'], 200);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Введенный старый пароль неверный'], 422);
         }
     }
 

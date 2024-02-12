@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfilePasswordRequest;
 use App\Http\Requests\StoreRequest;
 use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
@@ -15,6 +16,7 @@ use App\Models\User;
 use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use stdClass;
 
 class EventsController extends Controller
@@ -255,4 +257,5 @@ class EventsController extends Controller
         }
         return view('result-page', compact('routes', 'event'));
     }
+
 }
