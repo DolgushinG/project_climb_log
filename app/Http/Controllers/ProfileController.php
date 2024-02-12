@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Http\Requests\ProfilePasswordRequest;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
@@ -51,7 +50,7 @@ class ProfileController extends Controller
             if($active){
                 $users = Participant::get_places_participant_in_qualification($event->id, $user_id);
                 $user_place = $users[$user_id];
-                $status = "Внес результаты";
+                $status = "Результаты добавлены";
             }else{
                 $status = "Необходимо добавить результаты";
                 $user_place = 'Нет результата';

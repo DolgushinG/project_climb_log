@@ -218,10 +218,26 @@ class EventsController extends Controller
         $form->switch('active', 'Опубликовать сразу?');
         $form->saving(function (Form $form) {
             if ($form->active === "1" || $form->active === "on") {
-                $count = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->get();
-                if($count->isNotEmpty()){
+                $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+                if($events && $events->id != $form->model()->id){
                     throw new \Exception('Только одно соревнование может быть опубликовано');
                 }
+            }
+
+            foreach ($form->categories as $category){
+                foreach ($category as $c){
+                    $category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
+                        ->where('event_id', '=', $form->model()->id)
+                        ->where('category', '=', $c)->first();
+                    if(!$category){
+                        $participant_categories = new ParticipantCategory;
+                        $participant_categories->owner_id = Admin::user()->id;
+                        $participant_categories->event_id = $form->model()->id;
+                        $participant_categories->category = $c;
+                        $participant_categories->save();
+                    }
+                }
+
             }
             $count = 0;
             if($form->grade_and_amount){

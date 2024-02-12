@@ -40,6 +40,17 @@
                                                 </select>
                                                 <label for="floatingSelectGender">Отметить пол</label>
                                             </div>
+                                            @else
+                                                <div class="form-floating mb-3" style="display: none">
+                                                    <select class="form-select" id="floatingSelectGender"
+                                                            aria-label="Floating label select example" required>
+                                                        <option selected disabled value="">Отметить пол
+                                                        </option>
+                                                        <option value="male">M</option>
+                                                        <option value="female">Ж</option>
+                                                    </select>
+                                                    <label for="floatingSelectGender">Отметить пол</label>
+                                                </div>
                                         @endif
                                         <div class="form-floating mb-3">
                                             <select class="form-select" id="floatingSelect"
@@ -56,38 +67,18 @@
                                             </select>
                                             <label for="floatingSelect">Выбрать время для сета</label>
                                         </div>
-                                        @if(!Auth::user()->category)
-                                            <div class="form-floating mb-3">
-                                                <select class="form-select" id="floatingSelectCategory"
-                                                        aria-label="Floating label select example" required>
-                                                    <option selected disabled value="">Открыть для выбора категории
-                                                    </option>
-                                                    @foreach($categories as $category)
-                                                        <option
-                                                            value="{{$category->id}}">{{$category->category}}</option>
-                                                    @endforeach
-                                                </select>
-                                                <label for="floatingSelectCategory">Выбрать категорию</label>
-                                            </div>
-                                        @else
-                                            <div class="form-floating mb-3">
-                                                <select class="form-select" id="floatingSelectCategory"
-                                                        aria-label="Floating label select example" required>
-                                                    <option selected disabled value="">Открыть для выбора категории
-                                                    </option>
-                                                    @foreach($categories as $category)
-                                                        @if($category->id == Auth::user()->category)
-                                                            <option selected
-                                                                    value="{{$category->id}}">{{$category->category}}</option>
-                                                        @else
-                                                            <option
-                                                                value="{{$category->id}}">{{$category->category}}</option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                                <label for="floatingSelectCategory">Выбрать категорию</label>
-                                            </div>
-                                        @endif
+                                        <div class="form-floating mb-3">
+                                            <select class="form-select" id="floatingSelectCategory"
+                                                    aria-label="Floating label select example" required>
+                                                <option selected disabled value="">Открыть для выбора категории
+                                                </option>
+                                                @foreach($event->categories as $index => $category)
+                                                    <option
+                                                        value="{{$category}}">{{$category}}</option>
+                                                @endforeach
+                                            </select>
+                                            <label for="floatingSelectCategory">Выбрать категорию</label>
+                                        </div>
                                         <a id="btn-participant" data-id="{{$event->id}}"
                                            data-title="{{$event->title_eng}}" data-user-id="{{Auth()->user()->id}}"
                                            class="btn btn-dark rounded-pill" style="display: none">Участвовать</a>

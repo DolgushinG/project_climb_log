@@ -60,9 +60,7 @@ class EventsController extends Controller
                 }
                 $set->procent = intval($percent);
             }
-            $categories = ParticipantCategory::all();
-
-            return view('welcome', compact('event', 'categories', 'sets'));
+            return view('welcome', compact(['event',  'sets']));
         } else {
             return view('404');
         }
@@ -131,21 +129,16 @@ class EventsController extends Controller
     }
 
     public function store(StoreRequest $request) {
+        $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
+
         $participant = new Participant;
         $participant->event_id = $request->event_id;
         $participant->user_id = $request->user_id;
         $participant->number_set = $request->number_set;
-        $participant->category_id = $request->category;
+        $participant->category_id = $participant_categories->id;
         $participant->owner_id = Event::find($request->event_id)->owner_id;
         $participant->active = 0;
         $participant->save();
-
-        if($request->category){
-            $user = User::find($request->user_id);
-            $user->category = $request->category;
-            $user->gender = $request->gender;
-            $user->save();
-        }
 
         if ($participant->save()) {
             return response()->json(['success' => true, 'message' => 'Успешная регистрация'], 201);
