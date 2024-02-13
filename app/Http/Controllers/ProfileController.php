@@ -68,6 +68,7 @@ class ProfileController extends Controller
             }
             $event['amount_passed_grades'] = json_encode(array_values($result));
         }
+//        dd($events);
         return view('profile.events', compact(['events']));
     }
     public function editChanges(Request $request) {

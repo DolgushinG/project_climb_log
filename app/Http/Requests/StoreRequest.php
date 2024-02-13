@@ -27,7 +27,7 @@ class StoreRequest extends FormRequest
             'number_set' => ['required', 'integer'],
             'user_id' => ['required', 'integer'],
             'event_id' => ['required', 'integer'],
-            'category' => ['required', 'integer'],
+            'category' => ['required'],
         ];
     }
 }

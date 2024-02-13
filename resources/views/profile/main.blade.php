@@ -59,7 +59,7 @@
 
                                 <li class="nav-item">
                                     <button id="setting" class="nav-link" data-bs-toggle="tab"
-                                            data-bs-target="#profile-settings">Настройка
+                                            data-bs-target="#profile-settings">Изменение пароля
                                     </button>
                                 </li>
 

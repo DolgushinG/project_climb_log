@@ -256,16 +256,19 @@ class EventsController extends Controller
 
         });
         $form->saved(function (Form $form) {
-            if ($form->grade_and_amount){
-                Event::generation_route(Admin::user()->id, $form->model()->id, $form->grade_and_amount);
-                $success = new MessageBag([
-                    'title'   => 'Соревнование успешно создано',
-                    'message' => '',
-                ]);
-
-                return back()->with(compact('success'));
+            $exist_routes_list = Grades::where('owner_id', '=', Admin::user()->id)
+                ->where('event_id', '=', $form->model()->id)->first();
+            if(!$exist_routes_list){
+                if ($form->grade_and_amount){
+                    Event::generation_route(Admin::user()->id, $form->model()->id, $form->grade_and_amount);
+                }
             }
-            return $form;
+            $success = new MessageBag([
+                'title'   => 'Соревнование успешно создано',
+                'message' => '',
+            ]);
+
+            return back()->with(compact('success'));
         });
         return $form;
     }

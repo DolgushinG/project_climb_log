@@ -208,6 +208,8 @@ class EventsController extends Controller
         }
         $result = ResultParticipant::insert($final_data);
 
+//        Participant::add_result_participant($user_id, );
+
         UpdateResultParticipants::dispatch($request->event_id);
         if ($result) {
             $event = Event::find($request->event_id);
@@ -219,16 +221,8 @@ class EventsController extends Controller
 
     public function insert_final_participant_result($route){
         $final_participant_result = Participant::where('event_id', '=', $route['event_id'])->where('user_id', '=', $route['user_id'])->first();
-//        if ($record === null) {
-//            $final_participant_result = new Participant;
-//        } else {
-//            $final_participant_result = $record;
-//        }
-        $final_participant_result->points = $final_participant_result->point + $route['points'];
-//        $final_participant_result->event_id = $route['event_id'];
-//        $final_participant_result->user_id = $route['user_id'];
+        $final_participant_result->points = $final_participant_result->points + $route['points'];
         $final_participant_result->user_place = Participant::get_places_participant_in_qualification($route['event_id'], $route['user_id'], true);
-//        $final_participant_result->owner_id = $route['owner_id'];
         $final_participant_result->save();
     }
 

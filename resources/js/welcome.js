@@ -7,7 +7,7 @@ $(document).on('click','#btn-participant', function(e) {
 
     var value = document.getElementById("floatingSelect").value
     var category_value = document.getElementById("floatingSelectCategory").value
-
+    var gender_value = document.getElementById("floatingSelectGender").value
     let button = $('#btn-participant')
     let event_id = document.getElementById('btn-participant').getAttribute('data-id')
     let event_title = document.getElementById('btn-participant').getAttribute('data-title')

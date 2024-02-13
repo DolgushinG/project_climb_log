@@ -149,4 +149,19 @@ class Participant extends Model
     {
         return $this->belongsTo(Event::class);
     }
+
+
+    public function add_result_participant($user_id, $points){
+
+        $final_participant_result = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $this->event_id)->first();
+        $final_participant_result->points = $points;
+        $final_participant_result->event_id = $this->event_id;
+        $final_participant_result->user_id = $user_id;
+        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($this->event_id, $user, true);
+        $final_participant_result->save();
+
+        $participant = Participant::where('user_id', '=', $user)->where('event_id', '=', $this->event_id)->first();
+        $participant->active = 1;
+        $participant->save();
+    }
 }

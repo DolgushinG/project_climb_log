@@ -3,9 +3,6 @@
     <!-- Settings Form -->
     <form>
         <div class="row mb-3">
-            <label for="current-password" class="col-md-4 col-lg-3 col-form-label">Настройка пароля</label>
-        </div>
-        <div class="row mb-3">
             <div class="col-md-8 col-lg-9">
                 <div class="form-check">
                     <label for="current-password" class="form-label">Старый пароль</label>
@@ -15,7 +12,6 @@
             </div>
         </div>
         <div class="row mb-3">
-            <label for="password" class="col-md-4 col-lg-3 col-form-label"></label>
             <div class="col-md-8 col-lg-9">
                 <div class="form-check">
                     <label for="new-password" class="form-label">Новый пароль</label>
@@ -25,7 +21,6 @@
             </div>
         </div>
         <div class="row mb-3">
-            <label for="password" class="col-md-4 col-lg-3 col-form-label"></label>
             <div class="col-md-8 col-lg-9">
                 <div class="form-check">
                     <label for="password_confirmation" class="form-label">Подтверждение
