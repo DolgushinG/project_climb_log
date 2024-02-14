@@ -4,6 +4,7 @@ var __webpack_exports__ = {};
   !*** ./resources/js/profile.js ***!
   \*********************************/
 $('#tab-overview').addClass('show active');
+getProfile('Overview');
 $(document).on('click', '#overview', function () {
   deactivateAllTabs();
   $('#tab-overview').addClass('show active');

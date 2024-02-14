@@ -1,12 +1,19 @@
 <div class="tab-pane fade active show pt-3" id="tab-settings">
     @foreach($user->types_auth as $auth)
+        @if($user->is_alert_for_needs_set_password)
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                Вход был выполнен через сервисы рекомендуется заполнить пароль
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         <div class="card">
             <div class="card-body pt-4">
-                Вход через был {!! $auth['icon_auth'] !!} <span class="badge bg-primary">{{strtoupper($auth['title_auth'])}}</span> - {{$user->updated_at}}
+                Доступен вход по {!! $auth['icon_auth'] !!} <span class="badge bg-primary">{{strtoupper($auth['title_auth'])}}</span>
             </div>
         </div>
     @endforeach
     <form>
+        @if($user->is_show_old_password)
         <div class="row mb-3">
             <div class="col-md-8 col-lg-9">
                 <div class="form-check">
@@ -16,6 +23,17 @@
                 </div>
             </div>
         </div>
+            @else
+            <div class="row mb-3" style="display: none">
+                <div class="col-md-8 col-lg-9">
+                    <div class="form-check">
+                        <label for="current-password" class="form-label">Старый пароль</label>
+                        <input type="password" autocomplete="current-password" name="current-password" class="form-control"
+                               id="current-password" value="1">
+                    </div>
+                </div>
+            </div>
+        @endif
         <div class="row mb-3">
             <div class="col-md-8 col-lg-9">
                 <div class="form-check">
@@ -103,6 +121,7 @@
             changePassword.removeAttribute('disabled','disabled');
         }
     });
+
     document.getElementById("new-password").addEventListener("input", (ev) => {
         var value_o = document.getElementById("current-password").value;
         var value_n = document.getElementById("new-password").value;

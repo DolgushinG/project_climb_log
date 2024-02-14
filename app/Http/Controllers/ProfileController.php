@@ -30,25 +30,35 @@ class ProfileController extends Controller
     }
     public function getTabContentOverview() {
         $user = User::find(Auth()->user()->id);
+        if(!$user->password){
+            $user['is_alert_needs_show_email_and_password'] = true;
+        } else {
+            $user['is_alert_needs_show_email_and_password'] = false;
+        }
         return view('profile.overview', compact(['user']));
     }
     public function getTabContentSetting() {
-        $types_auth = ['yandex_id', 'telegram_id', 'vk_id'];
         $user = User::find(Auth()->user()->id);
         $services = array();
+        $user['is_alert_for_needs_set_password'] = true;
         if($user->telegram_id){
             $services[] = array('icon_auth' => ' <i class="fa fa-telegram" aria-hidden="true"></i> ', 'title_auth' => 'Telegram');
+            $user['is_alert_for_needs_set_password'] = true;
         }
         if($user->yandex_id){
             $services[] = array('icon_auth' => ' <i class="fa fa-yandex" aria-hidden="true"></i> ', 'title_auth' => 'Yandex');
+            $user['is_alert_for_needs_set_password'] = true;
         }
         if($user->vk_id){
             $services[] = array('icon_auth' => ' <i class="fa fa-vk" aria-hidden="true"></i> ', 'title_auth' => 'VK');
+            $user['is_alert_for_needs_set_password'] = true;
         }
         if($user->password && $user->email) {
-            $services[] = array('icon_auth' => ' <i class="fa fa-key" aria-hidden="true"></i> ', 'title_auth' => 'По логину и паролю');
+            $services[] = array('icon_auth' => ' <i class="fa fa-key" aria-hidden="true"></i> ', 'title_auth' => 'По email и паролю');
+            $user['is_alert_for_needs_set_password'] = false;
         }
         $user['types_auth'] = $services;
+        $user['is_show_old_password'] = boolval($user->password);
         return view('profile.setting', compact('user'));
     }
     public function getTabContentEdit() {
@@ -115,6 +125,12 @@ class ProfileController extends Controller
 
     public function changePassword(Request $request)
     {
+        if(!Auth::user()->password){
+            $user = User::find(Auth::id());
+            $user->password = Hash::make($request->get('new_password'));
+            $user->save();
+            return response()->json(['success' => true, 'message' => 'Ваш пароль успешно изменен'], 200);
+        }
         $messages = array(
             'old_password.required' => 'Поле пароль обязательно для заполнения',
             'new_password.required' => 'Поле новый пароль обязательно для заполнения',
