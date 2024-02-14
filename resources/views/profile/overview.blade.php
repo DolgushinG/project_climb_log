@@ -27,10 +27,9 @@
             *Необходимо установить пароль в разделе Найстройки чтобы входить по логину и паролю
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-
-        <div class="row">
-            <div class="col-lg-3 col-md-4 label">Email</div>
-            <div class="col-lg-9 col-md-8">{{$user->email}}</div>
-        </div>
     @endif
+    <div class="row">
+        <div class="col-lg-3 col-md-4 label">Email(Логин)</div>
+        <div class="col-lg-9 col-md-8">{{$user->email}}</div>
+    </div>
 </div>

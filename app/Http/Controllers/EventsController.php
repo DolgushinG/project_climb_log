@@ -73,7 +73,7 @@ class EventsController extends Controller
         $users_id = $participant_event->pluck('user_id')->toArray();
         $users = User::whereIn('id', $users_id)->get()->toArray();
         $users_event = $participant_event->toArray();
-        $sets = Set::all();
+        $sets = Set::where('owner_id', '=', $event->owner_id)->get();
         $index = 0;
         foreach($users_event as $set => $user) {
             if ($index <= count($users)) {
@@ -91,8 +91,8 @@ class EventsController extends Controller
             }
             $index++;
         }
-        $categories = ParticipantCategory::all()->toArray();
-        return view('event.participants', compact('event', 'participants', 'categories'));
+        $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
+        return view('event.participants', compact(['event', 'participants', 'categories']));
     }
 
     public function get_final_results(Request $request, $climbing_gym, $title){
@@ -208,7 +208,9 @@ class EventsController extends Controller
         }
         $result = ResultParticipant::insert($final_data);
 
-//        Participant::add_result_participant($user_id, );
+        $participant = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
+        $participant->active = 1;
+        $participant->save();
 
         UpdateResultParticipants::dispatch($request->event_id);
         if ($result) {

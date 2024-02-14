@@ -103,9 +103,9 @@ class SetsController extends Controller
             $admin_id = \Encore\Admin\Facades\Admin::user()->id;
             $create->integer('owner_id', $admin_id)->default($admin_id)->style('display', 'None');
             $create->text('time', 'Время слота')->placeholder('например 10:00 - 12:00');
-            $create->integer('max_participants', 'Максимальное число участников')->placeholder('введи число');
+            $create->integer('max_participants', 'Максимальное число участников')->placeholder('введите число');
             $create->select('day_of_week', 'День слота')->options(self::DAYS);
-            $create->integer('number_set', 'Номер сета')->placeholder('введи число');;
+            $create->integer('number_set', 'Номер сета')->placeholder('введите номер сета');;
         });
         $grid->column('time', 'Время слота')->editable();
         $grid->column('max_participants', 'Макс. число участников')->editable();
