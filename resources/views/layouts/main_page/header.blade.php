@@ -13,6 +13,7 @@
             @auth
             <li class="nav-item dropdown pe-3">
 
+
                 <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
                     @if(Auth()->user()->avatar)
                         <img src="{{Auth()->user()->avatar}}" alt="Profile" class="rounded-circle">
@@ -20,7 +21,7 @@
                         <img src="https://eu.ui-avatars.com/api/?name={{Auth()->user()->middlename}}&background=random&color=050202&font-size=0.33&size=150" alt="Profile" class="rounded-circle">
                     @endif
                     <span class="d-none d-md-block dropdown-toggle ps-2">{{Auth()->user()->middlename}}</span>
-                </a><!-- End Profile Iamge Icon -->
+                </a>
 
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                     <li class="dropdown-header">
@@ -58,6 +59,27 @@
             </li><!-- End Profile Nav -->
             @endauth
             @guest
+                <li class="nav-item dropdown pe-3">
+
+                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+                        <span class="d-none d-md-block dropdown-toggle ps-2">Рейтинг</span>
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <i class="bi bi-list-stars"></i>
+                                <span>Рейтинг по городам(в разработке)</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <i class="bi bi-list-stars"></i>
+                                <span>Рейтинг по России(в разработке)</span>
+                            </a>
+                        </li>
+                    </ul><!-- End Profile Dropdown Items -->
+                </li><!-- End Profile Nav -->
                 <li class="nav-item dropdown pe-3">
 
                     <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">

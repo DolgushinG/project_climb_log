@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use function Symfony\Component\String\s;
 
 class ProfileController extends Controller
 {
@@ -32,7 +33,22 @@ class ProfileController extends Controller
         return view('profile.overview', compact(['user']));
     }
     public function getTabContentSetting() {
+        $types_auth = ['yandex_id', 'telegram_id', 'vk_id'];
         $user = User::find(Auth()->user()->id);
+        $services = array();
+        if($user->telegram_id){
+            $services[] = array('icon_auth' => ' <i class="fa fa-telegram" aria-hidden="true"></i> ', 'title_auth' => 'Telegram');
+        }
+        if($user->yandex_id){
+            $services[] = array('icon_auth' => ' <i class="fa fa-yandex" aria-hidden="true"></i> ', 'title_auth' => 'Yandex');
+        }
+        if($user->vk_id){
+            $services[] = array('icon_auth' => ' <i class="fa fa-vk" aria-hidden="true"></i> ', 'title_auth' => 'VK');
+        }
+        if($user->password && $user->email) {
+            $services[] = array('icon_auth' => ' <i class="fa fa-key" aria-hidden="true"></i> ', 'title_auth' => 'По логину и паролю');
+        }
+        $user['types_auth'] = $services;
         return view('profile.setting', compact('user'));
     }
     public function getTabContentEdit() {

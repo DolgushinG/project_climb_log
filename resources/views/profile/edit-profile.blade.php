@@ -69,8 +69,6 @@
         <div class="text-center">
             <button id="saveChanges" type="submit" class="btn btn-primary btn-save-change">Сохранить</button>
         </div>
-    </form><!-- End Profile Edit Form -->
+    </form>
 
 </div>
-
-<script type="text/javascript" src="{{ asset('js/ddata.js') }}"></script>

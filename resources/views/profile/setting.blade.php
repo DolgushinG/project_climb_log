@@ -1,6 +1,11 @@
 <div class="tab-pane fade active show pt-3" id="tab-settings">
-
-    <!-- Settings Form -->
+    @foreach($user->types_auth as $auth)
+        <div class="card">
+            <div class="card-body pt-4">
+                Вход через был {!! $auth['icon_auth'] !!} <span class="badge bg-primary">{{strtoupper($auth['title_auth'])}}</span> - {{$user->updated_at}}
+            </div>
+        </div>
+    @endforeach
     <form>
         <div class="row mb-3">
             <div class="col-md-8 col-lg-9">
