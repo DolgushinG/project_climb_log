@@ -56,7 +56,7 @@ class AuthController extends BaseAuthController
 
         $form->display('username', trans('admin.username'));
         $form->text('name', trans('admin.name'))->rules('required');
-        $form->image('avatar', trans('admin.avatar'));
+        $form->image('avatar', trans('admin.avatar'))->move('images/profile_images')->uniqueName();;
         $form->text('climbing_gym_name', trans('admin.climbing_gym_name'));
         $form->text('climbing_gym_link', trans('admin.climbing_gym_link'));
         $form->text('address', trans('admin.address'));
