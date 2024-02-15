@@ -19,10 +19,10 @@
                                         </div>
                                         <div class="pt-4 pb-2">
                                             <div class="col-12" style="text-align: center">
-                                                <a href="/auth/telegram/redirect" class="btn btn-primary w-100" type="button">
-                                                    <i class="fa fa-telegram" aria-hidden="true"></i> Войти через Telegram
-                                                </a>
-    {{--                                            {!! Socialite::driver('telegram')->getButton() !!}--}}
+{{--                                                <a href="/auth/telegram/redirect" class="btn btn-primary w-100" type="button">--}}
+{{--                                                    <i class="fa fa-telegram" aria-hidden="true"></i> Войти через Telegram--}}
+{{--                                                </a>--}}
+                                                {!! Socialite::driver('telegram')->getButton() !!}
                                             </div>
                                         </div>
                                         <div class="col-12">
