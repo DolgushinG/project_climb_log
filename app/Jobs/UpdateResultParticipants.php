@@ -61,15 +61,13 @@ class UpdateResultParticipants implements ShouldQueue
                     $routes_only_passed[] = $user_model;
                 }
             }
-            if($user == 123){
-               dd($routes_only_passed);
-            }
             if ($format == 1) {
                 $points = 0;
                 usort($routes_only_passed, function ($a, $b) {
                     return $a['points'] <=> $b['points'];
                 });
-                $lastElems = array_slice($routes_only_passed, -10, 10);
+                $amount = Event::find($this->event_id)->mode_amount_routes;
+                $lastElems = array_slice($routes_only_passed, -$amount, $amount);
                 foreach ($lastElems as $lastElem) {
                     $points += $lastElem->points;
                 }

@@ -52,7 +52,7 @@
                                                     @if($participant['gender'] == "male")
                                                         @if($participant['category_id'] == $category['id'])
                                                             <tr>
-                                                                <td>{{$participant['firstname']}} {{$participant['lastname']}}</td>
+                                                                <td>{{$participant['middlename']}}</td>
                                                                 <td>{{$participant['number_set']}} ({{$participant['time']}})
                                                                 </td>
                                                                 <td>{{$participant['city']}}</td>
@@ -121,7 +121,7 @@
                                                     @if($participant['gender'] == "female")
                                                         @if($participant['category_id'] == $category['id'])
                                                             <tr>
-                                                                <td>{{$participant['firstname']}} {{$participant['lastname']}}</td>
+                                                                <td>{{$participant['middlename']}}</td>
                                                                 <td>{{$participant['number_set']}} ({{$participant['time']}})
                                                                 </td>
                                                                 <td>{{$participant['city']}}</td>

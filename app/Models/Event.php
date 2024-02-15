@@ -136,7 +136,8 @@ class Event extends Model
                 usort($routes_only_passed, function($a, $b) {
                     return $a['points'] <=> $b['points'];
                 });
-                $lastElems = array_slice($routes_only_passed, -10, 10);
+                $amount = $event->mode_amount_routes;
+                $lastElems = array_slice($routes_only_passed, -$amount, $amount);
                 foreach ($lastElems as $lastElem) {
                     $points += $lastElem->points;
                 }

@@ -79,8 +79,7 @@ class EventsController extends Controller
             if ($index <= count($users)) {
                 $set = $sets->where('number_set', '=', $user['number_set'])->where('owner_id', '=',$event->owner_id)->first();
                 $participants[] = array(
-                    'firstname' => $users[$index]['firstname'],
-                    'lastname' => $users[$index]['lastname'],
+                    'middlename' => $users[$index]['middlename'],
                     'city' => $users[$index]['city'],
                     'team' => $users[$index]['team'],
                     'number_set' => $user['number_set'],
@@ -118,7 +117,7 @@ class EventsController extends Controller
         foreach ($final_results as $res) {
             $user = User::where('id', '=', $res['user_id'])->first();
             $participant = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $res['user_id'])->first();
-            $res['user_name'] = $user->firstname.' '.$user->lastname;
+            $res['user_name'] = $user->middlename;
             $res['gender'] = $user->gender;
             $res['city'] = $user->city;
             $res['category_id'] = $participant->category_id;
@@ -198,19 +197,23 @@ class EventsController extends Controller
             usort($final_data_only_passed_route, function($a, $b) {
                 return $a['points'] <=> $b['points'];
             });
-            $lastElems = array_slice($final_data_only_passed_route, -10, 10);
+            $points = 0;
+            $amount = Event::find($request->event_id)->mode_amount_routes;
+            $lastElems = array_slice($final_data_only_passed_route, -$amount, $amount);
             foreach ($lastElems as $lastElem) {
-                $this->insert_final_participant_result($lastElem);
+                $points += $lastElem['points'];
             }
+            $participant = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
+            $participant->points = $points;
+            $participant->active = 1;
+            $participant->save();
         }
+
         foreach ($final_data as $index => $data){
             $final_data[$index] = collect($data)->except('points')->toArray();
         }
-        $result = ResultParticipant::insert($final_data);
 
-        $participant = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
-        $participant->active = 1;
-        $participant->save();
+        $result = ResultParticipant::insert($final_data);
 
         UpdateResultParticipants::dispatch($request->event_id);
         if ($result) {
