@@ -24,9 +24,9 @@
                             <div class="icon"><i class="bx bxl-dribbble"></i></div>
                             <h4 class="title"><a href="">Удобная регистрация участников через соц. сети</a></h4>
                             <p class="description">
-                                <span class="badge bg-primary">Telegram</span>
-                                <span class="badge bg-primary">VK</span>
-                                <span class="badge bg-black">Yandex</span>
+                                <img src="{{asset('storage/img/icons/telegram.svg')}}" alt="telegram">
+                                <img src="{{asset('storage/img/icons/vk.svg')}}" alt="vk">
+                                <img src="{{asset('storage/img/icons/yandex.svg')}}" alt="yandex">
                             </p>
                         </div>
                     </div>
@@ -42,8 +42,8 @@
                     <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
                         <div class="icon-box" data-aos="fade-up" data-aos-delay="300">
                             <div class="icon"><i class="bx bx-tachometer"></i></div>
-                            <h4 class="title"><a href="">Возможность просмотра прошедних,предстоящих и текущих соревнований</a></h4>
-                            <p class="description">По всей России</p>
+                            <h4 class="title"><a href="">Возможность просмотра результата соревнований</a></h4>
+                            <p class="description">Прошедних,предстоящих и текущих по всей России</p>
                         </div>
                     </div>
 
