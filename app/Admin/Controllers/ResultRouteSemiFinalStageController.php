@@ -183,18 +183,18 @@ class ResultRouteSemiFinalStageController extends Controller
             $fields = ['firstname',
                 'id', 'category', 'avatar','active', 'team', 'city',
                 'email', 'year', 'lastname', 'skill', 'sport_category', 'email_verified_at', 'created_at', 'updated_at',
-                'telegram_id','yandex_id','vk_id'];
+                'telegram_id','yandex_id','vkontakte_id'];
             $male = self::getUsersSorted($users_male, $fields, $model, 'semifinal', Admin::user()->id);
             $female = self::getUsersSorted($users_female, $fields, $model, 'semifinal', Admin::user()->id);
             $final_all_users = array_merge($male, $female);
             $all_users = array_merge($male, $female);
             foreach ($final_all_users as $index => $user) {
-                $fields = ['owner_id', 'event_id','avatar', 'user_id','telegram_id','yandex_id','vk_id'];
+                $fields = ['owner_id', 'event_id','avatar', 'user_id','telegram_id','yandex_id','vkontakte_id'];
                 $final_all_users[$index] = collect($user)->except($fields)->toArray();
             }
 
             foreach ($all_users as $index => $user) {
-                $fields = ['gender', 'middlename','avatar','telegram_id','yandex_id','vk_id'];
+                $fields = ['gender', 'middlename','avatar','telegram_id','yandex_id','vkontakte_id'];
                 $all_users[$index] = collect($user)->except($fields)->toArray();
                 $final_result_stage = ResultSemiFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
                 if (!$final_result_stage) {

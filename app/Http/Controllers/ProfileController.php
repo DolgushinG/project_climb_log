@@ -49,7 +49,7 @@ class ProfileController extends Controller
             $services[] = array('icon_auth' => ' <i class="fa fa-yandex" aria-hidden="true"></i> ', 'title_auth' => 'Yandex');
             $user['is_alert_for_needs_set_password'] = true;
         }
-        if($user->vk_id){
+        if($user->vkontakte_id){
             $services[] = array('icon_auth' => ' <i class="fa fa-vk" aria-hidden="true"></i> ', 'title_auth' => 'VK');
             $user['is_alert_for_needs_set_password'] = true;
         }

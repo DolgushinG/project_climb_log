@@ -32,7 +32,7 @@ class User extends Authenticatable
         'avatar',
         'telegram_id',
         'yandex_id',
-        'vk_id',
+        'vkontakte_id',
     ];
 
     /**

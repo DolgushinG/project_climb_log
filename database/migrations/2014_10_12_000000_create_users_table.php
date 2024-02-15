@@ -24,7 +24,7 @@ class CreateUsersTable extends Migration
             $table->string('city')->nullable();
             $table->string('team')->nullable();
             $table->unsignedBigInteger('telegram_id')->nullable();
-            $table->unsignedBigInteger('vk_id')->nullable();
+            $table->unsignedBigInteger('vkontakte_id')->nullable();
             $table->unsignedBigInteger('yandex_id')->nullable();
             $table->string('category')->nullable();
             $table->string('skill')->nullable();
