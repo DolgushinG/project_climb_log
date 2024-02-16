@@ -42,9 +42,9 @@
 
                     <li class="dropdown"><a class="nav-link nav-profile d-flex align-items-center pe-0" href="{{route('profile')}}" data-bs-toggle="dropdown">
                             @if(Auth()->user()->avatar)
-                                <img src="{{Auth()->user()->avatar}}" alt="Profile" class="rounded-circle">
+                                <img src="{{Auth()->user()->avatar}}" alt="Profile" class="img-fluid rounded-circle">
                             @else
-                                <img src="https://eu.ui-avatars.com/api/?name={{Auth()->user()->middlename}}&background=random&color=050202&font-size=0.33&size=35" alt="Profile" class="rounded-circle">
+                                <img src="https://eu.ui-avatars.com/api/?name={{Auth()->user()->middlename}}&background=random&color=050202&font-size=0.33&size=15" alt="Profile" class="img-fluid rounded-circle">
                             @endif
                             <span class="d-none d-md-block dropdown-toggle ps-2">{{Auth()->user()->middlename}}</span>
                         </a>
