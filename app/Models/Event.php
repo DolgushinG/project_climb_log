@@ -173,4 +173,10 @@ class Event extends Model
         $final_participant_result->save();
     }
 
+    public static function update_participant_place($event_id, $user_id){
+        $final_participant_result = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first();
+        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user_id, true);
+        $final_participant_result->save();
+    }
+
 }

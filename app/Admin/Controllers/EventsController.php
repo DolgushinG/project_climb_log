@@ -223,22 +223,6 @@ class EventsController extends Controller
                     throw new \Exception('Только одно соревнование может быть опубликовано');
                 }
             }
-
-            foreach ($form->categories as $category){
-                foreach ($category as $c){
-                    $category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
-                        ->where('event_id', '=', $form->model()->id)
-                        ->where('category', '=', $c)->first();
-                    if(!$category){
-                        $participant_categories = new ParticipantCategory;
-                        $participant_categories->owner_id = Admin::user()->id;
-                        $participant_categories->event_id = $form->model()->id;
-                        $participant_categories->category = $c;
-                        $participant_categories->save();
-                    }
-                }
-
-            }
             $count = 0;
             if($form->grade_and_amount){
                 foreach ($form->grade_and_amount as $value){
@@ -256,6 +240,21 @@ class EventsController extends Controller
 
         });
         $form->saved(function (Form $form) {
+            foreach ($form->categories as $category){
+                foreach ($category as $c){
+                    $category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
+                        ->where('event_id', '=', $form->model()->id)
+                        ->where('category', '=', $c)->first();
+                    if(!$category){
+                        $participant_categories = new ParticipantCategory;
+                        $participant_categories->owner_id = Admin::user()->id;
+                        $participant_categories->event_id = $form->model()->id;
+                        $participant_categories->category = $c;
+                        $participant_categories->save();
+                    }
+                }
+
+            }
             $exist_routes_list = Grades::where('owner_id', '=', Admin::user()->id)
                 ->where('event_id', '=', $form->model()->id)->first();
             if(!$exist_routes_list){

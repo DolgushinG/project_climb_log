@@ -215,6 +215,11 @@ class EventsController extends Controller
 
         $result = ResultParticipant::insert($final_data);
 
+        $users = Participant::where('event_id', '=', $request->event_id)->pluck('user_id')->toArray();
+        foreach ($users as $user) {
+            Event::update_participant_place($request->event_id, $user);
+        }
+
         UpdateResultParticipants::dispatch($request->event_id);
         if ($result) {
             $event = Event::find($request->event_id);

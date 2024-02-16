@@ -26,7 +26,7 @@ class UpdateResultParticipants implements ShouldQueue
      *
      * @var int
      */
-    public int $timeout = 36000;
+    public int $timeout = 120000;
 
     /**
      * Create a new job instance.
