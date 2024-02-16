@@ -185,7 +185,7 @@ class EventsController extends Controller
             $route['points'] = $coefficient * $value_route;
             # Формат все трассы считаем сразу
             if($format == 2) {
-                Event::insert_final_participant_result($route['event_id'], $route['points'], $route['user_id']);
+                (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id']);
             }
             $final_data[] = $route;
             if ($route['attempt'] != 0){
