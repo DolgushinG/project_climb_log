@@ -168,6 +168,7 @@ class Event extends Model
     public function insert_final_participant_result($event_id, $points, $user_id){
         $final_participant_result = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first();
         $final_participant_result->points = $final_participant_result->points + $points;
+        $final_participant_result->active = 1;
         $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user_id, true);
         $final_participant_result->save();
     }
