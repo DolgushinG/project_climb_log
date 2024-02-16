@@ -20,6 +20,14 @@ class UpdateResultParticipants implements ShouldQueue
 
     private mixed $event_id;
 
+
+    /**
+     * The number of seconds the job can run before timing out.
+     *
+     * @var int
+     */
+    public int $timeout = 36000;
+
     /**
      * Create a new job instance.
      *
