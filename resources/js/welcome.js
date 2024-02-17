@@ -18,8 +18,6 @@ $(document).on('click','#btn-participant', function(e) {
         url: '/takePart',
         data: {'number_set': value, 'event_id': event_id, 'user_id': user_id, 'category': category_value, 'gender': gender_value},
         success: function(xhr, status, error) {
-            // button.removeClass('btn-save-change')
-            // button.addClass('btn-edit-change')
             button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
                 '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
 
@@ -27,16 +25,14 @@ $(document).on('click','#btn-participant', function(e) {
                 button.text(xhr.message)
             }, 3000);
             setTimeout(function () {
-                button.text('Вы принимаете участие')
+                button.text('Внести результат')
                 button.removeClass('btn btn-dark rounded-pill')
-                button.addClass('btn border-t-neutral-500 rounded-pil')
-                button.attr("disabled", "true");
-                button.css('pointer-events', 'none');
-
+                button.addClass('btn btn-success rounded-pill')
+                button.attr("id", "listRoutesEvent");
+                document.getElementById("listRoutesEvent").onclick = function () {
+                    location.href = "/routes/event/"+event_title+"/list-routes-event";
+                };
             }, 6000);
-            setTimeout(function () {
-                window.location.href = event_title;
-            }, 3000);
         },
         error: function(xhr, status, error) {
             button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +

@@ -45,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/getProfileEvents', [App\Http\Controllers\ProfileController::class, 'getTabContentEvents'])->name('getTabContentEvents');
     Route::post('/takePart', [App\Http\Controllers\EventsController::class, 'store'])->name('takePart');
     Route::post('/sendResultParticipant', [App\Http\Controllers\EventsController::class, 'sendResultParticipant'])->name('sendResultParticipant');
-    Route::get('/routes/event/{title}', [App\Http\Controllers\EventsController::class, 'listRoutesEvent'])->name('listRoutesEvent');
+    Route::get('/routes/event/{title}/list-routes-event', [App\Http\Controllers\EventsController::class, 'listRoutesEvent'])->name('listRoutesEvent');
 });
 
 require __DIR__.'/auth.php';

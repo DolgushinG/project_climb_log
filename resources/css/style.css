@@ -360,6 +360,15 @@ h6 {
   .navbar ul {
     display: none;
   }
+    .btn-failed {
+        font-size: 13px;
+    }
+    .btn-flash {
+        font-size: 13px;
+    }
+    .btn-redpoint {
+        font-size: 13px;
+    }
 }
 
 .navbar-mobile {
@@ -565,7 +574,15 @@ h6 {
     line-height: 24px;
     margin-bottom: 30px;
   }
-
+    .btn-failed {
+        font-size: 13px;
+    }
+    .btn-flash {
+        font-size: 13px;
+    }
+    .btn-redpoint {
+        font-size: 13px;
+    }
   #hero .btn-get-started,
   #hero .btn-watch-video {
     font-size: 13px;
@@ -575,6 +592,15 @@ h6 {
 @media (max-height: 500px) {
   #hero {
     height: 120vh;
+  }
+    .btn-failed {
+        font-size: 13px;
+    }
+  .btn-flash {
+      font-size: 13px;
+  }
+  .btn-redpoint {
+    font-size: 13px;
   }
 }
 
@@ -648,6 +674,15 @@ section {
   .breadcrumbs h2 {
     margin: 0 0 10px 0;
   }
+    .btn-failed {
+        font-size: 13px;
+    }
+    .btn-flash {
+        font-size: 13px;
+    }
+    .btn-redpoint {
+        font-size: 13px;
+    }
 }
 
 .breadcrumbs ol {
@@ -674,6 +709,15 @@ section {
   .breadcrumbs .d-flex {
     display: block !important;
   }
+    .btn-failed {
+        font-size: 13px;
+    }
+    .btn-flash {
+        font-size: 13px;
+    }
+    .btn-redpoint {
+        font-size: 13px;
+    }
 
   .breadcrumbs ol {
     display: block;
@@ -905,6 +949,15 @@ section {
   .clients img {
     max-width: 40%;
   }
+    .btn-failed {
+        font-size: 13px;
+    }
+    .btn-flash {
+        font-size: 13px;
+    }
+    .btn-redpoint {
+        font-size: 13px;
+    }
 }
 
 /*--------------------------------------------------------------
@@ -1805,6 +1858,15 @@ section {
     text-align: center;
     padding: 2px 0;
   }
+    .btn-failed {
+        font-size: 13px;
+    }
+    .btn-flash {
+        font-size: 13px;
+    }
+    .btn-redpoint {
+        font-size: 13px;
+    }
 }
 
 .btn-container-mobile-fixed{

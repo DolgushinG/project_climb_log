@@ -84,9 +84,9 @@
                                             </select>
                                             <label for="floatingSelectCategory">Выбрать категорию</label>
                                         </div>
-                                        <a id="btn-participant" data-id="{{$event->id}}"
+                                        <button id="btn-participant" data-id="{{$event->id}}"
                                            data-title="{{$event->title_eng}}" data-user-id="{{Auth()->user()->id}}"
-                                           class="btn btn-dark rounded-pill" style="display: none">Участвовать</a>
+                                           class="btn btn-dark rounded-pill" style="display: none">Участвовать</button>
 
                                     @endif
                                 @endauth
