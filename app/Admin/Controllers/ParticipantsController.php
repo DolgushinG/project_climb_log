@@ -154,19 +154,19 @@ class  ParticipantsController extends Controller
             $fields = ['firstname','id', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
             $users = User::whereIn('id', $users_id)->get();
             foreach ($users as $index => $user){
+                $participant_update = Participant::where('event_id', '=', $model->id)->where('user_id', '=', $user->id)->first();
                 $users[$index] = collect($user->toArray())->except($fields);
                 $users[$index]['middlename'] = $user->middlename;
-                $place = Participant::get_places_participant_in_qualification($model->id, $user->id, true);
+                $place = Participant::get_places_participant_in_qualification($model->id, $user->id, $user->gender, $participant_update->category_id,true);
                 $users[$index]['place'] = $place;
                 $users[$index]['number_set'] = 'Сет '.$users_number_set[$user->id];
                 $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
                 $users[$index]['city'] = $user->city;
                 $users[$index]['team'] = $user->team;
-                $users[$index]['category'] = User::category($user->category);
+                $users[$index]['category'] = User::category($participant_update->category_id);
                 $users[$index]['points'] = $users_point[$user->id];
                 $users[$index]['active'] = $users_active[$user->id];
 
-                $participant_update = Participant::where('event_id', '=', $model->id)->where('user_id', '=', $user->id)->first();
                 $participant_update->user_place = $place;
                 $participant_update->save();
 

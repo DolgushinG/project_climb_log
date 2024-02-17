@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfilePasswordRequest;
 use App\Http\Requests\StoreRequest;
 use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
@@ -185,7 +184,7 @@ class EventsController extends Controller
             $route['points'] = $coefficient * $value_route;
             # Формат все трассы считаем сразу
             if($format == 2) {
-                (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id']);
+                (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id'], $gender);
             }
             $final_data[] = $route;
             if ($route['attempt'] != 0){
@@ -215,9 +214,15 @@ class EventsController extends Controller
 
         $result = ResultParticipant::insert($final_data);
 
-        $users = Participant::where('event_id', '=', $request->event_id)->pluck('user_id')->toArray();
-        foreach ($users as $user) {
-            Event::update_participant_place($request->event_id, $user);
+        $participants = User::query()
+            ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
+            ->where('participants.event_id', '=', $request->event_id)
+            ->select(
+                'users.id',
+                'users.gender',
+            )->get();
+        foreach ($participants as $participant) {
+            Event::update_participant_place($request->event_id, $participant->id, $participant->gender);
         }
 
         UpdateResultParticipants::dispatch($request->event_id);

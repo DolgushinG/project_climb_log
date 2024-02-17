@@ -84,31 +84,33 @@ class Event extends Model
         $routes = ResultParticipant::where('event_id', '=', $event_id)->select('route_id')->distinct()->get()->toArray();
         $event = Event::find($event_id);
         $format = $event->mode;
-        $final_participant = Participant::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
-        foreach ($final_participant as $user) {
+        $participants = User::query()
+            ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
+            ->where('participants.event_id', '=',$event_id)
+            ->select(
+                'users.id',
+                'participants.category_id',
+                'users.gender',
+            )->get();
+        foreach ($participants as $participant) {
+            # Points для Формата все трассы считаем сразу
             $points = 0;
             $routes_only_passed = array();
-            $gender = User::find($user)->gender;
             foreach ($routes as $route) {
                 $user_model = ResultParticipant::where('event_id', '=', $event_id)
-                    ->where('user_id', '=', $user)
+                    ->where('user_id', '=', $participant->id)
                     ->where('route_id', '=', $route['route_id'])
                     ->first();
-                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route['route_id'], $event->owner_id, $gender);
                 if($user_model->attempt != 0) {
                     $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
-                    $coefficient = ResultParticipant::get_coefficient($event_id, $route['route_id'], $gender);
+                    $coefficient = EventAndCoefficientRoute::where('event_id', '=', $event_id)
+                        ->where('route_id', '=', $route['route_id'])->first()->toArray();
                     $value_route = (new \App\Models\ResultParticipant)->get_value_route($user_model->attempt, $value_category, $event->mode);
-                    $points += $coefficient * $value_route;
-                    $point_route = $coefficient * $value_route;
-                    # Формат все трассы считаем сразу
-                    if($format == 2) {
-                        (new Event)->insert_final_participant_result($event_id, $point_route, $user);
-                    }
+                    $points += $coefficient['coefficient_'.$participant->gender] * $value_route;
+                    $point_route = $coefficient['coefficient_'.$participant->gender] * $value_route;
                     $user_model->points = $point_route;
                     $routes_only_passed[] = $user_model;
                 }
-
             }
             if($format == 1){
                 $points = 0;
@@ -121,18 +123,16 @@ class Event extends Model
                     $points += $lastElem->points;
                 }
             }
-
-            $final_participant_result = Participant::where('user_id', '=', $user)->where('event_id', '=', $event_id)->first();
+            $final_participant_result = Participant::where('user_id', '=', $participant->id)->where('event_id', '=', $event_id)->first();
             $final_participant_result->points = $points;
             $final_participant_result->event_id = $event_id;
-            $final_participant_result->user_id = $user;
+            $final_participant_result->user_id = $participant->id;
             $final_participant_result->save();
-        }
-        foreach ($final_participant as $user) {
-            $place = Participant::get_places_participant_in_qualification($event_id, $user, true);
-            $final_participant_result = Participant::where('user_id', '=', $user)->where('event_id', '=', $event_id)->first();
-            $final_participant_result->user_place = $place;
-            $final_participant_result->save();
+
+            $place = Participant::get_places_participant_in_qualification($event_id, $participant->id, $participant->gender, $participant->category_id,true);
+            $participant_result = Participant::where('user_id', '=', $participant->id)->where('event_id', '=', $event_id)->first();
+            $participant_result->user_place = $place;
+            $participant_result->save();
         }
         $update = UpdateParticipantResult::where('event_id', '=', $event_id)->first();
         if(!$update){
@@ -165,17 +165,17 @@ class Event extends Model
         ResultRouteSemiFinalStageController::getUsersSorted($users_male, $fields, $event, 'final', $owner_id);
     }
 
-    public function insert_final_participant_result($event_id, $points, $user_id){
+    public function insert_final_participant_result($event_id, $points, $user_id, $gender){
         $final_participant_result = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first();
         $final_participant_result->points = $final_participant_result->points + $points;
         $final_participant_result->active = 1;
-        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user_id, true);
+        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user_id, $gender, $final_participant_result->category_id,true);
         $final_participant_result->save();
     }
 
-    public static function update_participant_place($event_id, $user_id){
+    public static function update_participant_place($event_id, $user_id, $gender){
         $final_participant_result = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first();
-        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user_id, true);
+        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($event_id, $user_id, $gender, $final_participant_result->category_id,true);
         $final_participant_result->save();
     }
 

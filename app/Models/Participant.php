@@ -2,11 +2,8 @@
 
 namespace App\Models;
 
-use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use function Symfony\Component\Translation\t;
 
 class Participant extends Model
 {
@@ -49,7 +46,9 @@ class Participant extends Model
             if($type == 'Final'){
                 $place = Participant::get_place_participant_in_semifinal($event_id, $d_array['user_id']);
             } else {
-                $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], true);
+                $gender = User::find($d_array['user_id'])->gender;
+                $category_id = Participant::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
+                $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
             }
             $index_user_final_in_res = self::findIndexByUserId($result_final, $d_array['user_id']);
             $user_places[] = array('user_id' => $d_array['user_id'], 'place' => $place, 'index' => $index_user_final_in_res);
@@ -92,10 +91,8 @@ class Participant extends Model
     public static function get_place_participant_in_semifinal($event_id, $user_id){
         return ResultSemiFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->get()->place;
     }
-    public static function get_places_participant_in_qualification($event_id, $user_id, $get_place_user = false){
-        $user = User::find($user_id);
-        $category_id = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first()->category_id;
-        $users_id = User::where('gender', '=', $user->gender)->pluck('id');
+    public static function get_places_participant_in_qualification($event_id, $user_id, $gender, $category_id, $get_place_user = false){
+        $users_id = User::where('gender', '=', $gender)->pluck('id');
         $all_participant_event = Participant::whereIn('user_id', $users_id)->where('category_id', '=', $category_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
         $user_places = array();
         foreach ($all_participant_event as $index => $user){
@@ -148,20 +145,5 @@ class Participant extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
-    }
-
-
-    public function add_result_participant($user_id, $points){
-
-        $final_participant_result = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $this->event_id)->first();
-        $final_participant_result->points = $points;
-        $final_participant_result->event_id = $this->event_id;
-        $final_participant_result->user_id = $user_id;
-        $final_participant_result->user_place = Participant::get_places_participant_in_qualification($this->event_id, $user, true);
-        $final_participant_result->save();
-
-        $participant = Participant::where('user_id', '=', $user)->where('event_id', '=', $this->event_id)->first();
-        $participant->active = 1;
-        $participant->save();
     }
 }

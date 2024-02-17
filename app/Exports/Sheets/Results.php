@@ -207,7 +207,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             $amount_passed_flash = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 1)->get()->count();
             $amount_passed_redpoint = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 2)->get()->count();
             $amount_passed_routes = $amount_passed_flash+$amount_passed_redpoint;
-            $place = Participant::get_places_participant_in_qualification($this->event_id, $user['id'], true);
+            $place = Participant::get_places_participant_in_qualification($this->event_id, $user['id'], $this->gender, $this->category->id, true);
             $users[$index]['user_place'] = $place;
             $users[$index]['amount_passed_routes'] = $amount_passed_routes;
             $users[$index]['amount_passed_flash'] = $amount_passed_flash;

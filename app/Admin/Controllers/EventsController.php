@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Format;
 use App\Models\Grades;
 use App\Models\ParticipantCategory;
+use App\Models\Set;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -18,6 +19,7 @@ use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Table;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\MessageBag;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -262,6 +264,10 @@ class EventsController extends Controller
                     Event::generation_route(Admin::user()->id, $form->model()->id, $form->grade_and_amount);
                 }
             }
+            $exist_sets = Set::where('owner_id', '=', Admin::user()->id)->first();
+            if(!$exist_sets) {
+                $this->install_set(Admin::user()->id);
+            }
             $success = new MessageBag([
                 'title'   => 'Соревнование успешно создано',
                 'message' => '',
@@ -330,5 +336,19 @@ class EventsController extends Controller
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/ods',
         ]);
+    }
+
+    public function install_set($owner_id){
+        $sets = array(
+            ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'friday','number_set' => 1],
+            ['owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'friday','number_set' => 2],
+            ['owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'saturday','number_set' => 6],
+            ['owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'friday','number_set' => 3],
+            ['owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'saturday','number_set' => 7],
+            ['owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'friday','number_set' => 4],
+            ['owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'saturday','number_set' => 8],
+            ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'saturday','number_set' => 5],
+        );
+        DB::table('sets')->insert($sets);
     }
 }

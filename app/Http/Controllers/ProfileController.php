@@ -72,10 +72,9 @@ class ProfileController extends Controller
         $events = Event::whereIn('id', $events_id)->get();
         foreach ($events as $event){
             $event['amount_participant'] = Participant::where('event_id', '=', $event->id)->get()->count();
-            $active = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->active;
-            if($active){
-                $users = Participant::get_places_participant_in_qualification($event->id, $user_id);
-                $user_place = $users[$user_id];
+            $participant = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+            if($participant->active){
+                $user_place = $participant->user_place;
                 $status = "Результаты добавлены";
             }else{
                 $status = "Необходимо добавить результаты";
@@ -94,7 +93,6 @@ class ProfileController extends Controller
             }
             $event['amount_passed_grades'] = json_encode(array_values($result));
         }
-//        dd($events);
         return view('profile.events', compact(['events']));
     }
     public function editChanges(Request $request) {
