@@ -360,7 +360,6 @@ class ResultRouteSemiFinalStageController extends Controller
                 $users_with_result[$index]['amount_zone'] = $result['amount_zone'];
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
-
         }
 //        if($user->id == 45){
 //            dd($users_with_result);
