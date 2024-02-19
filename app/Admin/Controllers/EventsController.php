@@ -190,13 +190,11 @@ class EventsController extends Controller
                 1 =>'С полуфиналом',
                 0 =>'Без полуфинала',
             ])->when(1, function (Form $form) {
-                $form->hidden('is_semifinal')->value(1);
                 $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->value(5);
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
             })->when(0, function (Form $form) {
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
-                $form->hidden('is_semifinal')->value(0);
-            })->value(0)->required();
+            })->required();
         $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
 
 //        $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
