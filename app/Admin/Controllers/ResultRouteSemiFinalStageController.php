@@ -361,11 +361,9 @@ class ResultRouteSemiFinalStageController extends Controller
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
         }
-//        if($user->id == 45){
-//            dd($users_with_result);
-//        }
-//        dd($users_with_result);
         $users_sorted = Participant::counting_final_place($model->id, $users_with_result, $type);
+//        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
+//        dd($users_sorted);
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user){
             $fields = ['result'];

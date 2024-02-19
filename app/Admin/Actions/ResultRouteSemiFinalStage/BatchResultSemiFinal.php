@@ -4,6 +4,7 @@ namespace App\Admin\Actions\ResultRouteSemiFinalStage;
 
 use App\Models\Event;
 use App\Models\Participant;
+use App\Models\ResultRouteSemiFinalStage;
 use Encore\Admin\Actions\Action;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -53,7 +54,13 @@ class BatchResultSemiFinal extends Action
         $users_female = Participant::better_participants($event->id, 'female', 10);
         $merged_users = $users_male->merge($users_female);
         $result = $merged_users->pluck( 'middlename','id');
-        $this->select('user_id', 'Участник')->options($result);
+        $result_semifinal = ResultRouteSemiFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
+        foreach ($result as $index => $res){
+            if(in_array($index, $result_semifinal)){
+                $result[$index] = $res.' [Уже добавлен]';
+            }
+        }
+        $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
             $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();

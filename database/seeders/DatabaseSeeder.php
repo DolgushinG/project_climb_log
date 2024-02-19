@@ -40,8 +40,8 @@ class DatabaseSeeder extends Seeder
             ParticipantSeeder::class,
             GradesSeeder::class,
             ResultParticipantSeeder::class,
-            ResultRouteSemiFinalStageSeeder::class,
-            ResultRouteFinalSeeder::class,
+//            ResultRouteSemiFinalStageSeeder::class,
+//            ResultRouteFinalSeeder::class,
         ]);
     }
 }

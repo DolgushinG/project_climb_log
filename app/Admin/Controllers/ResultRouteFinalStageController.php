@@ -114,18 +114,21 @@ class ResultRouteFinalStageController extends Controller
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchResultFinal);
         });
-
+        $grid->actions(function ($actions) {
+            $actions->disableEdit();
+            $actions->disableView();
+        });
 //        $events_title = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck('title','id')->toArray();
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
 //        $grid->column('event_id','Соревнование')->select($events_title);
-        $grid->column('final_route_id', __('Номер маршрута'))->editable();
+        $grid->column('final_route_id', __('Номер маршрута'));
         if($event->is_semifinal){
-            $grid->column('user_id', __('Участник'))->select($this->getUsersFinal($event->id));
+            $grid->column('user.middlename', __('Участник'));
         } else {
             $grid->column('user_id', __('Участник'))->select($this->getUsersPartipants($event->id));
         }
-        $grid->column('amount_try_top', __('Кол-во попыток на топ'))->editable();
-        $grid->column('amount_try_zone', __('Кол-во попыток на зону'))->editable();
+        $grid->column('amount_try_top', __('Кол-во попыток на топ'));
+        $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
         $grid->disableExport();
         $grid->disableColumnSelector();
         $grid->disableCreateButton();

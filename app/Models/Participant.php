@@ -17,6 +17,7 @@ class Participant extends Model
         return $this->belongsTo(User::class);
     }
     public static function counting_final_place($event_id, $result_final, $type='final'){
+//        dd($result_final);
         // Сортировка по amount_top в убывающем порядке, затем по amount_try_top в возрастающем порядке,
         // затем по amount_zone в убывающем порядке, затем по amount_try_zone в возрастающем порядке
         usort($result_final, function ($a, $b) {
@@ -32,7 +33,7 @@ class Participant extends Model
             $key = "{$item['amount_top']}_{$item['amount_try_top']}_{$item['amount_zone']}_{$item['amount_try_zone']}";
             $grouped_results[$key][] = $item;
         }
-
+//        dd($grouped_results);
 // Фильтрация групп, оставляем только те, где количество элементов больше 1 (т.е., где есть дубликаты)
         $duplicate_groups = array_filter($grouped_results, function ($group) {
             return count($group) > 1;
@@ -43,45 +44,54 @@ class Participant extends Model
 
         $user_places = array();
         foreach ($duplicate_arrays as $index => $d_array){
-            if($type == 'Final'){
+            if($type == 'final'){
                 $place = Participant::get_place_participant_in_semifinal($event_id, $d_array['user_id']);
             } else {
                 $gender = User::find($d_array['user_id'])->gender;
                 $category_id = Participant::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
                 $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
             }
-            $index_user_final_in_res = self::findIndexByUserId($result_final, $d_array['user_id']);
+            $index_user_final_in_res = self::findIndexBy($result_final, $d_array['user_id'], 'user_id');
             $user_places[] = array('user_id' => $d_array['user_id'], 'place' => $place, 'index' => $index_user_final_in_res);
 
         }
-//        dd($user_places, $result_final);
-        usort($user_places, function ($a, $b) {
-            return $a['place'] <=> $b['place'];
-        });
-//        dd($user_places);
-        # Расставляем места
-        foreach ($user_places as $index => $user_place){
-//            dd($result_final, $user_place['index'], $index);
-            $result_final[$user_place['index']]['place'] = $user_place['index'] + 1;
-//            dd($result_final[$user_place['index']]['place']);
+       # Если есть дубликаты то в $user_places будут сортированы результаты
+        if($user_places != []) {
+            usort($user_places, function ($a, $b) {
+                return $a['index'] <=> $b['index'];
+            });
+            $start_replace_in_result = $user_places[0]['index'];
+            $count_replace_el_in_result = count($user_places);
+            usort($user_places, function ($a, $b) {
+                return $a['place'] <=> $b['place'];
+            });
+            $new_result_final = $result_final;
+            $index = 0;
+            for ($i = $start_replace_in_result; $i < $count_replace_el_in_result; $i++) {
+                $new_result_final[$i] = $result_final[$user_places[$index]['index']];
+                $index++;
+            }
+            # Расставляем места
+            foreach ($user_places as $index => $user_place) {
+                $new_result_final[$user_place['index']]['place'] = $user_place['index'] + 1;
+            }
+        } else{
+            $new_result_final = $result_final;
         }
-
-        // Расставляем места в зависимости от результатов квалификации
-        foreach ($result_final as $index => $result){
+//        // Расставляем места в зависимости от результатов квалификации
+        foreach ($new_result_final as $index => $result){
             if (!$result['place']){
-                $result_final[$index]['place'] = $index+1;
+                $new_result_final[$index]['place'] = $index+1;
             }
         }
-//        dd($result_final);
-        usort($result_final, function ($a, $b) {
+        usort($new_result_final, function ($a, $b) {
             return $a['place'] <=> $b['place'];
         });
-
-       return $result_final;
+       return $new_result_final;
     }
-    public static function findIndexByUserId($array, $userId) {
+    public static function findIndexBy($array, $element, $needle) {
         foreach ($array as $key => $item) {
-            if ($item['user_id'] == $userId) {
+            if ($item[$needle] == $element) {
                 return $key;
             }
         }
@@ -89,7 +99,7 @@ class Participant extends Model
     }
 
     public static function get_place_participant_in_semifinal($event_id, $user_id){
-        return ResultSemiFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->get()->place;
+        return ResultSemiFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
     }
     public static function get_places_participant_in_qualification($event_id, $user_id, $gender, $category_id, $get_place_user = false){
         $users_id = User::where('gender', '=', $gender)->pluck('id');
@@ -132,9 +142,9 @@ class Participant extends Model
     public static function better_participants($event_id, $gender, $amount_better){
         $participant_users_id = Participant::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
         $users_id = User::whereIn('id', $participant_users_id)->where('gender', '=', $gender)->pluck('id');
-//        $users_id = User::whereIn('id', $participant_users_id)->where('gender', '=', $gender)->where('category', '=', 3)->pluck('id');
-        $participant_sort_id = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->sortByDesc('points')->take($amount_better)->pluck('user_id');
-        return User::whereIn('id', $participant_sort_id)->get();
+        $participant_sort_id = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->sortByDesc('points')->pluck('user_id');
+        $after_slice_participant_final_sort_id = array_slice($participant_sort_id->toArray(), 0,$amount_better);
+        return User::whereIn('id', $after_slice_participant_final_sort_id)->get();
     }
 
     public function user()

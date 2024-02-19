@@ -84,10 +84,15 @@ class User extends Authenticatable
         return $this->belongsToMany(Event::class);
     }
 
-    public function result_final_stage()
+    public function result_semi_final_stage()
     {
         return $this->hasOne(ResultRouteSemiFinalStage::class);
     }
 
+    public function result_route_final_stage()
+    {
+        return $this->hasOne(ResultRouteFinalStage::class);
+
+    }
 
 }
