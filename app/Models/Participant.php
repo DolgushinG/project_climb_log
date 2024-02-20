@@ -67,13 +67,15 @@ class Participant extends Model
             });
             $index = 0;
             $temp_array_for_result = array();
+//            dd($user_places, $result_final);
             for ($i = $start_replace_in_result; $i <= $count_replace_el_in_result; $i++) {
                 $temp_array_for_result[] = $result_final[$user_places[$index]['index']];
                 $index++;
             }
+//            dd($user_places, $result_final, $temp_array_for_result);
             $x = 0;
             for ($i = $start_replace_in_result; $i <= $count_replace_el_in_result; $i++) {
-                $result_final[$user_places[$x]['index']] = $temp_array_for_result[$x];
+                $result_final[$i] = $temp_array_for_result[$x];
                 $x++;
             }
             # Расставляем места
@@ -159,5 +161,9 @@ class Participant extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function category(){
+        return $this->belongsTo(ParticipantCategory::class);
     }
 }

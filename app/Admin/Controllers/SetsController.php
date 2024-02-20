@@ -2,6 +2,8 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchForceRecouting;
+use App\Admin\Actions\ResultQualification\BatchResultQualification;
 use App\Models\Set;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Facades\Admin;
@@ -89,6 +91,13 @@ class SetsController extends Controller
         } else {
             $grid->column('owner_id', 'Owner');
         }
+        $grid->disableExport();
+        $grid->disableCreateButton();
+        $grid->disableColumnSelector();
+        $grid->actions(function ($actions) {
+            $actions->disableEdit();
+            $actions->disableView();
+        });
 //        $grid->id('ID');
         $grid->filter(function($filter){
 

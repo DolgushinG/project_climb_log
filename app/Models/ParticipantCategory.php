@@ -11,4 +11,5 @@ class ParticipantCategory extends Model
     {
         return $this->belongsTo(Participant::class);
     }
+
 }

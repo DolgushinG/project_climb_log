@@ -114,10 +114,14 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchResultSemiFinal);
         });
-        $grid->column('final_route_id', __('Номер маршрута'))->editable();
+        $grid->actions(function ($actions) {
+            $actions->disableEdit();
+            $actions->disableView();
+        });
+        $grid->column('final_route_id', __('Номер маршрута'));
         $grid->column('user_id', __('Участник'))->select($this->getUsers()->toArray());
-        $grid->column('amount_try_top', __('Кол-во попыток на топ'))->editable();
-        $grid->column('amount_try_zone', __('Кол-во попыток на зону'))->editable();
+        $grid->column('amount_try_top', __('Кол-во попыток на топ'));
+        $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
         $grid->disableExport();
         $grid->disableColumnSelector();
         $grid->disableCreateButton();

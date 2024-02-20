@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
 use App\Admin\CustomAction\ActionExport;
@@ -231,12 +232,20 @@ class  ParticipantsController extends Controller
         $grid->disableColumnSelector();
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchResultQualification);
+            $tools->append(new BatchForceRecouting);
+        });
+        $grid->actions(function ($actions) {
+            $actions->disableEdit();
+            $actions->disableView();
+            $actions->disableDelete();
         });
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
         })->editable();
-        $grid->column('category_id', 'Категория')->select($this->getUserCategory()->toArray());
+        $grid->column('category_id', 'Категория')
+            ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
+            ->select($this->getUserCategory()->toArray());
         $grid->column('number_set', 'Номер сета')->editable();
         $grid->column('user_place', 'Место в квалификации')->sortable();
         $grid->column('points', 'Баллы')->sortable();
@@ -357,19 +366,13 @@ class  ParticipantsController extends Controller
         $form->hidden('owner_id')->value(Admin::user()->id);
         $form->text('event_id');
         $form->text('number_set', 'number_set');
-        $form->text('firstname', 'firstname');
-        $form->text('lastname', 'lastname');
-        $form->text('gender', 'gender');
-        $form->text('year', 'year');
-        $form->text('city', 'city');
-        $form->text('team', 'team');
-        $form->text('skill', 'skill');
-        $form->text('sports_category', 'sports_category');
-        $form->text('age', 'age');
+        $form->text('category_id', 'number_set');
         $form->switch('active', 'active');
         $form->display(trans('admin.created_at'));
         $form->display(trans('admin.updated_at'));
-
+        $form->saving(function (Form $form) {
+//            dd($form->category);
+        });
         return $form;
     }
     public function exportQualificationExcel(Request $request)
