@@ -52,7 +52,7 @@ class  ParticipantsController extends Controller
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($event) {
 //                    $row->column(10, $this->grid4());
-                    $row->column(10, $this->grid2());
+                    $row->column(20, $this->grid2());
                 } else {
                     $row->column(10, $this->grid());
                     $row->column(10, $this->grid3());
