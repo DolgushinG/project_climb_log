@@ -65,29 +65,33 @@ class Participant extends Model
             usort($user_places, function ($a, $b) {
                 return $a['place'] <=> $b['place'];
             });
-            $new_result_final = $result_final;
             $index = 0;
-            for ($i = $start_replace_in_result; $i < $count_replace_el_in_result; $i++) {
-                $new_result_final[$i] = $result_final[$user_places[$index]['index']];
+            $temp_array_for_result = array();
+            for ($i = $start_replace_in_result; $i <= $count_replace_el_in_result; $i++) {
+                $temp_array_for_result[] = $result_final[$user_places[$index]['index']];
                 $index++;
+            }
+            $x = 0;
+            for ($i = $start_replace_in_result; $i <= $count_replace_el_in_result; $i++) {
+                $result_final[$user_places[$x]['index']] = $temp_array_for_result[$x];
+                $x++;
             }
             # Расставляем места
             foreach ($user_places as $index => $user_place) {
-                $new_result_final[$user_place['index']]['place'] = $user_place['index'] + 1;
+                $result_final[$user_place['index']]['place'] = $user_place['index'] + 1;
             }
-        } else{
-            $new_result_final = $result_final;
         }
 //        // Расставляем места в зависимости от результатов квалификации
-        foreach ($new_result_final as $index => $result){
+        foreach ($result_final as $index => $result){
             if (!$result['place']){
-                $new_result_final[$index]['place'] = $index+1;
+                $result_final[$index]['place'] = $index+1;
             }
         }
-        usort($new_result_final, function ($a, $b) {
+        usort($result_final, function ($a, $b) {
             return $a['place'] <=> $b['place'];
         });
-       return $new_result_final;
+//        dd($result_final);
+       return $result_final;
     }
     public static function findIndexBy($array, $element, $needle) {
         foreach ($array as $key => $item) {
