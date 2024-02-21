@@ -165,7 +165,7 @@ return [
         /*
          * Package Service Providers...
          */
-
+        App\Providers\MaterialUIServiceProvider::class,
         /*
          * Application Service Providers...
          */

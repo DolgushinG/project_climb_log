@@ -12,7 +12,6 @@
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "jxlwqq/data-table": "^1.0",
-        "jxlwqq/material-ui": "^1.0",
         "laravel-admin-ext/chartjs": "^1.0",
         "laravel-admin-ext/helpers": "2.*",
         "laravel-admin-ext/summernote": "^1.0",
