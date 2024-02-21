@@ -31,8 +31,10 @@ Grid::init(function (Grid $grid) {
         $actions->disableView();
     });
 });
-
 Encore\Admin\Grid\Column::define('actions', app\Admin\CustomAction\CustomActions::class);
 app('view')->prependNamespace('admin', resource_path('views/admin'));
 //Admin::js('/vendor/chart.js/chart.js');
 Form::extend('tablecustom', CustomTable::class);
+
+Admin::headerJs('/vendor/laravel-admin-ext/material-ui/MaterialAdminLTE/dist/js/material.min.js');
+Admin::headerJs('/vendor/laravel-admin-ext/material-ui/MaterialAdminLTE/dist/js/ripples.min.js');
