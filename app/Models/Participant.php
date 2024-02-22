@@ -22,8 +22,8 @@ class Participant extends Model
         // затем по amount_zone в убывающем порядке, затем по amount_try_zone в возрастающем порядке
         usort($result_final, function ($a, $b) {
             return $b['amount_top'] <=> $a['amount_top']
-                ?: $a['amount_try_top'] <=> $b['amount_try_top']
-                ?: $b['amount_zone'] <=> $a['amount_zone']
+                ?: $a['amount_zone'] <=> $b['amount_zone']
+                ?: $b['amount_try_top'] <=> $a['amount_try_top']
                 ?: $a['amount_try_zone'] <=> $b['amount_try_zone'];
         });
 
