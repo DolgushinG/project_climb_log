@@ -194,7 +194,7 @@ class EventsController extends Controller
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
             })->when(0, function (Form $form) {
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
-            })->required();
+            })->value(0)->required();
         $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
 
 //        $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
@@ -240,38 +240,40 @@ class EventsController extends Controller
 
         });
         $form->saved(function (Form $form) {
-            foreach ($form->categories as $category){
-                foreach ($category as $c){
-                    $category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
-                        ->where('event_id', '=', $form->model()->id)
-                        ->where('category', '=', $c)->first();
-                    if(!$category){
-                        $participant_categories = new ParticipantCategory;
-                        $participant_categories->owner_id = Admin::user()->id;
-                        $participant_categories->event_id = $form->model()->id;
-                        $participant_categories->category = $c;
-                        $participant_categories->save();
+            if($form->categories){
+                foreach ($form->categories as $category){
+                    foreach ($category as $c){
+                        $category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
+                            ->where('event_id', '=', $form->model()->id)
+                            ->where('category', '=', $c)->first();
+                        if(!$category){
+                            $participant_categories = new ParticipantCategory;
+                            $participant_categories->owner_id = Admin::user()->id;
+                            $participant_categories->event_id = $form->model()->id;
+                            $participant_categories->category = $c;
+                            $participant_categories->save();
+                        }
                     }
                 }
-
-            }
-            $exist_routes_list = Grades::where('owner_id', '=', Admin::user()->id)
-                ->where('event_id', '=', $form->model()->id)->first();
-            if(!$exist_routes_list){
-                if ($form->grade_and_amount){
-                    Event::generation_route(Admin::user()->id, $form->model()->id, $form->grade_and_amount);
+                $exist_routes_list = Grades::where('owner_id', '=', Admin::user()->id)
+                    ->where('event_id', '=', $form->model()->id)->first();
+                if(!$exist_routes_list){
+                    if ($form->grade_and_amount){
+                        Event::generation_route(Admin::user()->id, $form->model()->id, $form->grade_and_amount);
+                    }
                 }
-            }
-            $exist_sets = Set::where('owner_id', '=', Admin::user()->id)->first();
-            if(!$exist_sets) {
-                $this->install_set(Admin::user()->id);
-            }
-            $success = new MessageBag([
-                'title'   => 'Соревнование успешно создано',
-                'message' => '',
-            ]);
+                $exist_sets = Set::where('owner_id', '=', Admin::user()->id)->first();
+                if(!$exist_sets) {
+                    $this->install_set(Admin::user()->id);
+                }
+                $success = new MessageBag([
+                    'title'   => 'Соревнование успешно создано',
+                    'message' => '',
+                ]);
 
-            return back()->with(compact('success'));
+                return back()->with(compact('success'));
+            }
+            return $form;
         });
         return $form;
     }

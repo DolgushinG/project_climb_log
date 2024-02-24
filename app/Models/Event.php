@@ -103,6 +103,7 @@ class Event extends Model
                     ->first();
                 if($user_model->attempt != 0) {
                     $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
+//                    (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event->id, $route['route_id'], $event->owner_id, $participant->gender);
                     $coefficient = EventAndCoefficientRoute::where('event_id', '=', $event_id)
                         ->where('route_id', '=', $route['route_id'])->first()->toArray();
                     $value_route = (new \App\Models\ResultParticipant)->get_value_route($user_model->attempt, $value_category, $event->mode);

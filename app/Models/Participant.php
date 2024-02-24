@@ -45,7 +45,14 @@ class Participant extends Model
         $user_places = array();
         foreach ($duplicate_arrays as $index => $d_array){
             if($type == 'final'){
-                $place = Participant::get_place_participant_in_semifinal($event_id, $d_array['user_id']);
+                $is_semifinal = Event::find($event_id)->is_semifinal;
+                if($is_semifinal){
+                    $place = Participant::get_place_participant_in_semifinal($event_id, $d_array['user_id']);
+                } else {
+                    $gender = User::find($d_array['user_id'])->gender;
+                    $category_id = Participant::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
+                    $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
+                }
             } else {
                 $gender = User::find($d_array['user_id'])->gender;
                 $category_id = Participant::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
@@ -67,14 +74,13 @@ class Participant extends Model
             });
             $index = 0;
             $temp_array_for_result = array();
-//            dd($user_places, $result_final);
-            for ($i = $start_replace_in_result; $i <= $count_replace_el_in_result; $i++) {
+
+            for ($i = $start_replace_in_result; $i < $count_replace_el_in_result; $i++) {
                 $temp_array_for_result[] = $result_final[$user_places[$index]['index']];
                 $index++;
             }
-//            dd($user_places, $result_final, $temp_array_for_result);
             $x = 0;
-            for ($i = $start_replace_in_result; $i <= $count_replace_el_in_result; $i++) {
+            for ($i = $start_replace_in_result; $i < $count_replace_el_in_result; $i++) {
                 $result_final[$i] = $temp_array_for_result[$x];
                 $x++;
             }
@@ -128,7 +134,6 @@ class Participant extends Model
         } else {
             $active_participant = Participant::where('event_id', '=', $event_id)->where('active', '=', 1)->pluck('user_id')->toArray();
         }
-
         if ($active_participant) {
             return count(User::whereIn('id', $active_participant)->where('gender', '=', $gender)->get()->toArray());
         } else {
@@ -160,7 +165,7 @@ class Participant extends Model
 
     public function event()
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class)->where('active', '=', 1);
     }
 
     public function category(){

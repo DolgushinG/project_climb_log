@@ -22,37 +22,31 @@ class ResultParticipant extends Model
 
     protected $table = 'result_participant';
 
-    private static function counting_result($event_id, $route_id, $category_id=null)
+    private static function counting_result($event_id, $route_id, $gender)
     {
-        if($category_id){
-            return count(ResultParticipant::where('event_id', '=', $event_id)
-                ->where('route_id', '=', $route_id)
-                ->where('category_id', '=', $category_id)
-                ->whereNotIn('attempt',[0])
-                ->get()
-                ->toArray());
-        } else {
-            return count(ResultParticipant::where('event_id', '=', $event_id)
-                ->where('route_id', '=', $route_id)
-                ->whereNotIn('attempt',[0])
-                ->get()
-                ->toArray());
-        }
-
+        $users = User::query()
+            ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
+            ->where('participants.event_id', '=', $event_id)
+            ->where('participants.active', '=', 1)
+            ->where('gender', '=', $gender)
+            ->select(
+                'users.id',
+            )
+            ->pluck('id');
+        return count(ResultParticipant::whereIn('user_id', $users)
+            ->where('route_id', '=', $route_id)
+            ->whereNotIn('attempt',[0])
+            ->get()
+            ->toArray());
     }
 
-    public static function get_coefficient($event_id, $route_id, $gender, $category_id=null){
-        if($category_id){
-            $active_participant = Participant::participant_with_result($event_id, $gender, $category_id);
-            $count_route_passed = self::counting_result($event_id, $route_id, $category_id);
-        } else {
-            $active_participant = Participant::participant_with_result($event_id, $gender);
-            $count_route_passed = self::counting_result($event_id, $route_id);
-        }
+    public static function get_coefficient($event_id, $route_id, $gender){
+        $active_participant = Participant::participant_with_result($event_id, $gender);
+        $count_route_passed = self::counting_result($event_id, $route_id, $gender);
         if ($count_route_passed == 0) {
             $count_route_passed = 1;
         }
-        return sqrt($active_participant / $count_route_passed );
+        return sqrt($active_participant / $count_route_passed);
     }
     public function get_value_route($attempt, $value_category, $format) {
         switch ($format) {

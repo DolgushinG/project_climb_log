@@ -41,13 +41,13 @@ class ResultRouteSemiFinalStageController extends Controller
             ->header(trans('admin.index'))
             ->description(trans('admin.description'))
             ->row(function(Row $row) {
-                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+                $event = Event::where('owner_id', '=', Admin::user()->id)
+                    ->where('active', '=', 1)
+                    ->where('is_semifinal', '=', 1)
+                    ->first();
                 if($event) {
                     $row->column(10, $this->grid2());
                     $row->column(10, $this->grid());
-                } else {
-                    $row->column(10, $this->grid2());
-                    $row->column(10, $this->grid3());
                 }
             });
     }
@@ -105,8 +105,8 @@ class ResultRouteSemiFinalStageController extends Controller
     {
         $grid = new Grid(new ResultRouteSemiFinalStage);
         if (!Admin::user()->isAdministrator()){
-            $grid->model()->where('owner_id', '=', Admin::user()->id);
-
+            $grid->model()
+                ->where('owner_id', '=', Admin::user()->id);
         }
         $grid->model()->where(function ($query) {
             $query->has('event.result_semifinal_stage');
@@ -118,6 +118,7 @@ class ResultRouteSemiFinalStageController extends Controller
             $actions->disableEdit();
             $actions->disableView();
         });
+
         $grid->column('final_route_id', __('Номер маршрута'));
         $grid->column('user_id', __('Участник'))->select($this->getUsers()->toArray());
         $grid->column('amount_try_top', __('Кол-во попыток на топ'));
@@ -162,7 +163,10 @@ class ResultRouteSemiFinalStageController extends Controller
     {
         $grid = new Grid(new Event);
         if (!Admin::user()->isAdministrator()){
-            $grid->model()->where('owner_id', '=', Admin::user()->id)->where('is_semifinal', '=', '1');
+            $grid->model()
+                ->where('owner_id', '=', Admin::user()->id)
+                ->where('active', '=',1)
+                ->where('is_semifinal', '=', 1);
         }
         $grid->actions(function ($actions){
             $actions->disableDelete();
@@ -180,7 +184,7 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->disableBatchActions();
         $grid->disableFilter();
         $grid->column('title', 'Соревнование')->expand(function ($model) {
-            $headers = ['Участник', 'Пол', 'Место с учетом квалы', 'Кол-во топ','Кол-во попыток на топ','Кол-во зон', 'Кол-во попыток на зону', ];
+            $headers = ['Участник', 'Пол', 'Место с учетом квалы', 'Кол-во топ','Кол-во зон','Кол-во попыток на топ', 'Кол-во попыток на зону', ];
             $style = ['table-bordered','table-hover', 'table-striped'];
             $users_male = Participant::better_participants($model->id, 'male', 10);
             $users_female = Participant::better_participants($model->id, 'female', 10);
@@ -208,9 +212,9 @@ class ResultRouteSemiFinalStageController extends Controller
                 $final_result_stage->event_id = $all_users[$index]['event_id'];
                 $final_result_stage->user_id = $all_users[$index]['user_id'];
                 $final_result_stage->amount_top = $all_users[$index]['amount_top'];
+                $final_result_stage->amount_zone = $all_users[$index]['amount_zone'];
                 $final_result_stage->amount_try_top = $all_users[$index]['amount_try_top'];
                 $final_result_stage->amount_try_zone = $all_users[$index]['amount_try_zone'];
-                $final_result_stage->amount_zone = $all_users[$index]['amount_zone'];
                 $final_result_stage->place = $all_users[$index]['place'];
                 $final_result_stage->save();
             }
@@ -237,25 +241,6 @@ class ResultRouteSemiFinalStageController extends Controller
         return $grid;
     }
 
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
-    protected function grid3()
-    {
-        $grid = new Grid(new Event);
-        $grid->disableExport();
-        $grid->disableColumnSelector();
-        $grid->disableCreateButton();
-        $grid->disablePagination();
-        $grid->disablePerPageSelector();
-        $grid->disableBatchActions();
-        $grid->disableFilter();
-        $grid->disableActions();
-        $grid->setTitle('Нет активных соревнований');
-        return $grid;
-    }
 
     /**
      * Make a show builder.
@@ -360,8 +345,8 @@ class ResultRouteSemiFinalStageController extends Controller
                 $users_with_result[$index]['event_id'] = $model->id;
                 $users_with_result[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
                 $users_with_result[$index]['amount_top'] = $result['amount_top'];
-                $users_with_result[$index]['amount_try_top'] = $result['amount_try_top'];
                 $users_with_result[$index]['amount_zone'] = $result['amount_zone'];
+                $users_with_result[$index]['amount_try_top'] = $result['amount_try_top'];
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
         }
@@ -387,8 +372,8 @@ class ResultRouteSemiFinalStageController extends Controller
             $result->user_id = $users_sorted[$index]['user_id'];
             $result->owner_id = $users_sorted[$index]['owner_id'];
             $result->amount_top = $users_sorted[$index]['amount_top'];
-            $result->amount_try_top = $users_sorted[$index]['amount_try_top'];
             $result->amount_zone = $users_sorted[$index]['amount_zone'];
+            $result->amount_try_top = $users_sorted[$index]['amount_try_top'];
             $result->amount_try_zone = $users_sorted[$index]['amount_try_zone'];
             $result->place = $users_sorted[$index]['place'];
             $result->save();

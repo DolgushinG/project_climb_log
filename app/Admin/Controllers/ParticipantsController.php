@@ -245,7 +245,7 @@ class  ParticipantsController extends Controller
         })->editable();
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
-            ->select($this->getUserCategory()->toArray());
+            ->select($this->getUserCategory());
         $grid->column('number_set', 'Номер сета')->editable();
         $grid->column('user_place', 'Место в квалификации')->sortable();
         $grid->column('points', 'Баллы')->sortable();
@@ -263,7 +263,7 @@ class  ParticipantsController extends Controller
                 'female'    => 'Женщина',
             ]);
 //            $filter->in('number_set', 'Номер сета')->checkbox(Set::where('owner_id', '=', Admin::user()->id)->pluck('number_set'));
-            $filter->in('category_id', 'Категория')->checkbox($this->getUserCategory()->toArray());
+            $filter->in('category_id', 'Категория')->checkbox($this->getUserCategory());
 
         });
         return $grid;
@@ -410,10 +410,9 @@ class  ParticipantsController extends Controller
     }
     protected function getUserCategory()
     {
-        $participant = Participant::where('owner_id', '=', Admin::user()->id)
-            ->where('active', '=', 1)
-            ->pluck('category_id')->toArray();
-        return ParticipantCategory::whereIn('id', $participant)->pluck('category', 'id');
+        $categories = Event::where('owner_id', '=', Admin::user()->id)
+            ->where('active', 1)->first()->categories;
+        return ParticipantCategory::whereIn('category', $categories)->pluck('category', 'id')->toArray();
     }
 
 }
