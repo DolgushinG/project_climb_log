@@ -37,7 +37,8 @@ class ProfileController extends Controller
         } else {
             $user['is_alert_needs_show_email_and_password'] = false;
         }
-        return view('profile.overview', compact(['user']));
+        $activities = Activity::where('causer_id', '=', $user->id)->orderBy('updated_at')->take(5)->get();
+        return view('profile.overview', compact(['user', 'activities']));
     }
     public function getTabContentSetting() {
         $user = User::find(Auth()->user()->id);

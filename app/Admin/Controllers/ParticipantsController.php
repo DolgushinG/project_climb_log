@@ -262,7 +262,6 @@ class  ParticipantsController extends Controller
                 'male'    => 'Мужчина',
                 'female'    => 'Женщина',
             ]);
-//            $filter->in('number_set', 'Номер сета')->checkbox(Set::where('owner_id', '=', Admin::user()->id)->pluck('number_set'));
             $filter->in('category_id', 'Категория')->checkbox($this->getUserCategory());
 
         });
@@ -410,9 +409,9 @@ class  ParticipantsController extends Controller
     }
     protected function getUserCategory()
     {
-        $categories = Event::where('owner_id', '=', Admin::user()->id)
-            ->where('active', 1)->first()->categories;
-        return ParticipantCategory::whereIn('category', $categories)->pluck('category', 'id')->toArray();
+        $event = Event::where('owner_id', '=', Admin::user()->id)
+            ->where('active', 1)->first();
+        return ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('category', 'id')->toArray();
     }
 
 }

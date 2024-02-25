@@ -127,11 +127,11 @@ class EventsController extends Controller
     }
 
     public function store(StoreRequest $request) {
-        $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
         $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
         if($participant){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
+        $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
         $participant = new Participant;
         $participant->event_id = $request->event_id;
         $participant->user_id = $request->user_id;

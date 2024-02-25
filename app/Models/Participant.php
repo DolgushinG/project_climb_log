@@ -11,7 +11,6 @@ class Participant extends Model
 
     protected $table = 'participants';
 
-
     public function owner()
     {
         return $this->belongsTo(User::class);
