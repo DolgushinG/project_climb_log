@@ -14,3 +14,6 @@ yarn-error.log
 /.idea
 /.vscode
 /resources/views/NiceAdmin/
+/app/Models/User.php
+/public/js/
+/public/css/
