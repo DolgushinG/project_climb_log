@@ -9,7 +9,12 @@
                             <div class="card">
                                 <div class="card-body text-center bg-primary rounded-top">
                                     <div class="user-box">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="user avatar">
+                                    @if ($user->avatar === null)
+                                            <img src="https://eu.ui-avatars.com/api/?name={{ $user->middlename }}&background=random&color=050202&font-size=0.33"
+                                                 alt="Profile" class="img-fluid rounded-circle">
+                                    @else
+                                        <img src="{{$user->avatar}}" class="img-fluid rounded-circle" alt="user avatar">
+                                    @endif
                                     </div>
                                     <h5 class="mb-1 text-white">{{$user->middlename}}</h5>
                                 </div>
@@ -45,16 +50,16 @@
                                     </ul>
                                     <div class="row text-center mt-4">
                                         <div class="col p-2">
-                                            <h4 class="mb-1 line-height-5">154</h4>
-                                            <small class="mb-0 font-weight-bold">% FLASH</small>
+                                            <h4 class="mb-1 line-height-5">{{$state_user['flash']}}</h4>
+                                            <small class="mb-0 font-weight-bold">% Flash</small>
                                         </div>
                                         <div class="col p-2">
-                                            <h4 class="mb-1 line-height-5">2.2k</h4>
-                                            <small class="mb-0 font-weight-bold">% REDPOINT</small>
+                                            <h4 class="mb-1 line-height-5">{{$state_user['redpoint']}}</h4>
+                                            <small class="mb-0 font-weight-bold">% Redpoint </small>
                                         </div>
                                         <div class="col p-2">
-                                            <h4 class="mb-1 line-height-5">9.1k</h4>
-                                            <small class="mb-0 font-weight-bold">Всего трасс</small>
+                                            <h4 class="mb-1 line-height-5"> {{$state_user['all']}}</h4>
+                                            <small class="mb-0 font-weight-bold">Всего трасс </small>
                                         </div>
                                     </div>
                                 </div>

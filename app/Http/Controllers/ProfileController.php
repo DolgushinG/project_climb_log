@@ -26,9 +26,15 @@ class ProfileController extends Controller
     }
     public function index() {
         $user = User::find(Auth()->user()->id);
-
+        $state_user = array();
+        $result_flash = ResultParticipant::where('user_id', $user->id)->where('attempt', 1)->get()->count();
+        $result_redpoint = ResultParticipant::where('user_id', $user->id)->where('attempt', 2)->get()->count();
+        $result_all_route_passed = ResultParticipant::where('user_id', $user->id)->whereIn('attempt', [1,2])->get()->count();
+        $state_user['flash'] =  round(($result_flash / $result_all_route_passed) * 100, 2);
+        $state_user['redpoint'] =  round(($result_redpoint / $result_all_route_passed) * 100, 2);
+        $state_user['all'] =  $result_all_route_passed;
         $activities = Activity::where('causer_id', '=', $user->id)->orderBy('updated_at')->take(5)->get();
-        return view('profile.main', compact(['user', 'activities']));
+        return view('profile.main', compact(['user', 'activities', 'state_user']));
     }
     public function getTabContentOverview() {
         $user = User::find(Auth()->user()->id);
@@ -38,7 +44,17 @@ class ProfileController extends Controller
             $user['is_alert_needs_show_email_and_password'] = false;
         }
         $activities = Activity::where('causer_id', '=', $user->id)->orderBy('updated_at')->take(5)->get();
-        return view('profile.overview', compact(['user', 'activities']));
+        $state_participant = array();
+        $all = Participant::where('user_id', $user->id)->where('active', 1)->get()->count();
+        $best_place = Participant::where('user_id', $user->id)
+            ->where('active', 1)
+            ->select('user_place')
+            ->orderBy('user_place')
+            ->first()
+            ->user_place;
+        $state_participant['amount_event'] = $all;
+        $state_participant['best_place'] = $best_place;
+        return view('profile.overview', compact(['user', 'activities', 'state_participant']));
     }
     public function getTabContentSetting() {
         $user = User::find(Auth()->user()->id);

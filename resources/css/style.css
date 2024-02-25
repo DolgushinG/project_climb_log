@@ -229,7 +229,7 @@ h6 {
 .navbar a:focus {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /*justify-content: space-between;*/
   padding: 0 3px;
   font-size: 15px;
   font-weight: 600;
