@@ -2,12 +2,12 @@ $('#tab-overview').addClass('show active');
 getProfile('Overview');
 $(document).on('click', '#overview', function () {
     deactivateAllTabs();
-    $('#tab-overview').addClass('show active');
+    $('#overview').addClass('show active');
     getProfile('Overview');
 });
 $(document).on('click', '#edit', function () {
     deactivateAllTabs();
-    $('#tab-edit').addClass('show active');
+    $('#edit').addClass('show active');
     getProfile('Edit');
 });
 $(document).on('click', '#events', function () {
@@ -17,11 +17,11 @@ $(document).on('click', '#events', function () {
 });
 $(document).on('click', '#setting', function () {
     deactivateAllTabs();
-    $('#tab-setting').addClass('show active');
+    $('#setting').addClass('active');
     getProfile('Setting');
 });
 function deactivateAllTabs() {
-    $('#tab-overview, #tab-edit, #tab-setting, #tab-events').removeClass('show active');
+    $('#overview, #edit, #setting, #events').removeClass('show active');
 }
 function getProfile(tab, id='#tabContent') {
     $.ajaxSetup({

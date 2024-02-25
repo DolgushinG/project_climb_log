@@ -9,12 +9,21 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use stdClass;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, LogsActivity;
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->setDescriptionForEvent(fn(string $eventName) => "Успешный вход")
+            ->useLogName('login')
+            ->logOnly(['middlename']);
+    }
     /**
      * The attributes that are mass assignable.
      *
@@ -174,5 +183,6 @@ class User extends Authenticatable
 
 
     }
+
 
 }

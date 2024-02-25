@@ -1,16 +1,25 @@
 <div class="tab-pane fade active show pt-3" id="tab-settings">
     @foreach($user->types_auth as $auth)
         @if($user->is_alert_for_needs_set_password)
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                Вход был выполнен через сервисы рекомендуется заполнить пароль
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="row mb-3">
+                <div class="col-md-8 col-lg-9">
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert"
+                    <label for="" class="form-label">Вход был выполнен через сервисы рекомендуется заполнить пароль</label>
+                        Вход был выполнен через сервисы рекомендуется заполнить пароль
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
             </div>
+
         @endif
-        <div class="card">
-            <div class="card-body pt-4">
-                Доступен вход по {!! $auth['icon_auth'] !!} <span class="badge bg-primary">{{strtoupper($auth['title_auth'])}}</span>
+            <div class="row mb-3">
+                <div class="col-md-8 col-lg-9">
+                        <label for="" class="form-check">
+                            Доступен вход по {!! $auth['icon_auth'] !!} <span class="badge bg-primary">{{strtoupper($auth['title_auth'])}}</span>
+                        </label>
+                    </div>
+                </div>
             </div>
-        </div>
     @endforeach
     <form>
         @if($user->is_show_old_password)

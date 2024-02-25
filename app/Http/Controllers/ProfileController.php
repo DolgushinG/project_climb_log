@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Activitylog\Models\Activity;
 use function Symfony\Component\String\s;
 
 class ProfileController extends Controller
@@ -26,7 +27,8 @@ class ProfileController extends Controller
     public function index() {
         $user = User::find(Auth()->user()->id);
 
-        return view('profile.main', compact(['user']));
+        $activities = Activity::where('causer_id', '=', $user->id)->orderBy('updated_at')->take(5)->get();
+        return view('profile.main', compact(['user', 'activities']));
     }
     public function getTabContentOverview() {
         $user = User::find(Auth()->user()->id);

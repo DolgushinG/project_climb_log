@@ -1,81 +1,96 @@
 @extends('layouts.main_page.app')
 @section('content')
-
     <main id="main" class="main">
-
-        <div class="pagetitle">
-            <h1>Профиль</h1>
-        </div><!-- End Page Title -->
-
         <section class="section profile">
-            <div class="row">
-                <div class="col-xl-4">
-
-                    <div class="card">
-                        <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
-                            @if ($user->avatar === null)
-                                <img
-                                    src="https://eu.ui-avatars.com/api/?name={{ $user->middlename }}&background=random&color=050202&font-size=0.33&size=150"
-                                    alt="Profile" class="rounded-circle">
-                            @else
-                                <img src="{{$user->avatar}}" class="rounded-circle" alt="user avatar">
-                            @endif
-                            <h2>{{$user->middlename}}</h2>
-                            <h3>{{$user->city}} </h3>
-                            @if ($user->team === null)
-                                <h3>Команда не указана</h3>
-                            @else
-                                <h3>{{$user->team}}</h3>
-                            @endif
-                            <div class="social-links mt-2">
-                                <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-                                <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-                                <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-                                <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="profile-card-4 z-depth-3">
+                            <div class="card">
+                                <div class="card-body text-center bg-primary rounded-top">
+                                    <div class="user-box">
+                                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="user avatar">
+                                    </div>
+                                    <h5 class="mb-1 text-white">{{$user->middlename}}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group shadow-none">
+                                        <li class="list-group-item">
+                                            <div class="list-icon">
+                                                <i class="fa fa-building"></i>
+                                            </div>
+                                            <div class="list-details">
+                                                <span>{{$user->city ?? ''}}</span>
+                                                <small>Город</small>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="list-icon">
+                                                <i class="fa fa-envelope"></i>
+                                            </div>
+                                            <div class="list-details">
+                                                <span>{{$user->email ?? ''}}</span>
+                                                <small>Email</small>
+                                            </div>
+                                        </li>
+{{--                                        <li class="list-group-item">--}}
+{{--                                            <div class="list-icon">--}}
+{{--                                                <i class="fa fa-globe"></i>--}}
+{{--                                            </div>--}}
+{{--                                            <div class="list-details">--}}
+{{--                                                <span>www.example.com</span>--}}
+{{--                                                <small>Website Address</small>--}}
+{{--                                            </div>--}}
+{{--                                        </li>--}}
+                                    </ul>
+                                    <div class="row text-center mt-4">
+                                        <div class="col p-2">
+                                            <h4 class="mb-1 line-height-5">154</h4>
+                                            <small class="mb-0 font-weight-bold">% FLASH</small>
+                                        </div>
+                                        <div class="col p-2">
+                                            <h4 class="mb-1 line-height-5">2.2k</h4>
+                                            <small class="mb-0 font-weight-bold">% REDPOINT</small>
+                                        </div>
+                                        <div class="col p-2">
+                                            <h4 class="mb-1 line-height-5">9.1k</h4>
+                                            <small class="mb-0 font-weight-bold">Всего трасс</small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-lg-8">
+                        <div class="card z-depth-3">
+                            <div class="card-body">
 
-                </div>
-
-                <div class="col-xl-8">
-
-                    <div class="card">
-                        <div class="card-body pt-3">
-                            <!-- Bordered Tabs -->
-                            <ul class="nav nav-tabs nav-tabs-bordered">
-
-                                <li class="nav-item">
-                                    <button id="overview" class="nav-link active" data-bs-toggle="tab"
-                                            data-bs-target="#profile-overview">Информация
-                                    </button>
-                                </li>
-
-                                <li class="nav-item">
-                                    <button id="edit" class="nav-link" data-bs-toggle="tab"
-                                            data-bs-target="#profile-edit">Изменить профиль
-                                    </button>
-                                </li>
-
-                                <li class="nav-item">
-                                    <button id="setting" class="nav-link" data-bs-toggle="tab"
-                                            data-bs-target="#profile-settings">Настройка
-                                    </button>
-                                </li>
-
-                                <li class="nav-item">
-                                    <button id="events" class="nav-link" data-bs-toggle="tab"
-                                            data-bs-target="#profile-events">Соревнования
-                                    </button>
-                                </li>
-
-                            </ul>
-                            <div id="tabContent" class="tab-content pt-2">
-
-                                @include('profile.overview')
-
-                            </div><!-- End Bordered Tabs -->
-                            @include('message.message')
+                                <ul class="nav nav-pills nav-pills-primary nav-justified">
+                                    <li class="nav-item">
+                                        <button id="overview" data-target="#profile-overview" data-toggle="pill"
+                                                class="nav-link active"><i class="icon-user"></i> <span
+                                                class="hidden-xs">Профиль</span></button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button id="events" data-target="#profile-events" data-toggle="pill"
+                                                class="nav-link"><i class="icon-envelope-open"></i> <span
+                                                class="hidden-xs">Соревнования</span></button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button id="setting" data-target="#profile-settings" data-toggle="pill"
+                                                class="nav-link"><i class="icon-note"></i> <span class="hidden-xs">Пароль</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button id="edit" data-target="#profile-edit" data-toggle="pill"
+                                                class="nav-link"><i class="icon-note"></i> <span class="hidden-xs">Изменить</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                                <div id="tabContent" class="tab-content p-3">
+                                    @include('profile.overview')
+                                </div>
+                            </div>
                         </div>
                     </div>
 
