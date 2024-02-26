@@ -163,6 +163,9 @@
 
             var results = [...document.querySelectorAll('.btn-check')].map(input => [input.id, input.checked, input.getAttribute('data-grade')])
             let button = $('#btn-send-result')
+            button.attr("disabled", "true")
+            button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+                        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
             let event_id = document.getElementById('btn-send-result').getAttribute('data-id')
             let user_id = document.getElementById('btn-send-result').getAttribute('data-user-id')
             let owner_id = document.getElementById('btn-send-result').getAttribute('data-owner-id')
@@ -175,13 +178,13 @@
                     // button.removeClass('btn-save-change')
                     // button.addClass('btn-edit-change')
                     button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-                        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+                        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Почти почти...')
 
                     setTimeout(function () {
                         button.text(xhr.message)
                     }, 3000);
                     setTimeout(function () {
-                        button.text('Отправлено')
+                        button.text('Да результаты добавлены...')
                         button.removeClass('btn btn-dark rounded-pill')
                         button.addClass('btn border-t-neutral-500 rounded-pil')
                         button.attr("disabled", "true");
