@@ -96,6 +96,8 @@ class EventFactory extends Factory
             'title_eng' => $this->faker->word(),
             'subtitle' => $this->faker->word(),
             'link' => $this->faker->url(),
+            'link_payment' => "https://www.tinkoff.ru/cf/1ZyTiSRkXmZ",
+            'img_payment' => "images/qr.png",
             'amount_routes_in_semifinal' => $this->faker->randomElement([4,5]),
             'amount_routes_in_final' => 4,
             'categories' => $this->faker->randomElement([['Новичок', 'Общий зачет'], ['Новичок', 'Любители', 'Спортсмены']]),

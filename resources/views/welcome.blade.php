@@ -102,38 +102,19 @@
                 </div>
                 <div class="col-xl-6">
 
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="info-box card">
-                                <i class="bi bi-geo-alt"></i>
-                                <h3>Адрес</h3>
-                                <p>{{$event->city}}</p>
-                                <p>{{$event->address}}</p>
-                                <p>{{$event->climbing_gym_name}}</p>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="info-box card">
-                                <i class="bi bi-telephone"></i>
-                                <h3>Call Us</h3>
-                                <p>+1 5589 55488 55<br>+1 6678 254445 41</p>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="info-box card">
-                                <i class="bi bi-clock"></i>
-                                <h3>Старт</h3>
-                                <p>{{$event->start_date}} {{$event->start_time}} -
-                                    <br>{{$event->end_date}} {{$event->end_time}}</p>
-                            </div>
-                        </div>
-                    </div>
+
                     <div class="card">
                         <div class="card-body">
                             <!-- Bordered Tabs Justified -->
-                            <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
+                            <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
                                 <li class="nav-item flex-fill" role="presentation">
-                                    <button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab"
+                                    <button class="nav-link w-100 active" id="info-tab" data-bs-toggle="tab"
+                                            data-bs-target="#bordered-justified-info" type="button" role="tab"
+                                            aria-controls="info" aria-selected="true">Общая информация
+                                    </button>
+                                </li>
+                                <li class="nav-item flex-fill" role="presentation">
+                                    <button class="nav-link w-100" id="home-tab" data-bs-toggle="tab"
                                             data-bs-target="#bordered-justified-home" type="button" role="tab"
                                             aria-controls="home" aria-selected="true">Сеты
                                     </button>
@@ -152,35 +133,61 @@
                                 </li>
                             </ul>
                             <div class="tab-content pt-2" id="borderedTabJustifiedContent">
-                                <div class="tab-pane fade show active" id="bordered-justified-home" role="tabpanel"
+                                <div class="tab-pane fade show" id="bordered-justified-home" role="tabpanel"
                                      aria-labelledby="home-tab">
-                                    {{--                                    <div class="card p-4">--}}
-                                    {{--                                        <div class="card-body">--}}
-                                    <h5 class="card-title">Заполняемость сетов</h5>
-
-                                    <!-- Progress Bars with labels-->
-                                    @foreach($sets as $set)
-                                        @if($set->free != 0)
-                                            <label>Сет {{$set->number_set}}-{{$set->time}}
-                                                (@lang('somewords.'.$set->day_of_week))(Свободно
-                                                - {{100 - $set->procent}}%)</label>
-                                            <div class="progress mt-1">
-                                                <div class="progress-bar" role="progressbar"
-                                                     style="width: {{$set->procent}}%" aria-valuenow="{{$set->free}}"
-                                                     aria-valuemin="0" aria-valuemax="{{$set->max_participants}}"></div>
+                                    <div class="info-box card z-depth-3">
+                                        <div class="container">
+                                            <div class="row">
+                                                <h5 class="card-title">Заполняемость сетов</h5>
+                                                @foreach($sets as $set)
+                                                    @if($set->free != 0)
+                                                        <label>Сет {{$set->number_set}}-{{$set->time}}
+                                                            (@lang('somewords.'.$set->day_of_week))(Свободно
+                                                            - {{100 - $set->procent}}%)</label>
+                                                    @else
+                                                        <label>Сет {{$set->number_set}}-{{$set->time}}
+                                                            (@lang('somewords.'.$set->day_of_week)) (Полностью забит)</label>
+                                                    @endif
+                                                        <div class="container">
+                                                            <div class="progress mt-1 pl-3">
+                                                                <div class="progress-bar" role="progressbar"
+                                                                     style="width: {{$set->procent}}%" aria-valuenow="{{$set->free}}"
+                                                                     aria-valuemin="0" aria-valuemax="{{$set->max_participants}}"></div>
+                                                            </div>
+                                                        </div>
+                                                @endforeach
                                             </div>
-                                        @else
-                                            <label>Сет {{$set->number_set}}-{{$set->time}}
-                                                (@lang('somewords.'.$set->day_of_week)) (Полностью забит)</label>
-                                            <div class="progress mt-1">
-                                                <div class="progress-bar" role="progressbar"
-                                                     style="width: {{$set->procent}}%" aria-valuenow="{{$set->free}}"
-                                                     aria-valuemin="0" aria-valuemax="{{$set->max_participants}}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade show active" id="bordered-justified-info" role="tabpanel"
+                                     aria-labelledby="info-tab">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="info-box card z-depth-3">
+                                                <i class="bi bi-geo-alt"></i>
+                                                <h3>Адрес</h3>
+                                                <p>{{$event->city}}</p>
+                                                <p>{{$event->address}}</p>
+                                                <p>{{$event->climbing_gym_name}}</p>
                                             </div>
-                                        @endif
-                                    @endforeach
-                                    {{--                                        </div>--}}
-                                    {{--                                    </div>--}}
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="info-box card z-depth-3">
+                                                <i class="bi bi-telephone"></i>
+                                                <h3>Связь с организатором</h3>
+                                                <p>{{$event->contact}}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 pt-4">
+                                            <div class="info-box card z-depth-3">
+                                                <i class="bi bi-clock"></i>
+                                                <h3>Старт</h3>
+                                                <p>{{$event->start_date}} {{$event->start_time}} -
+                                                    <br>{{$event->end_date}} {{$event->end_time}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="tab-pane fade" id="bordered-justified-profile" role="tabpanel"
                                      aria-labelledby="profile-tab">
@@ -188,7 +195,20 @@
                                 </div>
                                 <div class="tab-pane fade" id="bordered-justified-contact" role="tabpanel"
                                      aria-labelledby="contact-tab">
-                                    <p>{!! $event->description !!}</p>
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="container text-center pt-2 pb-2">
+                                                 <label> Сумма к оплате: </label>
+                                                <span class="badge bg-success" style="font-size: 22px"> 4500 руб </span><br>
+                                            </div>
+                                            <div class="container text-center pt-2 pb-2">
+                                                <a class="btn btn-primary" style="font-size: 22px" href="{{$event->link_payment}}">Оплатить</a><br>
+                                            </div>
+                                            @if($event->img_payment)
+                                                <img class="img-fluid img-responsive" src="{{asset('storage/'.$event->img_payment)}}" alt="qr">
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </div><!-- End Bordered Tabs Justified -->
 

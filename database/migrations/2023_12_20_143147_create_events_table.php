@@ -33,6 +33,8 @@ class CreateEventsTable extends Migration
             $table->string('title_eng');
             $table->string('subtitle');
             $table->string('link');
+            $table->string('link_payment');
+            $table->string('img_payment');
             $table->integer('is_semifinal');
             $table->json('categories');
             $table->integer('choice_transfer')->nullable();
