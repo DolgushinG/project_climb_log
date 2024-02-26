@@ -3,10 +3,8 @@
 use Encore\Admin\Facades\Admin;
 use Illuminate\Routing\Router;
 
-Route::middleware(['basicAuth'])->group(function () {
-    Admin::routes();
-});
 
+Admin::routes();
 
 Route::group([
     'prefix'        => config('admin.route.prefix'),
