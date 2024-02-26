@@ -84,13 +84,12 @@ class EventsController extends Controller
                     'number_set' => $user['number_set'],
                     'time' => $set->time.' '.trans_choice('somewords.'.$set->day_of_week, 10),
                     'gender' => $users[$index]['gender'],
-                    'category_id' => $users[$index]['category'],
                     );
             }
             $index++;
         }
-        $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
-        return view('event.participants', compact(['event', 'participants', 'categories']));
+
+        return view('event.participants', compact(['event', 'participants', 'sets']));
     }
 
     public function get_final_results(Request $request, $climbing_gym, $title){

@@ -2,135 +2,60 @@
 @section('content')
     <main id="main" class="main">
         <section class="section contact">
-            <div class="row gy-4">
-                <div class="col-xl-6">
+            <div class="row">
+                <div class="col">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Мужчины</h5>
                             <!-- Bordered Tabs Justified -->
-                            <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
-                                @foreach($categories as $category)
-                                    @if($category['id'] == $categories[array_search($category['id'], $categories)]['id'])
+                            <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
+                                @foreach($sets as $set)
+                                    @if($set->number_set == 1)
                                         <li class="nav-item flex-fill" role="presentation">
-                                            <button class="nav-link w-100 active" id="{{$category['id']}}-tab"
+                                            <button class="nav-link w-100 active" id="{{$set->id}}-tab"
                                                     data-bs-toggle="tab"
-                                                    data-bs-target="#bordered-justified-{{$category['id']}}" type="button"
-                                                    role="tab" aria-controls="{{$category['id']}}"
-                                                    aria-selected="true">{{$category['category']}}</button>
+                                                    data-bs-target="#bordered-justified-{{$set->id}}" type="button"
+                                                    role="tab" aria-controls="{{$set->id}}"
+                                                    aria-selected="true">{{$set->time}} @lang('somewords.'.$set->day_of_week)</button>
                                         </li>
                                     @else
                                         <li class="nav-item flex-fill" role="presentation">
-                                            <button class="nav-link w-100" id="{{$category['id']}}-tab"
+                                            <button class="nav-link w-100" id="{{$set->id}}-tab"
                                                     data-bs-toggle="tab"
-                                                    data-bs-target="#bordered-justified-{{$category['id']}}" type="button"
-                                                    role="tab" aria-controls="{{$category['id']}}"
-                                                    aria-selected="true">{{$category['category']}}</button>
+                                                    data-bs-target="#bordered-justified-{{$set->id}}" type="button"
+                                                    role="tab" aria-controls="{{$set->id}}"
+                                                    aria-selected="true">{{$set->time}} @lang('somewords.'.$set->day_of_week)</button>
                                         </li>
                                     @endif
                                 @endforeach
                             </ul>
                             <div class="tab-content pt-2" id="borderedTabJustifiedContent">
-                                @foreach($categories as $category)
-                                    @if($category['id'] == $categories[array_search($category['id'], $categories)]['id'])
-                                        <div class="tab-pane fade show active" id="bordered-justified-{{$category['id']}}"
-                                             role="tabpanel" aria-labelledby="{{$category['id']}}-tab">
+                                @foreach($sets as $set)
+                                    @if($set->number_set == 1)
+                                        <div class="tab-pane fade show active" id="bordered-justified-{{$set->id}}"
+                                             role="tabpanel" aria-labelledby="{{$set->id}}-tab">
                                             @else
-                                                <div class="tab-pane fade show" id="bordered-justified-{{$category['id']}}"
-                                                     role="tabpanel" aria-labelledby="{{$category['id']}}-tab">
+                                                <div class="tab-pane fade show" id="bordered-justified-{{$set->id}}"
+                                                     role="tabpanel" aria-labelledby="{{$set->id}}-tab">
                                             @endif
                                             <table class="table table-sm">
                                                 <thead>
                                                 <tr>
                                                     <th scope="col">Участник</th>
-                                                    <th scope="col">Сет</th>
                                                     <th scope="col">Город</th>
                                                     <th scope="col">Команда</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
                                                 @foreach($participants as $participant)
-                                                    @if($participant['gender'] == "male")
-                                                        @if($participant['category_id'] == $category['id'])
-                                                            <tr>
-                                                                <td>{{$participant['middlename']}}</td>
-                                                                <td>{{$participant['number_set']}} ({{$participant['time']}})
-                                                                </td>
-                                                                <td>{{$participant['city']}}</td>
-                                                                <td>{{$participant['team']}}</td>
-                                                            </tr>
-                                                        @endif
-                                                </tbody>
-                                                @endif
-                                                @endforeach
-                                            </table>
-                                        </div>
-                                @endforeach
-                            </div><!-- End Bordered Tabs Justified -->
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Женщины</h5>
-                            <!-- Bordered Tabs Justified -->
-                            <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustifiedWomen"
-                                role="tablist">
-                                @foreach($categories as $category)
-                                    @if($category['id'] == $categories[array_search($category['id'], $categories)]['id'])
-                                        <li class="nav-item flex-fill" role="presentation">
-                                            <button class="nav-link w-100 active" id="{{$category['id']}}-tab"
-                                                    data-bs-toggle="tab"
-                                                    data-bs-target="#bordered-justified-women-{{$category['id']}}"
-                                                    type="button" role="tab" aria-controls="{{$category['id']}}"
-                                                    aria-selected="true">{{$category['category']}}</button>
-                                        </li>
-                                    @else
-                                        <li class="nav-item flex-fill" role="presentation">
-                                            <button class="nav-link w-100" id="{{$category['id']}}-tab"
-                                                    data-bs-toggle="tab"
-                                                    data-bs-target="#bordered-justified-women-{{$category['id']}}"
-                                                    type="button" role="tab" aria-controls="{{$category['id']}}"
-                                                    aria-selected="true">{{$category['category']}}</button>
-                                        </li>
-                                    @endif
-                                @endforeach
-                            </ul>
-                            <div class="tab-content pt-2" id="borderedTabJustifiedContentWomen">
-                                @foreach($categories as $category)
-                                    @if($category['id'] == $categories[array_search($category['id'], $categories)]['id'])
-                                        <div class="tab-pane fade show active"
-                                             id="bordered-justified-women-{{$category['id']}}" role="tabpanel"
-                                             aria-labelledby="{{$category['id']}}-tab">
-                                            @else
-                                                <div class="tab-pane fade show"
-                                                     id="bordered-justified-women-{{$category['id']}}" role="tabpanel"
-                                                     aria-labelledby="{{$category['id']}}-tab">
-                                            @endif
-                                            <table class="table table-sm">
-                                                <thead>
-                                                <tr>
-                                                    <th scope="col">Участник</th>
-                                                    <th scope="col">Сет</th>
-                                                    <th scope="col">Город</th>
-                                                    <th scope="col">Команда</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                @foreach($participants as $participant)
-                                                    @if($participant['gender'] == "female")
-                                                        @if($participant['category_id'] == $category['id'])
-                                                            <tr>
-                                                                <td>{{$participant['middlename']}}</td>
-                                                                <td>{{$participant['number_set']}} ({{$participant['time']}})
-                                                                </td>
-                                                                <td>{{$participant['city']}}</td>
-                                                                <td>{{$participant['team']}}</td>
-                                                            </tr>
-                                                        @endif
+                                                    @if($participant['number_set'] == $set->number_set)
+                                                        <tr>
+                                                            <td>{{$participant['middlename']}}</td>
+                                                            <td>{{$participant['city']}}</td>
+                                                            <td>{{$participant['team']}}</td>
+                                                        </tr>
                                                     @endif
-                                                @endforeach
                                                 </tbody>
+                                                @endforeach
                                             </table>
                                         </div>
                                 @endforeach
@@ -138,7 +63,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </section>
     </main><!-- End #main -->
 @endsection

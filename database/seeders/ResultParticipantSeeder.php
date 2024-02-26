@@ -40,7 +40,7 @@ class ResultParticipantSeeder extends Seeder
         }
         for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
             prepare_result_participant($i, $i);
-            UpdateResultParticipants::dispatch(1);
+            UpdateResultParticipants::dispatch($i);
         }
 
     }

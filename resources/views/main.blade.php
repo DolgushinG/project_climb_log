@@ -565,7 +565,7 @@
 
                 <div class="section-title">
 {{--                    <h2>Team</h2>--}}
-                    <h3>Соревнования</h3>
+                    <h3>Открыта регистрация прямо сейчас</h3>
 {{--                    <p>Ut possimus qui ut temporibus culpa velit eveniet modi omnis est adipisci expedita at voluptas--}}
 {{--                        atque vitae autem.</p>--}}
                 </div>

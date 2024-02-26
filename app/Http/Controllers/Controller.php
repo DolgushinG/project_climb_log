@@ -22,7 +22,7 @@ class Controller extends BaseController
             $count = Event::where('active', '=', 1)->where('city', '=', $city)->get()->count();
             $cities[] = array('name' => $city, 'count_event' => $count);
         }
-        $events = Event::where('active', '=', 1)->get();
+        $events = Event::where('active', '=', 1)->take(4)->get();
         return view('main', compact(['events', 'cities']));
     }
 }

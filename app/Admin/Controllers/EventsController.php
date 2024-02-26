@@ -184,6 +184,8 @@ class EventsController extends Controller
         $form->hidden('title_eng')->default('1');
         $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
         $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
+        $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
+        $form->image('img_payment', 'QR код на оплату')->placeholder('Ссылка');
         $form->summernote('description', 'Описание')->placeholder('Описание')->required();
         $form->radio('is_semifinal','Настройка финалов')
             ->options([

@@ -9,7 +9,7 @@
                             <h5 class="card-title">Мужчины <span
                                     class="badge bg-success text-light">{{$stats->male}}</span></h5>
                             <!-- Bordered Tabs Justified -->
-                            <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
+                            <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
                                 @foreach($categories as $category)
                                     @if($category['id'] == $categories[array_search($category['id'], $categories)]['id'])
                                     <li class="nav-item flex-fill" role="presentation">
@@ -87,7 +87,7 @@
                             <h5 class="card-title">Женщины <span
                                     class="badge bg-dark text-white">{{$stats->female}}</span></h5>
                             <!-- Bordered Tabs Justified -->
-                            <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustifiedWomen"
+                            <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustifiedWomen"
                                 role="tablist">
                                 @foreach($categories as $category)
                                     @if($category['id'] == $categories[array_search($category['id'], $categories)]['id'])
