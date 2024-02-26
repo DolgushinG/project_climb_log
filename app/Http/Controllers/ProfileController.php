@@ -30,9 +30,16 @@ class ProfileController extends Controller
         $result_flash = ResultParticipant::where('user_id', $user->id)->where('attempt', 1)->get()->count();
         $result_redpoint = ResultParticipant::where('user_id', $user->id)->where('attempt', 2)->get()->count();
         $result_all_route_passed = ResultParticipant::where('user_id', $user->id)->whereIn('attempt', [1,2])->get()->count();
-        $state_user['flash'] =  round(($result_flash / $result_all_route_passed) * 100, 2);
-        $state_user['redpoint'] =  round(($result_redpoint / $result_all_route_passed) * 100, 2);
-        $state_user['all'] =  $result_all_route_passed;
+        if($result_all_route_passed > 0){
+            $state_user['flash'] =  round(($result_flash / $result_all_route_passed) * 100, 2);
+            $state_user['redpoint'] =  round(($result_redpoint / $result_all_route_passed) * 100, 2);
+            $state_user['all'] =  $result_all_route_passed;
+        } else {
+            $state_user['flash'] = 0;
+            $state_user['redpoint'] = 0;
+            $state_user['all'] = 0;
+        }
+        
         $activities = Activity::where('causer_id', '=', $user->id)->orderBy('updated_at')->take(5)->get();
         return view('profile.main', compact(['user', 'activities', 'state_user']));
     }
