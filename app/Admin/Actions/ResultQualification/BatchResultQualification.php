@@ -21,7 +21,7 @@ class BatchResultQualification extends Action
 
     public function handle(Request $request)
     {
-        return $this->response()->success('Success!')->download('exports/events/'.$request->format_export.'/qualification/'.$request->title);
+        return $this->response()->download('exports/events/'.$request->format_export.'/qualification/'.$request->title);
     }
 
     public function form()
