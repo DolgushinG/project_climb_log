@@ -60,11 +60,11 @@ return [
     */
     'route' => [
 
-        'prefix' => env('ADMIN_ROUTE_PREFIX', 'backside'),
+        'prefix' => env('ADMIN_ROUTE_PREFIX', 'admin'),
 
         'namespace' => 'App\\Admin\\Controllers',
 
-        'middleware' => ['web', 'admin'],
+        'middleware' => ['web', 'admin', 'auth'],
     ],
 
     /*
