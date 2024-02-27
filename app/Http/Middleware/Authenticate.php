@@ -14,7 +14,7 @@ class Authenticate extends Middleware
      */
     protected function redirectTo($request)
     {
-        dd($request->url(),$request->fullUrl());
+        dd($request->url(),$request->path());
         if($request->url() === 'admin'){
             return abort('404');
         }
