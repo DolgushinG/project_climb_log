@@ -31,10 +31,10 @@ class CreateEventsTable extends Migration
             $table->integer('count_routes');
             $table->string('title');
             $table->string('title_eng');
-            $table->string('subtitle');
+            $table->string('subtitle')->nullable();
             $table->string('link');
-            $table->string('link_payment');
-            $table->string('img_payment');
+            $table->string('link_payment')->nullable();
+            $table->string('img_payment')->nullable();
             $table->integer('is_semifinal');
             $table->json('categories');
             $table->integer('choice_transfer')->nullable();
