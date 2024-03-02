@@ -245,7 +245,7 @@ class  ParticipantsController extends Controller
         })->editable();
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
-            ->select($this->getUserCategory());
+            ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         $grid->column('number_set', 'Номер сета')->editable();
         $grid->column('user_place', 'Место в квалификации')->sortable();
         $grid->column('points', 'Баллы')->sortable();
@@ -262,7 +262,7 @@ class  ParticipantsController extends Controller
                 'male'    => 'Мужчина',
                 'female'    => 'Женщина',
             ]);
-            $filter->in('category_id', 'Категория')->checkbox($this->getUserCategory());
+            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
 
         });
         return $grid;
@@ -407,11 +407,6 @@ class  ParticipantsController extends Controller
             ->pluck('user_id')->toArray();
         return User::whereIn('id', $participant)->pluck('middlename', 'id');
     }
-    protected function getUserCategory()
-    {
-        $event = Event::where('owner_id', '=', Admin::user()->id)
-            ->where('active', 1)->first();
-        return ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('category', 'id')->toArray();
-    }
+
 
 }

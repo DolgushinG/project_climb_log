@@ -197,8 +197,12 @@ class EventsController extends Controller
             })->when(0, function (Form $form) {
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
             })->value(0)->required();
+        $form->radio('is_additional','Финалы для разных групп')
+            ->options([
+                1 =>'С финалами для разных групп',
+                0 =>'Классика финал для лучших в квалификации',
+            ])->value(0)->required();
         $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
-
 //        $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
 //            ->options([1 => 'Ручной перевод по необходимости',2 => 'Настройка авто перевода в другую категорию'])->when(1, function (Form $form) {
 //            })->when(2, function (Form $form) {

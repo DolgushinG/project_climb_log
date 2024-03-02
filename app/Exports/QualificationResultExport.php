@@ -24,12 +24,13 @@ class QualificationResultExport implements WithMultipleSheets
     {
         $sheets = [];
         $genders = ['male', 'female'];
-        $categories = ParticipantCategory::all();
+        $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
         foreach ($genders as $gender) {
             foreach ($categories as $category) {
                 $sheets[] = new Results($this->event_id, 'Qualification', $gender, $category);
             }
         }
+        dd($sheets);
         return $sheets;
     }
 }

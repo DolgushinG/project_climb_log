@@ -37,6 +37,7 @@ class CreateEventsTable extends Migration
             $table->string('img_payment')->nullable();
             $table->string('amoout_start_price')->nullable();
             $table->integer('is_semifinal');
+            $table->integer('is_additional_final')->nullable();
             $table->json('categories');
             $table->integer('choice_transfer')->nullable();
             $table->integer('amount_routes_in_final');

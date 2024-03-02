@@ -16,6 +16,7 @@ class CreateResultFinalStageTable extends Migration
         Schema::create('result_final_stage', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('owner_id');
+            $table->integer('category_id');
             $table->integer('event_id');
             $table->integer('place');
             $table->integer('user_id');

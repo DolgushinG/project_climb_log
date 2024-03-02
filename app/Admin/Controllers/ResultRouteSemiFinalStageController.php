@@ -7,6 +7,7 @@ use App\Admin\CustomAction\ActionExport;
 use App\Exports\SemiFinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
+use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
 use App\Models\ResultRouteFinalStage;
 use App\Models\ResultSemiFinalStage;
@@ -323,6 +324,7 @@ class ResultRouteSemiFinalStageController extends Controller
             return [];
         }
         $users_with_result = [];
+//        dd($users);
         foreach ($users as $index => $user){
             if($type == 'final'){
                 $result_user = ResultRouteFinalStage::where('owner_id', '=', $owner_id)
@@ -335,11 +337,12 @@ class ResultRouteSemiFinalStageController extends Controller
                     ->where('user_id', '=', $user->id)
                     ->get();
             }
-            $result = ResultRouteSemiFinalStage::merge_result_user_in_semifinal_stage($result_user);
+            $result = ResultRouteSemiFinalStage::merge_result_user_in_stage($result_user);
             if($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null){
                 $users_with_result[$index] = collect($user->toArray())->except($fields);
                 $users_with_result[$index]['result'] = $result;
                 $users_with_result[$index]['place'] = null;
+                $users_with_result[$index]['category_id'] = $result['category_id'];
                 $users_with_result[$index]['owner_id'] = $owner_id;
                 $users_with_result[$index]['user_id'] = $user->id;
                 $users_with_result[$index]['event_id'] = $model->id;
@@ -350,6 +353,7 @@ class ResultRouteSemiFinalStageController extends Controller
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
         }
+//        dd($users_with_result);
         $users_sorted = Participant::counting_final_place($model->id, $users_with_result, $type);
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
 //        dd($users_sorted);
@@ -368,8 +372,10 @@ class ResultRouteSemiFinalStageController extends Controller
                     $result = new ResultSemiFinalStage;
                 }
             }
+            $category_id = ParticipantCategory::where('id', $users_sorted[$index]['category_id'])->where('event_id', $model->id)->first()->id;
             $result->event_id = $users_sorted[$index]['event_id'];
             $result->user_id = $users_sorted[$index]['user_id'];
+            $result->category_id = $category_id;
             $result->owner_id = $users_sorted[$index]['owner_id'];
             $result->amount_top = $users_sorted[$index]['amount_top'];
             $result->amount_zone = $users_sorted[$index]['amount_zone'];

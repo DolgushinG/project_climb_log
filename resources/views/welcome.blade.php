@@ -77,7 +77,7 @@
                                                     aria-label="Floating label select example" required>
                                                 <option selected disabled value="">Открыть для выбора категории
                                                 </option>
-                                                @foreach($event->categories as $index => $category)
+                                                @foreach($event->categories as $category)
                                                     <option
                                                         value="{{$category}}">{{$category}}</option>
                                                 @endforeach

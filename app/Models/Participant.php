@@ -149,11 +149,15 @@ class Participant extends Model
         }
     }
 
-    public static function better_participants($event_id, $gender, $amount_better){
-        $participant_users_id = Participant::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
+    public static function better_participants($event_id, $gender, $amount_better, $category_id = null){
+        if($category_id){
+            $participant_users_id = Participant::where('event_id', '=', $event_id)->where('category_id', '=', $category_id)->pluck('user_id')->toArray();
+        } else {
+            $participant_users_id = Participant::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
+        }
         $users_id = User::whereIn('id', $participant_users_id)->where('gender', '=', $gender)->pluck('id');
         $participant_sort_id = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->sortByDesc('points')->pluck('user_id');
-        $after_slice_participant_final_sort_id = array_slice($participant_sort_id->toArray(), 0,$amount_better);
+        $after_slice_participant_final_sort_id = array_slice($participant_sort_id->toArray(), 0, $amount_better);
         return User::whereIn('id', $after_slice_participant_final_sort_id)->get();
     }
 

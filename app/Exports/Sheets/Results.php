@@ -52,7 +52,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         if ($this->type == 'Qualification'){
             return 'A1';
         } else {
-            return 'A2';
+            return 'A3';
         }
 
     }
@@ -67,29 +67,35 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                             'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                             'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                             'wrapText' => true,
+                            'color' => array('rgb' => 'FF0000'),
+                            'size'      =>  25,
                         ],
                     ];
+
                     if($this->type != 'Qualification') {
+                        $sheet->mergeCells('A1:C1');
+                        $sheet->setCellValue('A1', $this->title());
+                        $sheet->getStyle('A1')->applyFromArray($style);
 
-                        $sheet->mergeCells('G1:J1');
-                        $sheet->setCellValue('I1', "Трасса 1");
-                        $sheet->getStyle('I1')->applyFromArray($style);
+                        $sheet->mergeCells('G2:J2');
+                        $sheet->setCellValue('I2', "Трасса 1");
+                        $sheet->getStyle('I2')->applyFromArray($style);
 
-                        $sheet->mergeCells('K1:N1');
-                        $sheet->setCellValue('K1', "Трасса 2");
-                        $sheet->getStyle('K1')->applyFromArray($style);
+                        $sheet->mergeCells('K2:N2');
+                        $sheet->setCellValue('K2', "Трасса 2");
+                        $sheet->getStyle('K2')->applyFromArray($style);
 
-                        $sheet->mergeCells('O1:R1');
-                        $sheet->setCellValue('O1', "Трасса 3");
-                        $sheet->getStyle('O1')->applyFromArray($style);
+                        $sheet->mergeCells('O2:R2');
+                        $sheet->setCellValue('O2', "Трасса 3");
+                        $sheet->getStyle('O2')->applyFromArray($style);
 
-                        $sheet->mergeCells('S1:V1');
-                        $sheet->setCellValue('S1', "Трасса 4");
-                        $sheet->getStyle('S1')->applyFromArray($style);
+                        $sheet->mergeCells('S2:V2');
+                        $sheet->setCellValue('S2', "Трасса 4");
+                        $sheet->getStyle('S2')->applyFromArray($style);
 
-                        $sheet->mergeCells('W1:Z1');
-                        $sheet->setCellValue('W1', "Трасса 5");
-                        $sheet->getStyle('W1')->applyFromArray($style);
+                        $sheet->mergeCells('W2:Z2');
+                        $sheet->setCellValue('W2', "Трасса 5");
+                        $sheet->getStyle('W2')->applyFromArray($style);
                     }
                 },
             ];
@@ -184,8 +190,8 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             $category = '';
         }
         return  trans_choice('somewords.'.$this->type, 10).
-            '('.$category.
-            ' '.trans_choice('somewords.'.$this->gender, 10).')';
+            ' ['.$category.
+            ']['.trans_choice('somewords.'.$this->gender, 10).']';
     }
 
 
@@ -237,19 +243,43 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
     }
 
     public function get_final($table){
-        $users = User::query()
-            ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-            ->where($table.'.event_id', '=', $this->event_id)
-            ->select(
-                $table.'.place',
-                'users.id',
-                'users.middlename',
-                $table.'.amount_top',
-                $table.'.amount_try_top',
-                $table.'.amount_zone',
-                $table.'.amount_try_zone',
-            )
-            ->where('gender', '=', $this->gender)->get()->sortBy('place')->toArray();
+        if($table === "result_final_stage"){
+            $users = User::query()
+                ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+                ->where($table.'.event_id', '=', $this->event_id)
+                ->select(
+                    $table.'.place',
+                    $table.'.category_id',
+                    'users.id',
+                    'users.middlename',
+                    $table.'.amount_top',
+                    $table.'.amount_try_top',
+                    $table.'.amount_zone',
+                    $table.'.amount_try_zone',
+                )
+                ->where('gender', '=', $this->gender)
+                ->where('category_id', '=', $this->category->id)
+                ->get()
+                ->sortBy('place')
+                ->toArray();
+        } else {
+            $users = User::query()
+                ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+                ->where($table.'.event_id', '=', $this->event_id)
+                ->select(
+                    $table.'.place',
+                    'users.id',
+                    'users.middlename',
+                    $table.'.amount_top',
+                    $table.'.amount_try_top',
+                    $table.'.amount_zone',
+                    $table.'.amount_try_zone',
+                )
+                ->where('gender', '=', $this->gender)
+                ->get()
+                ->sortBy('place')
+                ->toArray();
+        }
         foreach ($users as $index => $user){
             if($table == 'result_final_stage'){
                 $final_result = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
@@ -262,7 +292,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $users[$index]['amount_zone_'.$result->final_route_id] = $result->amount_zone;
                 $users[$index]['amount_try_zone_'.$result->final_route_id] = $result->amount_try_zone;
             }
-            $users[$index] = collect($users[$index])->except('id');
+            $users[$index] = collect($users[$index])->except('id', 'category_id');
         }
         return collect($users);
     }

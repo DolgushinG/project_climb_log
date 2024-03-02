@@ -20,12 +20,13 @@ class ResultRouteSemiFinalStage extends Model
         return $this->belongsTo(User::class);
     }
 
-    public static function merge_result_user_in_semifinal_stage($result){
+    public static function merge_result_user_in_stage($result){
         $final_result = array('user_id' => null, 'event_id' => null, 'amount_top' => null,'amount_try_top' => null, 'amount_zone' => null, 'amount_try_zone' => null);
         foreach ($result as $res)
         {
             $final_result['user_id'] = $res->user_id;
             $final_result['event_id'] = $res->event_id;
+            $final_result['category_id'] = $res->category_id;
             $final_result['amount_try_top'] += $res->amount_try_top;
             $final_result['amount_top'] += $res->amount_top;
             $final_result['amount_try_zone'] += $res->amount_try_zone;
