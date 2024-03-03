@@ -102,6 +102,7 @@ class EventFactory extends Factory
             'info_payment' => $this->faker->paragraph(20),
             'amount_routes_in_semifinal' => $this->faker->randomElement([4,5]),
             'amount_routes_in_final' => 4,
+            'amount_start_price' => 1800,
             'categories' => $this->faker->randomElement([['Новичок', 'Общий зачет'], ['Новичок', 'Любители', 'Спортсмены']]),
 //            'transfer_to_next_category' => $transfer_to_text_category,
             'count_routes' => 30,
