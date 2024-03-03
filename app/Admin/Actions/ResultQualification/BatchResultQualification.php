@@ -31,8 +31,6 @@ class BatchResultQualification extends Action
         $this->select('title', 'Сореванование')->options($events);
         $this->radio('format_export', 'Какой формат')->options(
             [
-                "csv" => "csv",
-                "ods" => "ods",
                 "excel" => "excel"
             ]);
     }

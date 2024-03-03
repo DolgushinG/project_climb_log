@@ -44,8 +44,6 @@ class ResultRouteSemiFinalStageController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header(trans('admin.index'))
-            ->description(trans('admin.description'))
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)
                     ->where('active', '=', 1)
@@ -172,6 +170,7 @@ class ResultRouteSemiFinalStageController extends Controller
                 'male'    => 'Мужчина',
                 'female'    => 'Женщина',
             ]);
+            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         });
         return $grid;
     }

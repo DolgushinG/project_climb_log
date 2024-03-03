@@ -46,8 +46,6 @@ class ResultRouteFinalStageController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header(trans('admin.index'))
-            ->description(trans('admin.description'))
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
@@ -97,7 +95,6 @@ class ResultRouteFinalStageController extends Controller
                             $final_result_stage = new ResultFinalStage;
                         }
                         $category_id = ParticipantCategory::where('id', $all_users[$index]['category_id'])->where('event_id', $event->id)->first()->id;
-                        dd($event->id, $all_users[$index]['user_id'], $all_users[$index]['category_id']);
                         $final_result_stage->event_id = $all_users[$index]['event_id'];
                         $final_result_stage->user_id = $all_users[$index]['user_id'];
                         $final_result_stage->category_id = $category_id;
@@ -167,62 +164,6 @@ class ResultRouteFinalStageController extends Controller
      *
      * @return Grid
      */
-    protected function grid()
-    {
-
-        $grid = new Grid(new ResultRouteFinalStage);
-        if (!Admin::user()->isAdministrator()){
-            $grid->model()->where('owner_id', '=', Admin::user()->id);
-        }
-        $grid->model()->where(function ($query) {
-            $query->has('event.result_final_stage');
-        });
-        $grid->tools(function (Grid\Tools $tools) {
-            $tools->append(new BatchResultFinal);
-        });
-        $grid->actions(function ($actions) {
-//            $actions->disableEdit();
-            $actions->disableView();
-        });
-
-//        $grid->disableBatchActions();
-//        $events_title = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck('title','id')->toArray();
-        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-//        $grid->column('event_id','Соревнование')->select($events_title);
-        $grid->column('final_route_id', __('Номер маршрута'));
-        if($event->is_additional_final){
-            $grid->column('user.middlename', __('Участник'));
-        } else {
-            if($event->is_semifinal){
-                $grid->column('user.middlename', __('Участник'));
-            } else {
-                $grid->column('user_id', __('Участник'))->select($this->getUsersPartipants($event->id));
-            }
-        }
-
-        $grid->column('amount_try_top', __('Кол-во попыток на топ'));
-        $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
-        $grid->disableExport();
-        $grid->disableColumnSelector();
-        $grid->disableCreateButton();
-        $grid->filter(function($filter){
-            $filter->disableIdFilter();
-//            // Add a column filter
-            $filter->in('user.gender', 'Пол')->checkbox([
-                'male'    => 'Мужчина',
-                'female'    => 'Женщина',
-            ]);
-
-        });
-        return $grid;
-    }
-
-
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
     protected function grid2()
     {
         $grid = new Grid(new ResultFinalStage());
@@ -269,6 +210,7 @@ class ResultRouteFinalStageController extends Controller
                 'male'    => 'Мужчина',
                 'female'    => 'Женщина',
             ]);
+            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         });
         return $grid;
     }

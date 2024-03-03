@@ -37,8 +37,6 @@ class EventsController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header(trans('admin.index'))
-            ->description(trans('admin.description'))
             ->body($this->grid());
     }
 
@@ -99,6 +97,7 @@ class EventsController extends Controller
         } else {
             $grid->column('owner_id', 'Owner')->editable();
         }
+
         $grid->actions(function ($actions) {
             $actions->disableView();
             $actions->append(new ActionExport($actions->getKey(), 'all', 'excel'));
@@ -159,7 +158,7 @@ class EventsController extends Controller
 
         });
 
-        $form->display('id')->style('display', 'None');
+        $form->hidden('id');
         $form->hidden('owner_id')->value(Admin::user()->id);
         $form->date('start_date', 'Дата старта')->placeholder('Дата старта')->required();
         $form->date('end_date', 'Дата окончания')->placeholder('Дата окончания')->required();
@@ -200,7 +199,7 @@ class EventsController extends Controller
             })->when(0, function (Form $form) {
                 $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
             })->value(0)->required();
-        $form->radio('is_additional','Финалы для разных групп')
+        $form->radio('is_additional_final','Финалы для разных групп')
             ->options([
                 1 =>'С финалами для разных групп',
                 0 =>'Классика финал для лучших в квалификации',
@@ -276,7 +275,7 @@ class EventsController extends Controller
                     $this->install_set(Admin::user()->id);
                 }
                 $success = new MessageBag([
-                    'title'   => 'Соревнование успешно создано',
+                    'title'   => 'Соревнование успешно сохранено',
                     'message' => '',
                 ]);
 

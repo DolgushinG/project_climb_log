@@ -46,8 +46,6 @@ class  ParticipantsController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header(trans('admin.index'))
-            ->description(trans('admin.description'))
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($event) {
@@ -110,114 +108,6 @@ class  ParticipantsController extends Controller
      *
      * @return Grid
      */
-    protected function grid()
-    {
-        $grid = new Grid(new Event);
-        if (!Admin::user()->isAdministrator()){
-            $grid->model()->where('owner_id', '=', Admin::user()->id);
-        }
-
-        $grid->actions(function ($actions) {
-            $actions->disableDelete();
-            $actions->disableEdit();
-            $actions->disableView();
-            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'excel'));
-            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'csv'));
-            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'ods'));
-        });
-        $grid->disableExport();
-        $grid->disableCreateButton();
-        $grid->disableColumnSelector();
-        $grid->disablePagination();
-        $grid->disablePerPageSelector();
-        $grid->disableBatchActions();
-        $grid->disableFilter();
-        $grid->column('title', 'Название')->expand(function ($model) {
-            $headers = ['Участник','Пол','Город','Команда','Категория','Место','Сет','Баллы', 'Результаты'];
-
-            $style = ['table-bordered','table-hover', 'table-striped'];
-
-            $options = [
-                'responsive' => true,
-                'paging' => true,
-                'lengthChange' => true,
-                'searching' => true,
-                'ordering' => true,
-                'info' => true,
-                'autoWidth' => true,
-                'deferRender' => true,
-                'processing' => true,
-            ];
-            $users_id = $model->participant()->where('owner_id', '=', Admin::user()->id)->pluck('user_id')->toArray();
-            $users_point = $model->participant()->pluck('points','user_id')->toArray();
-            $users_active = $model->participant()->pluck('active','user_id')->toArray();
-            $users_number_set = $model->participant()->pluck('number_set','user_id')->toArray();
-            $fields = ['firstname','id', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
-            $users = User::whereIn('id', $users_id)->get();
-            foreach ($users as $index => $user){
-                $participant_update = Participant::where('event_id', '=', $model->id)->where('user_id', '=', $user->id)->first();
-                $users[$index] = collect($user->toArray())->except($fields);
-                $users[$index]['middlename'] = $user->middlename;
-                $place = Participant::get_places_participant_in_qualification($model->id, $user->id, $user->gender, $participant_update->category_id,true);
-                $users[$index]['place'] = $place;
-                $users[$index]['number_set'] = 'Сет '.$users_number_set[$user->id];
-                $users[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
-                $users[$index]['city'] = $user->city;
-                $users[$index]['team'] = $user->team;
-                $users[$index]['category'] = User::category($participant_update->category_id);
-                $users[$index]['points'] = $users_point[$user->id];
-                $users[$index]['active'] = $users_active[$user->id];
-
-                $participant_update->user_place = $place;
-                $participant_update->save();
-
-                if (isset($users_active[$user->id])){
-                    if ($users_active[$user->id]){
-                            $status = '<i class="fa fa-circle text-success">';
-                        } else {
-                            $status = '<i class="fa fa-times-circle text-danger">';
-                        }
-                    $users[$index]['active'] = $status;
-                }
-//
-            }
-            return new DataTable($headers, $users->toArray(), $style, $options);
-        });
-        $grid->column('active', 'Статус')->using([0 => 'Не активно', 1 => 'Активно'])->display(function ($title, $column) {
-            If ($this->active == 0) {
-                return $column->label('default');
-            } else {
-                return $column->label('success');
-            }
-        });
-        $grid->header(function ($query) {
-            $event_id = $query->where('owner_id', '=', Admin::user()->id)->get()->pluck('id');
-            $users_id = Participant::whereIn('event_id',$event_id)->get()->pluck('user_id');
-            $users_female = User::whereIn('id', $users_id)->where('gender', '=', 'female')->get()->count();
-            $users_male = User::whereIn('id', $users_id)->where('gender', '=', 'male')->get()->count();
-            $gender = array('female' => $users_female, 'male' => $users_male);
-            $doughnut = view('admin.charts.gender', compact('gender'));
-
-            return new Box('Соотношение мужчин и женщин', $doughnut);
-        });
-
-        $grid->filter(function($filter){
-            $filter->disableIdFilter();
-            $filter->in('active', 'Внесли результат')->checkbox([
-                1    => 'Те кто внес',
-                0    => 'Не внесли',
-            ]);
-        });
-
-        return $grid;
-    }
-
-
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
     protected function grid2()
     {
         $grid = new Grid(new Participant);
@@ -273,6 +163,7 @@ class  ParticipantsController extends Controller
                 'male'    => 'Мужчина',
                 'female'    => 'Женщина',
             ]);
+            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         });
         return $grid;
     }
