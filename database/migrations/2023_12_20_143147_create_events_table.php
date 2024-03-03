@@ -23,6 +23,7 @@ class CreateEventsTable extends Migration
             $table->time('end_time');
             $table->string('document')->nullable();
             $table->longText('description');
+            $table->text('contact');
             $table->string('image');
             $table->json('grade_and_amount');
             $table->string('climbing_gym_name');
@@ -35,11 +36,12 @@ class CreateEventsTable extends Migration
             $table->string('link');
             $table->string('link_payment')->nullable();
             $table->string('img_payment')->nullable();
-            $table->string('info_payment')->nullable();
+            $table->longText('info_payment')->nullable();
             $table->string('amount_start_price')->nullable();
             $table->integer('is_semifinal');
             $table->integer('is_additional_final')->nullable();
             $table->json('categories');
+            $table->integer('is_input_birthday')->nullable();
             $table->integer('choice_transfer')->nullable();
             $table->integer('amount_routes_in_final');
             $table->integer('amount_routes_in_semifinal')->nullable();

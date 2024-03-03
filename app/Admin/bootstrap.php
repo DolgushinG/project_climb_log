@@ -25,7 +25,8 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 
 Encore\Admin\Form::forget(['map', 'editor']);
-
+Admin::css('https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css');
+Admin::js('https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js');
 Grid::init(function (Grid $grid) {
     $grid->actions(function (Grid\Displayers\Actions $actions) {
         $actions->disableView();
@@ -35,6 +36,7 @@ Encore\Admin\Grid\Column::define('actions', app\Admin\CustomAction\CustomActions
 app('view')->prependNamespace('admin', resource_path('views/admin'));
 //Admin::js('/vendor/chart.js/chart.js');
 Form::extend('tablecustom', CustomTable::class);
+Admin::js('/vendor/dadata/ddata.js');
 
-Admin::headerJs('/vendor/laravel-admin-ext/material-ui/MaterialAdminLTE/dist/js/material.min.js');
-Admin::headerJs('/vendor/laravel-admin-ext/material-ui/MaterialAdminLTE/dist/js/ripples.min.js');
+//Admin::headerJs('/vendor/laravel-admin-ext/material-ui/MaterialAdminLTE/dist/js/material.min.js');
+//Admin::headerJs('/vendor/laravel-admin-ext/material-ui/MaterialAdminLTE/dist/js/ripples.min.js');

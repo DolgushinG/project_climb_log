@@ -51,11 +51,7 @@ class  ParticipantsController extends Controller
                 if($event) {
 //                    $row->column(10, $this->grid4());
                     $row->column(20, $this->grid2());
-                } else {
-                    $row->column(10, $this->grid());
-                    $row->column(10, $this->grid3());
                 }
-
             });
     }
 
@@ -136,6 +132,7 @@ class  ParticipantsController extends Controller
             $actions->disableDelete();
         });
         $grid->column('user.middlename', __('Участник'));
+        $grid->column('user.birthday', __('Дата Рождения'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
         });
@@ -143,7 +140,9 @@ class  ParticipantsController extends Controller
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         $grid->column('number_set', 'Номер сета')->editable();
-        $grid->column('user_place', 'Место в квалификации')->help('При некорректном раставлением мест, необходимо пересчитать результаты')->sortable();
+        $grid->column('user_place', 'Место в квалификации')
+            ->help('При некорректном раставлением мест, необходимо пересчитать результаты')
+            ->sortable();
         $grid->column('points', 'Баллы')->sortable();
         $grid->column('active', 'Статус')->using([0 => 'Не внес', 1 => 'Внес'])->display(function ($title, $column) {
             If ($this->active == 0) {
@@ -165,25 +164,6 @@ class  ParticipantsController extends Controller
             ]);
             $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         });
-        return $grid;
-    }
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
-    protected function grid3()
-    {
-        $grid = new Grid(new Event);
-        $grid->disableExport();
-        $grid->disableColumnSelector();
-        $grid->disableCreateButton();
-        $grid->disablePagination();
-        $grid->disablePerPageSelector();
-        $grid->disableBatchActions();
-        $grid->disableFilter();
-        $grid->disableActions();
-        $grid->setTitle('Нет активных соревнований');
         return $grid;
     }
 

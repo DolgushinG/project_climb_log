@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('lastname')->nullable();
             $table->string('avatar')->nullable();
             $table->string('gender')->nullable();
-            $table->string('year')->nullable();
+            $table->string('birthday')->nullable();
             $table->string('city')->nullable();
             $table->string('team')->nullable();
             $table->unsignedBigInteger('telegram_id')->nullable();

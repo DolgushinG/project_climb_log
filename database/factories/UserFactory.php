@@ -25,7 +25,7 @@ class UserFactory extends Factory
             'firstname' => $firstname,
             'lastname' => $lastname,
             'middlename' => $middlename,
-            'year' => '1920',
+            'birthday' => '1992-05-29',
             'city' => $this->faker->city(),
             'team' => $this->faker->word(),
             'skill' => null,

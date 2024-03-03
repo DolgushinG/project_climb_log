@@ -115,7 +115,7 @@ class EventsController extends Controller
             'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
             'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
         ];
-        $grid->column('active', 'Опубликовать')->switch($states);
+        $grid->column('active', 'Активно')->switch($states);
 
         return $grid;
     }
@@ -167,6 +167,7 @@ class EventsController extends Controller
         $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
         $form->file('document', 'Прикрепить документ')->placeholder('Прикрепить документ');
         $form->image('image', 'Афиша')->value('images/dada')->placeholder('Афиша')->required();
+        $form->text('contact', 'Контактная информация')->required();
         $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
         $form->hidden('climbing_gym_name_eng')->default('1');
         $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
@@ -187,7 +188,9 @@ class EventsController extends Controller
         $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
         $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
         $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
-        $form->image('img_payment', 'QR код на оплату')->placeholder('Ссылка');
+        $form->image('img_payment', 'QR код на оплату')->placeholder('QR');
+        $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
+        $form->summernote('info_payment', 'Доп инфа об оплате')->placeholder('Инфа...');
         $form->summernote('description', 'Описание')->placeholder('Описание')->required();
         $form->radio('is_semifinal','Настройка финалов')
             ->options([
@@ -205,6 +208,11 @@ class EventsController extends Controller
                 0 =>'Классика финал для лучших в квалификации',
             ])->value(0)->required();
         $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
+        $states = [
+            'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
+            'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+        ];
+        $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states($states);
 //        $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
 //            ->options([1 => 'Ручной перевод по необходимости',2 => 'Настройка авто перевода в другую категорию'])->when(1, function (Form $form) {
 //            })->when(2, function (Form $form) {
@@ -223,7 +231,7 @@ class EventsController extends Controller
             })->required();
 //        $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
 //        $form->switch('active', 'Опубликовать сразу?');
-        $form->switch('active', 'Опубликовать сразу?');
+        $form->switch('active', 'Активно')->states($states);
         $form->saving(function (Form $form) {
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();

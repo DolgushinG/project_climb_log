@@ -29,6 +29,14 @@
                                         @endif
 
                                     @else
+                                        @if($event->is_input_birthday)
+                                            @if(!Auth::user()->birthday)
+                                                <label for="inputDate" class="col col-form-label">Укажите дату рождения</label>
+                                                <div class="col-sm-10">
+                                                    <input name="birthday" id="birthday" type="date" class="form-control">
+                                                </div>
+                                            @endif
+                                        @endif
                                         @if(!Auth::user()->gender)
                                             <div class="form-floating mb-3">
                                                 <select class="form-select" id="floatingSelectGender"
@@ -162,32 +170,21 @@
                                 </div>
                                 <div class="tab-pane fade show active" id="bordered-justified-info" role="tabpanel"
                                      aria-labelledby="info-tab">
-                                    <div class="row">
-                                        <div class="col-lg-6">
-                                            <div class="info-box card z-depth-3">
-                                                <i class="bi bi-geo-alt"></i>
-                                                <h3>Адрес</h3>
+                                    <section id="services" class="services">
+                                        <div class="container" data-aos="fade-up">
+
+                                            <div class="section-title">
+                                                <h2>Адрес</h2>
                                                 <p>{{$event->city}}</p>
                                                 <p>{{$event->address}}</p>
                                                 <p>{{$event->climbing_gym_name}}</p>
                                             </div>
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <div class="info-box card z-depth-3">
-                                                <i class="bi bi-telephone"></i>
-                                                <h3>Связь с организатором</h3>
+                                            <div class="section-title">
+                                                <h2>Контакты</h2>
                                                 <p>{{$event->contact}}</p>
                                             </div>
                                         </div>
-                                        <div class="col-lg-6 pt-4">
-                                            <div class="info-box card z-depth-3">
-                                                <i class="bi bi-clock"></i>
-                                                <h3>Старт</h3>
-                                                <p>{{$event->start_date}} {{$event->start_time}} -
-                                                    <br>{{$event->end_date}} {{$event->end_time}}</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    </section>
                                 </div>
                                 <div class="tab-pane fade" id="bordered-justified-profile" role="tabpanel"
                                      aria-labelledby="profile-tab">
@@ -199,11 +196,16 @@
                                         <div class="row">
                                             <div class="container text-center pt-2 pb-2">
                                                  <label> Сумма к оплате: </label>
-                                                <span class="badge bg-success" style="font-size: 22px"> 4500 руб </span><br>
+                                                <span class="badge bg-success" style="font-size: 22px"> {{$event->amount_start_price}} руб </span><br>
                                             </div>
+                                            @if($event->info_payment)
+                                                <p>{!! $event->info_payment !!}</p>
+                                            @endif
+                                            @if($event->link_payment)
                                             <div class="container text-center pt-2 pb-2">
                                                 <a class="btn btn-primary" style="font-size: 22px" href="{{$event->link_payment}}">Оплатить</a><br>
                                             </div>
+                                            @endif
                                             @if($event->img_payment)
                                                 <img class="img-fluid img-responsive" src="{{asset('storage/'.$event->img_payment)}}" alt="qr">
                                             @endif

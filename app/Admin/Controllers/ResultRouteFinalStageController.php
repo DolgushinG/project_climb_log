@@ -107,9 +107,6 @@ class ResultRouteFinalStageController extends Controller
                         $final_result_stage->save();
                     }
                     $row->column(12, $this->grid2());
-                } else {
-                    $row->column(10, $this->grid2());
-                    $row->column(10, $this->grid3());
                 }
 
             });

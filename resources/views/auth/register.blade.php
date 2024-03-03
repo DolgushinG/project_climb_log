@@ -1,5 +1,7 @@
 @extends('layouts.main_page.app')
 @section('content')
+    <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js"></script>
     @guest
         <main id="main" class="main">
             <div class="container">
@@ -48,11 +50,11 @@
                                                 </select>
                                             </div>
                                             <div class="col-12">
-                                                <label for="year" class="form-label">Год рождения</label>
+                                                <label for="birthday" class="form-label">Дата рождения</label>
                                                 <div class="input-group has-validation">
-                                                    <input type="text" name="year" class="form-control" id="year"
-                                                           value="{{old('year')}}" required autofocus>
-                                                    <div class="invalid-feedback">Введите год рождения</div>
+                                                    <input type="text" name="birthday" class="form-control" id="birthday"
+                                                           value="{{old('birthday')}}" required autofocus>
+                                                    <div class="invalid-feedback">Введите дату рождения</div>
                                                 </div>
                                             </div>
                                             <div class="col-12">
@@ -121,4 +123,5 @@
             </div>
         </main>
     @endguest<!-- End #main -->
+    <script type="text/javascript" src="{{ asset('js/ddata.js') }}"></script>
 @endsection

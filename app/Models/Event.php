@@ -68,6 +68,25 @@ class Event extends Model
         return $this->belongsToMany(User::class);
     }
 
+    public function number_to_month($month): string
+    {
+        switch ($month){
+            case 1: $m='Январь'; break;
+            case 2: $m='Февраль'; break;
+            case 3: $m='Март'; break;
+            case 4: $m='Апрель'; break;
+            case 5: $m='Май'; break;
+            case 6: $m='Июнь'; break;
+            case 7: $m='Июль'; break;
+            case 8: $m='Август'; break;
+            case 9: $m='Сентябрь'; break;
+            case 10: $m='Октябрь'; break;
+            case 11: $m='Ноябрь'; break;
+            case 12: $m='Декабрь'; break;
+        }
+        return $m;
+    }
+
     public function translate_to_eng($text, $mode='eng'){
         $cyr = ['а','б','в','г','д','е','ё','ж','з','и','й','к','л','м','н','о','п', 'р','с','т','у','ф','х','ц','ч','ш','щ','ъ','ы','ь','э','ю','я', 'А','Б','В','Г','Д','Е','Ё','Ж','З','И','Й','К','Л','М','Н','О','П', 'Р','С','Т','У','Ф','Х','Ц','Ч','Ш','Щ','Ъ','Ы','Ь','Э','Ю','Я'
         ];

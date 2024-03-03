@@ -130,6 +130,12 @@ class EventsController extends Controller
         if($participant){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
+        if($request->user_id){
+            $user = User::find($request->user_id);
+            $user->gender = $request->gender;
+            $user->birthday = $request->birthday;
+            $user->save();
+        }
         $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
         $participant = new Participant;
         $participant->event_id = $request->event_id;

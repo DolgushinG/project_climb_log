@@ -14,32 +14,6 @@ function formatResult(value, currentValue, suggestion, options) {
 function formatSelected(suggestion) {
     return suggestion.data.city;
 }
-$("#email").suggestions({
-    token: token,
-    type: "EMAIL",
-    /* Вызывается, когда пользователь выбирает одну из подсказок */
-    onSelect: function(suggestion) {
-    }
-});
-$("#address").suggestions({
-    token: token,
-    minChars: "2",
-    noSuggestionsHint: "ADDRESS: 'Неизвестный адрес'",
-    count: 5,
-    type: "ADDRESS",
-    hint: false,
-    constraints: {
-        locations: { country: "*" }
-    },
-    onSelect: function(suggestion) {
-    }
-});
-$("#country").suggestions({
-    token: token,
-    type: "COUNTRY",
-    onSelect: function(suggestion) {
-    }
-});
     //dadate
 $("#city").suggestions({
     minChars: "2",
