@@ -30,7 +30,7 @@ class ParticipantSeeder extends Seeder
                 $user = User::find($i);
                 $user->category = $category_id;
                 $user->save();
-               $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'category_id' => $category_id, 'user_id' => $i, 'number_set' => rand(1, 6), 'active' => 1);
+               $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'category_id' => $category_id, 'user_id' => $i, 'number_set' => rand(1, 6), 'active' => 1);
             }
             DB::table('participants')->insert($participants);
         }

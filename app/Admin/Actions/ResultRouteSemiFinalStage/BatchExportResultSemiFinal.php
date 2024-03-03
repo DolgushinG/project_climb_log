@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Admin\Actions\ResultQualification;
+namespace App\Admin\Actions\ResultRouteSemiFinalStage;
 
 use App\Admin\CustomAction\ActionExport;
 use App\Exports\QualificationResultExport;
@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
-class BatchResultQualification extends Action
+class BatchExportResultSemiFinal extends Action
 {
     public $name = 'Экспорт';
 
@@ -21,7 +21,7 @@ class BatchResultQualification extends Action
 
     public function handle(Request $request)
     {
-        return $this->response()->download('exports/events/'.$request->format_export.'/qualification/'.$request->title);
+        return $this->response()->download('exports/events/'.$request->format_export.'/semifinal/'.$request->title);
     }
 
     public function form()
@@ -31,8 +31,6 @@ class BatchResultQualification extends Action
         $this->select('title', 'Сореванование')->options($events);
         $this->radio('format_export', 'Какой формат')->options(
             [
-                "csv" => "csv",
-                "ods" => "ods",
                 "excel" => "excel"
             ]);
     }

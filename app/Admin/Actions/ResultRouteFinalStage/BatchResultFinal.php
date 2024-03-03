@@ -108,7 +108,7 @@ class BatchResultFinal extends Action
 
     public function html()
     {
-        return "<a class='send-add btn btn-sm btn-warning'><i class='fa fa-info-circle'></i> Внести результат</a>";
+        return "<a class='send-add btn btn-sm btn-success'><i class='fa fa-arrow-down'></i> Внести результат</a>";
     }
 
 }

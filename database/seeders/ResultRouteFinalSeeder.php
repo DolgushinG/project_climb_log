@@ -31,6 +31,7 @@ class ResultRouteFinalSeeder extends Seeder
 
             $result = array();
             foreach ($final_users as $user) {
+                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {
@@ -49,7 +50,7 @@ class ResultRouteFinalSeeder extends Seeder
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $user['id'], 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $user['id'],'category_id' => $participant->category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
 //                    if($event_id == 3 &&  $user['id'] == 42){
 //                        dd($result);
 //                    }

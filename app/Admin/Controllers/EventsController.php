@@ -102,8 +102,8 @@ class EventsController extends Controller
         $grid->actions(function ($actions) {
             $actions->disableView();
             $actions->append(new ActionExport($actions->getKey(), 'all', 'excel'));
-            $actions->append(new ActionExport($actions->getKey(), 'all', 'csv'));
-            $actions->append(new ActionExport($actions->getKey(), 'all', 'ods'));
+//            $actions->append(new ActionExport($actions->getKey(), 'all', 'csv'));
+//            $actions->append(new ActionExport($actions->getKey(), 'all', 'ods'));
         });
         $grid->disableFilter();
         $grid->disableExport();
@@ -112,8 +112,11 @@ class EventsController extends Controller
         $grid->column('title', 'Название');
         $grid->column('subtitle', 'Надпись под названием');
         $grid->column('link', 'Ссылка')->link();
-
-        $grid->column('active', 'Опубликовать')->switch();
+        $states = [
+            'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
+            'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+        ];
+        $grid->column('active', 'Опубликовать')->switch($states);
 
         return $grid;
     }

@@ -15,6 +15,7 @@ use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
 use App\Models\ResultRouteFinalStage;
+use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -61,7 +62,6 @@ class ResultRouteFinalStageController extends Controller
                             $all_group_participants['male'][$category] = Participant::better_participants($event->id, 'male', 6, $category_id);
                             $all_group_participants['female'][$category] = Participant::better_participants($event->id, 'female', 6, $category_id);
                         }
-//                        dd($all_group_participants);
                         foreach ($all_group_participants as $group_participants){
                             foreach ($group_participants as $participants){
                                 $user = ResultRouteSemiFinalStageController::getUsersSorted($participants, $fields, $event, 'final', Admin::user()->id);
@@ -83,7 +83,6 @@ class ResultRouteFinalStageController extends Controller
                             $users_male = Participant::better_participants($event->id, 'male', 6);
                             $users_female = Participant::better_participants($event->id, 'female', 6);
                         }
-
                         $male = ResultRouteSemiFinalStageController::getUsersSorted($users_male, $fields, $event, 'final', Admin::user()->id);
                         $female = ResultRouteSemiFinalStageController::getUsersSorted($users_female, $fields, $event, 'final', Admin::user()->id);
                         $all_users = array_merge($male, $female);
@@ -98,6 +97,7 @@ class ResultRouteFinalStageController extends Controller
                             $final_result_stage = new ResultFinalStage;
                         }
                         $category_id = ParticipantCategory::where('id', $all_users[$index]['category_id'])->where('event_id', $event->id)->first()->id;
+                        dd($event->id, $all_users[$index]['user_id'], $all_users[$index]['category_id']);
                         $final_result_stage->event_id = $all_users[$index]['event_id'];
                         $final_result_stage->user_id = $all_users[$index]['user_id'];
                         $final_result_stage->category_id = $category_id;
@@ -109,7 +109,7 @@ class ResultRouteFinalStageController extends Controller
                         $final_result_stage->place = $all_users[$index]['place'];
                         $final_result_stage->save();
                     }
-                    $row->column(10, $this->grid2());
+                    $row->column(12, $this->grid2());
                 } else {
                     $row->column(10, $this->grid2());
                     $row->column(10, $this->grid3());
@@ -181,9 +181,11 @@ class ResultRouteFinalStageController extends Controller
             $tools->append(new BatchResultFinal);
         });
         $grid->actions(function ($actions) {
-            $actions->disableEdit();
+//            $actions->disableEdit();
             $actions->disableView();
         });
+
+//        $grid->disableBatchActions();
 //        $events_title = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck('title','id')->toArray();
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
 //        $grid->column('event_id','Соревнование')->select($events_title);
@@ -233,10 +235,12 @@ class ResultRouteFinalStageController extends Controller
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultFinal);
             $tools->append(new BatchResultFinal);
-            $tools->append(new BatchForceRecouting);
+        });
+        $grid->selector(function (Grid\Tools\Selector $selector) {
+            $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         });
         $grid->actions(function ($actions) {
-            $actions->disableEdit();
+//            $actions->disableEdit();
             $actions->disableView();
         });
         $grid->disableExport();
@@ -244,8 +248,10 @@ class ResultRouteFinalStageController extends Controller
         $grid->disableColumnSelector();
         $grid->disablePagination();
         $grid->disablePerPageSelector();
-        $grid->disableBatchActions();
         $grid->column('user.middlename', __('Участник'));
+        $grid->column('user.gender', __('Пол'))->display(function ($gender) {
+            return trans_choice('somewords.'.$gender, 10);
+        });
         $grid->column('category_id', 'Категория')->display(function ($category_id) {
             $owner_id = Admin::user()->id;
             $event = Event::where('owner_id', '=', $owner_id)
@@ -263,8 +269,6 @@ class ResultRouteFinalStageController extends Controller
                 'male'    => 'Мужчина',
                 'female'    => 'Женщина',
             ]);
-            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-
         });
         return $grid;
     }
@@ -310,6 +314,21 @@ class ResultRouteFinalStageController extends Controller
 
         return $show;
     }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $result = ResultFinalStage::find($id);
+        ResultRouteFinalStage::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+        ResultFinalStage::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+    }
+
 
     /**
      * Make a form builder.

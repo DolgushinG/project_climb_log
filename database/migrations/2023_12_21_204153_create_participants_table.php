@@ -23,7 +23,7 @@ class CreateParticipantsTable extends Migration
             $table->float('points')->nullable();
             $table->integer('user_place')->nullable();
             $table->boolean('active');
-            $table->boolean('is_payment')->nullable();
+            $table->boolean('is_paid')->nullable();
             $table->timestamps();
         });
     }

@@ -2,7 +2,11 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultFinal;
+use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
+use App\Admin\Actions\ResultRouteSemiFinalStage\CustomActionsDelete;
+use App\Admin\Actions\ResultRouteSemiFinalStage\CustomSemiFinalActionsDelete;
 use App\Admin\CustomAction\ActionExport;
 use App\Exports\SemiFinalResultExport;
 use App\Models\Event;
@@ -22,6 +26,7 @@ use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 use Illuminate\Http\Request;
+use Illuminate\Support\MessageBag;
 use Jxlwqq\DataTable\DataTable;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -47,10 +52,32 @@ class ResultRouteSemiFinalStageController extends Controller
                     ->where('is_semifinal', '=', 1)
                     ->first();
                 if($event) {
-                    $row->column(10, $this->grid2());
+                    $users_male = Participant::better_participants($event->id, 'male', 10);
+                    $users_female = Participant::better_participants($event->id, 'female', 10);
+                    $fields = ['firstname',
+                        'id', 'category', 'avatar','active', 'team', 'city',
+                        'email', 'year', 'lastname', 'skill', 'sport_category', 'email_verified_at', 'created_at', 'updated_at',
+                        'telegram_id','yandex_id','vkontakte_id'];
+                    self::getUsersSorted($users_male, $fields, $event, 'semifinal', Admin::user()->id);
+                    self::getUsersSorted($users_female, $fields, $event, 'semifinal', Admin::user()->id);
+//                    $row->column(10, $this->grid2());
                     $row->column(10, $this->grid());
                 }
             });
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $result = ResultSemiFinalStage::find($id);
+        ResultRouteSemiFinalStage::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+        ResultSemiFinalStage::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
     }
 
     /**
@@ -104,48 +131,43 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     protected function grid()
     {
-        $grid = new Grid(new ResultRouteSemiFinalStage);
+        $grid = new Grid(new ResultSemiFinalStage());
         if (!Admin::user()->isAdministrator()){
-            $grid->model()
-                ->where('owner_id', '=', Admin::user()->id);
+            $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
         $grid->model()->where(function ($query) {
             $query->has('event.result_semifinal_stage');
         });
         $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new BatchExportResultFinal);
             $tools->append(new BatchResultSemiFinal);
         });
+//        $grid->batchActions(function ($batch) {
+//            $batch->add(new CustomSemiFinalActionsDelete());
+//        });
         $grid->actions(function ($actions) {
             $actions->disableEdit();
+//            $actions->disableDelete();
             $actions->disableView();
         });
 
-        $grid->column('final_route_id', __('Номер маршрута'));
-        $grid->column('user_id', __('Участник'))->select($this->getUsers()->toArray());
-        $grid->column('amount_try_top', __('Кол-во попыток на топ'));
-        $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
         $grid->disableExport();
-        $grid->disableColumnSelector();
         $grid->disableCreateButton();
+        $grid->disableColumnSelector();
+        $grid->disablePagination();
+        $grid->disablePerPageSelector();
+        $grid->disableBatchActions();
+        $grid->column('user.middlename', __('Участник'));
+        $grid->column('user.gender', __('Пол'))->display(function ($gender) {
+            return trans_choice('somewords.'.$gender, 10);
+        });
+        $grid->column('place', __('Место'))->sortable();
+        $grid->column('amount_top', __('Кол-во топов'));
+        $grid->column('amount_try_top', __('Кол-во попыток на топ'));
+        $grid->column('amount_zone', __('Кол-во зон'));
+        $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
         $grid->filter(function($filter){
-            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-            $ev = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->pluck( 'title', 'id');
-            $male_users_middlename = Participant::better_participants($event->id, 'male', 10)->pluck('middlename','id')->toArray();
-            $female_users_middlename = Participant::better_participants($event->id, 'female', 10)->pluck('middlename','id')->toArray();
-            $new = $male_users_middlename + $female_users_middlename;
-            // Remove the default id filter
             $filter->disableIdFilter();
-
-            // Add a column filter
-            $filter->in('event.id', 'Соревнование')->checkbox(
-                $ev
-            );
-
-            $filter->in('user.id', 'Участник')->checkbox(
-                $new
-            );
-
-//            // Add a column filter
             $filter->in('user.gender', 'Пол')->checkbox([
                 'male'    => 'Мужчина',
                 'female'    => 'Женщина',
@@ -153,95 +175,6 @@ class ResultRouteSemiFinalStageController extends Controller
         });
         return $grid;
     }
-
-
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
-    protected function grid2()
-    {
-        $grid = new Grid(new Event);
-        if (!Admin::user()->isAdministrator()){
-            $grid->model()
-                ->where('owner_id', '=', Admin::user()->id)
-                ->where('active', '=',1)
-                ->where('is_semifinal', '=', 1);
-        }
-        $grid->actions(function ($actions){
-            $actions->disableDelete();
-            $actions->disableEdit();
-            $actions->disableView();
-            $actions->append(new ActionExport($actions->getKey(), 'Semifinal' , 'excel'));
-            $actions->append(new ActionExport($actions->getKey(), 'Semifinal', 'csv'));
-            $actions->append(new ActionExport($actions->getKey(), 'Semifinal', 'ods'));
-        });
-        $grid->disableExport();
-        $grid->disableColumnSelector();
-        $grid->disableCreateButton();
-        $grid->disablePagination();
-        $grid->disablePerPageSelector();
-        $grid->disableBatchActions();
-        $grid->disableFilter();
-        $grid->column('title', 'Соревнование')->expand(function ($model) {
-            $headers = ['Участник', 'Пол', 'Место с учетом квалы', 'Кол-во топ','Кол-во зон','Кол-во попыток на топ', 'Кол-во попыток на зону', ];
-            $style = ['table-bordered','table-hover', 'table-striped'];
-            $users_male = Participant::better_participants($model->id, 'male', 10);
-            $users_female = Participant::better_participants($model->id, 'female', 10);
-            $fields = ['firstname',
-                'id', 'category', 'avatar','active', 'team', 'city',
-                'email', 'year', 'lastname', 'skill', 'sport_category', 'email_verified_at', 'created_at', 'updated_at',
-                'telegram_id','yandex_id','vkontakte_id'];
-            $male = self::getUsersSorted($users_male, $fields, $model, 'semifinal', Admin::user()->id);
-            $female = self::getUsersSorted($users_female, $fields, $model, 'semifinal', Admin::user()->id);
-            $final_all_users = array_merge($male, $female);
-            $all_users = array_merge($male, $female);
-            foreach ($final_all_users as $index => $user) {
-                $fields = ['owner_id', 'event_id','avatar', 'user_id','telegram_id','yandex_id','vkontakte_id'];
-                $final_all_users[$index] = collect($user)->except($fields)->toArray();
-            }
-
-            foreach ($all_users as $index => $user) {
-                $fields = ['gender', 'middlename','avatar','telegram_id','yandex_id','vkontakte_id'];
-                $all_users[$index] = collect($user)->except($fields)->toArray();
-                $final_result_stage = ResultSemiFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
-                if (!$final_result_stage) {
-                    $final_result_stage = new ResultSemiFinalStage;
-                }
-                $final_result_stage->owner_id = $all_users[$index]['owner_id'];
-                $final_result_stage->event_id = $all_users[$index]['event_id'];
-                $final_result_stage->user_id = $all_users[$index]['user_id'];
-                $final_result_stage->amount_top = $all_users[$index]['amount_top'];
-                $final_result_stage->amount_zone = $all_users[$index]['amount_zone'];
-                $final_result_stage->amount_try_top = $all_users[$index]['amount_try_top'];
-                $final_result_stage->amount_try_zone = $all_users[$index]['amount_try_zone'];
-                $final_result_stage->place = $all_users[$index]['place'];
-                $final_result_stage->save();
-            }
-            $options = [
-                'responsive' => true,
-                'paging' => true,
-                'lengthChange' => true,
-                'searching' => true,
-                'ordering' => false,
-                'info' => true,
-                'autoWidth' => true,
-                'deferRender' => true,
-                'processing' => true,
-            ];
-            return new DataTable($headers, $final_all_users, $style, $options);
-        });
-        $grid->column('active', 'Статус')->using([0 => 'Не активно', 1 => 'Активно'])->display(function ($title, $column) {
-            If ($this->active == 0) {
-                return $column->label('default');
-            } else {
-                return $column->label('success');
-            }
-        });
-        return $grid;
-    }
-
 
     /**
      * Make a show builder.
@@ -366,16 +299,17 @@ class ResultRouteSemiFinalStageController extends Controller
                 if (!$result){
                     $result = new ResultFinalStage;
                 }
+                $category_id = ParticipantCategory::where('id', $users_sorted[$index]['category_id'])->where('event_id', $model->id)->first()->id;
+                $result->category_id = $category_id;
             } else {
                 $result = ResultSemiFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
                 if (!$result){
                     $result = new ResultSemiFinalStage;
                 }
             }
-            $category_id = ParticipantCategory::where('id', $users_sorted[$index]['category_id'])->where('event_id', $model->id)->first()->id;
+
             $result->event_id = $users_sorted[$index]['event_id'];
             $result->user_id = $users_sorted[$index]['user_id'];
-            $result->category_id = $category_id;
             $result->owner_id = $users_sorted[$index]['owner_id'];
             $result->amount_top = $users_sorted[$index]['amount_top'];
             $result->amount_zone = $users_sorted[$index]['amount_zone'];

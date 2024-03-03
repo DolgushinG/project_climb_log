@@ -227,6 +227,12 @@ class  ParticipantsController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.participant');
         });
+        $grid->selector(function (Grid\Tools\Selector $selector) {
+            $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+            $selector->select('active', 'Кто добавил', [ 1 => 'Добавил',  0 => 'Не добавил']);
+            $selector->select('is_paid', 'Кто оплатил', [ 1 => 'Да',  0 => 'Нет']);
+        });
+        $grid->disableBatchActions();
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
@@ -242,12 +248,12 @@ class  ParticipantsController extends Controller
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
-        })->editable();
+        });
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         $grid->column('number_set', 'Номер сета')->editable();
-        $grid->column('user_place', 'Место в квалификации')->sortable();
+        $grid->column('user_place', 'Место в квалификации')->help('При некорректном раставлением мест, необходимо пересчитать результаты')->sortable();
         $grid->column('points', 'Баллы')->sortable();
         $grid->column('active', 'Статус')->using([0 => 'Не внес', 1 => 'Внес'])->display(function ($title, $column) {
             If ($this->active == 0) {
@@ -256,14 +262,17 @@ class  ParticipantsController extends Controller
                 return $column->label('success');
             }
         });
+        $states = [
+            'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
+            'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+        ];
+        $grid->column('is_paid', 'Оплата')->switch($states);
         $grid->filter(function($filter){
             $filter->disableIdFilter();
             $filter->in('user.gender', 'Пол')->checkbox([
                 'male'    => 'Мужчина',
                 'female'    => 'Женщина',
             ]);
-            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-
         });
         return $grid;
     }
@@ -367,6 +376,7 @@ class  ParticipantsController extends Controller
         $form->text('number_set', 'number_set');
         $form->text('category_id', 'number_set');
         $form->switch('active', 'active');
+        $form->switch('is_paid', 'is_paid');
         $form->display(trans('admin.created_at'));
         $form->display(trans('admin.updated_at'));
         $form->saving(function (Form $form) {

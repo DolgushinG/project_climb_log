@@ -31,15 +31,13 @@ class BatchExportResultFinal extends Action
         $this->select('title', 'Сореванование')->options($events);
         $this->radio('format_export', 'Какой формат')->options(
             [
-                "csv" => "csv",
-                "ods" => "ods",
                 "excel" => "excel"
             ]);
     }
 
     public function html()
     {
-        return "<a class='export btn btn-sm btn-warning'><i class='fa fa-info-circle'></i>Экспорт</a>";
+        return "<a class='export btn btn-sm btn-primary'><i class='fa fa-arrow-up'></i> Экспорт</a>";
     }
 
 }
