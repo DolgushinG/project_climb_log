@@ -231,7 +231,9 @@ class EventsController extends Controller
             })->required();
 //        $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
 //        $form->switch('active', 'Опубликовать сразу?');
-        $form->switch('active', 'Активно')->states($states);
+        $form->switch('active', 'Активно')
+            ->help('Не обязательно сразу делать активно, после сохранения будет ссылка по которой можно будет посмотреть')
+            ->states($states);
         $form->saving(function (Form $form) {
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
