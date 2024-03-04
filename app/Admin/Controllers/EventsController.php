@@ -166,7 +166,7 @@ class EventsController extends Controller
         $form->time('end_time', 'Время окончания')->placeholder('Время окончания')->required();
         $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
         $form->file('document', 'Прикрепить документ')->placeholder('Прикрепить документ');
-        $form->image('image', 'Афиша')->value('images/dada')->placeholder('Афиша')->required();
+        $form->image('image', 'Афиша')->placeholder('Афиша')->required();
         $form->text('contact', 'Контактная информация')->required();
         $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
         $form->hidden('climbing_gym_name_eng')->default('1');
