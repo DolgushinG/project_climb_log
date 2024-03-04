@@ -15,12 +15,14 @@
             <table class="table table-striped">
                 <td>Название</td>
                 <td>Кол-во участников</td>
-                @foreach($events as $event)
-                <tr>
-                    <td>{{ $event->title }}</td>
-                    <td><span class="label label-primary">{{ $event->count_participant }}</span></td>
-                </tr>
-                @endforeach
+                @if($events)
+                    @foreach($events as $event)
+                    <tr>
+                        <td>{{ $event->title }}</td>
+                        <td><span class="label label-primary">{{ $event->count_participant }}</span></td>
+                    </tr>
+                    @endforeach
+                @endif
             </table>
         </div>
         <!-- /.table-responsive -->

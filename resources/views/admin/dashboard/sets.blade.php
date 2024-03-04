@@ -11,6 +11,7 @@
 
     <!-- /.box-header -->
     <div class="box-body sets">
+        @if($sets)
         @foreach($sets as $set)
             @if($set->free != 0)
                 <label style="font-size: 12px">Сет {{$set->number_set}}-{{$set->time}}
@@ -31,6 +32,7 @@
                 </div>
             @endif
         @endforeach
+        @endif
         <!-- /.table-responsive -->
     </div>
     <!-- /.box-body -->

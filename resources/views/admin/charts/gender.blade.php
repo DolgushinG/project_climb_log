@@ -7,8 +7,8 @@
             data: {
                 datasets: [{
                     data: [
-                        {{ $gender['male'] }},
-                        {{ $gender['female'] }},
+                        {{ $gender['male'] ?? 0 }},
+                        {{ $gender['female'] ?? 0 }},
                     ],
                     backgroundColor: [
                         'rgb(54, 162, 235)',

@@ -30,5 +30,5 @@
 </div>
 <div class="links">
     <a href="{{$admin_info->climbing_gym_link}}" target="_blank">Мой сайт скалодром</a>
-    <a href="{{$admin_info->current_event}}"  target="_blank">Текущие соревнование</a>
+{{--    <a href="{{$admin_info->current_event}}"  target="_blank">Текущие соревнование</a>--}}
 </div>
