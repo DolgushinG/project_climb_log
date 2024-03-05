@@ -1,21 +1,32 @@
 @extends('layouts.main_page.app')
 @section('content')
-<div class="ag-page-404 mb-2">
-    <div class="ag-toaster-wrap">
-        <div class="ag-toaster">
-            <div class="ag-toaster_back"></div>
-            <div class="ag-toaster_front">
-                <div class="js-toaster_lever ag-toaster_lever"></div>
+    <main id="main">
+        <!-- ======= Featured Services Section ======= -->
+        <section id="featured-services" class="featured-services">
+            <div class="container" data-aos="fade-up">
+
+                <div class="ag-page-404 mb-2">
+                    <div class="ag-toaster-wrap">
+                        <div class="ag-toaster">
+                            <div class="ag-toaster_back"></div>
+                            <div class="ag-toaster_front">
+                                <div class="js-toaster_lever ag-toaster_lever"></div>
+                            </div>
+                            <div class="ag-toaster_toast-handler">
+                                <div class="ag-toaster_shadow"></div>
+                                <div class="js-toaster_toast ag-toaster_toast js-ag-hide"></div>
+                            </div>
+                        </div>
+                        <canvas id="canvas-404" class="ag-canvas-404"></canvas>
+                        <img class="ag-canvas-404_img" src="https://raw.githubusercontent.com/SochavaAG/example-mycode/master/pens/404-error-smoke-from-toaster/images/smoke.png">
+                    </div>
+                </div>
+
             </div>
-            <div class="ag-toaster_toast-handler">
-                <div class="ag-toaster_shadow"></div>
-                <div class="js-toaster_toast ag-toaster_toast js-ag-hide"></div>
-            </div>
-        </div>
-        <canvas id="canvas-404" class="ag-canvas-404"></canvas>
-        <img class="ag-canvas-404_img" src="https://raw.githubusercontent.com/SochavaAG/example-mycode/master/pens/404-error-smoke-from-toaster/images/smoke.png">
-    </div>
-</div>
+        </section><!-- End Featured Services Section -->
+
+    </main><!-- End #main -->
+
 
 <script>
     (function ($) {
