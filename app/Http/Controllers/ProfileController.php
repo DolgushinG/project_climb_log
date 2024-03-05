@@ -39,7 +39,7 @@ class ProfileController extends Controller
             $state_user['redpoint'] = 0;
             $state_user['all'] = 0;
         }
-        
+
         $activities = Activity::where('causer_id', '=', $user->id)->orderBy('updated_at')->take(5)->get();
         return view('profile.main', compact(['user', 'activities', 'state_user']));
     }
@@ -57,8 +57,12 @@ class ProfileController extends Controller
             ->where('active', 1)
             ->select('user_place')
             ->orderBy('user_place')
-            ->first()
-            ->user_place;
+            ->first();
+        if($best_place){
+            $best_place = $best_place->user_place;
+        } else {
+            $best_place = null;
+        }
         $state_participant['amount_event'] = $all;
         $state_participant['best_place'] = $best_place;
         return view('profile.overview', compact(['user', 'activities', 'state_participant']));

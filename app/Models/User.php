@@ -35,6 +35,7 @@ class User extends Authenticatable
         'lastname',
         'gender',
         'birthday',
+        'year',
         'sport_category',
         'skill',
         'city',

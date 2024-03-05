@@ -1,36 +1,44 @@
-<x-guest-layout>
-    <x-auth-card>
-        <x-slot name="logo">
-            <a href="/">
-                <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-            </a>
-        </x-slot>
+@extends('layouts.main_page.app')
+@section('content')
+    @guest
+        <main id="main" class="main">
+            <div class="container">
+                <section
+                    class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
 
-        <div class="mb-4 text-sm text-gray-600">
-            {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-        </div>
+                                <div class="card mb-3">
 
-        <!-- Session Status -->
-        <x-auth-session-status class="mb-4" :status="session('status')" />
-
-        <!-- Validation Errors -->
-        <x-auth-validation-errors class="mb-4" :errors="$errors" />
-
-        <form method="POST" action="{{ route('password.email') }}">
-            @csrf
-
-            <!-- Email Address -->
-            <div>
-                <x-label for="email" :value="__('Email')" />
-
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
+                                    <div class="card-body">
+                                        <p class="text-center small">Восстановление пароля</p>
+                                        <form method="POST" class="row g-3 needs-validation" action="{{ route('password.email') }}">
+                                            @csrf
+                                            <p class="text-center small">Ввдите ваш email и пароль чтобы войти</p>
+                                            <!-- Email Address -->
+                                            <div class="col-12">
+                                                <label for="email" class="form-label">Email</label>
+                                                <div class="input-group has-validation">
+                                                    <span class="input-group-text" id="inputGroupPrepend">@</span>
+                                                    <input type="email" id="email" name="email" class="form-control"
+                                                           value="{{old('email')}}" required autofocus>
+                                                    <div class="invalid-feedback">Пожалуйста введите email</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <button class="btn btn-primary w-100" type="submit">
+                                                    {{ __('Отправить письмо о сбросе пароля') }}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <x-button>
-                    {{ __('Email Password Reset Link') }}
-                </x-button>
-            </div>
-        </form>
-    </x-auth-card>
-</x-guest-layout>
+        </main><!-- End #main -->
+    @endguest
+@endsection
