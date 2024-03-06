@@ -171,7 +171,7 @@ class EventsController extends Controller
         $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
         $form->hidden('climbing_gym_name_eng')->default('1');
         $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
-        $form->number('count_routes', 'Кол-во трасс по умалчанию 30 трасс **(Кол-во трасс должно совпадать с Категориями и их кол-вом)
+        $form->hidden('count_routes', 'Кол-во трасс по умалчанию 30 трасс **(Кол-во трасс должно совпадать с Категориями и их кол-вом)
         ')->options(['max' => 150, 'min' => 10, 'step' => 1, 'postfix' => ' маршрутов'])->default(30)->placeholder('Кол-во трасс')->required();
         $routes = $this->getRoutes();
 
@@ -241,8 +241,15 @@ class EventsController extends Controller
                     throw new \Exception('Только одно соревнование может быть опубликовано');
                 }
             }
-            $count = 0;
             if($form->grade_and_amount){
+                $main_count = 0;
+                foreach ($form->grade_and_amount as $route){
+                    for ($count = 1; $count <= $route['Кол-во']; $count++){
+                        $main_count++;
+                    }
+                }
+                $form->count_routes = $main_count;
+                $count = 0;
                 foreach ($form->grade_and_amount as $value){
                     $count += intval($value["Кол-во"]);
                 }

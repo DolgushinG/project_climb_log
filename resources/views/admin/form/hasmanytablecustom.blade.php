@@ -8,7 +8,9 @@
     <div class="{{$viewClass['label']}}"><h4 class="pull-right">{{ $label }}</h4></div>
     <div class="{{$viewClass['field']}}">
         <div class="col-sm-12">
-            <label id="count_routes_label" class="form-control">30</label>
+
+            <label>Кол-во трасс в сумме</label>
+            <label id="count_routes_label" class="form-control">15</label>
         </div>
         <div id="has-many-{{$column}}" style="margin-top: 15px;">
             <table class="table table-has-many has-many-{{$column}}">
@@ -66,12 +68,6 @@
                         let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {
                             return currentSum + currentNumber
                         }, 0)
-                        let count_routes = document.querySelector('#count_routes').value
-                        if (Number(count_routes) !== results) {
-                            document.getElementById('count_routes_label').style.background = 'red';
-                        } else {
-                            document.getElementById('count_routes_label').style.background = 'white';
-                        }
                         document.getElementById('count_routes_label').textContent = results;
                     });
                 });
