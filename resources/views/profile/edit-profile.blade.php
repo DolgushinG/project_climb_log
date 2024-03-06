@@ -102,6 +102,12 @@
             </div>
         </div>
         <div class="row mb-3">
+            <label for="birthday" class="col-md-4 col-lg-3 col-form-label">Год рождения</label>
+            <div class="col-md-8 col-lg-9">
+                <input name="birthday" type="date" class="form-control" id="birthday" value="{{$user->birthday}}">
+            </div>
+        </div>
+        <div class="row mb-3">
             <label for="gender" class="col-md-4 col-lg-3 col-form-label">Пол</label>
             <div class="col-md-8 col-lg-9">
                 <select class="form-select" name="gender" id="gender" required>

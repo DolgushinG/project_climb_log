@@ -10,6 +10,10 @@
                 <p>
                     @lang('somewords.'.$user->gender  ?? '')
                 </p>
+                <h6>Год рождения</h6>
+                <p>
+                    {{$user->birthday ?? ''}}
+                </p>
             </div>
             <div class="col-md-6">
                 <h6>Общая статистика</h6>

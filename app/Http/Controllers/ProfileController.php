@@ -145,6 +145,7 @@ class ProfileController extends Controller
         $user->city = $request->city;
         $user->gender = $request->gender;
         $user->team = $request->team;
+        $user->birthday = $request->birthday;
         if ($user->save()) {
             return response()->json(['success' => true, 'message' => 'Успешно сохранено'], 200);
         } else {
