@@ -580,9 +580,10 @@ h6 {
   }
 }
 
-@media (max-width: 768px) {
+@media (min-device-width: 481px) and (max-device-width: 768px){
   #hero {
     height: 100vh;
+    background: url("../img/welcome-banner-ipad.png") left;
   }
 
   #hero h1 {
@@ -604,15 +605,15 @@ h6 {
     .btn-redpoint {
         font-size: 13px;
     }
-  #hero .btn-get-started,
-  #hero .btn-watch-video {
+  #hero .btn-get-started{
     font-size: 13px;
   }
 }
 
-@media (max-height: 500px) {
+@media  (min-device-width: 200px) and (max-device-width: 480px) {
   #hero {
-    height: 120vh;
+      height: 75vh;
+      background: url("../img/welcome-banner-mobile.png") left;
   }
     .btn-failed {
         font-size: 13px;
