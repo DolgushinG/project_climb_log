@@ -1,6 +1,12 @@
 @extends('layouts.main_page.app')
 @section('content')
-    <main id="main" class="main">
+    <section id="contact" class="d-flex align-items-center">
+        <div class="container" data-aos="zoom-out" data-aos-delay="100">
+            <h2><br>
+                <span>Предворительные результаты</span></h2>
+        </div>
+    </section><!-- End Hero -->
+    <main id="main">
         <section class="section contact">
             <div class="row gy-4">
                 <div class="col-xl-6">
@@ -13,7 +19,7 @@
                                 @foreach($categories as $category)
                                     @if($category['id'] == $categories[array_search($category['id'], $categories)]['id'])
                                     <li class="nav-item flex-fill" role="presentation">
-                                        <button class="nav-link w-100 active" id="{{$category['id']}}-tab"
+                                        <button class="nav-link active" id="{{$category['id']}}-tab"
                                                 data-bs-toggle="tab"
                                                 data-bs-target="#bordered-justified-{{$category['id']}}" type="button"
                                                 role="tab" aria-controls="{{$category['id']}}"
@@ -23,7 +29,7 @@
                                     </li>
                                     @else
                                         <li class="nav-item flex-fill" role="presentation">
-                                            <button class="nav-link w-100" id="{{$category['id']}}-tab"
+                                            <button class="nav-link" id="{{$category['id']}}-tab"
                                                     data-bs-toggle="tab"
                                                     data-bs-target="#bordered-justified-{{$category['id']}}" type="button"
                                                     role="tab" aria-controls="{{$category['id']}}"
@@ -124,7 +130,7 @@
                                                      id="bordered-justified-women-{{$category['id']}}" role="tabpanel"
                                                      aria-labelledby="{{$category['id']}}-tab">
                                             @endif
-                                            <table class="table table-sm">
+                                                <table class="table table-sm">
                                                 <thead>
                                                 <tr>
                                                     <th scope="col">
@@ -155,10 +161,11 @@
                                             @if($stats->female_categories[$category['id']] == 0)
                                                 <p>Результатов пока нет</p>
                                             @endif
+                                                </div>
                                         </div>
-
                                 @endforeach
                             </div><!-- End Bordered Tabs Justified -->
+                        </div>
                         </div>
                     </div>
                 </div>

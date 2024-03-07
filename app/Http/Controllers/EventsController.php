@@ -65,14 +65,19 @@ class EventsController extends Controller
         }
 
     }
-    public function get_participants(Request $request,$climbing_gym, $title){
+    public function get_participants(Request $request, $climbing_gym, $title){
         $event = Event::where('title_eng', '=', $title)->first();
         $participants = array();
         $participant_event = Participant::where('event_id', '=',$event->id)->get();
         $users_id = $participant_event->pluck('user_id')->toArray();
         $users = User::whereIn('id', $users_id)->get()->toArray();
         $users_event = $participant_event->toArray();
+        $days = Set::where('owner_id', '=', $event->owner_id)->select('day_of_week')->distinct()->get();
         $sets = Set::where('owner_id', '=', $event->owner_id)->get();
+        $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('number_set');
+        foreach ($number_sets as $index => $set){
+            $sets[$index]->count_participant = Participant::where('event_id', '=',$event->id)->where('number_set', $set)->count();
+        }
         $index = 0;
         foreach($users_event as $set => $user) {
             if ($index <= count($users)) {
@@ -88,8 +93,7 @@ class EventsController extends Controller
             }
             $index++;
         }
-
-        return view('event.participants', compact(['event', 'participants', 'sets']));
+        return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
     }
 
     public function get_final_results(Request $request, $climbing_gym, $title){
@@ -103,7 +107,7 @@ class EventsController extends Controller
         $stats->female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->get()->count();
         $categories = ParticipantCategory::where('event_id', $event->id)->get();
 
-        foreach ($categories as $category){
+        foreach ($categories as $category) {
             $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
             $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
             $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('category_id', '=', $category->id)->get()->count();
