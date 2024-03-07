@@ -173,15 +173,7 @@ class EventsController extends Controller
         $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
         $form->hidden('count_routes', 'Кол-во трасс по умалчанию 30 трасс **(Кол-во трасс должно совпадать с Категориями и их кол-вом)
         ')->options(['max' => 150, 'min' => 10, 'step' => 1, 'postfix' => ' маршрутов'])->default(30)->placeholder('Кол-во трасс')->required();
-        $routes = $this->getRoutes();
 
-        $form->tablecustom('grade_and_amount', '', function ($table) {
-            $grades = $this->getGrades();
-            $table->select('Категория')->options($grades)->readonly();
-            $table->text('Кол-во')->width('50px');
-            $table->text('Ценность')->width('50px');
-            $table->disableButton();
-        })->value($routes);
 
         $form->text('title', 'Название')->placeholder('Введи название')->required();
         $form->hidden('title_eng')->default('1');
@@ -227,7 +219,22 @@ class EventsController extends Controller
         $form->radio('mode','Настройка формата')
             ->options($formats)->when(1, function (Form $form) {
                 $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
+                $routes = $this->getRoutes();
+                $form->tablecustom('grade_and_amount', '', function ($table) {
+                    $grades = $this->getGrades();
+                    $table->select('Категория')->options($grades)->readonly();
+                    $table->text('Кол-во')->width('50px');
+                    $table->text('Ценность')->width('50px');
+                    $table->disableButton();
+                })->value($routes);
             })->when(2, function (Form $form) {
+                $routes = $this->getRoutes();
+                $form->tablecustom('grade_and_amount', '', function ($table) {
+                    $grades = $this->getGrades();
+                    $table->select('Категория')->options($grades)->readonly();
+                    $table->text('Кол-во')->width('50px');
+                    $table->disableButton();
+                })->value($routes);
             })->required();
 //        $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
 //        $form->switch('active', 'Опубликовать сразу?');
@@ -235,6 +242,7 @@ class EventsController extends Controller
             ->help('Не обязательно сразу делать активно, после сохранения будет ссылка по которой можно будет посмотреть')
             ->states($states);
         $form->saving(function (Form $form) {
+//            dd($form);
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($events && $events->id != $form->model()->id){

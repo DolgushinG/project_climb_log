@@ -40,7 +40,11 @@ class Event extends Model
     public static function generation_route($owner_id, $event_id, $routes){
         $grades = array();
         foreach ($routes as $route){
-            $grades[] = array('owner_id' => $owner_id ,'event_id' => $event_id, 'grade' => $route['Категория'], 'amount' => $route['Кол-во'], 'value' => $route['Ценность']);
+            if(isset($route['Ценность'])){
+                $grades[] = array('owner_id' => $owner_id ,'event_id' => $event_id, 'grade' => $route['Категория'], 'amount' => $route['Кол-во'], 'value' => $route['Ценность']);
+            } else {
+                $grades[] = array('owner_id' => $owner_id ,'event_id' => $event_id, 'grade' => $route['Категория'], 'amount' => $route['Кол-во']);
+            }
         }
         DB::table('grades')->insert($grades);
     }

@@ -18,7 +18,7 @@ class CreateGradesTable extends Migration
             $table->integer('owner_id');
             $table->integer('event_id');
             $table->string('grade');
-            $table->integer('value');
+            $table->integer('value')->nullable();
             $table->integer('amount');
             $table->timestamps();
         });
