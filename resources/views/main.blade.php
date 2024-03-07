@@ -441,7 +441,9 @@
                 <div class="row portfolio-container" data-aos="fade-up" data-aos-delay="200">
                 @foreach($events as $event)
                         <div class="col-lg-4 col-md-6 portfolio-item filter-{{$event->city}}">
-                            <img src="storage/{{$event->image}}" class="img-fluid" alt="">
+                            <a href="event/{{$event->climbing_gym_name_eng}}/{{$event->title_eng}}" class="details-link" title="More Details">
+                                <img src="storage/{{$event->image}}" class="img-fluid" alt="">
+                            </a>
                             <div class="portfolio-info">
                                 <h4>{{$event->city}}</h4>
                                 <a href="storage/{{$event->image}}" data-gallery="portfolioGallery"
