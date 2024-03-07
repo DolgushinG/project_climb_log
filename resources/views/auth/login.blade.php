@@ -91,8 +91,8 @@
                                             <div class="col-12">
                                                 @if (Route::has('password.request'))
                                                     <a href="{{ route('password.request') }}"
-                                                       class="btn btn-primary w-100">
-                                                        {{ __('Забыл пароль?') }}
+                                                       class="small mb-0">
+                                                        {{ __('Забыли пароль?') }}
                                                     </a>
                                                 @endif
                                             </div>
