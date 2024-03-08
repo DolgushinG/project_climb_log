@@ -151,3 +151,4 @@
     </form>
 
 </div>
+<script type="text/javascript" src="{{ asset('js/ddata.js') }}"></script>

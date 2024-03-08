@@ -1,5 +1,7 @@
 @extends('layouts.main_page.app')
 @section('content')
+    <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js"></script>
     <main id="main" class="main">
         <section class="section profile">
             <div class="container">
@@ -104,4 +106,5 @@
         </section>
         <script type="text/javascript" src="{{ asset('js/profile.js') }}"></script>
     </main><!-- End #main -->
+
 @endsection
