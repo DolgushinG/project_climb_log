@@ -41,10 +41,10 @@
                                                 <label for="gender" class="form-label">Пол</label>
                                                 <select class="form-select" name="gender" id="gender" required>
                                                     <option selected disabled value="">Укажите пол...</option>
-                                                    <option value="male">
+                                                    <option id="male" value="male">
                                                         М
                                                     </option>
-                                                    <option value="female">
+                                                    <option id="female" value="female">
                                                         Ж
                                                     </option>
                                                 </select>
@@ -102,7 +102,7 @@
                                             {{--                                        </div>--}}
                                             {{--                                    </div>--}}
                                             <div class="col-12">
-                                                <button class="btn btn-primary w-100" type="submit">Создать аккаунт
+                                                <button id="submit" class="btn btn-primary w-100" type="submit">Создать аккаунт
                                                 </button>
                                             </div>
                                             <div class="col-12">

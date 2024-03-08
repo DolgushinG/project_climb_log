@@ -8,6 +8,9 @@ $(document).on('click','#btn-participant', function(e) {
     var value = document.getElementById("floatingSelect").value
     var category_value = document.getElementById("floatingSelectCategory").value
     var gender_value = document.getElementById("floatingSelectGender").value
+    if(document.getElementById("floatingSelectSportCategory")){
+        var sport_category_value = document.getElementById("floatingSelectSportCategory").value
+    }
     if(document.getElementById("birthday")){
         var birthday_value = document.getElementById("birthday").value
     }
@@ -25,6 +28,7 @@ $(document).on('click','#btn-participant', function(e) {
             'user_id': user_id,
             'category': category_value,
             'gender': gender_value,
+            'sport_category': sport_category_value,
             'birthday': birthday_value,
         },
         success: function(xhr, status, error) {

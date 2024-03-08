@@ -12,6 +12,12 @@ $(document).on('click', '#btn-participant', function (e) {
   var value = document.getElementById("floatingSelect").value;
   var category_value = document.getElementById("floatingSelectCategory").value;
   var gender_value = document.getElementById("floatingSelectGender").value;
+  if (document.getElementById("floatingSelectSportCategory")) {
+    var sport_category_value = document.getElementById("floatingSelectSportCategory").value;
+  }
+  if (document.getElementById("birthday")) {
+    var birthday_value = document.getElementById("birthday").value;
+  }
   var button = $('#btn-participant');
   var event_id = document.getElementById('btn-participant').getAttribute('data-id');
   var event_title = document.getElementById('btn-participant').getAttribute('data-title');
@@ -25,7 +31,9 @@ $(document).on('click', '#btn-participant', function (e) {
       'event_id': event_id,
       'user_id': user_id,
       'category': category_value,
-      'gender': gender_value
+      'gender': gender_value,
+      'sport_category': sport_category_value,
+      'birthday': birthday_value
     },
     success: function success(xhr, status, error) {
       button.text('').append('<i id="spinner" style="margin-left: -12px;\n' + '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...');

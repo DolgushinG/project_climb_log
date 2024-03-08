@@ -17,6 +17,17 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, LogsActivity;
 
+    const sport_categories = array(
+        "б/р",
+        "III разряд",
+        "II разряд",
+        "I разряд",
+        "КМС",
+        "МС",
+        "МСМК",
+        "ЗМС"
+    );
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -47,7 +58,6 @@ class User extends Authenticatable
         'yandex_id',
         'vkontakte_id',
     ];
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -184,6 +194,8 @@ class User extends Authenticatable
 
 
     }
+
+
 
 
 }

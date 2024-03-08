@@ -59,7 +59,8 @@ class EventsController extends Controller
                 }
                 $set->procent = intval($percent);
             }
-            return view('welcome', compact(['event',  'sets']));
+            $sport_categories = User::sport_categories;
+            return view('welcome', compact(['event', 'sport_categories', 'sets']));
         } else {
             return view('404');
         }
@@ -137,6 +138,7 @@ class EventsController extends Controller
         if($request->user_id){
             $user = User::find($request->user_id);
             $user->gender = $request->gender;
+            $user->sport_category = $request->sport_category;
             $user->birthday = $request->birthday;
             $user->save();
         }

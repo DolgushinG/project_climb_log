@@ -205,6 +205,7 @@ class EventsController extends Controller
             'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
         ];
         $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states($states);
+        $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states($states);
 //        $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
 //            ->options([1 => 'Ручной перевод по необходимости',2 => 'Настройка авто перевода в другую категорию'])->when(1, function (Form $form) {
 //            })->when(2, function (Form $form) {

@@ -46,7 +46,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-12">
-                                                <button class="btn btn-primary w-100" type="submit">
+                                                <button id="submit" class="btn btn-primary w-100" type="submit">
                                                     Войти
                                                 </button>
                                             </div>

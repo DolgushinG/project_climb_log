@@ -14,6 +14,10 @@
                 <p>
                     {{$user->birthday ?? ''}}
                 </p>
+                <h6>Разряд</h6>
+                <p>
+                    {{$user->sport_category ?? ''}}
+                </p>
             </div>
             <div class="col-md-6">
                 <h6>Общая статистика</h6>

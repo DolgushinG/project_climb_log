@@ -108,32 +108,32 @@
             </div>
         </div>
         <div class="row mb-3">
+            <label for="sport_category" class="col-md-4 col-lg-3 col-form-label">Разряд</label>
+            <div class="col-md-8 col-lg-9">
+                <select name="sport_category" class="form-select" aria-label="sport_category">
+                    <option>Выбрать</option>
+                    @foreach ($sport_categories as $category)
+                        @if($category === $user->sport_category)
+                            <option selected value="{{$category}}">{{$category}}</option>
+                        @else
+                            <option value="{{$category}}">{{$category}}</option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        <div class="row mb-3">
             <label for="gender" class="col-md-4 col-lg-3 col-form-label">Пол</label>
             <div class="col-md-8 col-lg-9">
                 <select class="form-select" name="gender" id="gender" required>
-                @if($user->gender == "male")
-                <option disabled value="">Укажите пол...</option>
-                <option selected value="male">
-                    М
-                </option>
-                <option value="female">
-                    Ж
-                </option>
-                @elseif($user->gender == "female")
                     <option disabled value="">Укажите пол...</option>
-                    <option value="male">
-                        М
-                    </option>
-                    <option selected value="female">
-                        Ж
+                @if($user->gender == "male")
+                    <option selected value="{{$user->gender}}">
+                        @lang('somewords.'.$user->gender  ?? '')
                     </option>
                 @else
-                    <option selected disabled value="">Укажите пол...</option>
-                    <option value="male">
-                        М
-                    </option>
-                    <option value="female">
-                        Ж
+                    <option value="{{$user->gender}}">
+                        @lang('somewords.'.$user->gender  ?? '')
                     </option>
                 @endif
             </select>

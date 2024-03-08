@@ -64,7 +64,8 @@ class ProfileController extends Controller
             $best_place = null;
         }
         $state_participant['amount_event'] = $all;
-        $state_participant['best_place'] = $best_place;
+        $state_participant['bestd_place'] = $best_place;
+
         return view('profile.overview', compact(['user', 'activities', 'state_participant']));
     }
     public function getTabContentSetting() {
@@ -93,7 +94,8 @@ class ProfileController extends Controller
     }
     public function getTabContentEdit() {
         $user = User::find(Auth()->user()->id);
-        return view('profile.edit-profile', compact(['user']));
+        $sport_categories = User::sport_categories;
+        return view('profile.edit-profile', compact(['sport_categories', 'user']));
     }
 
     public function getTabContentEvents() {
@@ -144,6 +146,7 @@ class ProfileController extends Controller
         $user->lastname = $request->lastname;
         $user->city = $request->city;
         $user->gender = $request->gender;
+        $user->sport_category = $request->sport_category;
         $user->team = $request->team;
         $user->birthday = $request->birthday;
         if ($user->save()) {
