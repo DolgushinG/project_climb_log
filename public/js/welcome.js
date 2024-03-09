@@ -41,13 +41,21 @@ $(document).on('click', '#btn-participant', function (e) {
         button.text(xhr.message);
       }, 3000);
       setTimeout(function () {
-        button.text('Внести результат');
-        button.removeClass('btn btn-dark rounded-pill');
-        button.addClass('btn btn-success rounded-pill');
-        button.attr("id", "listRoutesEvent");
-        document.getElementById("listRoutesEvent").onclick = function () {
-          location.href = "/routes/event/" + event_title + "/list-routes-event";
-        };
+        var is_qualification_counting_like_final = "<?php echo $event->is_qualification_counting_like_final; ?>";
+        if (!is_qualification_counting_like_final) {
+          button.text('Внести результат');
+          button.removeClass('btn btn-dark rounded-pill');
+          button.addClass('btn btn-success rounded-pill');
+          button.attr("id", "listRoutesEvent");
+          document.getElementById("listRoutesEvent").onclick = function () {
+            location.href = "/routes/event/" + event_title + "/list-routes-event";
+          };
+        } else {
+          button.text('Вы принимаете участие');
+          button.removeClass('btn btn-dark rounded-pill');
+          button.addClass('btn btn-secondary rounded-pill');
+          button.attr('disabled', 'disabled');
+        }
       }, 6000);
     },
     error: function error(xhr, status, _error) {

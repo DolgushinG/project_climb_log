@@ -25,11 +25,11 @@ class CreateEventsTable extends Migration
             $table->longText('description');
             $table->text('contact');
             $table->string('image');
-            $table->json('grade_and_amount');
+            $table->json('grade_and_amount')->nullable();
             $table->string('climbing_gym_name');
             $table->string('climbing_gym_name_eng');
             $table->string('city');
-            $table->integer('count_routes');
+            $table->integer('count_routes')->nullable();
             $table->string('title');
             $table->string('title_eng');
             $table->string('subtitle')->nullable();
@@ -40,6 +40,10 @@ class CreateEventsTable extends Migration
             $table->integer('amount_start_price')->nullable();
             $table->integer('is_semifinal');
             $table->integer('is_additional_final')->nullable();
+            $table->integer('is_qualification_counting_like_final')->nullable();
+            $table->integer('amount_point_flash')->nullable();
+            $table->integer('amount_point_redpoint')->nullable();
+            $table->integer('amount_the_best_participant')->nullable();
             $table->json('categories');
             $table->integer('is_input_birthday')->nullable();
             $table->integer('is_need_sport_category')->nullable();
@@ -47,7 +51,7 @@ class CreateEventsTable extends Migration
             $table->integer('amount_routes_in_final');
             $table->integer('amount_routes_in_semifinal')->nullable();
             $table->json('transfer_to_next_category')->nullable();
-            $table->integer('mode');
+            $table->integer('mode')->nullable();
             $table->integer('mode_amount_routes')->nullable();
             $table->boolean('active');
             $table->timestamps();

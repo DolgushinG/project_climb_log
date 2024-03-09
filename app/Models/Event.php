@@ -61,6 +61,10 @@ class Event extends Model
     {
         return $this->hasOne(ResultRouteSemiFinalStage::class);
     }
+    public function result_qualification_like_final()
+    {
+        return $this->hasOne(ResultRouteQualificationLikeFinal::class);
+    }
 
     public function result_final_stage()
     {

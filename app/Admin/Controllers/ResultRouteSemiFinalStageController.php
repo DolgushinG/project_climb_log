@@ -2,8 +2,8 @@
 
 namespace App\Admin\Controllers;
 
-use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultFinal;
-use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
+use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultQualificationLikeFinal;
+use App\Admin\Actions\ResultRouteFinalStage\BatchResultQualificationLikeFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\CustomActionsDelete;
 use App\Admin\Actions\ResultRouteSemiFinalStage\CustomSemiFinalActionsDelete;
@@ -13,7 +13,9 @@ use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
+use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteFinalStage;
+use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultSemiFinalStage;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Http\Controllers\Controller;
@@ -29,6 +31,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
 use Jxlwqq\DataTable\DataTable;
 use Maatwebsite\Excel\Facades\Excel;
+use function Symfony\Component\String\s;
 
 class ResultRouteSemiFinalStageController extends Controller
 {
@@ -137,7 +140,7 @@ class ResultRouteSemiFinalStageController extends Controller
             $query->has('event.result_semifinal_stage');
         });
         $grid->tools(function (Grid\Tools $tools) {
-            $tools->append(new BatchExportResultFinal);
+            $tools->append(new BatchExportResultQualificationLikeFinal);
             $tools->append(new BatchResultSemiFinal);
         });
 //        $grid->batchActions(function ($batch) {
@@ -256,18 +259,25 @@ class ResultRouteSemiFinalStageController extends Controller
             return [];
         }
         $users_with_result = [];
-//        dd($users);
         foreach ($users as $index => $user){
-            if($type == 'final'){
-                $result_user = ResultRouteFinalStage::where('owner_id', '=', $owner_id)
-                    ->where('event_id', '=', $model->id)
-                    ->where('user_id', '=', $user->id)
-                    ->get();
-            } else {
-                $result_user = ResultRouteSemiFinalStage::where('owner_id', '=', $owner_id)
-                    ->where('event_id', '=', $model->id)
-                    ->where('user_id', '=', $user->id)
-                    ->get();
+            switch ($type) {
+                case 'final':
+                    $result_user = ResultRouteFinalStage::where('owner_id', '=', $owner_id)
+                        ->where('event_id', '=', $model->id)
+                        ->where('user_id', '=', $user->id)
+                        ->get();
+                    break;
+                case 'qualification_like_final':
+                    $result_user = ResultRouteQualificationLikeFinal::where('owner_id', '=', $owner_id)
+                        ->where('event_id', '=', $model->id)
+                        ->where('user_id', '=', $user->id)
+                        ->get();
+                    break;
+                default:
+                    $result_user = ResultRouteSemiFinalStage::where('owner_id', '=', $owner_id)
+                        ->where('event_id', '=', $model->id)
+                        ->where('user_id', '=', $user->id)
+                        ->get();
             }
             $result = ResultRouteSemiFinalStage::merge_result_user_in_stage($result_user);
             if($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null){
@@ -293,10 +303,17 @@ class ResultRouteSemiFinalStageController extends Controller
         foreach ($users_sorted as $index => $user){
             $fields = ['result'];
             $users_sorted[$index] = collect($user)->except($fields)->toArray();
-            if($type == 'final'){
-                $result = ResultFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
-                if (!$result){
-                    $result = new ResultFinalStage;
+            if($type == 'final' || $type == 'qualification_like_final'){
+                if($type == 'qualification_like_final'){
+                    $result = ResultQualificationLikeFinal::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
+                    if (!$result){
+                        $result = new ResultQualificationLikeFinal;
+                    }
+                } else {
+                    $result = ResultFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
+                    if (!$result){
+                        $result = new ResultFinalStage;
+                    }
                 }
                 $category_id = ParticipantCategory::where('id', $users_sorted[$index]['category_id'])->where('event_id', $model->id)->first()->id;
                 $result->category_id = $category_id;
@@ -306,7 +323,6 @@ class ResultRouteSemiFinalStageController extends Controller
                     $result = new ResultSemiFinalStage;
                 }
             }
-
             $result->event_id = $users_sorted[$index]['event_id'];
             $result->user_id = $users_sorted[$index]['user_id'];
             $result->owner_id = $users_sorted[$index]['owner_id'];

@@ -4,19 +4,25 @@ namespace App\Admin\Controllers;
 
 use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
-use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
+use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportResultQualificationLikeFinal;
+use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchResultQualificationLikeFinal;
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\Extensions\Popover;
 use App\Admin\Extensions\Tools\UserGender;
 use App\Exceptions\ExportToCsv;
 use App\Exceptions\ExportToExcel;
 use App\Exceptions\ExportToOds;
+use App\Exports\QualificationLikeFinalResultExport;
 use App\Exports\SemiFinalResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Http\Controllers\Controller;
 use App\Models\ParticipantCategory;
+use App\Models\ResultFinalStage;
+use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultRouteFinalStage;
+use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultSemiFinalStage;
 use App\Models\Set;
 use App\Models\User;
@@ -33,7 +39,7 @@ use Illuminate\Http\Request;
 use Jxlwqq\DataTable\DataTable;
 use Maatwebsite\Excel\Facades\Excel;
 
-class  ParticipantsController extends Controller
+class ParticipantsController extends Controller
 {
     use HasResourceActions;
 
@@ -49,40 +55,18 @@ class  ParticipantsController extends Controller
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($event) {
-//                    $row->column(10, $this->grid4());
-                    $row->column(20, $this->grid2());
+                    if($event->is_qualification_counting_like_final){
+                        $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
+                        $participant_users_id = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+                        $participants = User::whereIn('id', $participant_users_id)->get();
+                        ResultRouteSemiFinalStageController::getUsersSorted($participants, $fields, $event, 'qualification_like_final', Admin::user()->id);
+                        $row->column(20, $this->qualification_counting_like_final());
+                    } else {
+                        $row->column(20, $this->qualification_classic());
+                    }
+
                 }
             });
-    }
-
-    /**
-     * Show interface.
-     *
-     * @param mixed $id
-     * @param Content $content
-     * @return Content
-     */
-    public function show($id, Content $content)
-    {
-        return $content
-            ->header(trans('admin.detail'))
-            ->description(trans('admin.description'))
-            ->body($this->detail($id));
-    }
-
-    /**
-     * Edit interface.
-     *
-     * @param mixed $id
-     * @param Content $content
-     * @return Content
-     */
-    public function edit($id, Content $content)
-    {
-        return $content
-            ->header(trans('admin.edit'))
-            ->description(trans('admin.description'))
-            ->body($this->form()->edit($id));
     }
 
     /**
@@ -100,11 +84,28 @@ class  ParticipantsController extends Controller
     }
 
     /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        if ($event->is_qualification_counting_like_final) {
+            $result = ResultQualificationLikeFinal::find($id);
+            ResultRouteQualificationLikeFinal::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+            ResultQualificationLikeFinal::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+        }
+    }
+
+    /**
      * Make a grid builder.
      *
      * @return Grid
      */
-    protected function grid2()
+    protected function qualification_classic()
     {
         $grid = new Grid(new Participant);
         if (!Admin::user()->isAdministrator()){
@@ -167,71 +168,62 @@ class  ParticipantsController extends Controller
         return $grid;
     }
 
+
     /**
      * Make a grid builder.
      *
      * @return Grid
      */
-    protected function grid4()
+    protected function qualification_counting_like_final()
     {
-        $grid = new Grid(new Event);
+        $grid = new Grid(new ResultQualificationLikeFinal);
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
-        $grid->actions(function ($actions) {
-            $actions->disableDelete();
-            $actions->disableEdit();
-            $actions->disableView();
-            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'excel'));
-            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'csv'));
-            $actions->append(new ActionExport($actions->getKey(), 'qualification', 'ods'));
+        $grid->model()->where(function ($query) {
+            $query->has('event.result_qualification_like_final');
         });
+        $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new BatchExportResultQualificationLikeFinal);
+            $tools->append(new BatchResultQualificationLikeFinal);
+        });
+        $grid->actions(function ($actions) {
+            $actions->disableEdit();
+//            $actions->disableDelete();
+            $actions->disableView();
+        });
+
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->disablePagination();
         $grid->disablePerPageSelector();
         $grid->disableBatchActions();
-        $grid->disableFilter();
-        $grid->column('title', 'Название');
-        $grid->column('active', 'Статус')->using([0 => 'Не активно', 1 => 'Активно'])->display(function ($title, $column) {
-            If ($this->active == 0) {
-                return $column->label('default');
-            } else {
-                return $column->label('success');
-            }
+        $grid->column('user.middlename', __('Участник'));
+        $grid->column('user.gender', __('Пол'))->display(function ($gender) {
+            return trans_choice('somewords.'.$gender, 10);
+        });
+        $grid->column('category_id', 'Категория')->display(function ($category_id) {
+            $owner_id = Admin::user()->id;
+            $event = Event::where('owner_id', '=', $owner_id)
+                ->where('active', 1)->first();
+            return ParticipantCategory::where('id', '=', $category_id)->where('event_id', $event->id)->first()->category;
+        })->sortable();
+        $grid->column('place', __('Место'))->sortable();
+        $grid->column('amount_top', __('Кол-во топов'));
+        $grid->column('amount_try_top', __('Кол-во попыток на топ'));
+        $grid->column('amount_zone', __('Кол-во зон'));
+        $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
+        $grid->filter(function($filter){
+            $filter->disableIdFilter();
+            $filter->in('user.gender', 'Пол')->checkbox([
+                'male'    => 'Мужчина',
+                'female'    => 'Женщина',
+            ]);
+            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         });
         return $grid;
     }
-
-    /**
-     * Make a show builder.
-     *
-     * @param mixed $id
-     * @return Show
-     */
-    protected function detail($id)
-    {
-        $show = new Show(Participant::findOrFail($id));
-
-        $show->id('ID');
-        $show->event_id('event_id');
-        $show->number_set('number_set');
-        $show->firstname('firstname');
-        $show->lastname('lastname');
-        $show->year('year');
-        $show->city('city');
-        $show->team('team');
-        $show->skill('skill');
-        $show->sports_category('sports_category');
-        $show->age('age');
-        $show->active('active');
-        $show->created_at(trans('admin.created_at'));
-        $show->updated_at(trans('admin.updated_at'));
-
-        return $show;
-    }
-
     /**
      * Make a form builder.
      *
@@ -239,26 +231,59 @@ class  ParticipantsController extends Controller
      */
     protected function form()
     {
-        $form = new Form(new Participant);
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        if($event->is_qualification_counting_like_final){
+            $form = new Form(new ResultRouteQualificationLikeFinal);
+            $form->display('ID');
+            $form->hidden('owner_id')->value(Admin::user()->id);
+            $form->text('event_id', 'event_id');
+            $form->text('user_id', 'user_id');
+            $form->text('route_id', 'final_route_id');
+            $form->text('amount_try_top', 'amount_try_top');
+            $form->text('amount_try_zone', 'amount_try_zone');
+            $form->hidden('amount_zone', 'amount_zone');
+            $form->hidden('amount_top', 'amount_top');
+            $form->display(trans('admin.created_at'));
+            $form->display(trans('admin.updated_at'));
+            $form->saving(function (Form $form) {
+                if($form->amount_try_top > 0){
+                    $form->amount_top  = 1;
+                } else {
+                    $form->amount_top  = 0;
+                }
+                if($form->amount_try_zone > 0){
+                    $form->amount_zone  = 1;
+                } else {
+                    $form->amount_zone  = 0;
+                }
+            });
+        } else {
+            $form = new Form(new Participant);
+            $form->display('ID');
+            $form->hidden('owner_id')->value(Admin::user()->id);
+            $form->text('event_id');
+            $form->text('number_set', 'number_set');
+            $form->text('category_id', 'number_set');
+            $form->switch('active', 'active');
+            $form->switch('is_paid', 'is_paid');
+            $form->display(trans('admin.created_at'));
+            $form->display(trans('admin.updated_at'));
+        }
 
-        $form->display('ID');
-        $form->hidden('owner_id')->value(Admin::user()->id);
-        $form->text('event_id');
-        $form->text('number_set', 'number_set');
-        $form->text('category_id', 'number_set');
-        $form->switch('active', 'active');
-        $form->switch('is_paid', 'is_paid');
-        $form->display(trans('admin.created_at'));
-        $form->display(trans('admin.updated_at'));
-        $form->saving(function (Form $form) {
-//            dd($form->category);
-        });
         return $form;
     }
     public function exportQualificationExcel(Request $request)
     {
         $file_name = 'Результаты квалификации.xlsx';
         $result = Excel::download(new QualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
+    }
+    public function exportQualificationLikeFinalExcel(Request $request)
+    {
+        $file_name = 'Результаты квалификации.xlsx';
+        $result = Excel::download(new QualificationLikeFinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);

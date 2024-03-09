@@ -19,39 +19,54 @@
                                         <button href="{{route('takePart')}}" disabled
                                                 class="btn border-t-neutral-500 rounded-pill">Вы принимаете участие
                                         </button>
-                                        @if(\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
-                                            <button href="#" class="btn border-t-neutral-500 rounded-pill" disabled>Вы
-                                                внесли результаты
-                                            </button>
-                                        @else
-                                            <a href="{{route('listRoutesEvent', $event->title_eng)}}"
-                                               class="btn btn-success rounded-pill">Внести результаты</a>
+                                        @if(!$event->is_qualification_counting_like_final)
+                                            @if(\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
+                                                <button href="#" class="btn border-t-neutral-500 rounded-pill" disabled>Вы
+                                                    внесли результаты
+                                                </button>
+                                            @else
+                                                <a href="{{route('listRoutesEvent', $event->title_eng)}}"
+                                                   class="btn btn-success rounded-pill">Внести результаты</a>
+                                            @endif
                                         @endif
-
                                     @else
-                                        @if($event->is_need_sport_category)
-                                            @if(!Auth::user()->sport_category)
-                                                <div class="form-floating mb-3">
+
+                                        @if($event->is_input_birthday)
+                                            @if(!Auth::user()->birthday)
+                                            <label for="inputDate" class="col col-form-label">Укажите дату рождения</label>
+                                            <div class="col-sm-10">
+                                                <input name="birthday" id="birthday" type="date" class="form-control">
+                                            </div>
+                                            @else
+                                                <div class="col-sm-10" style="display: none">
+                                                    <input name="birthday" id="birthday" type="date" class="form-control">
+                                                </div>
+                                            @endif
+                                        @endif
+                                            @if($event->is_need_sport_category)
+                                                @if(!Auth::user()->sport_category)
+                                                    <div class="form-floating mb-3">
+                                                        <select class="form-select" id="floatingSelectSportCategory"
+                                                                aria-label="Floating label select example" required>
+                                                            <option selected disabled value="">Открыть для выбора разряда
+                                                            </option>
+                                                            @foreach ($sport_categories as $category)
+                                                                <option value="{{$category}}">{{$category}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <label for="floatingSelectSportCategory">Требуется указать разряд</label>
+                                                    </div>
+                                                @else
                                                     <select class="form-select" id="floatingSelectSportCategory"
-                                                            aria-label="Floating label select example" required>
+                                                            aria-label="Floating label select example" required style="display: none">
                                                         <option selected disabled value="">Открыть для выбора разряда
                                                         </option>
                                                         @foreach ($sport_categories as $category)
                                                             <option value="{{$category}}">{{$category}}</option>
                                                         @endforeach
                                                     </select>
-                                                    <label for="floatingSelectSportCategory">Требуется указать разряд</label>
-                                                </div>
+                                                @endif
                                             @endif
-                                        @endif
-                                        @if($event->is_input_birthday)
-                                            @if(!Auth::user()->birthday)
-                                                <label for="inputDate" class="col col-form-label">Укажите дату рождения</label>
-                                                <div class="col-sm-10">
-                                                    <input name="birthday" id="birthday" type="date" class="form-control">
-                                                </div>
-                                            @endif
-                                        @endif
                                         @if(!Auth::user()->gender)
                                             <div class="form-floating mb-3">
                                                 <select class="form-select" id="floatingSelectGender"
@@ -115,9 +130,11 @@
                                 @endauth
                                 <a href="{{route('participants', [$event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Список участников</a>
+
+                                @if(!$event->is_qualification_counting_like_final)
                                 <a href="{{route('final_results',[$event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Предворительные результаты</a>
-
+                                @endif
                             </div>
                         </div>
                     </div>

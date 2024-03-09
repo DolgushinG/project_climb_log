@@ -27,7 +27,6 @@ class EventsController extends Controller
 {
     use HasResourceActions;
 
-
     /**
      * Index interface.
      *
@@ -107,9 +106,7 @@ class EventsController extends Controller
         $grid->disableFilter();
         $grid->disableExport();
 //        $grid->disableColumnSelector();
-        $grid->column('count_routes', 'Кол-во маршрутов');
         $grid->column('title', 'Название');
-        $grid->column('subtitle', 'Надпись под названием');
         $grid->column('link', 'Ссылка')->link();
         $states = [
             'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
@@ -165,15 +162,11 @@ class EventsController extends Controller
         $form->time('start_time', 'Время старта')->placeholder('Время старта')->required();
         $form->time('end_time', 'Время окончания')->placeholder('Время окончания')->required();
         $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
-//        $form->file('document', 'Прикрепить документ')->placeholder('Прикрепить документ');
         $form->image('image', 'Афиша')->placeholder('Афиша')->required();
         $form->text('contact', 'Контактная информация')->required();
         $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
         $form->hidden('climbing_gym_name_eng')->default('1');
         $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
-        $form->hidden('count_routes', 'Кол-во трасс по умалчанию 30 трасс **(Кол-во трасс должно совпадать с Категориями и их кол-вом)
-        ')->options(['max' => 150, 'min' => 10, 'step' => 1, 'postfix' => ' маршрутов'])->default(30)->placeholder('Кол-во трасс')->required();
-
 
         $form->text('title', 'Название')->placeholder('Введи название')->required();
         $form->hidden('title_eng')->default('1');
@@ -184,6 +177,41 @@ class EventsController extends Controller
         $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
         $form->summernote('info_payment', 'Доп инфа об оплате')->placeholder('Инфа...');
         $form->summernote('description', 'Описание')->placeholder('Описание')->required();
+        $form->radio('is_qualification_counting_like_final','Настройка подсчета квалификации')
+            ->options([
+                0 =>'Считаем по классике',
+                1 =>'Считаем как финальный раунд (кол-во топов и зон)',
+            ])->when(0, function (Form $form) {
+                $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
+                    ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
+                $form->text('amount_point_flash','Балл за флэш')->value(1);
+                $form->text('amount_point_redpoint','Балл за редпоинт')->value(0.9);
+                $formats = Format::all()->pluck('format', 'id');
+                $form->radio('mode','Настройка формата')
+                    ->options($formats)->when(1, function (Form $form) {
+//                        dd($form->grade_and_amount);
+                        $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
+                        $routes = $this->getRoutes();
+                        $form->tablecustom('grade_and_amount', '', function ($table) {
+                            $grades = $this->getGrades();
+                            $table->select('Категория')->options($grades)->readonly();
+                            $table->text('Кол-во')->width('50px');
+                            $table->text('Ценность')->width('50px');
+                            $table->disableButton();
+                        })->value($routes);
+                    })->when(2, function (Form $form) {
+                        $routes = $this->getRoutes();
+                        $form->tablecustom('grade_and_amount', '', function ($table) {
+                            $grades = $this->getGrades();
+                            $table->select('Категория')->options($grades)->readonly();
+                            $table->text('Кол-во')->width('50px');
+                            $table->disableButton();
+                        })->value($routes);
+                    });
+            })->when(1, function (Form $form) {
+                $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
+                    ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
+            })->value(0)->required();
         $form->radio('is_semifinal','Настройка финалов')
             ->options([
                 1 =>'С полуфиналом',
@@ -206,44 +234,11 @@ class EventsController extends Controller
         ];
         $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states($states);
         $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states($states);
-//        $form->radio('choice_transfer','Настройка перевода участников в другую категорию')
-//            ->options([1 => 'Ручной перевод по необходимости',2 => 'Настройка авто перевода в другую категорию'])->when(1, function (Form $form) {
-//            })->when(2, function (Form $form) {
-//                $form->table('transfer_to_next_category', '', function ($table) use ($form){
-//                    $table->select('Категория участника')->options($form->model()->categories)->readonly();
-//                    $table->select('В какую категорию переводить')->options($form->model()->categories)->readonly();
-//                    $table->select('От какой категории будет перевод')->options($this->getGrades())->width('30px');
-//                    $table->number('Кол-во трасс для перевода')->width('50px');
-//                });
-//            })->required();
-        $formats = Format::all()->pluck('format', 'id');
-        $form->radio('mode','Настройка формата')
-            ->options($formats)->when(1, function (Form $form) {
-                $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
-                $routes = $this->getRoutes();
-                $form->tablecustom('grade_and_amount', '', function ($table) {
-                    $grades = $this->getGrades();
-                    $table->select('Категория')->options($grades)->readonly();
-                    $table->text('Кол-во')->width('50px');
-                    $table->text('Ценность')->width('50px');
-                    $table->disableButton();
-                })->value($routes);
-            })->when(2, function (Form $form) {
-                $routes = $this->getRoutes();
-                $form->tablecustom('grade_and_amount', '', function ($table) {
-                    $grades = $this->getGrades();
-                    $table->select('Категория')->options($grades)->readonly();
-                    $table->text('Кол-во')->width('50px');
-                    $table->disableButton();
-                })->value($routes);
-            })->required();
-//        $form->select('mode', 'Формат')->options([1 => '10 лучших трасс', 2 => 'Все трассы'])->required();
-//        $form->switch('active', 'Опубликовать сразу?');
         $form->switch('active', 'Активно')
             ->help('Не обязательно сразу делать активно, после сохранения будет ссылка по которой можно будет посмотреть')
             ->states($states);
         $form->saving(function (Form $form) {
-//            dd($form);
+
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($events && $events->id != $form->model()->id){
@@ -265,12 +260,12 @@ class EventsController extends Controller
                 if (intval($form->count_routes) != $count) {
                     throw new \Exception('Кол-во трасс '.$form->count_routes. ' Категория и Кол-во '.$count.' должны быть одинаковыми');
                 }
-                $climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
-                $title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
-                $form->climbing_gym_name_eng =  $climbing_gym_name_eng;
-                $form->title_eng = $title_eng;
-                $form->link = '/event/'.$climbing_gym_name_eng.'/'.$title_eng;
             }
+            $climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
+            $title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
+            $form->climbing_gym_name_eng =  $climbing_gym_name_eng;
+            $form->title_eng = $title_eng;
+            $form->link = '/event/'.$climbing_gym_name_eng.'/'.$title_eng;
 
         });
         $form->saved(function (Form $form) {
@@ -385,4 +380,6 @@ class EventsController extends Controller
         );
         DB::table('sets')->insert($sets);
     }
+
+
 }

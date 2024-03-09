@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class QualificationResultExport implements WithMultipleSheets
+class QualificationLikeFinalResultExport implements WithMultipleSheets
 {
 
     public $event_id;
@@ -27,7 +27,7 @@ class QualificationResultExport implements WithMultipleSheets
         $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
         foreach ($genders as $gender) {
             foreach ($categories as $category) {
-                $sheets[] = new Results($this->event_id, 'Qualification', $gender, $category);
+                $sheets[] = new Results($this->event_id, 'QualificationLikeFinal', $gender, $category);
             }
         }
         return $sheets;

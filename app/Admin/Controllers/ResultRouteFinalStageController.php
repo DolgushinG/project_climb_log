@@ -4,8 +4,8 @@ namespace App\Admin\Controllers;
 
 use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
-use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultFinal;
-use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
+use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultQualificationLikeFinal;
+use App\Admin\Actions\ResultRouteFinalStage\BatchResultQualificationLikeFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\Extensions\Tools\UserGender;
@@ -171,8 +171,8 @@ class ResultRouteFinalStageController extends Controller
             $query->has('event.result_final_stage');
         });
         $grid->tools(function (Grid\Tools $tools) {
-            $tools->append(new BatchExportResultFinal);
-            $tools->append(new BatchResultFinal);
+            $tools->append(new BatchExportResultQualificationLikeFinal);
+            $tools->append(new BatchResultQualificationLikeFinal);
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));

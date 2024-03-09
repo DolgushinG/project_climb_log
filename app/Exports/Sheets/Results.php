@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ResultParticipant;
 use App\Models\ResultRouteFinalStage;
+use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -140,6 +141,23 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $final[] = 'Попытки на ZONE';
                 }
                 return $final;
+            case 'QualificationLikeFinal':
+                $qualification_like_final = [
+                    'Место',
+                    'Участник(Фамилия Имя)',
+                    'Сумма TOP',
+                    'Сумма попыток на TOP',
+                    'Сумма ZONE',
+                    'Сумма попыток на ZONE',
+                ];
+                $count = ResultRouteQualificationLikeFinal::count_route_in_qualification_final($this->event_id);
+                for($i = 0; $i <= $count; $i++){
+                    $qualification_like_final[] = 'TOP';
+                    $qualification_like_final[] = 'Попытки на TOP';
+                    $qualification_like_final[] = 'ZONE';
+                    $qualification_like_final[] = 'Попытки на ZONE';
+                }
+                return $qualification_like_final;
             case 'Qualification':
                 $qualification = [
                     'Место',
@@ -172,6 +190,9 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         }
         if($this->type == 'Final'){
             return self::get_final('result_final_stage');
+        }
+        if($this->type == 'QualificationLikeFinal'){
+            return self::get_final('result_qualification_like_final');
         }
         if($this->type == 'Qualification'){
             return self::get_qualification();
@@ -243,7 +264,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
     }
 
     public function get_final($table){
-        if($table === "result_final_stage"){
+        if($table === "result_final_stage" || $table === "result_qualification_like_final"){
             $users = User::query()
                 ->leftJoin($table, 'users.id', '=', $table.'.user_id')
                 ->where($table.'.event_id', '=', $this->event_id)
@@ -284,7 +305,11 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             if($table == 'result_final_stage'){
                 $final_result = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
             } else {
-                $final_result = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+                if($table === "result_qualification_like_final"){
+                    $final_result = ResultRouteQualificationLikeFinal::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+                } else {
+                    $final_result = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+                }
             }
             foreach ($final_result as $result){
                 $users[$index]['amount_top_'.$result->final_route_id] = $result->amount_top;
