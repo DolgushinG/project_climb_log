@@ -15,5 +15,9 @@ yarn-error.log
 /.vscode
 /resources/views/NiceAdmin/
 /app/Models/User.php
-/public/js/
-/public/css/
+/public/js/app.js
+/public/js/main.js
+/public/js/ddata.js
+/public/js/profile.js
+/public/js/welcome.js.js
+/public/css/*
