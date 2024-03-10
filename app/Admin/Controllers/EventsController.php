@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Format;
 use App\Models\Grades;
 use App\Models\ParticipantCategory;
+use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\Set;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -209,6 +211,7 @@ class EventsController extends Controller
                         })->value($routes);
                     });
             })->when(1, function (Form $form) {
+                $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->value(10);
                 $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
                     ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
             })->value(0)->required();
@@ -224,7 +227,7 @@ class EventsController extends Controller
             })->value(0)->required();
         $form->radio('is_additional_final','Финалы для разных групп')
             ->options([
-                1 =>'С финалами для разных групп',
+                1 =>'С финалами для каждой категории групп',
                 0 =>'Классика финал для лучших в квалификации',
             ])->value(0)->required();
         $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
@@ -269,19 +272,16 @@ class EventsController extends Controller
 
         });
         $form->saved(function (Form $form) {
+            ParticipantCategory::where('owner_id', '=', Admin::user()->id)
+                ->where('event_id', '=', $form->model()->id)->delete();
             if($form->categories){
                 foreach ($form->categories as $category){
                     foreach ($category as $c){
-                        $category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
-                            ->where('event_id', '=', $form->model()->id)
-                            ->where('category', '=', $c)->first();
-                        if(!$category){
-                            $participant_categories = new ParticipantCategory;
-                            $participant_categories->owner_id = Admin::user()->id;
-                            $participant_categories->event_id = $form->model()->id;
-                            $participant_categories->category = $c;
-                            $participant_categories->save();
-                        }
+                        $participant_categories = new ParticipantCategory;
+                        $participant_categories->owner_id = Admin::user()->id;
+                        $participant_categories->event_id = $form->model()->id;
+                        $participant_categories->category = $c;
+                        $participant_categories->save();
                     }
                 }
                 $exist_routes_list = Grades::where('owner_id', '=', Admin::user()->id)
@@ -380,6 +380,4 @@ class EventsController extends Controller
         );
         DB::table('sets')->insert($sets);
     }
-
-
 }

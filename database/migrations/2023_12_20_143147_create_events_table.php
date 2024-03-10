@@ -49,6 +49,7 @@ class CreateEventsTable extends Migration
             $table->integer('is_need_sport_category')->nullable();
             $table->integer('choice_transfer')->nullable();
             $table->integer('amount_routes_in_final');
+            $table->integer('amount_routes_in_qualification_like_final')->nullable();
             $table->integer('amount_routes_in_semifinal')->nullable();
             $table->json('transfer_to_next_category')->nullable();
             $table->integer('mode')->nullable();

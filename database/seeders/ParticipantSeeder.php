@@ -34,19 +34,20 @@ class ParticipantSeeder extends Seeder
             }
             DB::table('participants')->insert($participants);
         }
-        $events = Event::all();
-        foreach ($events as $event){
-            $amount_categories = count($event->categories);
-            if($amount_categories == 2){
-                prepare_participant_with_owner($event->id, $event->id, 60, 'Новичок', 1);
-                prepare_participant_with_owner($event->id, $event->id, 120, 'Общий зачет', 61);
-            } else {
-                prepare_participant_with_owner($event->id, $event->id, 40, 'Новичок', 1);
-                prepare_participant_with_owner($event->id, $event->id, 80, 'Любители', 41);
-                prepare_participant_with_owner($event->id, $event->id, 120, 'Спортсмены', 81);
-            }
-        }
-
+//        $events = Event::all();
+//        foreach ($events as $event){
+//            $amount_categories = count($event->categories);
+//            if($amount_categories == 2){
+//                prepare_participant_with_owner($event->id, $event->id, 60, 'Новичок', 1);
+//                prepare_participant_with_owner($event->id, $event->id, 120, 'Общий зачет', 61);
+//            } else {
+//                prepare_participant_with_owner($event->id, $event->id, 40, 'Новичок', 1);
+//                prepare_participant_with_owner($event->id, $event->id, 80, 'Любители', 41);
+//                prepare_participant_with_owner($event->id, $event->id, 120, 'Спортсмены', 81);
+//            }
+//        }
+        prepare_participant_with_owner(1, 8, 60, 'Новичок', 1);
+        prepare_participant_with_owner(1, 8, 120, 'Общий зачет', 61);
 
     }
 }

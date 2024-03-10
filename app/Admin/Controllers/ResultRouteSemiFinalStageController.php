@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultQualificationLikeFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultQualificationLikeFinal;
+use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\CustomActionsDelete;
 use App\Admin\Actions\ResultRouteSemiFinalStage\CustomSemiFinalActionsDelete;
@@ -140,7 +141,7 @@ class ResultRouteSemiFinalStageController extends Controller
             $query->has('event.result_semifinal_stage');
         });
         $grid->tools(function (Grid\Tools $tools) {
-            $tools->append(new BatchExportResultQualificationLikeFinal);
+            $tools->append(new BatchExportResultSemiFinal);
             $tools->append(new BatchResultSemiFinal);
         });
 //        $grid->batchActions(function ($batch) {
