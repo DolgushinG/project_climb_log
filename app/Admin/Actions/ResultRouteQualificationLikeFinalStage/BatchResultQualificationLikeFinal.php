@@ -51,6 +51,9 @@ class BatchResultQualificationLikeFinal extends Action
                 'amount_try_zone' => intval($results['amount_try_zone_'.$i]),
             );
         }
+        $participant = Participant::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+        $participant->active = 1;
+        $participant->save();
         DB::table('result_route_qualification_like_final')->insert($data);
         return $this->response()->success('Результат успешно внесен')->refresh();
     }

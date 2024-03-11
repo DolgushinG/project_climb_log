@@ -153,7 +153,7 @@ class ResultRouteFinalStageController extends Controller
      */
     protected function grid2()
     {
-        $grid = new Grid(new ResultFinalStage());
+        $grid = new Grid(new ResultFinalStage);
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
@@ -199,26 +199,6 @@ class ResultRouteFinalStageController extends Controller
             ]);
             $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         });
-        return $grid;
-    }
-
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
-    protected function grid3()
-    {
-        $grid = new Grid(new Event);
-        $grid->disableExport();
-        $grid->disableColumnSelector();
-        $grid->disableCreateButton();
-        $grid->disablePagination();
-        $grid->disablePerPageSelector();
-        $grid->disableBatchActions();
-        $grid->disableFilter();
-        $grid->disableActions();
-        $grid->setTitle('Нет активных соревнований');
         return $grid;
     }
 

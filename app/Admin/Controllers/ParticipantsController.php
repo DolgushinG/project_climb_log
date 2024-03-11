@@ -6,37 +6,23 @@ use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportResultQualificationLikeFinal;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchResultQualificationLikeFinal;
-use App\Admin\CustomAction\ActionExport;
-use App\Admin\Extensions\Popover;
-use App\Admin\Extensions\Tools\UserGender;
-use App\Exceptions\ExportToCsv;
-use App\Exceptions\ExportToExcel;
-use App\Exceptions\ExportToOds;
 use App\Exports\QualificationLikeFinalResultExport;
-use App\Exports\SemiFinalResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Http\Controllers\Controller;
 use App\Models\ParticipantCategory;
-use App\Models\ResultFinalStage;
 use App\Models\ResultQualificationLikeFinal;
-use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteQualificationLikeFinal;
-use App\Models\ResultSemiFinalStage;
-use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
-use Encore\Admin\Grid\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
-use Encore\Admin\Widgets\Box;
 use Illuminate\Http\Request;
-use Jxlwqq\DataTable\DataTable;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ParticipantsController extends Controller
@@ -198,7 +184,6 @@ class ParticipantsController extends Controller
         $grid->disableColumnSelector();
         $grid->disablePagination();
         $grid->disablePerPageSelector();
-        $grid->disableBatchActions();
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);

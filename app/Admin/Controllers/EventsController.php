@@ -236,7 +236,6 @@ class EventsController extends Controller
             ->help('Не обязательно сразу делать активно, после сохранения будет ссылка по которой можно будет посмотреть')
             ->states($states);
         $form->saving(function (Form $form) {
-
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($events && $events->id != $form->model()->id){
@@ -259,12 +258,13 @@ class EventsController extends Controller
                     throw new \Exception('Кол-во трасс '.$form->count_routes. ' Категория и Кол-во '.$count.' должны быть одинаковыми');
                 }
             }
-            $climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
-            $title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
-            $form->climbing_gym_name_eng =  $climbing_gym_name_eng;
-            $form->title_eng = $title_eng;
-            $form->link = '/event/'.$climbing_gym_name_eng.'/'.$title_eng;
-
+            if($form->climbing_gym_name){
+                $climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
+                $title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
+                $form->climbing_gym_name_eng =  $climbing_gym_name_eng;
+                $form->title_eng = $title_eng;
+                $form->link = '/event/'.$climbing_gym_name_eng.'/'.$title_eng;
+            }
         });
         $form->saved(function (Form $form) {
             ParticipantCategory::where('owner_id', '=', Admin::user()->id)
