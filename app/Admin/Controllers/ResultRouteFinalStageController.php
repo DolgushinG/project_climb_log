@@ -168,7 +168,7 @@ class ResultRouteFinalStageController extends Controller
             $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         });
         $grid->actions(function ($actions) {
-//            $actions->disableEdit();
+            $actions->disableEdit();
             $actions->disableView();
         });
         $grid->disableExport();
