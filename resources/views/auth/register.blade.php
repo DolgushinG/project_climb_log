@@ -3,10 +3,13 @@
     <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js"></script>
     @guest
-        <main id="main" class="main">
+        <section class="d-flex align-items-center">
+            <div class="container" data-aos="zoom-out" data-aos-delay="100">
+            </div>
+        </section><!-- End Hero -->
+        <main id="main">
             <div class="container">
-                <section
-                        class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+                <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
                     <div class="container">
                         <div class="row justify-content-center">
                             <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
@@ -14,7 +17,11 @@
                                 <div class="card mb-3">
 
                                     <div class="card-body">
-
+                                        @if($errors->any())
+                                            @foreach($errors->all() as $error)
+                                                <span class="text-uppercase text-danger d-block mb-3" data-aos="fade-left" data-aos-delay="300">{{ $error }}</span>
+                                            @endforeach
+                                        @endif
                                         <div class="pt-4 pb-2">
                                             <h5 class="card-title text-center pb-0 fs-4">Регистрация аккаунта</h5>
                                             <p class="text-center small">Введите данные для регистрации</p>

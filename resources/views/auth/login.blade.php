@@ -12,7 +12,11 @@
                                 <div class="card mb-3">
 
                                     <div class="card-body">
-
+                                        @if($errors->any())
+                                            @foreach($errors->all() as $error)
+                                                <span class="text-uppercase text-danger d-block mb-3" data-aos="fade-left" data-aos-delay="300">{{ $error }}</span>
+                                            @endforeach
+                                        @endif
                                         <div class="pt-4 pb-2">
                                             <h5 class="card-title text-center pb-0 fs-4">Войти в аккаунт</h5>
                                             <p class="text-center small">Каждый сервис это уникальный аккаунт </p>
