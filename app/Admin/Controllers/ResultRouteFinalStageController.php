@@ -2,22 +2,14 @@
 
 namespace App\Admin\Controllers;
 
-use App\Admin\Actions\BatchForceRecouting;
-use App\Admin\Actions\ResultQualification\BatchResultQualification;
 use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultFinal;
-use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultQualificationLikeFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
-use App\Admin\Actions\ResultRouteFinalStage\BatchResultQualificationLikeFinal;
-use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
-use App\Admin\CustomAction\ActionExport;
-use App\Admin\Extensions\Tools\UserGender;
 use App\Exports\FinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
 use App\Models\ResultRouteFinalStage;
-use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -28,11 +20,7 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
-use Encore\Admin\Widgets\Box;
-use Encore\Admin\Widgets\Tab;
-use Encore\Admin\Widgets\Table;
 use Illuminate\Http\Request;
-use Jxlwqq\DataTable\DataTable;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ResultRouteFinalStageController extends Controller

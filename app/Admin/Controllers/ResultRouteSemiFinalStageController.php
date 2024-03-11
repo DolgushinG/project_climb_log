@@ -2,13 +2,8 @@
 
 namespace App\Admin\Controllers;
 
-use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultQualificationLikeFinal;
-use App\Admin\Actions\ResultRouteFinalStage\BatchResultQualificationLikeFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
-use App\Admin\Actions\ResultRouteSemiFinalStage\CustomActionsDelete;
-use App\Admin\Actions\ResultRouteSemiFinalStage\CustomSemiFinalActionsDelete;
-use App\Admin\CustomAction\ActionExport;
 use App\Exports\SemiFinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
@@ -29,10 +24,7 @@ use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 use Illuminate\Http\Request;
-use Illuminate\Support\MessageBag;
-use Jxlwqq\DataTable\DataTable;
 use Maatwebsite\Excel\Facades\Excel;
-use function Symfony\Component\String\s;
 
 class ResultRouteSemiFinalStageController extends Controller
 {

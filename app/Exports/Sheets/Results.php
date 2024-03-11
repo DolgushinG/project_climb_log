@@ -77,26 +77,63 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                         $sheet->mergeCells('A1:C1');
                         $sheet->setCellValue('A1', $this->title());
                         $sheet->getStyle('A1')->applyFromArray($style);
-
-                        $sheet->mergeCells('G2:J2');
-                        $sheet->setCellValue('I2', "Трасса 1");
-                        $sheet->getStyle('I2')->applyFromArray($style);
-
-                        $sheet->mergeCells('K2:N2');
-                        $sheet->setCellValue('K2', "Трасса 2");
-                        $sheet->getStyle('K2')->applyFromArray($style);
-
-                        $sheet->mergeCells('O2:R2');
-                        $sheet->setCellValue('O2', "Трасса 3");
-                        $sheet->getStyle('O2')->applyFromArray($style);
-
-                        $sheet->mergeCells('S2:V2');
-                        $sheet->setCellValue('S2', "Трасса 4");
-                        $sheet->getStyle('S2')->applyFromArray($style);
-
-                        $sheet->mergeCells('W2:Z2');
-                        $sheet->setCellValue('W2', "Трасса 5");
-                        $sheet->getStyle('W2')->applyFromArray($style);
+                        $merge_cells = [
+                            1 => ["G","J"],
+                            2 => ["K", "N"],
+                            3 => ["O", "R"],
+                            4 => ["S", "V"],
+                            5 => ["W", "Z"],
+                            6 => ["AA", "AD"],
+                            7 => ["AE", "AH"],
+                            8 => ["AI", "AL"],
+                            9 => ["AM", "AP"],
+                            10 => ["AQ", "AT"],
+                            11 => ["AU", "AX"],
+                            12 => ["AY", "BB"],
+                            13 => ["BC", "BF"],
+                            14 => ["BG", "BJ"],
+                            15 => ["BK", "BN"],
+                            16 => ["BO", "BR"],
+                            17 => ["BS", "BV"],
+                            18 => ["BW", "BZ"],
+                            19 => ["CA", "CD"],
+                            20 => ["CE", "CH"],
+                        ];
+                        $cell_title = [
+                            1 => "I",
+                            2 => "M",
+                            3 => "Q",
+                            4 => "U",
+                            5 => "Y",
+                            6 => "AC",
+                            7 => "AG",
+                            8 => "AK",
+                            9 => "AO",
+                            10 => "AS",
+                            11 => "AW",
+                            12 => "BA",
+                            13 => "BE",
+                            14 => "BI",
+                            15 => "BM",
+                            16 => "BQ",
+                            17 => "BU",
+                            18 => "BY",
+                            19 => "CC",
+                            20 => "CG",
+                        ];
+                        switch ($this->type){
+                            case 'Final':
+                                $count = ResultRouteFinalStage::count_route_in_final_stage($this->event_id);
+                            case 'SemiFinal':
+                                $count = ResultRouteFinalStage::count_route_in_final_stage($this->event_id);
+                            case 'QualificationLikeFinal':
+                                $count = ResultRouteQualificationLikeFinal::count_route_in_qualification_final($this->event_id);
+                        }
+                        for($i = 1; $i <= $count; $i++){
+                            $sheet->mergeCells($merge_cells[$i][0].'2:'.$merge_cells[$i][1].'2');
+                            $sheet->setCellValue($cell_title[$i].'2', "Трасса ".$i);
+                            $sheet->getStyle($cell_title[$i])->applyFromArray($style);
+                        }
                     }
                 },
             ];
@@ -134,7 +171,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     'Сумма попыток на ZONE',
                 ];
                 $count = ResultRouteSemiFinalStage::count_route_in_semifinal_stage($this->event_id);
-                for($i = 0; $i <= $count; $i++){
+                for($i = 1; $i <= $count; $i++){
                     $final[] = 'TOP';
                     $final[] = 'Попытки на TOP';
                     $final[] = 'ZONE';
@@ -151,7 +188,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     'Сумма попыток на ZONE',
                 ];
                 $count = ResultRouteQualificationLikeFinal::count_route_in_qualification_final($this->event_id);
-                for($i = 0; $i <= $count; $i++){
+                for($i = 1; $i <= $count; $i++){
                     $qualification_like_final[] = 'TOP';
                     $qualification_like_final[] = 'Попытки на TOP';
                     $qualification_like_final[] = 'ZONE';
@@ -210,9 +247,8 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         } else {
             $category = '';
         }
-        return  trans_choice('somewords.'.$this->type, 10).
-            ' ['.$category.
-            ']['.trans_choice('somewords.'.$this->gender, 10).']';
+        return trans_choice('somewords.'.$this->type, 10).
+            ' [ '.$category.' ][ '.trans_choice('somewords.'.$this->gender, 10).']';
     }
 
 

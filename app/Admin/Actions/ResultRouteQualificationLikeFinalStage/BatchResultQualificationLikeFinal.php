@@ -75,7 +75,6 @@ class BatchResultQualificationLikeFinal extends Action
         $this->select('user_id', 'Участник')->options($result)->required(true);
         $this->hidden('event_id', '')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_qualification_like_final; $i++){
-//            $this->html('route_id')->label('Трасса '.$i);
             $this->integer('route_id_'.$i, 'Трасса')->value($i)->readOnly();
             $this->integer('amount_try_top_'.$i, 'Попытки на топ');
             $this->integer('amount_try_zone_'.$i, 'Попытки на зону');

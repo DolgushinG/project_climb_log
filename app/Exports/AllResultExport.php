@@ -26,15 +26,20 @@ class AllResultExport implements WithMultipleSheets
         $sheets = [];
         $genders = ['male', 'female'];
         $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
+        $event = Event::find($this->event_id);
+        if($event->is_qualification_counting_like_final){
+            $stage = 'QualificationLikeFinal';
+        } else {
+            $stage = 'Qualification';
+        }
         foreach ($genders as $gender) {
             foreach ($categories as $category){
-                $sheets[] = new Results($this->event_id, 'Qualification', $gender, $category);
+                $sheets[] = new Results($this->event_id, $stage, $gender, $category);
             }
         }
         foreach ($genders as $gender) {
             $sheets[] = new Results($this->event_id, 'SemiFinal', $gender);
         }
-        $event = Event::find($this->event_id);
         if($event->is_additional_final){
             $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
             foreach ($genders as $gender) {

@@ -9,5 +9,6 @@ return [
     'grade' => 'Категория трассы',
     'SemiFinal' => 'Полуфинал',
     'Qualification' => 'Квалификация',
+    'QualificationLikeFinal' => 'Квалификация',
     'Final' => 'Финал',
 ];
