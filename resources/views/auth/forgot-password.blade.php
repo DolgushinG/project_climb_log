@@ -26,6 +26,11 @@
                                                     <div class="invalid-feedback">Пожалуйста введите email</div>
                                                 </div>
                                             </div>
+                                            @if($errors->any())
+                                                @foreach($errors->all() as $error)
+                                                    <span class="text-uppercase text-danger d-block mb-3" data-aos="fade-left" data-aos-delay="300">{{ $error }}</span>
+                                                @endforeach
+                                            @endif
                                             <div class="col-12">
                                                 <button class="btn btn-primary w-100" type="submit">
                                                     {{ __('Отправить письмо о сбросе пароля') }}
