@@ -21,6 +21,7 @@
 
 use App\Admin\Extensions\CustomButton;
 use App\Admin\Extensions\CustomTable;
+use App\Admin\Extensions\Links;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -33,16 +34,14 @@ Grid::init(function (Grid $grid) {
         $actions->disableView();
     });
 });
+
 Encore\Admin\Grid\Column::define('actions', app\Admin\CustomAction\CustomActions::class);
 app('view')->prependNamespace('admin', resource_path('views/admin'));
 //Admin::js('/vendor/chart.js/chart.js');
 Form::extend('tablecustom', CustomTable::class);
-Form::extend('custom_button', CustomButton::class);
 Admin::js('/vendor/dadata/ddata.js');
 Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
-
-    $navbar->left(view('admin.nav-bar.create-event'));
-
+    $navbar->right(new \App\Admin\Extensions\Links());
 });
 Admin::script('window.onbeforeunload = function() {
     return "Вы уверены, что хотите покинуть эту страницу? Ваши данные могут быть потеряны.";
