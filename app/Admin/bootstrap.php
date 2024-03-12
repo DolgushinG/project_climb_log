@@ -53,7 +53,9 @@ Admin::script("$(document).ready(function() {
       const submitButton = document.querySelector('.pull-right [type=\"submit\"]');
       const requiredInputs = document.querySelectorAll('input[required]');
       const requiredRadio = document.querySelectorAll('radio[required]');
-      submitButton.disabled = true;
+      if(submitButton){
+         submitButton.disabled = true;
+      }
       function checkInputs() {
         let isValid = true;
         requiredInputs.forEach(input => {
