@@ -132,7 +132,7 @@ class EventsController extends Controller
         $form = new Form(new Event);
         $form->tab('Общая информация о соревновании', function ($form) {
             $form->footer(function ($footer) {
-                $footer->disableReset();
+//                $footer->disableReset();
                 $footer->disableViewCheck();
                 $footer->disableEditingCheck();
                 $footer->disableCreatingCheck();
@@ -312,7 +312,7 @@ class EventsController extends Controller
      */
     protected function getGrades(): array
     {
-        $grades = ['5' => '5', '5+' => '5+','6A' => '6A','6A+' => '6A+', '6B' => '6B', '6B+' => '6B+','6C' => '6C',
+        $grades = ['4' => '4','5' => '5', '5+' => '5+','6A' => '6A','6A+' => '6A+', '6B' => '6B', '6B+' => '6B+','6C' => '6C',
             '6C+' => '6C+','7A' => '7A','7A+' => '7A+','7B' => '7B','7B+' => '7B+','7C' => '7C','7C+' => '7C+','8A' => '8A'];
         return $grades;
     }

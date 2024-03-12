@@ -86,12 +86,16 @@ Admin::script("$(document).ready(function() {
 
 Admin::script("$(document).ready(function() {
     // Отслеживание изменений в input и select элементах формы
-    $('form').find('input, select').on('input change', function() {
+    $('form').find('input, select, textarea').on('input change click', function() {
         var inputName = $(this).attr('name');
         var inputValue = $(this).val();
         saveDraft(inputName, inputValue);
     });
-
+    $('#start_time').on('click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
     // Отслеживание кликов по input элементам для выбора дат и других выборов
       $('#start_time').on('click', function() {
         var inputName = $(this).attr('name');
@@ -132,7 +136,10 @@ Admin::script("$(document).ready(function() {
     $('form').submit(function() {
         clearDraft();
     });
-
+     $('[type=submit]').on('click', function() {
+       clearDraft();
+       clearDraft();
+    });
     // Функция для очистки данных черновика
     function clearDraft() {
         var cookies = document.cookie.split(';');
@@ -151,5 +158,8 @@ Admin::script("$(document).ready(function() {
             return decodeURIComponent(match[2]);
         }
         return null;
+    }
+    if(getCookie('title') !== null){
+        document.getElementById('create-events-link').textContent = 'Черновик соревнования'
     }
 });");

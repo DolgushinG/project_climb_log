@@ -24,7 +24,7 @@ class Links
 <!--    </a>-->
 <!--</li>-->
 <li>
-    <a href="/admin/events/create">
+    <a href="/admin/events/create" id="create-events-link">
       <i class="fa fa-flag-o"></i>
       Создать соревнование
     </a>
