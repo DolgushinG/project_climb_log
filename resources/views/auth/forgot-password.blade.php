@@ -16,7 +16,6 @@
                                         <form method="POST" class="row g-3 needs-validation" action="{{ route('password.email') }}">
                                             @csrf
                                             <p class="text-center small">Ввдите ваш email и пароль чтобы войти</p>
-                                            <!-- Email Address -->
                                             <div class="col-12">
                                                 <label for="email" class="form-label">Email</label>
                                                 <div class="input-group has-validation">

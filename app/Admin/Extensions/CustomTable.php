@@ -37,9 +37,6 @@ class CustomTable extends HasMany
      */
     protected function buildRelatedForms()
     {
-//        if (is_null($this->form)) {
-//            return [];
-//        }
 
         $forms = [];
 

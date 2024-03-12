@@ -12,7 +12,7 @@
             <label>Кол-во трасс в сумме</label>
             <label id="count_routes_label" class="form-control">15</label>
         </div>
-        <div id="has-many-{{$column}}" style="margin-top: 15px;">
+        <div id="has-many-{{$column}}" style="margin-top: 15px; width: 35%;">
             <table class="table table-has-many has-many-{{$column}}">
                 <thead>
                 <tr>

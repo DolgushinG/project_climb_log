@@ -37,6 +37,64 @@ app('view')->prependNamespace('admin', resource_path('views/admin'));
 //Admin::js('/vendor/chart.js/chart.js');
 Form::extend('tablecustom', CustomTable::class);
 Admin::js('/vendor/dadata/ddata.js');
+Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
+    $navbar->left(view('admin.nav-bar.create-event'));
+
+});
+Admin::script('window.onbeforeunload = function() {
+    return "Вы уверены, что хотите покинуть эту страницу? Ваши данные могут быть потеряны.";
+};');
+Admin::script("$(document).ready(function() {
+    // Отслеживание изменений в input и select элементах формы
+    $('form').find('input, select').on('input change', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+     $('#start_time').on('click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+    $('#start_date').on('click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+    $('#end_time').on('click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+    $('#end_date').on('click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+
+    // Функция для сохранения данных каждого инпута и селекта в localStorage
+    function saveDraft(inputName, inputValue) {
+        localStorage.setItem(inputName, inputValue);
+    }
+
+    // Восстановление данных каждого инпута и селекта из localStorage при загрузке страницы
+    $('form').find('input:not([type=\"file\"]), select').each(function() {
+        var inputName = $(this).attr('name');
+        var savedValue = localStorage.getItem(inputName);
+        if (savedValue !== null) {
+            $(this).val(savedValue); // Восстановление данных
+        }
+    });
+
+    $('form').submit(function() {
+        clearDraft();
+    });
+
+    // Функция для очистки данных черновика
+    function clearDraft() {
+        localStorage.clear();
+    }
+});");
 //Admin::headerJs('/vendor/laravel-admin-ext/material-ui/MaterialAdminLTE/dist/js/material.min.js');
 //Admin::headerJs('/vendor/laravel-admin-ext/material-ui/MaterialAdminLTE/dist/js/ripples.min.js');

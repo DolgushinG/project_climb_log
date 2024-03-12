@@ -29,6 +29,7 @@ class FormatsController extends Controller
             ->description(trans('admin.description'))
             ->row(function(Row $row) {
                 $row->column(5, $this->grid());
+
             });
     }
 

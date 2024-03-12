@@ -15,6 +15,10 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
+use Encore\Admin\Widgets\Box;
+use Encore\Admin\Widgets\InfoBox;
+use Encore\Admin\Widgets\Tab;
+use Encore\Admin\Widgets\Table;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\MessageBag;
@@ -32,8 +36,13 @@ class EventsController extends Controller
      */
     public function index(Content $content)
     {
-        return $content
-            ->body($this->grid());
+        return $content->row(function ($row) {
+                $row->column(3, new InfoBox('New Users', 'users', 'aqua', '/admin/users', '1024'));
+                $row->column(3, new InfoBox('New Orders', 'shopping-cart', 'green', '/admin/orders', '150%'));
+                $row->column(3, new InfoBox('Articles', 'book', 'yellow', '/admin/articles', '2786'));
+                $row->column(3, new InfoBox('Documents', 'file', 'red', '/admin/files', '698726'));
+            })->body($this->grid());
+
     }
 
     /**
@@ -121,9 +130,101 @@ class EventsController extends Controller
      */
     protected function form()
     {
-
         $form = new Form(new Event);
+        $form->tab('Общая информация', function ($form) {
+            $form->footer(function ($footer) {
+                $footer->disableReset();
+                $footer->disableViewCheck();
+                $footer->disableEditingCheck();
+                $footer->disableCreatingCheck();
 
+            });
+            $form->hidden('owner_id')->value(Admin::user()->id);
+            $form->date('start_date', 'Дата старта')->placeholder('Дата старта')->required();
+            $form->date('end_date', 'Дата окончания')->placeholder('Дата окончания')->required();
+            $form->time('start_time', 'Время старта')->placeholder('Время старта')->required();
+            $form->time('end_time', 'Время окончания')->placeholder('Время окончания')->required();
+            $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
+            $form->image('image', 'Афиша')->placeholder('Афиша')->required();
+            $form->text('contact', 'Контактная информация')->required();
+            $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
+            $form->hidden('climbing_gym_name_eng')->default('1');
+            $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
+            $form->text('title', 'Название')->placeholder('Введи название')->required();
+            $form->hidden('title_eng')->default('1');
+            $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
+            $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
+            $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
+            $form->image('img_payment', 'QR код на оплату')->placeholder('QR');
+            $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
+            $form->summernote('info_payment', 'Доп инфа об оплате')->placeholder('Инфа...');
+            $form->summernote('description', 'Описание')->placeholder('Описание')->required();
+
+        })->tab('Настройка трасс и категорий ', function ($form) {
+
+            $form->radio('is_qualification_counting_like_final','Настройка подсчета квалификации')
+                ->options([
+                    0 =>'Считаем по классике',
+                    1 =>'Считаем как финальный раунд (кол-во топов и зон)',
+                ])->when(0, function (Form $form) {
+                    $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
+                        ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
+                    $form->text('amount_point_flash','Балл за флэш')->value(1);
+                    $form->text('amount_point_redpoint','Балл за редпоинт')->value(0.9);
+                    $formats = Format::all()->pluck('format', 'id');
+                    $form->radio('mode','Настройка формата')
+                        ->options($formats)->when(1, function (Form $form) {
+                            $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
+                            $routes = $this->getRoutes();
+                            $form->tablecustom('grade_and_amount', '', function ($table) {
+                                $grades = $this->getGrades();
+                                $table->select('Категория')->options($grades)->readonly();
+                                $table->number('Кол-во')->width('50px');
+                                $table->text('Ценность')->width('50px');
+                                $table->disableButton();
+                            })->value($routes);
+                        })->when(2, function (Form $form) {
+                            $routes = $this->getRoutes();
+                            $form->tablecustom('grade_and_amount', '', function ($table) {
+                                $grades = $this->getGrades();
+                                $table->select('Категория')->options($grades)->readonly();
+                                $table->number('Кол-во')->width('50px');
+                                $table->disableButton();
+                            })->value($routes);
+                        });
+                })->when(1, function (Form $form) {
+                    $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->value(10);
+                    $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
+                        ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
+                })->value(0)->required();
+
+        })->tab('Настройка', function ($form) {
+            $form->radio('is_semifinal','Настройка финалов')
+                ->options([
+                    1 =>'С полуфиналом',
+                    0 =>'Без полуфинала',
+                ])->when(1, function (Form $form) {
+                    $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->value(5);
+                    $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
+                })->when(0, function (Form $form) {
+                    $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
+                })->value(0)->required();
+            $form->radio('is_additional_final','Финалы для разных групп')
+                ->options([
+                    1 =>'С финалами для каждой категории групп',
+                    0 =>'Классика финал для лучших в квалификации',
+                ])->value(0)->required();
+            $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
+            $states = [
+                'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
+                'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+            ];
+            $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states($states);
+            $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states($states);
+            $form->switch('active', 'Активно')
+                ->help('Не обязательно сразу делать активно, после сохранения будет ссылка по которой можно будет посмотреть')
+                ->states($states);
+        });
         $form->tools(function (Form\Tools $tools) {
 
             // Disable `List` btn.
@@ -135,106 +236,6 @@ class EventsController extends Controller
             // Disable `Veiw` btn.
             $tools->disableView();
         });
-
-        $form->footer(function ($footer) {
-
-            // disable reset btn
-            $footer->disableReset();
-
-            // disable `View` checkbox
-            $footer->disableViewCheck();
-
-            // disable `Continue editing` checkbox
-            $footer->disableEditingCheck();
-
-            // disable `Continue Creating` checkbox
-            $footer->disableCreatingCheck();
-
-        });
-
-        $form->hidden('id');
-        $form->hidden('owner_id')->value(Admin::user()->id);
-        $form->date('start_date', 'Дата старта')->placeholder('Дата старта')->required();
-        $form->date('end_date', 'Дата окончания')->placeholder('Дата окончания')->required();
-        $form->time('start_time', 'Время старта')->placeholder('Время старта')->required();
-        $form->time('end_time', 'Время окончания')->placeholder('Время окончания')->required();
-        $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
-        $form->image('image', 'Афиша')->placeholder('Афиша')->required();
-        $form->text('contact', 'Контактная информация')->required();
-        $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
-        $form->hidden('climbing_gym_name_eng')->default('1');
-        $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
-
-        $form->text('title', 'Название')->placeholder('Введи название')->required();
-        $form->hidden('title_eng')->default('1');
-        $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
-        $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
-        $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
-        $form->image('img_payment', 'QR код на оплату')->placeholder('QR');
-        $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
-        $form->summernote('info_payment', 'Доп инфа об оплате')->placeholder('Инфа...');
-        $form->summernote('description', 'Описание')->placeholder('Описание')->required();
-        $form->radio('is_qualification_counting_like_final','Настройка подсчета квалификации')
-            ->options([
-                0 =>'Считаем по классике',
-                1 =>'Считаем как финальный раунд (кол-во топов и зон)',
-            ])->when(0, function (Form $form) {
-                $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
-                    ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
-                $form->text('amount_point_flash','Балл за флэш')->value(1);
-                $form->text('amount_point_redpoint','Балл за редпоинт')->value(0.9);
-                $formats = Format::all()->pluck('format', 'id');
-                $form->radio('mode','Настройка формата')
-                    ->options($formats)->when(1, function (Form $form) {
-//                        dd($form->grade_and_amount);
-                        $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
-                        $routes = $this->getRoutes();
-                        $form->tablecustom('grade_and_amount', '', function ($table) {
-                            $grades = $this->getGrades();
-                            $table->select('Категория')->options($grades)->readonly();
-                            $table->text('Кол-во')->width('50px');
-                            $table->text('Ценность')->width('50px');
-                            $table->disableButton();
-                        })->value($routes);
-                    })->when(2, function (Form $form) {
-                        $routes = $this->getRoutes();
-                        $form->tablecustom('grade_and_amount', '', function ($table) {
-                            $grades = $this->getGrades();
-                            $table->select('Категория')->options($grades)->readonly();
-                            $table->text('Кол-во')->width('50px');
-                            $table->disableButton();
-                        })->value($routes);
-                    });
-            })->when(1, function (Form $form) {
-                $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->value(10);
-                $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
-                    ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
-            })->value(0)->required();
-        $form->radio('is_semifinal','Настройка финалов')
-            ->options([
-                1 =>'С полуфиналом',
-                0 =>'Без полуфинала',
-            ])->when(1, function (Form $form) {
-                $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->value(5);
-                $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
-            })->when(0, function (Form $form) {
-                $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
-            })->value(0)->required();
-        $form->radio('is_additional_final','Финалы для разных групп')
-            ->options([
-                1 =>'С финалами для каждой категории групп',
-                0 =>'Классика финал для лучших в квалификации',
-            ])->value(0)->required();
-        $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
-        $states = [
-            'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
-            'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
-        ];
-        $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states($states);
-        $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states($states);
-        $form->switch('active', 'Активно')
-            ->help('Не обязательно сразу делать активно, после сохранения будет ссылка по которой можно будет посмотреть')
-            ->states($states);
         $form->saving(function (Form $form) {
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
