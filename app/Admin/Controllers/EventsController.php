@@ -202,7 +202,7 @@ class EventsController extends Controller
                     $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
                         ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
                 })->value(0)->required();
-//            $form->disableSubmit();
+//          
             $form->radio('is_semifinal','Настройка финалов')
                 ->options([
                     1 =>'С полуфиналом',
@@ -225,8 +225,8 @@ class EventsController extends Controller
             ];
             $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states($states);
             $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states($states);
-            $form->switch('active', 'Активно')
-                ->help('Не обязательно сразу делать активно, после сохранения будет ссылка по которой можно будет посмотреть')
+            $form->switch('active', 'Опубликовать')
+                ->help('Не обязательно сразу опубликовывать, после сохранения будет ссылка по которой можно будет посмотреть')
                 ->states($states);
         });
         $form->tools(function (Form\Tools $tools) {
