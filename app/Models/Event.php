@@ -108,7 +108,7 @@ class Event extends Model
     }
 
     public static function refresh_final_points_all_participant($event_id) {
-        $routes = ResultParticipant::where('event_id', '=', $event_id)->select('route_id')->distinct()->get()->toArray();
+        $routes = ResultParticipant::where('event_id', $event_id)->select('route_id')->distinct()->get()->toArray();
         $event = Event::find($event_id);
         $format = $event->mode;
         $participants = User::query()

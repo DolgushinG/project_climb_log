@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\CustomAction\ActionExport;
+use App\Admin\Extensions\CustomButton;
 use App\Exports\AllResultExport;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
@@ -84,8 +85,6 @@ class EventsController extends Controller
     public function create(Content $content)
     {
         return $content
-            ->header(trans('admin.create'))
-            ->description(trans('admin.description'))
             ->body($this->form());
     }
 
@@ -131,7 +130,7 @@ class EventsController extends Controller
     protected function form()
     {
         $form = new Form(new Event);
-        $form->tab('Общая информация', function ($form) {
+        $form->tab('Общая информация о соревновании', function ($form) {
             $form->footer(function ($footer) {
                 $footer->disableReset();
                 $footer->disableViewCheck();
@@ -140,28 +139,32 @@ class EventsController extends Controller
 
             });
             $form->hidden('owner_id')->value(Admin::user()->id);
+            $form->text('title', 'Название соревнования')->placeholder('Введи название')->required();
+//            $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название');
+            $form->hidden('title_eng')->default('1');
+            $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
+            $form->hidden('climbing_gym_name_eng')->default('1');
+            $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
+            $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
             $form->date('start_date', 'Дата старта')->placeholder('Дата старта')->required();
             $form->date('end_date', 'Дата окончания')->placeholder('Дата окончания')->required();
             $form->time('start_time', 'Время старта')->placeholder('Время старта')->required();
             $form->time('end_time', 'Время окончания')->placeholder('Время окончания')->required();
-            $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
+
             $form->image('image', 'Афиша')->placeholder('Афиша')->required();
+            $form->summernote('description', 'Описание')->placeholder('Описание')->required();
             $form->text('contact', 'Контактная информация')->required();
-            $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
-            $form->hidden('climbing_gym_name_eng')->default('1');
-            $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
-            $form->text('title', 'Название')->placeholder('Введи название')->required();
-            $form->hidden('title_eng')->default('1');
-            $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название')->required();
+
             $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
+
+
+//            $form->disableSubmit();
+        })->tab('Оплата', function ($form) {
             $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
             $form->image('img_payment', 'QR код на оплату')->placeholder('QR');
             $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
             $form->summernote('info_payment', 'Доп инфа об оплате')->placeholder('Инфа...');
-            $form->summernote('description', 'Описание')->placeholder('Описание')->required();
-
-        })->tab('Настройка трасс и категорий ', function ($form) {
-
+        })->tab('Параметры соревнования', function ($form) {
             $form->radio('is_qualification_counting_like_final','Настройка подсчета квалификации')
                 ->options([
                     0 =>'Считаем по классике',
@@ -175,7 +178,7 @@ class EventsController extends Controller
                     $form->radio('mode','Настройка формата')
                         ->options($formats)->when(1, function (Form $form) {
                             $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
-                            $routes = $this->getRoutes();
+                            $routes = Grades::getRoutes();
                             $form->tablecustom('grade_and_amount', '', function ($table) {
                                 $grades = $this->getGrades();
                                 $table->select('Категория')->options($grades)->readonly();
@@ -184,21 +187,20 @@ class EventsController extends Controller
                                 $table->disableButton();
                             })->value($routes);
                         })->when(2, function (Form $form) {
-                            $routes = $this->getRoutes();
+                            $routes = Grades::getRoutes();
                             $form->tablecustom('grade_and_amount', '', function ($table) {
                                 $grades = $this->getGrades();
                                 $table->select('Категория')->options($grades)->readonly();
                                 $table->number('Кол-во')->width('50px');
                                 $table->disableButton();
                             })->value($routes);
-                        });
+                        })->required();
                 })->when(1, function (Form $form) {
                     $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->value(10);
                     $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
                         ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
                 })->value(0)->required();
-
-        })->tab('Настройка', function ($form) {
+//            $form->disableSubmit();
             $form->radio('is_semifinal','Настройка финалов')
                 ->options([
                     1 =>'С полуфиналом',
@@ -311,31 +313,6 @@ class EventsController extends Controller
         $grades = ['5' => '5', '5+' => '5+','6A' => '6A','6A+' => '6A+', '6B' => '6B', '6B+' => '6B+','6C' => '6C',
             '6C+' => '6C+','7A' => '7A','7A+' => '7A+','7B' => '7B','7B+' => '7B+','7C' => '7C','7C+' => '7C+','8A' => '8A'];
         return $grades;
-    }
-
-    /**
-     * @return array[]
-     */
-    protected function getRoutes(): array
-    {
-        $routes = [
-            ['Категория' => '5', 'Кол-во' => 3, 'Ценность' => 100],
-            ['Категория' => '5+', 'Кол-во' => 3, 'Ценность' => 150],
-            ['Категория' => '6A', 'Кол-во' => 3, 'Ценность' => 200],
-            ['Категория' => '6A+', 'Кол-во' => 3, 'Ценность' => 250],
-            ['Категория' => '6B', 'Кол-во' => 3, 'Ценность' => 300],
-            ['Категория' => '6B+', 'Кол-во' => 2, 'Ценность' => 350],
-            ['Категория' => '6C', 'Кол-во' => 2, 'Ценность' => 400],
-            ['Категория' => '6C+', 'Кол-во' => 2, 'Ценность' => 450],
-            ['Категория' => '7A', 'Кол-во' => 2, 'Ценность' => 500],
-            ['Категория' => '7A+', 'Кол-во' => 2, 'Ценность' => 550],
-            ['Категория' => '7B', 'Кол-во' => 2, 'Ценность' => 600],
-            ['Категория' => '7B+', 'Кол-во' => 1, 'Ценность' => 650],
-            ['Категория' => '7C', 'Кол-во' => 1, 'Ценность' => 700],
-            ['Категория' => '7C+', 'Кол-во' => 1, 'Ценность' => 750],
-            ['Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 800],
-        ];
-        return $routes;
     }
 
     public function exportAllExcel(Request $request)

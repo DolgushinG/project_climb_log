@@ -46,7 +46,7 @@ class ResultParticipant extends Model
         }
         return sqrt($active_participant / $count_route_passed);
     }
-    public function get_value_route($attempt, $value_category, $format) {
+    public function get_value_route($attempt, $value_category, $format, $custom_value=null) {
         switch ($format) {
             # 10 лучших
             case 1:
