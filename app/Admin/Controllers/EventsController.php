@@ -164,6 +164,21 @@ class EventsController extends Controller
             $form->image('img_payment', 'QR код на оплату')->placeholder('QR');
             $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
             $form->summernote('info_payment', 'Доп инфа об оплате')->placeholder('Инфа...');
+        })->tab('Настройка Трасс', function ($form) {
+            $routes = Grades::getRoutes();
+            Admin::style(".select2-selection__arrow {
+                display: None;
+            }");
+            $form->html('<h4>Ценность трассы учитывается только в формате соревнований n лучших трасс, там необходимо искать лучшие трассы по баллам <br>
+                                Для других режимов ценность не учитывается, можно просто игнорировать это поле</h4>');
+            $form->tablecustom('grade_and_amount', '', function ($table) {
+                $grades = $this->getGrades();
+                $table->select('Категория')->options($grades)->readonly();
+                $table->number('Кол-во')->width('50px');
+                $table->text('Ценность')->width('50px');
+                $table->disableButton();
+            })->value($routes);
+
         })->tab('Параметры соревнования', function ($form) {
             $form->html('<p>*Классика - квалификация и полуфинал/финал для лучших в квалификации, </p>');
             $form->html('<p>*Как финальный раунд - то есть квалификация будет считаться как по кол-ву топов и зон </p>');
@@ -180,29 +195,13 @@ class EventsController extends Controller
                     $form->radio('mode','Настройка формата')
                         ->options($formats)->when(1, function (Form $form) {
                             $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
-                            $routes = Grades::getRoutes();
-                            $form->tablecustom('grade_and_amount', '', function ($table) {
-                                $grades = $this->getGrades();
-                                $table->select('Категория')->options($grades)->readonly();
-                                $table->number('Кол-во')->width('50px');
-                                $table->text('Ценность')->width('50px');
-                                $table->disableButton();
-                            })->value($routes);
                         })->when(2, function (Form $form) {
-                            $routes = Grades::getRoutes();
-                            $form->tablecustom('grade_and_amount', '', function ($table) {
-                                $grades = $this->getGrades();
-                                $table->select('Категория')->options($grades)->readonly();
-                                $table->number('Кол-во')->width('50px');
-                                $table->disableButton();
-                            })->value($routes);
-                        })->required();
+                        })->value(2)->required();
                 })->when(1, function (Form $form) {
                     $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->value(10);
                     $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
                         ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
                 })->value(0)->required();
-//          
             $form->radio('is_semifinal','Настройка финалов')
                 ->options([
                     1 =>'С полуфиналом',

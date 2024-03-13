@@ -46,7 +46,6 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 Admin::script('window.onbeforeunload = function() {
     return "Вы уверены, что хотите покинуть эту страницу? Ваши данные могут быть потеряны.";
 };');
-
 Admin::script("$(document).ready(function() {
 
       const submitButton = document.querySelector('.pull-right [type=\"submit\"]');
@@ -120,7 +119,10 @@ Admin::script("$(document).ready(function() {
 
     // Функция для сохранения данных каждого инпута и селекта в cookies
     function saveDraft(inputName, inputValue) {
-        document.cookie = encodeURIComponent(inputName) + '=' + encodeURIComponent(inputValue);
+        var existingValue = getCookie(inputName);
+        if (existingValue !== inputValue) {
+            document.cookie = encodeURIComponent(inputName) + '=' + encodeURIComponent(inputValue);
+        }
     }
 
     // Восстановление данных каждого инпута и селекта из cookies при загрузке страницы
@@ -138,7 +140,6 @@ Admin::script("$(document).ready(function() {
     });
      $('[type=submit]').on('click', function() {
        clearDraft();
-       clearDraft();
     });
     // Функция для очистки данных черновика
     function clearDraft() {
@@ -147,7 +148,7 @@ Admin::script("$(document).ready(function() {
             var cookie = cookies[i];
             var eqPos = cookie.indexOf('=');
             var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-            document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            document.cookie = name.trim() + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
         }
     }
 

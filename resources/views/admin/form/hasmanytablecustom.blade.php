@@ -10,7 +10,7 @@
         <div class="col-sm-12">
 
             <label>Кол-во трасс в сумме</label>
-            <label id="count_routes_label" class="form-control">15</label>
+            <label id="count_routes_label" class="form-control">30</label>
         </div>
         <div id="has-many-{{$column}}" style="margin-top: 15px; width: 35%;">
             <table class="table table-has-many has-many-{{$column}}">
@@ -62,15 +62,47 @@
                 </tbody>
             </table>
             <script>
-                const breakdownButton = document.querySelectorAll('.Кол-во');
-                breakdownButton.forEach(function (btn) {
-                    btn.addEventListener('input', function () {
-                        let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {
-                            return currentSum + currentNumber
-                        }, 0)
-                        document.getElementById('count_routes_label').textContent = results;
-                    });
+                var table = document.getElementById('has-many-grade_and_amount');
+                var label = document.getElementById('count_routes_label');
+
+                // Функция для обновления суммы
+                function updateTotal() {
+                    // Проходим по всем элементам в таблице
+                    let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {
+                        return currentSum + currentNumber
+                    }, 0)
+                    document.getElementById('count_routes_label').textContent = results;
+                }
+
+                // Добавляем обработчики для кнопок и инпутов
+                table.addEventListener('click', function(event) {
+                    updateTotal();
                 });
+
+                table.addEventListener('input', function(event) {
+                    if (event.target.classList.contains('input')) {
+                        updateTotal();
+                    }
+                });
+                {{--const breakdownButton = document.querySelectorAll('.Кол-во');--}}
+                {{--breakdownButton.forEach(function (btn) {--}}
+                {{--    btn.addEventListener('input', function () {--}}
+                {{--        let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {--}}
+                {{--            return currentSum + currentNumber--}}
+                {{--        }, 0)--}}
+                {{--        document.getElementById('count_routes_label').textContent = results;--}}
+                {{--    });--}}
+                {{--});--}}
+                {{--const input_group_btn = document.querySelectorAll("//button[contains(@class, 'btn btn-primary')]");--}}
+                {{--input_group_btn.forEach(function (btn) {--}}
+                {{--    console.log(12)--}}
+                {{--    btn.addEventListener('click', function () {--}}
+                {{--        let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {--}}
+                {{--            return currentSum + currentNumber--}}
+                {{--        }, 0)--}}
+                {{--        document.getElementById('count_routes_label').textContent = results;--}}
+                {{--    });--}}
+                {{--});--}}
 
                 // if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
                 //     $(document).ready(function () {

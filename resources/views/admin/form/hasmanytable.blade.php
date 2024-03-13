@@ -22,6 +22,15 @@
                     @endif
                 </tr>
                 </thead>
+                <script>
+                    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+                        $(document).ready(function () {
+                            {
+                                document.getElementsByTagName('body')[0].style.fontSize = "12px"
+                            }
+                        });
+                    }
+                </script>
                 <tbody class="has-many-{{$column}}-forms">
                 @foreach($forms as $pk => $form)
                     <tr class="has-many-{{$column}}-form fields-group">
@@ -77,133 +86,4 @@
 
 <hr style="margin-top: 0px;">
 
-<script>
-    const categories = [...document.querySelectorAll('input[name="categories[values][]"]')].map(input => input.value);
-    let inputs_for_categories_all = document.querySelectorAll('select.form-control.transfer_to_next_category.Категория.участника')
-    let inputs_for_categories_all_2 = document.querySelectorAll('.form-control.transfer_to_next_category.В.какую.категорию.переводить')
-    let category = document.querySelectorAll('tbody[class="list-categories-table"]')
-    let btn_add = document.querySelector('.add.btn.btn-success.btn-sm')
-    btn_add.addEventListener('click', function () {
-        if (document.URL.search('edit') === -1){
 
-
-            setTimeout(function() {
-                document.querySelector('.choice_transfer2').click();
-
-            }, 50);
-
-        } else {
-            setTimeout(function() {
-                let cat_all = document.querySelectorAll('select.form-control.transfer_to_next_category.Категория.участника')
-                let inputs_for_categories_all_2 = document.querySelectorAll('.form-control.transfer_to_next_category.В.какую.категорию.переводить')
-                let inputs_for_categories_all_3 = document.querySelectorAll('.transfer_to_next_category.От.какой.категории.будет.перевод')
-                let inputs_for_categories_all_4 = document.querySelectorAll('.transfer_to_next_category.Кол-во.трасс.для.перевода')
-                let btn_remove_for_categories_all_5 = document.querySelectorAll('.transfer_to_next_category._remove_.fom-removed')
-                for(let i = 0; i < cat_all.length; i++){
-                    let new_i = i+1
-                    cat_all[i].name = "transfer_to_next_category[new_" + new_i + "][Категория участника]"
-                    cat_all[i].previousSibling.previousElementSibling.name = "transfer_to_next_category[new_" + new_i + "][Категория участника]"
-                    inputs_for_categories_all_2[i].name = "transfer_to_next_category[new_" + new_i + "][В какую категорию переводить]"
-                    inputs_for_categories_all_2[i].previousSibling.previousElementSibling.name = "transfer_to_next_category[new_" + new_i + "][В какую категорию переводить]"
-                    inputs_for_categories_all_3[i].name = "transfer_to_next_category[new_" + new_i + "][От какой категории будет перевод]"
-                    inputs_for_categories_all_3[i].previousSibling.previousElementSibling.name = "transfer_to_next_category[new_" + new_i + "][От какой категории будет перевод]"
-                    inputs_for_categories_all_4[i].name = "transfer_to_next_category[new_" + new_i + "][Кол-во трасс для перевода]"
-                    setTimeout(function() {
-                        btn_remove_for_categories_all_5[i].name = 'transfer_to_next_category[new_'+new_i+'][_remove_]'
-
-                    }, 50);
-
-                }
-            }, 150);
-        }
-
-    });
-    if (document.URL.search('edit') === -1) {
-        setTimeout(function () {
-            for (let i = 0; i < categories.length; i++) {
-                inputs_for_categories_all.forEach(function (category) {
-                    try {
-                        category[i].text = categories[i]
-                    } catch (e) {
-                        category[i].value = categories[i]
-                    }
-                });
-                inputs_for_categories_all_2.forEach(function (category) {
-                    try {
-                        category[i].text = categories[i]
-                    } catch (e) {
-                        category[i].value = categories[i]
-                    }
-                });
-            }
-        }, 50);
-    }
-
-
-    category.forEach(function (category) {
-        category.addEventListener('input', function () {
-            let inputs_for_categories_all = document.querySelectorAll('select.form-control.transfer_to_next_category.Категория.участника')
-            let inputs_for_categories_all_2 = document.querySelectorAll('.form-control.transfer_to_next_category.В.какую.категорию.переводить')
-            inputs_for_categories_all.forEach((category) => {
-                Array.from(category).forEach((option) => {
-                    category.removeChild(option)
-                })
-            })
-            inputs_for_categories_all_2.forEach((category) => {
-                Array.from(category).forEach((option) => {
-                    category.removeChild(option)
-                })
-            })
-            inputs_for_categories_all.forEach((category) => {
-                update_list('input[name="categories[values][]"]', category)
-            })
-            inputs_for_categories_all_2.forEach((category) => {
-                update_list('input[name="categories[values][]"]', category)
-            })
-        });
-    });
-
-    const radios = document.querySelectorAll('#choice_transfer');
-    radios.forEach(function (radio) {
-        radio.addEventListener('click', function () {
-            let inputs_for_categories_all = document.querySelectorAll('select.form-control.transfer_to_next_category.Категория.участника')
-            let inputs_for_categories_all_2 = document.querySelectorAll('.form-control.transfer_to_next_category.В.какую.категорию.переводить')
-            inputs_for_categories_all.forEach((category) => {
-                remove_option(category)
-            })
-            inputs_for_categories_all_2.forEach((category) => {
-                remove_option(category)
-            })
-            inputs_for_categories_all.forEach((category) => {
-                update_list('input[name="categories[values][]"]', category)
-            })
-            inputs_for_categories_all_2.forEach((category) => {
-                update_list('input[name="categories[values][]"]', category)
-            })
-        });
-    });
-
-    function update_list(element, category){
-        const categories = [...document.querySelectorAll(element)].map(input => input.value);
-        for (let i = 0; i < categories.length; i++){
-            let opt = document.createElement('option');
-            opt.value = i;
-            opt.innerHTML = categories[i];
-            category.appendChild(opt);
-        }
-    }
-    function remove_option(category){
-        Array.from(category).forEach((option) => {
-            if(option.text === "1"){
-                category.removeChild(option)
-            }
-        })
-    }
-    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-        $(document).ready(function () {
-            {
-                document.getElementsByTagName('body')[0].style.fontSize = "12px"
-            }
-        });
-    }
-</script>
