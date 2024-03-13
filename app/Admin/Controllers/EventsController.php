@@ -139,8 +139,8 @@ class EventsController extends Controller
 
             });
             $form->hidden('owner_id')->value(Admin::user()->id);
-            $form->html('<h4 style="color: orange">Внимание!</h4>');
-            $form->html('<h4 style="color: red">Уход со страницы на другие страницы может повлечь потерю данных в форме на некоторых полях</h4>');
+           // $form->html('<h4 style="color: orange">Внимание!</h4>');
+           // $form->html('<h4 style="color: red">Уход со страницы на другие страницы может повлечь потерю данных в форме на некоторых полях</h4>');
             $form->text('title', 'Название соревнования')->placeholder('Введи название')->required();
 //            $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название');
             $form->hidden('title_eng')->default('1');
