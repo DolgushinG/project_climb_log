@@ -51,6 +51,9 @@ Admin::script("$(document).ready(function() {
       const submitButton = document.querySelector('.pull-right [type=\"submit\"]');
       const requiredInputs = document.querySelectorAll('input[required]');
       const requiredRadio = document.querySelectorAll('radio[required]');
+      if(!submitButton || !requiredInputs || !requiredRadio){
+        return;
+      }
       if(submitButton){
          submitButton.disabled = true;
       }
@@ -84,8 +87,10 @@ Admin::script("$(document).ready(function() {
     });");
 
 Admin::script("$(document).ready(function() {
+    var editingAreas = $('.note-editable');
+
     // Отслеживание изменений в input и select элементах формы
-    $('form').find('input, select, textarea').on('input change click', function() {
+    $('form').find('input, select, radio').on('input change click', function() {
         var inputName = $(this).attr('name');
         var inputValue = $(this).val();
         saveDraft(inputName, inputValue);
@@ -133,7 +138,6 @@ Admin::script("$(document).ready(function() {
             $(this).val(savedValue); // Восстановление данных
         }
     });
-
     // Очистка данных черновика при успешной отправке формы
     $('form').submit(function() {
         clearDraft();
@@ -164,3 +168,23 @@ Admin::script("$(document).ready(function() {
         document.getElementById('create-events-link').textContent = 'Черновик соревнования'
     }
 });");
+
+
+//Admin::script("document.addEventListener('DOMContentLoaded', function() {
+//    var form = document.querySelector('form[action]');
+//    var confirmExit = function(event) {
+//        if (form && (form.offsetHeight > 0 || form.getClientRects().length > 0) && !form.checkValidity()) {
+//            event.preventDefault(); // Отменяем переход по ссылке
+//            var confirmResult = confirm('Уверены, что хотите выйти из формы, заполненные данные будут потеряны, продолжить?');
+//            if (!confirmResult) {
+//                event.preventDefault(); // Отменяем переход по ссылке
+//            } else {
+//                window.location.href = this.getAttribute('href'); // Переходим по ссылке
+//            }
+//        }
+//    };
+//
+//    document.querySelectorAll('a[href]').forEach(function(link) {
+//        link.addEventListener('click', confirmExit);
+//    });
+//});");

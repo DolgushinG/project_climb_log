@@ -139,6 +139,8 @@ class EventsController extends Controller
 
             });
             $form->hidden('owner_id')->value(Admin::user()->id);
+            $form->html('<h4 style="color: orange">Внимание!</h4>');
+            $form->html('<h4 style="color: red">Уход со страницы на другие страницы может повлечь потерю данных в форме на некоторых полях</h4>');
             $form->text('title', 'Название соревнования')->placeholder('Введи название')->required();
 //            $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название');
             $form->hidden('title_eng')->default('1');
@@ -201,7 +203,7 @@ class EventsController extends Controller
                     $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->value(10);
                     $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
                         ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
-                })->value(0)->required();
+                })->required();
             $form->radio('is_semifinal','Настройка финалов')
                 ->options([
                     1 =>'С полуфиналом',
@@ -211,12 +213,12 @@ class EventsController extends Controller
                     $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
                 })->when(0, function (Form $form) {
                     $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
-                })->value(0)->required();
+                })->required();
             $form->radio('is_additional_final','Финалы для разных групп')
                 ->options([
                     1 =>'С финалами для каждой категории групп',
                     0 =>'Классика финал для лучших в квалификации',
-                ])->value(0)->required();
+                ])->required();
             $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
             $states = [
                 'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
