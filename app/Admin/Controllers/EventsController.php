@@ -370,11 +370,10 @@ class EventsController extends Controller
             $form->hidden('climbing_gym_name_eng')->default('1');
             $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
             $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
-            $form->date('start_date', 'Дата старта')->placeholder('Дата старта')->required();
-            $form->date('end_date', 'Дата окончания')->placeholder('Дата окончания')->required();
-            $form->time('start_time', 'Время старта')->placeholder('Время старта')->required();
-            $form->time('end_time', 'Время окончания')->placeholder('Время окончания')->required();
-
+            $form->date('start_date', 'Дата старта')->attribute('inputmode', 'none')->placeholder('Дата старта')->required();
+            $form->date('end_date', 'Дата окончания')->attribute('inputmode', 'none')->placeholder('Дата окончания')->required();
+            $form->time('start_time', 'Время старта')->attribute('inputmode', 'none')->placeholder('Время старта')->required();
+            $form->time('end_time', 'Время окончания')->attribute('inputmode', 'none')->placeholder('Время окончания')->required();
             $form->image('image', 'Афиша')->placeholder('Афиша')->required();
             $form->summernote('description', 'Описание')->placeholder('Описание')->required();
             $form->text('contact', 'Контактная информация')->required();
@@ -415,7 +414,7 @@ class EventsController extends Controller
                     $formats = Format::all()->pluck('format', 'id');
                     $form->radio('mode','Настройка формата')
                         ->options($formats)->when(1, function (Form $form) {
-                            $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
+                            $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->attribute('inputmode', 'none')->value(10);
                         })->when(2, function (Form $form) {
                         })->required();
                 })->when(1, function (Form $form) {
