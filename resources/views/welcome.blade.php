@@ -123,7 +123,7 @@
                                             <label for="floatingSelectCategory">Выбрать категорию</label>
                                         </div>
                                         <button id="btn-participant" data-id="{{$event->id}}"
-                                           data-title="{{$event->title_eng}}" data-user-id="{{Auth()->user()->id}}"
+                                           data-title="{{$event->title_eng}}" data-format="{{$event->is_qualification_counting_like_final}}" data-user-id="{{Auth()->user()->id}}"
                                            class="btn btn-dark rounded-pill" style="display: none">Участвовать</button>
 
                                     @endif

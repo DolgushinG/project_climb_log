@@ -17,6 +17,8 @@ $(document).on('click','#btn-participant', function(e) {
     let button = $('#btn-participant')
     let event_id = document.getElementById('btn-participant').getAttribute('data-id')
     let event_title = document.getElementById('btn-participant').getAttribute('data-title')
+    let is_qualification_counting_like_final = document.getElementById('btn-participant').getAttribute('data-format')
+
     let user_id = document.getElementById('btn-participant').getAttribute('data-user-id')
     e.preventDefault()
     $.ajax({
@@ -39,8 +41,7 @@ $(document).on('click','#btn-participant', function(e) {
                 button.text(xhr.message)
             }, 3000);
             setTimeout(function () {
-                var is_qualification_counting_like_final = "<?php echo $event->is_qualification_counting_like_final; ?>";
-                if(!is_qualification_counting_like_final){
+                if(!Number(is_qualification_counting_like_final)){
                     button.text('Внести результат')
                     button.removeClass('btn btn-dark rounded-pill')
                     button.addClass('btn btn-success rounded-pill')
@@ -57,6 +58,7 @@ $(document).on('click','#btn-participant', function(e) {
             }, 6000);
         },
         error: function(xhr, status, error) {
+
             button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
                 '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
             setTimeout(function () {
