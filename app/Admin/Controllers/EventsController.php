@@ -395,7 +395,7 @@ class EventsController extends Controller
             $form->tablecustom('grade_and_amount', '', function ($table) {
                 $grades = $this->getGrades();
                 $table->select('Категория')->options($grades)->readonly();
-                $table->number('Кол-во')->width('50px');
+                $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
                 $table->text('Ценность')->width('50px');
                 $table->disableButton();
             })->value($routes);
@@ -419,19 +419,19 @@ class EventsController extends Controller
                         })->when(2, function (Form $form) {
                         })->required();
                 })->when(1, function (Form $form) {
-                    $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->value(10);
+                    $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->attribute('inputmode', 'none')->value(10);
                     $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
-                        ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
+                        ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->attribute('inputmode', 'none')->value(6);
                 })->required();
             $form->radio('is_semifinal','Настройка финалов')
                 ->options([
                     1 =>'С полуфиналом',
                     0 =>'Без полуфинала',
                 ])->when(1, function (Form $form) {
-                    $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->value(5);
-                    $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
+                    $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->attribute('inputmode', 'none')->value(5);
+                    $form->number('amount_routes_in_final','Кол-во трасс в финале')->attribute('inputmode', 'none')->value(4);
                 })->when(0, function (Form $form) {
-                    $form->number('amount_routes_in_final','Кол-во трасс в финале')->value(4);
+                    $form->number('amount_routes_in_final','Кол-во трасс в финале')->attribute('inputmode', 'none')->value(4);
                 })->required();
             $form->radio('is_additional_final','Финалы для разных групп')
                 ->options([
