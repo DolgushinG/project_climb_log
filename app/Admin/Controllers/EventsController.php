@@ -134,9 +134,6 @@ class EventsController extends Controller
             Admin::style(".select2-selection__arrow {
                 display: None;
             }");
-            Admin::script('window.onbeforeunload = function() {
-    return "Вы уверены, что хотите покинуть эту страницу? Ваши данные могут быть потеряны.";
-};');
             Admin::script("$(document).ready(function() {
       const submitButton = document.querySelector('.pull-right [type=\"submit\"]');
       const requiredInputs = document.querySelectorAll('input[required]');

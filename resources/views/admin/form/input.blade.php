@@ -12,7 +12,7 @@
             <span class="input-group-addon">{!! $prepend !!}</span>
             @endif
 
-            <input {!! $attributes !!} />
+            <input inputmode='none' {!! $attributes !!} />
 
             @if ($append)
                 <span class="input-group-addon clearfix">{!! $append !!}</span>
