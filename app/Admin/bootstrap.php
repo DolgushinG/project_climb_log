@@ -89,8 +89,33 @@ Admin::script("$(document).ready(function() {
 Admin::script("$(document).ready(function() {
     var editingAreas = $('.note-editable');
 
+    editingAreas.each(function(index) {
+        $(this).attr('data-id', 'editableArea_' + (index + 1));
+    });
+
+    // Отслеживание изменений в тексте каждой редактируемой области
+    editingAreas.on('input', function() {
+        var content = $(this).html();
+        var areaId = $(this).attr('data-id');
+        saveDraft(areaId, content);
+    });
+
+    // Восстановление данных редактируемой области из cookies при загрузке страницы
+    editingAreas.each(function() {
+        var areaId = $(this).attr('data-id');
+        var savedContent = getCookie(areaId);
+        if (savedContent) {
+            $(this).html(savedContent); // Восстановление данных
+        }
+    });
+
     // Отслеживание изменений в input и select элементах формы
-    $('form').find('input, select, radio').on('input change click', function() {
+    $('form').find('input, select').on('input change click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+    $('form').find('textarea').on('input change', function() {
         var inputName = $(this).attr('name');
         var inputValue = $(this).val();
         saveDraft(inputName, inputValue);
@@ -124,6 +149,9 @@ Admin::script("$(document).ready(function() {
 
     // Функция для сохранения данных каждого инпута и селекта в cookies
     function saveDraft(inputName, inputValue) {
+        if(inputName === 'categories[values][]'){
+            return;
+        }
         var existingValue = getCookie(inputName);
         if (existingValue !== inputValue) {
             document.cookie = encodeURIComponent(inputName) + '=' + encodeURIComponent(inputValue);

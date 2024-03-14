@@ -165,7 +165,7 @@ class EventsController extends Controller
             $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
             $form->image('img_payment', 'QR код на оплату')->placeholder('QR');
             $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
-            $form->summernote('info_payment', 'Доп инфа об оплате')->placeholder('Инфа...');
+            $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
         })->tab('Настройка Трасс', function ($form) {
             $routes = Grades::getRoutes();
             Admin::style(".select2-selection__arrow {
