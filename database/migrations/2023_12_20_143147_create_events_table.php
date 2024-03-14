@@ -16,15 +16,15 @@ class CreateEventsTable extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('owner_id');
-            $table->string('address');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->time('start_time');
-            $table->time('end_time');
+            $table->string('address')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->string('document')->nullable();
-            $table->longText('description');
-            $table->text('contact');
-            $table->string('image');
+            $table->longText('description')->nullable();
+            $table->text('contact')->nullable();
+            $table->string('image')->nullable();
             $table->json('grade_and_amount')->nullable();
             $table->string('climbing_gym_name');
             $table->string('climbing_gym_name_eng');

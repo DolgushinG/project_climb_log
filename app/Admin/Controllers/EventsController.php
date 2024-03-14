@@ -131,6 +131,228 @@ class EventsController extends Controller
     {
         $form = new Form(new Event);
         $form->tab('Общая информация о соревновании', function ($form) {
+            Admin::style(".select2-selection__arrow {
+                display: None;
+            }");
+            Admin::script('window.onbeforeunload = function() {
+    return "Вы уверены, что хотите покинуть эту страницу? Ваши данные могут быть потеряны.";
+};');
+            Admin::script("$(document).ready(function() {
+      const submitButton = document.querySelector('.pull-right [type=\"submit\"]');
+      const requiredInputs = document.querySelectorAll('input[required]');
+      const requiredRadio = document.querySelectorAll('radio[required]');
+      if(!submitButton || !requiredInputs || !requiredRadio){
+        return;
+      }
+      if(submitButton){
+         submitButton.disabled = true;
+      }
+      function checkInputs() {
+        let isValid = true;
+        requiredInputs.forEach(input => {
+          if (input.value.trim() === '') {
+            isValid = false;
+          }
+        });
+        requiredRadio.forEach(input => {
+          if (input.value.trim() === '') {
+            isValid = false;
+          }
+        });
+
+        if (isValid) {
+          submitButton.disabled = false;
+        } else {
+          submitButton.disabled = true;
+        }
+      }
+
+      requiredInputs.forEach(input => {
+        input.addEventListener('input', checkInputs);
+        input.addEventListener('click', checkInputs);
+      });
+
+    });");
+            Admin::script("$(document).ready(function() {
+    var editingAreas = $('.note-editable');
+
+    editingAreas.each(function(index) {
+        $(this).attr('data-id', 'editableArea_' + (index + 1));
+    });
+
+    // Отслеживание изменений в тексте каждой редактируемой области
+    editingAreas.on('input', function() {
+        var content = $(this).html();
+        var areaId = $(this).attr('data-id');
+        saveDraft(areaId, content);
+    });
+
+    // Восстановление данных редактируемой области из cookies при загрузке страницы
+    editingAreas.each(function() {
+        var areaId = $(this).attr('data-id');
+        var savedContent = getCookie(areaId);
+        if (savedContent) {
+            $(this).html(savedContent); // Восстановление данных
+        }
+    });
+
+    document.querySelectorAll('#is_qualification_counting_like_final').forEach(input => {
+            input.addEventListener('click', radio_button);
+      });
+      function radio_button() {
+            var inputName = $(this).attr('id');
+            var inputClass = $(this).attr('class');
+            var existingValue = getCookie(inputName);
+            if (existingValue !== inputClass) {
+                saveDraft(inputName, inputClass);
+            }
+        };
+    document.querySelectorAll('#is_semifinal').forEach(input => {
+            input.addEventListener('click', radio_button);
+            });
+    document.querySelectorAll('#is_additional_final').forEach(input => {
+            input.addEventListener('click', radio_button);
+            });
+    document.querySelectorAll('#mode').forEach(input => {
+            input.addEventListener('click', radio_button);
+            });
+     function radio_button() {
+            var inputName = $(this).attr('id');
+            var inputClass = $(this).attr('class');
+            var existingValue = getCookie(inputName);
+            if (existingValue !== inputClass) {
+                saveDraft(inputName, inputClass);
+            }
+        };
+    restoreSwitch('active')
+    restoreSwitch('is_input_birthday')
+    restoreSwitch('is_need_sport_category')
+    function getElementByXpath(path) {
+        return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    }
+    function restoreSwitch(name){
+        var value = getCookie(name);
+        if(value === 'on'){
+            getElementByXpath('//input[contains(@class, \"'+name+'\")]/..//span[contains(@class, \"bootstrap-switch-handle-off bootstrap-switch-default\")]').click()
+        }
+    }
+    restoreRadioButtons('is_semifinal')
+    restoreRadioButtons('is_qualification_counting_like_final')
+    restoreRadioButtons('is_additional_final')
+    restoreRadioButtons('mode')
+    function restoreRadioButtons (name) {
+        var inputClass = getCookie(name)
+        let radio0 = name+'0'
+        let radio1 = name+'1'
+         if(!inputClass){
+            document.querySelector('.'+ radio1).click()
+        } else {
+            if(inputClass == radio1){
+                document.querySelector('.'+ radio1).click()
+            } else {
+                document.querySelector('.'+ radio1).click()
+                document.querySelector('.'+ radio0).click()
+            }
+        }
+    }
+    // Отслеживание изменений в input и select элементах формы
+    $('form').find('input, select').on('input change click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+    $('form').find('textarea').on('input change', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+    $('#start_time').on('click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+    // Отслеживание кликов по input элементам для выбора дат и других выборов
+      $('#start_time').on('click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+    $('#start_date').on('click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+    $('#end_time').on('click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+    $('#end_date').on('click', function() {
+        var inputName = $(this).attr('name');
+        var inputValue = $(this).val();
+        saveDraft(inputName, inputValue);
+    });
+
+    // Функция для сохранения данных каждого инпута и селекта в cookies
+    function saveDraft(inputName, inputValue) {
+        if(inputName === 'categories[values][]'){
+            return;
+        }
+        var existingValue = getCookie(inputName);
+        if (existingValue !== inputValue) {
+            document.cookie = encodeURIComponent(inputName) + '=' + encodeURIComponent(inputValue);
+        }
+    }
+    // Восстановление данных каждого инпута и селекта из cookies при загрузке страницы
+    $('form').find('input:not([type=\"file\"]), input:not([type=\"radio\"]), select, textarea').each(function() {
+        var inputName = $(this).attr('name');
+        if(inputName === 'is_qualification_counting_like_final'){
+            return;
+        }
+        if(inputName === 'is_semifinal'){
+            return;
+        }
+        if(inputName === 'is_additional_final'){
+            return;
+        }
+        if(inputName === 'mode'){
+            return;
+        }
+        var savedValue = getCookie(inputName);
+        if (savedValue) {
+            $(this).val(savedValue); // Восстановление данных
+        }
+    });
+    // Очистка данных черновика при успешной отправке формы
+    $('form').submit(function() {
+        clearDraft();
+    });
+     $('[type=submit]').on('click', function() {
+       clearDraft();
+    });
+    // Функция для очистки данных черновика
+
+    function clearDraft() {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i];
+            var eqPos = cookie.indexOf('=');
+            var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            document.cookie = name.trim() + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
+    }
+    // Вспомогательная функция для получения значения cookie по имени
+    function getCookie(name) {
+        var match = document.cookie.match(new RegExp('(^| )' + encodeURIComponent(name) + '=([^;]+)'));
+        if (match) {
+            return decodeURIComponent(match[2]);
+        }
+        return null;
+    }
+    if(getCookie('title') !== null){
+        document.getElementById('create-events-link').textContent = 'Черновик соревнования'
+    }
+});");
             $form->footer(function ($footer) {
 //                $footer->disableReset();
                 $footer->disableViewCheck();
@@ -168,9 +390,6 @@ class EventsController extends Controller
             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
         })->tab('Настройка Трасс', function ($form) {
             $routes = Grades::getRoutes();
-            Admin::style(".select2-selection__arrow {
-                display: None;
-            }");
             $form->html('<h4>Ценность трассы учитывается только в формате соревнований n лучших трасс, там необходимо искать лучшие трассы по баллам <br>
                                 Для других режимов ценность не учитывается, можно просто игнорировать это поле</h4>');
             $form->tablecustom('grade_and_amount', '', function ($table) {
@@ -198,7 +417,7 @@ class EventsController extends Controller
                         ->options($formats)->when(1, function (Form $form) {
                             $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->value(10);
                         })->when(2, function (Form $form) {
-                        })->value(2)->required();
+                        })->required();
                 })->when(1, function (Form $form) {
                     $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->value(10);
                     $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
