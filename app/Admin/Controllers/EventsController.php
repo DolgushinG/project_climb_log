@@ -374,7 +374,7 @@ class EventsController extends Controller
             $form->date('end_date', 'Дата окончания')->attribute('inputmode', 'none')->placeholder('Дата окончания')->required();
             $form->time('start_time', 'Время старта')->attribute('inputmode', 'none')->placeholder('Время старта')->required();
             $form->time('end_time', 'Время окончания')->attribute('inputmode', 'none')->placeholder('Время окончания')->required();
-            $form->image('image', 'Афиша')->placeholder('Афиша')->required();
+            $form->image('image', 'Афиша')->placeholder('Афиша')->attribute('inputmode', 'none')->required();
             $form->summernote('description', 'Описание')->placeholder('Описание')->required();
             $form->text('contact', 'Контактная информация')->required();
 
@@ -384,7 +384,7 @@ class EventsController extends Controller
 //            $form->disableSubmit();
         })->tab('Оплата', function ($form) {
             $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
-            $form->image('img_payment', 'QR код на оплату')->placeholder('QR');
+            $form->image('img_payment', 'QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
             $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
         })->tab('Настройка Трасс', function ($form) {
