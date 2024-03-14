@@ -251,7 +251,10 @@ class EventsController extends Controller
                 document.querySelector('.'+ radio1).click()
             } else {
                 document.querySelector('.'+ radio1).click()
-                document.querySelector('.'+ radio0).click()
+                let r = document.querySelector('.'+ radio0)
+                if(r){
+                    document.querySelector('.'+ radio0).click()
+                }
             }
         }
     }
