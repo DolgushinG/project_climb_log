@@ -255,9 +255,27 @@ class EventsController extends Controller
             }
         }
     }
+    var addButton = document.querySelector('.categories-add');
+    // Добавляем обработчик события для отслеживания клика
+    addButton.addEventListener('click', function() {
+       $('.list-categories-table').find('input').on('input change', function() {
+       let index = 0
+        document.querySelectorAll('input[name=\"categories[values][]\"]').forEach(input => {
+            var inputName = input.name + index;
+            saveDraft2(inputName,input.value)
+            index = index + 1
+        });
+    });
+    });
+
+
+
     // Отслеживание изменений в input и select элементах формы
     $('form').find('input, select').on('input change click', function() {
         var inputName = $(this).attr('name');
+        if(inputName === 'categories[values][]'){
+            return;
+        }
         var inputValue = $(this).val();
         saveDraft(inputName, inputValue);
     });
@@ -295,12 +313,19 @@ class EventsController extends Controller
 
     // Функция для сохранения данных каждого инпута и селекта в cookies
     function saveDraft(inputName, inputValue) {
-        if(inputName === 'categories[values][]'){
-            return;
-        }
         var existingValue = getCookie(inputName);
         if (existingValue !== inputValue) {
             document.cookie = encodeURIComponent(inputName) + '=' + encodeURIComponent(inputValue);
+        }
+    }
+    function saveDraft2(inputName, inputValue) {
+         var existingValue = getCookie(inputName);
+        if (existingValue !== inputValue) {
+            var expires = '';
+            var date = new Date();
+            date.setTime(date.getTime() + (10 * 24 * 60 * 60 * 1000));
+            expires = '; expires=' + date.toUTCString();
+            document.cookie = inputName.trim() + '=' + inputValue + expires + '; path=/';
         }
     }
     // Восстановление данных каждого инпута и селекта из cookies при загрузке страницы
@@ -318,11 +343,79 @@ class EventsController extends Controller
         if(inputName === 'mode'){
             return;
         }
+         if(inputName === 'categories[values][]'){
+            let table = document.querySelectorAll('.list-categories-table > tr');
+            if(table){
+                table.forEach(input => {
+                        input.remove();
+                    });
+            }
+            readCookie()
+             // Функция для удаления куки по имени
+            var removeButtons = document.querySelectorAll('.categories-remove');
+            removeButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var dataId = button.getAttribute('data-id');
+                    dataId = dataId.trim();
+                    document.cookie = dataId + \"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;\";
+                });
+            });
+            return;
+        }
         var savedValue = getCookie(inputName);
         if (savedValue) {
             $(this).val(savedValue); // Восстановление данных
         }
     });
+
+    function readCookie()
+    {
+       var allcookies = document.cookie;
+
+       // Get all the cookies pairs in an array
+       cookiearray  = allcookies.split(';');
+
+       // Now take key value pair out of this array
+       for(var i=0; i<cookiearray.length; i++){
+          name = cookiearray[i].split('=')[0];
+          value = cookiearray[i].split('=')[1];
+          if(name.startsWith(\"categories\") || name.startsWith(\" categories\")){
+             addRowToTable(name.trim(), value)
+          }
+
+       }
+    }
+
+   function addRowToTable(name, value) {
+        var newRow = document.createElement('tr');
+        var firstTd = document.createElement('td');
+        var formGroupDiv = document.createElement('div');
+        formGroupDiv.className = 'form-group';
+        var colDiv = document.createElement('div');
+        colDiv.className = 'col-sm-12';
+        var inputElement = document.createElement('input');
+        inputElement.setAttribute('name', name);
+        inputElement.setAttribute('value', value);
+        inputElement.className = 'form-control';
+        colDiv.appendChild(inputElement);
+        formGroupDiv.appendChild(colDiv);
+        firstTd.appendChild(formGroupDiv);
+        var secondTd = document.createElement('td');
+        secondTd.setAttribute('style', 'width: 75px;');
+        var removeButtonDiv = document.createElement('div');
+        removeButtonDiv.setAttribute('data-id', name);
+        removeButtonDiv.className = 'categories-remove btn btn-warning btn-sm pull-right';
+        var trashIcon = document.createElement('i');
+        trashIcon.className = 'fa fa-trash';
+        trashIcon.innerHTML = '&nbsp;Удалить';
+        removeButtonDiv.appendChild(trashIcon);
+        secondTd.appendChild(removeButtonDiv);
+        newRow.appendChild(firstTd);
+        newRow.appendChild(secondTd);
+        var tableBody = document.querySelector('.list-categories-table');
+        tableBody.appendChild(newRow);
+   }
+
     // Очистка данных черновика при успешной отправке формы
     $('form').submit(function() {
         clearDraft();
@@ -349,6 +442,9 @@ class EventsController extends Controller
         }
         return null;
     }
+    const getCookieValue = (name) => (
+        document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
+    )
     if(getCookie('title') !== null){
         document.getElementById('create-events-link').textContent = 'Черновик соревнования'
     }
