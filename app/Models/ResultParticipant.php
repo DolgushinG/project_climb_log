@@ -8,14 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class ResultParticipant extends Model
 {
     const FLASH = 1;
+
+    const STATUS_PASSED_FLASH = "1";
+    const STATUS_PASSED_REDPOINT = "2";
+    const STATUS_NOT_PASSED = "0";
+
     const REDPOINT = 0.9;
     const FAIL = 0;
     const FLASH_VALUE = 10;
     const REDPOINT_VALUE = 0;
 
-    const POINT_VALUES = array(0 => self::FAIL, 1 => self::FLASH_VALUE, 2 => self::REDPOINT_VALUE);
+    const POINT_VALUES = array(self::STATUS_NOT_PASSED => self::FAIL, self::STATUS_PASSED_FLASH => self::FLASH_VALUE, self::STATUS_PASSED_REDPOINT => self::REDPOINT_VALUE);
 
-    var $values = array(0 => self::FAIL, 1 => self::FLASH, 2 => self::REDPOINT);
+    var $values = array(self::STATUS_NOT_PASSED => self::FAIL, self::STATUS_PASSED_FLASH => self::FLASH, self::STATUS_PASSED_REDPOINT => self::REDPOINT);
 
 
     protected $table = 'result_participant';
@@ -44,7 +49,7 @@ class ResultParticipant extends Model
         if ($count_route_passed == 0) {
             $count_route_passed = 1;
         }
-        return sqrt($active_participant / $count_route_passed);
+        return sqrt($count_route_passed / $active_participant );
     }
     public function get_value_route($attempt, $value_category, $format, $custom_value=null) {
         switch ($format) {

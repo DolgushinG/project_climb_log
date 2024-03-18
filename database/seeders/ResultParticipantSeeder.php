@@ -27,7 +27,6 @@ class ResultParticipantSeeder extends Seeder
                 $info_routes = Grades::where('event_id', $event_id)->get();
                 $gender = User::find($user_id)->gender;
                 $route_id = 1;
-
                 foreach ($info_routes as $route){
                     for($i = 1; $i <= $route->amount;$i++){
                         (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route_id, $owner_id, $gender);
@@ -40,8 +39,8 @@ class ResultParticipantSeeder extends Seeder
         }
         for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
             prepare_result_participant($i, $i);
-            UpdateResultParticipants::dispatch($i);
         }
+        Event::refresh_final_points_all_participant($i);
 
     }
 }

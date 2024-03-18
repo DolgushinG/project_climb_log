@@ -171,27 +171,27 @@ class EventsController extends Controller
 
     });");
             Admin::script("$(document).ready(function() {
-    var editingAreas = $('.note-editable');
-
-    editingAreas.each(function(index) {
-        $(this).attr('data-id', 'editableArea_' + (index + 1));
-    });
-
-    // Отслеживание изменений в тексте каждой редактируемой области
-    editingAreas.on('input', function() {
-        var content = $(this).html();
-        var areaId = $(this).attr('data-id');
-        saveDraft(areaId, content);
-    });
-
-    // Восстановление данных редактируемой области из cookies при загрузке страницы
-    editingAreas.each(function() {
-        var areaId = $(this).attr('data-id');
-        var savedContent = getCookie(areaId);
-        if (savedContent) {
-            $(this).html(savedContent); // Восстановление данных
-        }
-    });
+//    var editingAreas = $('.note-editable');
+//
+//    editingAreas.each(function(index) {
+//        $(this).attr('data-id', 'editableArea_' + (index + 1));
+//    });
+//
+//    // Отслеживание изменений в тексте каждой редактируемой области
+//    editingAreas.on('input', function() {
+//        var content = $(this).html();
+//        var areaId = $(this).attr('data-id');
+//        saveDraft(areaId, content);
+//    });
+//
+//    // Восстановление данных редактируемой области из cookies при загрузке страницы
+//    editingAreas.each(function() {
+//        var areaId = $(this).attr('data-id');
+//        var savedContent = getCookie(areaId);
+//        if (savedContent) {
+//            $(this).html(savedContent); // Восстановление данных
+//        }
+//    });
 
     document.querySelectorAll('#is_qualification_counting_like_final').forEach(input => {
             input.addEventListener('click', radio_button);

@@ -222,7 +222,7 @@ class EventsController extends Controller
             $participant->active = 1;
             $participant->save();
         }
-
+//        dd($points);
         foreach ($final_data as $index => $data){
             $final_data[$index] = collect($data)->except('points')->toArray();
         }
@@ -239,8 +239,8 @@ class EventsController extends Controller
         foreach ($participants as $participant) {
             Event::update_participant_place($request->event_id, $participant->id, $participant->gender);
         }
-
-        UpdateResultParticipants::dispatch($request->event_id);
+        Event::refresh_final_points_all_participant($request->event_id);
+//        UpdateResultParticipants::dispatch($request->event_id);
         if ($result) {
             $event = Event::find($request->event_id);
             return response()->json(['success' => true, 'message' => 'Успешная внесение результатов', 'link' => $event->link], 201);
