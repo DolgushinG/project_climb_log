@@ -13,6 +13,9 @@ class Event extends Model
 {
     use HasFactory;
 
+    const DEFAULT_SEMIFINAL_PARTICIPANT = 10;
+    const DEFAULT_FINAL_PARTICIPANT = 6;
+
     protected $casts = [
         'grade_and_amount' =>'json',
         'transfer_to_next_category' =>'json',
@@ -106,21 +109,23 @@ class Event extends Model
             return str_replace($lat, $cyr, $text);
         }
     }
-    public static function get_result_format_all_route($event_id, $participant){
-        $routes_id_passed_with_red_point = ResultParticipant::where('event_id', $event_id)->where('user_id', $participant->id)->where('attempt', ResultParticipant::STATUS_PASSED_REDPOINT)->pluck('route_id');
+    public static function get_result_format_all_route($event, $participant){
+        $custom_red_point = $event->amount_point_redpoint ?? ResultParticipant::REDPOINT;
+        $custom_flash = $event->amount_point_flash ?? ResultParticipant::FLASH;
+        $routes_id_passed_with_red_point = ResultParticipant::where('event_id', $event->id)->where('user_id', $participant->id)->where('attempt', ResultParticipant::STATUS_PASSED_REDPOINT)->pluck('route_id');
         $counting_routes_with_red_point_passed = count($routes_id_passed_with_red_point);
-        $routes_id_passed_with_flash = ResultParticipant::where('event_id', $event_id)->where('user_id', $participant->id)->where('attempt', ResultParticipant::STATUS_PASSED_FLASH)->pluck('route_id');
+        $routes_id_passed_with_flash = ResultParticipant::where('event_id', $event->id)->where('user_id', $participant->id)->where('attempt', ResultParticipant::STATUS_PASSED_FLASH)->pluck('route_id');
         $counting_routes_with_flash_passed = count($routes_id_passed_with_flash);
         if($routes_id_passed_with_red_point->isNotEmpty()){
-            $sum_all_coefficients_rp = EventAndCoefficientRoute::where('event_id', '=', $event_id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_'.$participant->gender);
-            $result_red_point = $counting_routes_with_red_point_passed * ResultParticipant::REDPOINT;
+            $sum_all_coefficients_rp = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_'.$participant->gender);
+            $result_red_point = $counting_routes_with_red_point_passed * $custom_red_point;
             $finish_red_point_result = ($sum_all_coefficients_rp * $result_red_point)/$counting_routes_with_red_point_passed;
         } else {
             $finish_red_point_result = 0;
         }
         if($routes_id_passed_with_flash->isNotEmpty()){
-            $sum_all_coefficients_flash = EventAndCoefficientRoute::where('event_id', '=', $event_id)->whereIn('route_id', $routes_id_passed_with_flash)->get()->sum('coefficient_'.$participant->gender);
-            $result_flash = $counting_routes_with_flash_passed * ResultParticipant::FLASH;
+            $sum_all_coefficients_flash = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_flash)->get()->sum('coefficient_'.$participant->gender);
+            $result_flash = $counting_routes_with_flash_passed * $custom_flash;
             $finish_flash_result = ($sum_all_coefficients_flash * $result_flash)/$counting_routes_with_flash_passed;
         } else {
             $finish_flash_result = 0;
@@ -158,7 +163,6 @@ class Event extends Model
     }
 
     public static function refresh_final_points_all_participant($event_id) {
-//        $routes = ResultParticipant::where('event_id', $event_id)->select('route_id')->distinct()->get()->toArray();
         $event = Event::find($event_id);
         $format = $event->mode;
         $participants = User::query()
@@ -170,81 +174,44 @@ class Event extends Model
                 'users.gender',
             )->get();
         foreach ($participants as $participant) {
-//
-//            dd($points);
-//            $routes_only_passed = array();
-//            foreach ($routes as $route) {
-//                $user_model = ResultParticipant::where('event_id', '=', $event_id)
-//                    ->where('user_id', '=', $participant->id)
-//                    ->where('route_id', '=', $route['route_id'])
-//                    ->first();
-//                if($user_model->attempt != 0) {
-//                    $value_category = Grades::where('grade','=', $user_model->grade)->where('owner_id','=', $event->owner_id)->first()->value;
-////                    (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event->id, $route['route_id'], $event->owner_id, $participant->gender);
-//                    $coefficient = EventAndCoefficientRoute::where('event_id', '=', $event_id)
-//                        ->where('route_id', '=', $route['route_id'])->first()->toArray();
-//                    $value_route = (new \App\Models\ResultParticipant)->get_value_route($user_model->attempt, $value_category, $event->mode);
-//                    $points += $coefficient['coefficient_'.$participant->gender] * $value_route;
-//                    $point_route = $coefficient['coefficient_'.$participant->gender] * $value_route;
-//                    $user_model->points = $point_route;
-//                    $routes_only_passed[] = $user_model;
-//                }
-//            }
             if($format == 1){
                 $points = self::get_result_format_n_route($event, $participant);
-//                $points = 0;
-//                usort($routes_only_passed, function($a, $b) {
-//                    return $a['points'] <=> $b['points'];
-//                });
-//                $amount = $event->mode_amount_routes;
-//                $lastElems = array_slice($routes_only_passed, -$amount, $amount);
-////                dd($lastElems);
-//                foreach ($lastElems as $lastElem) {
-//                    $points += $lastElem->points;
-//                }
             }
             if($format == 2){
-                $points = self::get_result_format_all_route($event_id, $participant);
+                $points = self::get_result_format_all_route($event, $participant);
             }
-
             $final_participant_result = Participant::where('user_id', '=', $participant->id)->where('event_id', '=', $event_id)->first();
             $final_participant_result->points = $points;
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $participant->id;
             $final_participant_result->save();
-
             $place = Participant::get_places_participant_in_qualification($event_id, $participant->id, $participant->gender, $participant->category_id,true);
             $participant_result = Participant::where('user_id', '=', $participant->id)->where('event_id', '=', $event_id)->first();
             $participant_result->user_place = $place;
             $participant_result->save();
         }
-        $update = UpdateParticipantResult::where('event_id', '=', $event_id)->first();
-        if(!$update){
-            $update = new UpdateParticipantResult;
-        }
-        $amount_participant = Participant::where('event_id', '=', 1)->select('user_id')->get()->count();
-        $update->amount_participant = $amount_participant;
-        $update->event_id = $event_id;
-        $update->save();
     }
     public static function refresh_final_points_all_participant_in_semifinal($event_id, $owner_id) {
         $event = Event::find($event_id);
-        $result_female = Participant::better_participants($event_id, 'female', 10);
-        $result_male = Participant::better_participants($event_id, 'male', 10);
+        $amount_routes_in_semifinal = $event->amount_routes_in_semifinal ?? self::DEFAULT_SEMIFINAL_PARTICIPANT;
+        $result_female = Participant::better_participants($event_id, 'female', $amount_routes_in_semifinal);
+        $result_male = Participant::better_participants($event_id, 'male', $amount_routes_in_semifinal);
         $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
         ResultRouteSemiFinalStageController::getUsersSorted($result_female, $fields, $event, 'semifinal', $owner_id);
         ResultRouteSemiFinalStageController::getUsersSorted($result_male, $fields, $event, 'semifinal', $owner_id);
     }
     public static function refresh_final_points_all_participant_in_final($event_id, $owner_id){
-        $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
         $event = Event::find($event_id);
+        $amount_routes_in_final = $event->amount_routes_in_final ?? self::DEFAULT_FINAL_PARTICIPANT;
+        $amount_routes_in_semifinal = $event->amount_routes_in_semifinal ?? self::DEFAULT_SEMIFINAL_PARTICIPANT;
+        $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
         if($event->is_additional_final){
             # Если выбран режим что финал для всех то отдаем лучшех 6 участников каждый категории
             $all_group_participants = array();
             foreach ($event->categories as $category){
                 $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-                $all_group_participants['male'][$category] = Participant::better_participants($event->id, 'male', 6, $category_id);
-                $all_group_participants['female'][$category] = Participant::better_participants($event->id, 'female', 6, $category_id);
+                $all_group_participants['male'][$category] = Participant::better_participants($event->id, 'male', $amount_routes_in_final, $category_id);
+                $all_group_participants['female'][$category] = Participant::better_participants($event->id, 'female', $amount_routes_in_final, $category_id);
             }
             foreach ($all_group_participants as $group_participants){
                 foreach ($group_participants as $participants){
@@ -253,11 +220,11 @@ class Event extends Model
             }
         } else {
             if($event->is_semifinal){
-                $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', 6);
-                $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', 6);
+                $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', $amount_routes_in_semifinal);
+                $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', $amount_routes_in_semifinal);
             } else {
-                $users_female = Participant::better_participants($event_id, 'female', 6);
-                $users_male = Participant::better_participants($event_id, 'male', 6);
+                $users_female = Participant::better_participants($event_id, 'female', $amount_routes_in_semifinal);
+                $users_male = Participant::better_participants($event_id, 'male', $amount_routes_in_semifinal);
             }
             ResultRouteSemiFinalStageController::getUsersSorted($users_female, $fields, $event, 'final', $owner_id);
             ResultRouteSemiFinalStageController::getUsersSorted($users_male, $fields, $event, 'final', $owner_id);
