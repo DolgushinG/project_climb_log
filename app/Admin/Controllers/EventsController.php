@@ -272,21 +272,40 @@ class EventsController extends Controller
        $('.list-categories-table').find('input').on('input change', function() {
        let index = 0
         getElementsByXPath('//input[contains(@name, \"categories[values][]\")]').forEach(input => {
-            var inputName = input.name + index;
-            saveDraft2(inputName,input.value)
+            var existingValue = getCookieValue(input.name);
+            if (existingValue !== input.name) {
+                var inputName = input.name + index;
+                saveDraft2(inputName,input.value)
+            }
             index = index + 1
         });
     });
     });
+    function getCookieValue(name) {
+        var allcookies = document.cookie;
 
+       // Get all the cookies pairs in an array
+       cookiearray  = allcookies.split(';');
+
+       // Now take key value pair out of this array
+       for(var i=0; i<cookiearray.length; i++){
+          let get_name = cookiearray[i].split('=')[0];
+          let get_value = cookiearray[i].split('=')[1];
+          if(get_name.startsWith(\"categories[values][]\") || get_name.startsWith(\" categories[values][]\")){
+            if(name == get_name.trim()){
+                return get_name.trim()
+            }
+          }
+       }
+    }
 
 
     // Отслеживание изменений в input и select элементах формы
     $('form').find('input, select').on('input change click', function() {
         var inputName = $(this).attr('name');
-        if(inputName === 'categories[values][]'){
-            return;
-        }
+        if(name.startsWith(\"categories\") || name.startsWith(\" categories\")){
+             return
+          }
         var inputValue = $(this).val();
         saveDraft(inputName, inputValue);
     });
@@ -453,9 +472,7 @@ class EventsController extends Controller
         }
         return null;
     }
-    const getCookieValue = (name) => (
-        document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
-    )
+
     if(getCookie('title') !== null){
         document.getElementById('create-events-link').textContent = 'Черновик соревнования'
     }
