@@ -29,6 +29,7 @@ use Encore\Admin\Grid;
 Encore\Admin\Form::forget(['map', 'editor']);
 Admin::css('https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css');
 Admin::js('https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js');
+Admin::js('js/pages/js.cookie.js');
 Grid::init(function (Grid $grid) {
     $grid->actions(function (Grid\Displayers\Actions $actions) {
         $actions->disableView();

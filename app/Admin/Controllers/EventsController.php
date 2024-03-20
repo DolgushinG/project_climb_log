@@ -170,7 +170,11 @@ class EventsController extends Controller
       });
 
     });");
-            Admin::script("$(document).ready(function() {
+
+//            Admin::html('<script type="module" src="node_modules/js-cookie"></script>');
+            Admin::script(
+                "
+                $(document).ready(function() {
 //    var editingAreas = $('.note-editable');
 //
 //    editingAreas.each(function(index) {
@@ -201,7 +205,8 @@ class EventsController extends Controller
             var inputClass = $(this).attr('class');
             var existingValue = getCookie(inputName);
             if (existingValue !== inputClass) {
-                saveDraft(inputName, inputClass);
+                Cookies.set(inputName, inputClass, { expires: 7 })
+//                saveDraft(inputName, inputClass);
             }
         };
     document.querySelectorAll('#is_semifinal').forEach(input => {
@@ -218,7 +223,8 @@ class EventsController extends Controller
             var inputClass = $(this).attr('class');
             var existingValue = getCookie(inputName);
             if (existingValue !== inputClass) {
-                saveDraft(inputName, inputClass);
+                Cookies.set(inputName, inputClass, { expires: 7 })
+//                saveDraft(inputName, inputClass);
             }
         };
     restoreSwitch('active')
@@ -275,7 +281,8 @@ class EventsController extends Controller
             var existingValue = getCookieValue(input.name);
             if (existingValue !== input.name) {
                 var inputName = input.name + index;
-                saveDraft2(inputName,input.value)
+                Cookies.set(inputName, input.value, { expires: 7 })
+//                saveDraft2(inputName,input.value)
             }
             index = index + 1
         });
@@ -307,38 +314,45 @@ class EventsController extends Controller
              return
           }
         var inputValue = $(this).val();
-        saveDraft(inputName, inputValue);
+        Cookies.set(inputName, inputValue, { expires: 7 })
+//        saveDraft(inputName, inputValue);
     });
     $('form').find('textarea').on('input change', function() {
         var inputName = $(this).attr('name');
         var inputValue = $(this).val();
-        saveDraft(inputName, inputValue);
+//        saveDraft(inputName, inputValue);
+        Cookies.set(inputName, inputValue, { expires: 7 })
     });
     $('#start_time').on('click', function() {
         var inputName = $(this).attr('name');
         var inputValue = $(this).val();
-        saveDraft(inputName, inputValue);
+//        saveDraft(inputName, inputValue);
+        Cookies.set(inputName, inputValue, { expires: 7 })
     });
     // Отслеживание кликов по input элементам для выбора дат и других выборов
       $('#start_time').on('click', function() {
         var inputName = $(this).attr('name');
         var inputValue = $(this).val();
-        saveDraft(inputName, inputValue);
+//        saveDraft(inputName, inputValue);
+        Cookies.set(inputName, inputValue, { expires: 7 })
     });
     $('#start_date').on('click', function() {
         var inputName = $(this).attr('name');
         var inputValue = $(this).val();
-        saveDraft(inputName, inputValue);
+//        saveDraft(inputName, inputValue);
+        Cookies.set(inputName, inputValue, { expires: 7 })
     });
     $('#end_time').on('click', function() {
         var inputName = $(this).attr('name');
         var inputValue = $(this).val();
-        saveDraft(inputName, inputValue);
+//        saveDraft(inputName, inputValue);
+    Cookies.set(inputName, inputValue, { expires: 7 })
     });
     $('#end_date').on('click', function() {
         var inputName = $(this).attr('name');
         var inputValue = $(this).val();
-        saveDraft(inputName, inputValue);
+//        saveDraft(inputName, inputValue);
+        Cookies.set(inputName, inputValue, { expires: 7 })
     });
 
     // Функция для сохранения данных каждого инпута и селекта в cookies
@@ -381,32 +395,40 @@ class EventsController extends Controller
         if(inputName === 'mode'){
             return;
         }
-         if(inputName === 'categories[values][]'){
+        if(inputName === 'categories[values][]'){
             let table = document.querySelectorAll('.list-categories-table > tr');
             if(table){
                 table.forEach(input => {
                         input.remove();
                     });
             }
-            readCookie()
+
+            for(let i = 0; i <= 10; i++){
+                if(Cookies.get(inputName+i) !== undefined){
+                    let input_n = Cookies.get(inputName+i)
+                    addRowToTable(inputName+i, input_n)
+                }
+            }
+//            readCookie()
              // Функция для удаления куки по имени
             var removeButtons = document.querySelectorAll('.categories-remove');
             removeButtons.forEach(function(button) {
                 button.addEventListener('click', function() {
                     var dataId = button.getAttribute('data-id');
                     dataId = dataId.trim();
-                    var isSafari = window.safari !== undefined;
-                    if(isSafari){
-                        document.cookie = encodeURIComponent(dataId) + \"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;\";
-                    } else {
-                        document.cookie = dataId + \"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;\";
-                    }
+                    Cookies.remove(dataId)
+//                    var isSafari = window.safari !== undefined;
+//                    if(isSafari){
+//                        document.cookie = encodeURIComponent(dataId) + \"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;\";
+//                    } else {
+//                        document.cookie = dataId + \"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;\";
+//                    }
 
                 });
             });
             return;
         }
-        var savedValue = getCookie(inputName);
+        var savedValue = Cookies.get(inputName);
         if (savedValue) {
             $(this).val(savedValue); // Восстановление данных
         }
