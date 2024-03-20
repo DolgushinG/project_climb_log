@@ -291,7 +291,7 @@ class EventsController extends Controller
        for(var i=0; i<cookiearray.length; i++){
           let get_name = cookiearray[i].split('=')[0];
           let get_value = cookiearray[i].split('=')[1];
-          if(get_name.startsWith(\"categories[values][]\") || get_name.startsWith(\" categories[values][]\")){
+          if(get_name.startsWith(\"categories\") || get_name.startsWith(\" categories\")){
             if(name == get_name.trim()){
                 return get_name.trim()
             }
@@ -349,13 +349,21 @@ class EventsController extends Controller
         }
     }
     function saveDraft2(inputName, inputValue) {
-         var existingValue = getCookie(inputName);
+        var existingValue = getCookie(inputName);
         if (existingValue !== inputValue) {
-            var expires = '';
-            var date = new Date();
-            date.setTime(date.getTime() + (1 * 24 * 60 * 60 * 1000));
-            expires = '; expires=' + date.toUTCString();
-            document.cookie = inputName.trim() + '=' + inputValue + expires + '; path=/;Secure';
+            var isSafari = window.safari !== undefined;
+            if(isSafari){
+                var year = 1000 * 60 * 60 * 2;
+                var expires = new Date((new Date()).valueOf() + year);
+                document.cookie = encodeURIComponent(inputName.trim()) + '=' + encodeURIComponent(inputValue) + ';expires=' + expires.toUTCString() + '; path=/; SameSite=Lax';
+            } else {
+                var expires = '';
+                var date = new Date();
+                date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+                expires = '; expires=' + date.toUTCString();
+                document.cookie = inputName.trim() + '=' + inputValue + expires + '; path=/;Secure';
+            }
+
         }
     }
     // Восстановление данных каждого инпута и селекта из cookies при загрузке страницы
@@ -387,7 +395,13 @@ class EventsController extends Controller
                 button.addEventListener('click', function() {
                     var dataId = button.getAttribute('data-id');
                     dataId = dataId.trim();
-                    document.cookie = dataId + \"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;\";
+                    var isSafari = window.safari !== undefined;
+                    if(isSafari){
+                        document.cookie = encodeURIComponent(dataId) + \"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;\";
+                    } else {
+                        document.cookie = dataId + \"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;\";
+                    }
+
                 });
             });
             return;
@@ -410,7 +424,13 @@ class EventsController extends Controller
           name = cookiearray[i].split('=')[0];
           value = cookiearray[i].split('=')[1];
           if(name.startsWith(\"categories\") || name.startsWith(\" categories\")){
-             addRowToTable(name.trim(), value)
+             var isSafari = window.safari !== undefined;
+             if(isSafari){
+                var name1 = decodeURIComponent(name);
+                addRowToTable(name1, value)
+             } else {
+                addRowToTable(name.trim(), value)
+             }
           }
 
        }
