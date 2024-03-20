@@ -355,7 +355,7 @@ class EventsController extends Controller
             var date = new Date();
             date.setTime(date.getTime() + (1 * 24 * 60 * 60 * 1000));
             expires = '; expires=' + date.toUTCString();
-            document.cookie = inputName.trim() + '=' + inputValue + expires + '; path=/';Secure;
+            document.cookie = inputName.trim() + '=' + inputValue + expires + '; path=/;Secure';
         }
     }
     // Восстановление данных каждого инпута и селекта из cookies при загрузке страницы
