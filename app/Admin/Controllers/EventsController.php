@@ -227,6 +227,7 @@ class EventsController extends Controller
     function getElementByXpath(path) {
         return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
     }
+
     function restoreSwitch(name){
         var value = getCookie(name);
         if(value === 'on'){
@@ -255,12 +256,22 @@ class EventsController extends Controller
             }
         }
     }
+    function getElementsByXPath(xpath) {
+      let results = [];
+      let query = document.evaluate(xpath, document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+
+      for (let i = 0; i < query.snapshotLength; i++) {
+        results.push(query.snapshotItem(i));
+      }
+
+        return results;
+    }
     var addButton = document.querySelector('.categories-add');
     // Добавляем обработчик события для отслеживания клика
     addButton.addEventListener('click', function() {
        $('.list-categories-table').find('input').on('input change', function() {
        let index = 0
-        document.querySelectorAll('input[name=\"categories[values][]\"]').forEach(input => {
+        getElementsByXPath('//input[contains(@name, \"categories[values][]\")]').forEach(input => {
             var inputName = input.name + index;
             saveDraft2(inputName,input.value)
             index = index + 1
