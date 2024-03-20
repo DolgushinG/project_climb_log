@@ -353,9 +353,9 @@ class EventsController extends Controller
         if (existingValue !== inputValue) {
             var expires = '';
             var date = new Date();
-            date.setTime(date.getTime() + (10 * 24 * 60 * 60 * 1000));
+            date.setTime(date.getTime() + (1 * 24 * 60 * 60 * 1000));
             expires = '; expires=' + date.toUTCString();
-            document.cookie = inputName.trim() + '=' + inputValue + expires + '; path=/';
+            document.cookie = inputName.trim() + '=' + inputValue + expires + '; path=/';Secure;
         }
     }
     // Восстановление данных каждого инпута и селекта из cookies при загрузке страницы
