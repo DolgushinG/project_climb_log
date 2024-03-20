@@ -95,7 +95,6 @@ class User extends Authenticatable
     {
         return $this->hasOne(Participant::class);
     }
-
     public static function category($category_id)
     {   if($category_id){
             return ParticipantCategory::findOrFail($category_id)->category;

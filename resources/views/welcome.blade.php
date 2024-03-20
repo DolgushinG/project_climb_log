@@ -15,6 +15,29 @@
                                     <a href="{{route('login')}}" class="btn btn-dark rounded-pill">Войти для участия</a>
                                 @endguest
                                 @auth
+
+                                    <div class="form-floating mb-3">
+                                        <select class="form-select" id="floatingSelectChangeSet"
+                                                aria-label="Floating label select example" required>
+                                            @foreach($sets as $set)
+                                                @if($set->number_set == \App\Models\Participant::number_set(Auth()->user()->id, $event->id))
+                                                    <option selected value="{{\App\Models\Participant::number_set(Auth()->user()->id, $event->id)}}">Сет {{\App\Models\Participant::number_set(Auth()->user()->id, $event->id)}} (@lang('somewords.'.$set->day_of_week)) {{$set->time}} (еще
+                                                        мест {{$set->free}})</option>
+                                                @else
+                                                    @if($set->free != 0)
+                                                        <option value="{{$set->number_set}}">Сет {{$set->number_set}}
+                                                            (@lang('somewords.'.$set->day_of_week)) {{$set->time}} (еще
+                                                            мест {{$set->free}})
+                                                        </option>
+                                                    @endif
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                        <label for="floatingSelectChangeSet">Выбрать время для сета</label>
+                                    </div>
+                                    <button id="btn-participant-change-set" data-id="{{$event->id}}"
+                                            data-title="{{$event->title_eng}}" data-user-id="{{Auth()->user()->id}}"
+                                            class="btn btn-dark rounded-pill">Изменить сет</button>
                                     @if(\App\Models\User::user_participant($event->id))
                                         <button href="{{route('takePart')}}" disabled
                                                 class="btn border-t-neutral-500 rounded-pill">Вы принимаете участие
@@ -29,6 +52,7 @@
                                                    class="btn btn-success rounded-pill">Внести результаты</a>
                                             @endif
                                         @endif
+
                                     @else
 
                                         @if($event->is_input_birthday)

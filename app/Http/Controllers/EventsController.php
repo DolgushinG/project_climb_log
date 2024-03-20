@@ -160,6 +160,17 @@ class EventsController extends Controller
         }
     }
 
+    public function changeSet(Request $request) {
+        $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        $participant->number_set = $request->number_set;
+        $participant->save();
+        if ($participant->save()) {
+            return response()->json(['success' => true, 'message' => 'Успешно сохранено']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+        }
+    }
+
     public function sendResultParticipant(Request $request) {
         $user_id = $request->user_id;
         $participant_active = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();

@@ -166,6 +166,10 @@ class Participant extends Model
         return $this->belongsTo(User::class);
     }
 
+    public static function number_set($user_id, $event_id){
+        return Participant::where('user_id', $user_id)->where('event_id', $event_id)->first()->number_set;
+    }
+
     public function event()
     {
         return $this->belongsTo(Event::class)->where('active', '=', 1);
