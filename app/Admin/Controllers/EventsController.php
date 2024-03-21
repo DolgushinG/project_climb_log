@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\CustomAction\ActionExport;
+use App\Admin\CustomAction\ActionExportCardParticipant;
 use App\Admin\Extensions\CustomButton;
 use App\Exports\AllResultExport;
 use App\Models\Event;
@@ -105,6 +106,7 @@ class EventsController extends Controller
         $grid->actions(function ($actions) {
             $actions->disableView();
             $actions->append(new ActionExport($actions->getKey(), 'all', 'excel'));
+            $actions->append(new ActionExportCardParticipant($actions->getKey(), 'Карточка участника'));
 //            $actions->append(new ActionExport($actions->getKey(), 'all', 'csv'));
 //            $actions->append(new ActionExport($actions->getKey(), 'all', 'ods'));
         });

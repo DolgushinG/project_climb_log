@@ -6,6 +6,7 @@ use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportResultQualificationLikeFinal;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchResultQualificationLikeFinal;
+use App\Exports\ExportCardParticipant;
 use App\Exports\QualificationLikeFinalResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
@@ -269,6 +270,14 @@ class ParticipantsController extends Controller
     {
         $file_name = 'Результаты квалификации.xlsx';
         $result = Excel::download(new QualificationLikeFinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
+    }
+    public function cardParticipantExcel(Request $request)
+    {
+        $file_name = 'Карточка участника с трассами.xlsx';
+        $result = Excel::download(new ExportCardParticipant($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);
