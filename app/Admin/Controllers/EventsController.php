@@ -502,10 +502,8 @@ class EventsController extends Controller
     function clearDraft() {
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i];
-            var eqPos = cookie.indexOf('=');
-            var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-            document.cookie = name.trim() + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            let get_name = cookies[i].split('=')[0];
+             Cookies.remove(get_name.trim())
         }
     }
     // Вспомогательная функция для получения значения cookie по имени
@@ -554,6 +552,7 @@ class EventsController extends Controller
             $routes = Grades::getRoutes();
             $form->html('<h4>Ценность трассы учитывается только в формате соревнований n лучших трасс, там необходимо искать лучшие трассы по баллам <br>
                                 Для других режимов ценность не учитывается, можно просто игнорировать это поле</h4>');
+            $form->hidden('count_routes', '');
             $form->tablecustom('grade_and_amount', '', function ($table) {
                 $grades = $this->getGrades();
                 $table->select('Категория')->options($grades)->readonly();
@@ -637,13 +636,6 @@ class EventsController extends Controller
                     }
                 }
                 $form->count_routes = $main_count;
-                $count = 0;
-                foreach ($form->grade_and_amount as $value){
-                    $count += intval($value["Кол-во"]);
-                }
-                if (intval($form->count_routes) != $count) {
-                    throw new \Exception('Кол-во трасс '.$form->count_routes. ' Категория и Кол-во '.$count.' должны быть одинаковыми');
-                }
             }
             if($form->climbing_gym_name){
                 $climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
@@ -672,6 +664,7 @@ class EventsController extends Controller
                     if ($form->grade_and_amount){
                         Event::generation_route(Admin::user()->id, $form->model()->id, $form->grade_and_amount);
                     }
+
                 }
                 $exist_sets = Set::where('owner_id', '=', Admin::user()->id)->first();
                 if(!$exist_sets) {

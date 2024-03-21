@@ -15,6 +15,24 @@ class ExportHelpers
         }
         return $title_array;
     }
+
+    public static function prepare($start_cell, $count_routes, $max_part)
+    {
+        $part = 1;
+        $left_routes = 10;
+        $all_route = $count_routes;
+        $title_array = [];
+        while($part <= $max_part){
+            if($all_route < 10){
+                $left_routes = $all_route;
+            }
+            $title_array[] = self::generate_excel_title_array($left_routes * 2, $start_cell);
+            $part++;
+            $start_cell=$start_cell+3;
+            $all_route = $all_route - $left_routes;
+        }
+        return $title_array;
+    }
     public static function merge_arrays($arr) {
         $merged = [];
 
