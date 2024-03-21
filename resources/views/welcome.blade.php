@@ -20,8 +20,8 @@
                                         <select class="form-select" id="floatingSelectChangeSet"
                                                 aria-label="Floating label select example" required>
                                             @foreach($sets as $set)
-                                                @if($set->number_set == \App\Models\Participant::number_set(Auth()->user()->id, $event->id))
-                                                    <option selected value="{{\App\Models\Participant::number_set(Auth()->user()->id, $event->id)}}">Сет {{\App\Models\Participant::number_set(Auth()->user()->id, $event->id)}} (@lang('somewords.'.$set->day_of_week)) {{$set->time}} (еще
+                                                @if($set->number_set == \App\Models\Participant::participant_number_set(Auth()->user()->id, $event->id))
+                                                    <option selected value="{{\App\Models\Participant::participant_number_set(Auth()->user()->id, $event->id)}}">Сет {{\App\Models\Participant::participant_number_set(Auth()->user()->id, $event->id)}} (@lang('somewords.'.$set->day_of_week)) {{$set->time}} (еще
                                                         мест {{$set->free}})</option>
                                                 @else
                                                     @if($set->free != 0)
