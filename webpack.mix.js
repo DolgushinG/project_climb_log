@@ -23,3 +23,5 @@ mix.js('resources/js/main.js', 'public/js').postCss('resources/css/style.css', '
 mix.js('resources/js/welcome.js', 'public/js')
 mix.js('resources/js/profile.js', 'public/js')
 mix.js('resources/js/ddata.js', 'public/js')
+mix.js('resources/js/datepicker.js', 'public/js')
+

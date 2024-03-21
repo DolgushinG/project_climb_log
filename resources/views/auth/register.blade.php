@@ -2,6 +2,11 @@
 @section('content')
     <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js"></script>
+    <!--добавил библиотеки jQuery UI -->
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     @guest
         <section class="d-flex align-items-center">
             <div class="container" data-aos="zoom-out" data-aos-delay="100">
@@ -34,13 +39,13 @@
                                             <!-- Name -->
                                             <div class="col-12">
                                                 <label for="firstname" class="form-label">Ваше Имя</label>
-                                                <input type="text" name="firstname" class="form-control" id="firstname"
+                                                <input type="text" name="firstname" placeholder="Имя" class="form-control" id="firstname"
                                                        value="{{old('firstname')}}" required autofocus>
                                                 <div class="invalid-feedback">Пожалуйста введите ваше имя</div>
                                             </div>
                                             <div class="col-12">
                                                 <label for="lastname" class="form-label">Ваша Фамилия</label>
-                                                <input type="text" name="lastname" class="form-control" id="lastname"
+                                                <input type="text" name="lastname" placeholder="Фамилия" class="form-control" id="lastname"
                                                        value="{{old('lastname')}}" required autofocus>
                                                 <div class="invalid-feedback">Пожалуйста введите вашу фамилию</div>
                                             </div>
@@ -59,7 +64,7 @@
                                             <div class="col-12">
                                                 <label for="birthday" class="form-label">Дата рождения</label>
                                                 <div class="input-group has-validation">
-                                                    <input type="text" name="birthday" class="form-control" id="birthday"
+                                                    <input type="date" name="birthday" placeholder="гг-мм-дд" class="form-control" id="birthday"
                                                            value="{{old('birthday')}}" required autofocus>
                                                     <div class="invalid-feedback">Введите дату рождения</div>
                                                 </div>
@@ -67,7 +72,7 @@
                                             <div class="col-12">
                                                 <label for="city" class="form-label">Город</label>
                                                 <div class="input-group has-validation">
-                                                    <input type="text" name="city" class="form-control" id="city"
+                                                    <input type="text" name="city" placeholder="Город" class="form-control" id="city"
                                                            value="{{old('city')}}" required autofocus>
                                                     <div class="invalid-feedback">Введите город</div>
                                                 </div>
@@ -75,7 +80,7 @@
                                             <div class="col-12">
                                                 <label for="team" class="form-label">Команда</label>
                                                 <div class="input-group has-validation">
-                                                    <input type="text" name="team" class="form-control" id="team"
+                                                    <input type="text" name="team" placeholder="Команда" class="form-control" id="team"
                                                            value="{{old('team')}}" required autofocus>
                                                     <div class="invalid-feedback">Введите команда</div>
                                                 </div>
@@ -83,21 +88,21 @@
                                             <!-- Email Address -->
                                             <div class="col-12">
                                                 <label for="email" class="form-label">Email</label>
-                                                <input type="email" name="email" class="form-control" id="email"
+                                                <input type="email" name="email" placeholder="Почта" class="form-control" id="email"
                                                        value="{{old('email')}}" required autofocus>
                                                 <div class="invalid-feedback">Введите email</div>
                                             </div>
 
                                             <div class="col-12">
                                                 <label for="password" class="form-label">Пароль</label>
-                                                <input type="password" name="password" class="form-control"
+                                                <input type="password" name="password" placeholder="Пароль" class="form-control"
                                                        id="password" required>
                                                 <div class="invalid-feedback">Введите пароль</div>
                                             </div>
                                             <div class="col-12">
                                                 <label for="password_confirmation" class="form-label">Подтверждение
                                                     пароля</label>
-                                                <input type="password" name="password_confirmation" class="form-control"
+                                                <input type="password" name="password_confirmation" placeholder="Подтверждение пароля" class="form-control"
                                                        id="password_confirmation" required>
                                                 <div class="invalid-feedback">Введите пароль</div>
                                             </div>
@@ -129,6 +134,15 @@
                 </section>
             </div>
         </main>
+        <script>
+            // $( function() {
+            //     $( "#birthday" ).datepicker({
+            //         dateFormat: 'yy-mm-dd' // Формат даты, который вы хотите использовать
+            //     });
+            // });
+        </script>
     @endguest<!-- End #main -->
-    <script type="text/javascript" src="{{ asset('js/ddata.js') }}"></script>
+    <!-- подключил календарь -->
+
+{{--    <script src="{{ asset('js/datepicker.js') }}"></script>--}}
 @endsection
