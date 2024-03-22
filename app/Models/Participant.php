@@ -168,7 +168,7 @@ class Participant extends Model
 
     public static function participant_number_set($user_id, $event_id){
         if($user_id && $event_id){
-            return Participant::where('user_id', $user_id)->where('event_id', $event_id)->first()->number_set;
+            return Participant::where('user_id', $user_id)->where('event_id', $event_id)->first()->number_set ?? null;
         }
         return null;
     }

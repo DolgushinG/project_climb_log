@@ -2,26 +2,21 @@
 
 namespace App\Exports;
 
-use App\Exports\Sheets\Results;
+use App\Helpers\Helpers;
 use App\Models\Event;
-use App\Models\Participant;
-use App\Models\ParticipantCategory;
-use App\Models\ResultParticipant;
-use App\Models\ResultRouteFinalStage;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Concerns\WithDrawings;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Sheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use function Symfony\Component\Translation\t;
 
-class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAutoSize, WithEvents, WithStyles
+class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAutoSize, WithEvents, WithStyles, WithDrawings
 {
 
     public $event_id;
@@ -42,6 +37,17 @@ class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAut
         return 'A2';
     }
 
+    public function drawings()
+    {
+        $event = Event::find($this->event_id);
+        $qr_path = Helpers::save_qr_code($event);
+        $drawing = new Drawing();
+        $drawing->setPath($qr_path);
+        $drawing->setHeight(70);
+        $drawing->setCoordinates('S1');
+        return $drawing;
+    }
+
     public function registerEvents(): array {
         return [
             AfterSheet::class => function(AfterSheet $event) {
@@ -54,12 +60,18 @@ class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAut
                         'wrapText' => true,
                         'color' => array('rgb' => 'FF0000'),
                         'size'      =>  25,
-                        'bold' => true,
                     ],
+                    'bold' => true,
                 ];
+                $sheet->getDelegate()->getRowDimension('1')->setRowHeight(53);
                 $sheet->mergeCells('A1:D1');
                 $sheet->setCellValue('A1', $this->title_event());
+                $sheet->setCellValue('P1', 'Внести результат');
+                $sheet->mergeCells('P1:R1');
+                $sheet->mergeCells('S1:T1');
                 $sheet->getStyle('A1')->applyFromArray($style);
+                $sheet->getStyle('P1')->applyFromArray($style);
+                $sheet->getStyle('S1')->applyFromArray($style);
                 $sheet->mergeCells('E1:G1');
                 $sheet->setCellValue('E1', $this->title());
                 $sheet->getStyle('E1')->applyFromArray($style);
@@ -76,12 +88,15 @@ class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAut
                 $ready_title = ExportHelpers::merge_arrays($title_array);
                 $ready_title_flash_rp = ExportHelpers::merge_arrays($title_array_flash_rp);
                 $routes = 1;
+                $cell_height = 2;
                 foreach($ready_title as $title){
                     $set_cell_value = explode(':', $title)[0];
                     $sheet->mergeCells($title);
                     $sheet->setCellValue($set_cell_value, ''.$routes);
                     $sheet->getStyle($set_cell_value)->applyFromArray($style);
+                    $sheet->getDelegate()->getRowDimension($cell_height)->setRowHeight(53);
                     $routes++;
+                    $cell_height++;
                 }
                 foreach($empty_cell as $title){
                     $set_cell_value = explode(':', $title)[0];

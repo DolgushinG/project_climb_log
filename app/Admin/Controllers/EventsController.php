@@ -6,10 +6,12 @@ use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionExportCardParticipant;
 use App\Admin\Extensions\CustomButton;
 use App\Exports\AllResultExport;
+use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
 use App\Models\Format;
 use App\Models\Grades;
+use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\Set;
 use Encore\Admin\Controllers\HasResourceActions;
@@ -39,10 +41,16 @@ class EventsController extends Controller
     public function index(Content $content)
     {
         return $content->row(function ($row) {
-                $row->column(3, new InfoBox('New Users', 'users', 'aqua', '/admin/users', '1024'));
-                $row->column(3, new InfoBox('New Orders', 'shopping-cart', 'green', '/admin/orders', '150%'));
-                $row->column(3, new InfoBox('Articles', 'book', 'yellow', '/admin/articles', '2786'));
-                $row->column(3, new InfoBox('Documents', 'file', 'red', '/admin/files', '698726'));
+                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+                $sum_participant = Participant::where('event_id', $event->id)->count();
+                $participant_is_paid = Participant::where('event_id', $event->id)->where('is_paid', 1)->count();
+                $participant_is_not_paid = Participant::where('event_id', $event->id)->where('is_paid', 0)->count();
+                $participant_is_not_active = Participant::where('event_id', $event->id)->where('active', 0)->count();
+                $participant_is_active = Participant::where('event_id', $event->id)->where('active', 1)->count();
+                $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/participants', $sum_participant));
+                $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/participants', $participant_is_paid));
+                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active));
+                $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $participant_is_not_paid + $participant_is_not_active));
             })->body($this->grid());
 
     }
