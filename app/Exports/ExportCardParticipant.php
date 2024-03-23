@@ -84,7 +84,7 @@ class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAut
                 $max_part = ExportHelpers::countCell($count_routes);
                 $title_array = ExportHelpers::prepare(2, $count_routes, $max_part);
                 $title_array_flash_rp = ExportHelpers::prepare(3, $count_routes, $max_part);
-                $empty_cell =  ExportHelpers::generate_excel_title_array(20, $max_part * 3 + 1);
+//                $empty_cell =  ExportHelpers::generate_excel_title_array(20, $max_part * 3 + 1);
                 $ready_title = ExportHelpers::merge_arrays($title_array);
                 $ready_title_flash_rp = ExportHelpers::merge_arrays($title_array_flash_rp);
                 $routes = 1;
@@ -94,15 +94,15 @@ class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAut
                     $sheet->mergeCells($title);
                     $sheet->setCellValue($set_cell_value, ''.$routes);
                     $sheet->getStyle($set_cell_value)->applyFromArray($style);
-                    $sheet->getDelegate()->getRowDimension($cell_height)->setRowHeight(53);
+                    $sheet->getDelegate()->getRowDimension($cell_height)->setRowHeight(15);
                     $routes++;
                     $cell_height++;
                 }
-                foreach($empty_cell as $title){
-                    $set_cell_value = explode(':', $title)[0];
-                    $sheet->setCellValue($set_cell_value, '');
-                    $sheet->getStyle($set_cell_value)->applyFromArray($style);
-                }
+//                foreach($empty_cell as $title){
+//                    $set_cell_value = explode(':', $title)[0];
+//                    $sheet->setCellValue($set_cell_value, '');
+//                    $sheet->getStyle($set_cell_value)->applyFromArray($style);
+//                }
                 foreach($ready_title_flash_rp as $title){
                     $set_cell_value_1 = explode(':', $title)[0];
                     $set_cell_value_2 = explode(':', $title)[1];
