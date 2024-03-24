@@ -42,15 +42,18 @@ class EventsController extends Controller
     {
         return $content->row(function ($row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-                $sum_participant = Participant::where('event_id', $event->id)->count();
-                $participant_is_paid = Participant::where('event_id', $event->id)->where('is_paid', 1)->count();
-                $participant_is_not_paid = Participant::where('event_id', $event->id)->where('is_paid', 0)->count();
-                $participant_is_not_active = Participant::where('event_id', $event->id)->where('active', 0)->count();
-                $participant_is_active = Participant::where('event_id', $event->id)->where('active', 1)->count();
-                $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/participants', $sum_participant));
-                $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/participants', $participant_is_paid));
-                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active));
-                $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $participant_is_not_paid + $participant_is_not_active));
+                if($event){
+                    $sum_participant = Participant::where('event_id', $event->id)->count();
+                    $participant_is_paid = Participant::where('event_id', $event->id)->where('is_paid', 1)->count();
+                    $participant_is_not_paid = Participant::where('event_id', $event->id)->where('is_paid', 0)->count();
+                    $participant_is_not_active = Participant::where('event_id', $event->id)->where('active', 0)->count();
+                    $participant_is_active = Participant::where('event_id', $event->id)->where('active', 1)->count();
+                    $sum = $participant_is_not_paid + $participant_is_not_active;
+                }
+                $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/participants', $sum_participant ?? 0));
+                $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/participants', $participant_is_paid ?? 0));
+                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
+                $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
             })->body($this->grid());
 
     }
@@ -110,7 +113,6 @@ class EventsController extends Controller
         } else {
             $grid->column('owner_id', 'Owner')->editable();
         }
-
         $grid->actions(function ($actions) {
             $actions->disableView();
             $actions->append(new ActionExport($actions->getKey(), 'all', 'excel'));
@@ -118,6 +120,7 @@ class EventsController extends Controller
 //            $actions->append(new ActionExport($actions->getKey(), 'all', 'csv'));
 //            $actions->append(new ActionExport($actions->getKey(), 'all', 'ods'));
         });
+
         $grid->disableFilter();
         $grid->disableExport();
 //        $grid->disableColumnSelector();
@@ -144,7 +147,14 @@ class EventsController extends Controller
             Admin::style(".select2-selection__arrow {
                 display: None;
             }");
-            Admin::script("$(document).ready(function() {
+            Admin::script("
+
+            $(document).ready(function() {
+
+         if(window.location.href.indexOf(\"edit\") > -1)
+            {
+                 return
+            }
       const submitButton = document.querySelector('.pull-right [type=\"submit\"]');
       const requiredInputs = document.querySelectorAll('input[required]');
       const requiredRadio = document.querySelectorAll('radio[required]');
@@ -180,11 +190,13 @@ class EventsController extends Controller
       });
 
     });");
-
-//            Admin::html('<script type="module" src="node_modules/js-cookie"></script>');
             Admin::script(
                 "
                 $(document).ready(function() {
+                if(window.location.href.indexOf(\"edit\") > -1)
+            {
+                 return
+            }
 //    var editingAreas = $('.note-editable');
 //
 //    editingAreas.each(function(index) {
@@ -656,7 +668,8 @@ class EventsController extends Controller
         $form->saved(function (Form $form) {
             ParticipantCategory::where('owner_id', '=', Admin::user()->id)
                 ->where('event_id', '=', $form->model()->id)->delete();
-            if($form->categories){
+
+            if($form->model()->categories){
                 foreach ($form->categories as $category){
                     foreach ($category as $c){
                         $participant_categories = new ParticipantCategory;
