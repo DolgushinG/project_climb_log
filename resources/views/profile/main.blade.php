@@ -1,5 +1,9 @@
 @extends('layouts.main_page.app')
 @section('content')
+    <section id="contact" class="d-flex align-items-center">
+        <div class="container" data-aos="zoom-out" data-aos-delay="100">
+        </div>
+    </section><!-- End Hero -->
     <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js"></script>
     <main id="main" class="main">
