@@ -18,7 +18,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class BatchGenerateParticipant extends Action
 {
-    public $name = 'Сгенерировать участников[beta]';
+    public $name = 'Сгенерировать участников[beta](Ожидание до ~ 2 мин)';
 
     protected $selector = '.generate-participant';
 
@@ -58,7 +58,7 @@ class BatchGenerateParticipant extends Action
 
     public function html()
     {
-        return "<a class='generate-participant btn btn-sm btn-warning'><i class='fa fa-gears'></i> Сгенерировать участников [beta]</a>";
+        return "<a class='generate-participant btn btn-sm btn-warning'><i class='fa fa-gears'></i> Сгенерировать участников [beta](Ожидание до ~ 2 мин)</a>";
     }
 
 }
