@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchGenerateResultSemiFinalParticipant;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
 use App\Exports\SemiFinalResultExport;
@@ -24,6 +25,7 @@ use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ResultRouteSemiFinalStageController extends Controller
@@ -46,14 +48,20 @@ class ResultRouteSemiFinalStageController extends Controller
                     ->where('is_semifinal', '=', 1)
                     ->first();
                 if($event) {
-                    $users_male = Participant::better_participants($event->id, 'male', 10);
-                    $users_female = Participant::better_participants($event->id, 'female', 10);
+                    $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
+                    if($event->is_qualification_counting_like_final){
+                        $result_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant);
+                        $result_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant);
+                    } else {
+                        $result_female = Participant::better_participants($event->id, 'female', $amount_the_best_participant);
+                        $result_male = Participant::better_participants($event->id, 'male', $amount_the_best_participant);
+                    }
                     $fields = ['firstname',
                         'id', 'category', 'avatar','active', 'team', 'city',
                         'email', 'year', 'lastname', 'skill', 'sport_category', 'email_verified_at', 'created_at', 'updated_at',
                         'telegram_id','yandex_id','vkontakte_id'];
-                    self::getUsersSorted($users_male, $fields, $event, 'semifinal', Admin::user()->id);
-                    self::getUsersSorted($users_female, $fields, $event, 'semifinal', Admin::user()->id);
+                    self::getUsersSorted($result_male, $fields, $event, 'semifinal', Admin::user()->id);
+                    self::getUsersSorted($result_female, $fields, $event, 'semifinal', Admin::user()->id);
 //                    $row->column(10, $this->grid2());
                     $row->column(10, $this->grid());
                 }
@@ -135,6 +143,7 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultSemiFinal);
             $tools->append(new BatchResultSemiFinal);
+            $tools->append(new BatchGenerateResultSemiFinalParticipant);
         });
 //        $grid->batchActions(function ($batch) {
 //            $batch->add(new CustomSemiFinalActionsDelete());
@@ -266,7 +275,7 @@ class ResultRouteSemiFinalStageController extends Controller
                         ->where('user_id', '=', $user->id)
                         ->get();
                     break;
-                default:
+                case 'semifinal':
                     $result_user = ResultRouteSemiFinalStage::where('owner_id', '=', $owner_id)
                         ->where('event_id', '=', $model->id)
                         ->where('user_id', '=', $user->id)
@@ -291,7 +300,6 @@ class ResultRouteSemiFinalStageController extends Controller
 //        dd($users_with_result);
         $users_sorted = Participant::counting_final_place($model->id, $users_with_result, $type);
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
-//        dd($users_sorted);
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user){
             $fields = ['result'];
@@ -308,8 +316,13 @@ class ResultRouteSemiFinalStageController extends Controller
                         $result = new ResultFinalStage;
                     }
                 }
-                $category_id = ParticipantCategory::where('id', $users_sorted[$index]['category_id'])->where('event_id', $model->id)->first()->id;
-                $result->category_id = $category_id;
+                $category_id = ParticipantCategory::where('id', $users_sorted[$index]['category_id'])->where('event_id', $model->id)->first();
+                if($category_id){
+                    $category_id = $category_id->id;
+                    $result->category_id = $category_id;
+                } else {
+                    Log::error('It has not found category_id '.$users_sorted[$index]['category_id'].' '.$model->id);
+                }
             } else {
                 $result = ResultSemiFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
                 if (!$result){
@@ -324,6 +337,8 @@ class ResultRouteSemiFinalStageController extends Controller
             $result->amount_try_top = $users_sorted[$index]['amount_try_top'];
             $result->amount_try_zone = $users_sorted[$index]['amount_try_zone'];
             $result->place = $users_sorted[$index]['place'];
+
+
             $result->save();
         }
         return $users_sorted;

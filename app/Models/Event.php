@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Event extends Model
 {
@@ -164,7 +165,11 @@ class Event extends Model
 
     public static function refresh_final_points_all_participant($event_id) {
         $event = Event::find($event_id);
-        $format = $event->mode;
+        $format = $event->mode ?? null;
+        if(!$format){
+            Log::info('Обновление без формата 1 или 2, пока что недоступно потому что используется формат подсчета как финал)');
+            return;
+        }
         $participants = User::query()
             ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
             ->where('participants.event_id', '=',$event_id)
@@ -215,7 +220,7 @@ class Event extends Model
             }
             foreach ($all_group_participants as $group_participants){
                 foreach ($group_participants as $participants){
-                    ResultRouteSemiFinalStageController::getUsersSorted($participants, $fields, $event, 'final', Admin::user()->id);
+                    ResultRouteSemiFinalStageController::getUsersSorted($participants, $fields, $event, 'final', $owner_id);
                 }
             }
         } else {

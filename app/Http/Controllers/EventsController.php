@@ -201,16 +201,17 @@ class EventsController extends Controller
         $final_data = array();
         $final_data_only_passed_route = array();
         foreach ($data as $route){
-            (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
-
-            $coefficient = ResultParticipant::get_coefficient($route['event_id'], $route['route_id'], $gender);
             # Варианты форматов подсчета баллов
             $value_category = Grades::where('grade','=',$route['grade'])->where('owner_id','=', $request->owner_id)->first()->value;
             $value_route = (new \App\Models\ResultParticipant)->get_value_route($route['attempt'], $value_category, $format);
-            $route['points'] = $coefficient * $value_route;
             # Формат все трассы считаем сразу
             if($format == 2) {
+                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
+                $coefficient = ResultParticipant::get_coefficient($route['event_id'], $route['route_id'], $gender);
+                $route['points'] = $coefficient * $value_route;
                 (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id'], $gender);
+            } else if($format == 1) {
+                $route['points'] = $value_route;
             }
             $final_data[] = $route;
             if ($route['attempt'] != 0){
@@ -251,7 +252,6 @@ class EventsController extends Controller
             Event::update_participant_place($request->event_id, $participant->id, $participant->gender);
         }
         Event::refresh_final_points_all_participant($request->event_id);
-//        UpdateResultParticipants::dispatch($request->event_id);
         if ($result) {
             $event = Event::find($request->event_id);
             return response()->json(['success' => true, 'message' => 'Успешная внесение результатов', 'link' => $event->link], 201);

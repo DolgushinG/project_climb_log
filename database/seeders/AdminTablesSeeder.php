@@ -185,6 +185,14 @@ class AdminTablesSeeder extends Seeder
                     "icon" => "fa-cogs",
                     "uri" => "final-stage",
                     "permission" => "owner.result.route.final.stage"
+                ],
+                [
+                    "parent_id" => 0,
+                    "order" => 0,
+                    "title" => "Logs",
+                    "icon" => "fa-bars",
+                    "uri" => "logs",
+                    "permission" => "*"
                 ]
             ]
         );

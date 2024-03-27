@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Helpers\Generators\Generators;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
@@ -18,7 +19,8 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         for($i = 1;$i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
-            \App\Models\Event::factory()->count(1)->withOwnerId($i)->withCity($i)->withClimbingGym($i)->withSemiFinal(rand(0,1))->create();
+            $types = ['classic', 'child', 'custom_1', 'custom_2'];
+            Generators::event_create(1, $i, $types[array_rand($types)]);
             $categories = Event::find($i)->categories;
             foreach ($categories as $category){
                 $participant_category = new ParticipantCategory;
@@ -37,11 +39,12 @@ class DatabaseSeeder extends Seeder
             AdminRoleAndUsersSeeder::class,
             FormatsSeeder::class,
             SetsSeeder::class,
-            ParticipantSeeder::class,
+//            ParticipantSeeder::class,
             GradesSeeder::class,
 //            ResultParticipantSeeder::class,
 //            ResultRouteSemiFinalStageSeeder::class,
 //            ResultRouteFinalSeeder::class,
         ]);
     }
+
 }

@@ -97,7 +97,6 @@ class Participant extends Model
         usort($result_final, function ($a, $b) {
             return $a['place'] <=> $b['place'];
         });
-//        dd($result_final);
        return $result_final;
     }
     public static function findIndexBy($array, $element, $needle) {

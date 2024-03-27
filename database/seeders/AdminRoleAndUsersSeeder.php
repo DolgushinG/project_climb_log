@@ -9,7 +9,7 @@ use Illuminate\Database\Seeder;
 class AdminRoleAndUsersSeeder extends Seeder
 {
 
-    const COUNT_EVENTS = 4;
+    const COUNT_EVENTS = 2;
     /**
      * Run the database seeds.
      *

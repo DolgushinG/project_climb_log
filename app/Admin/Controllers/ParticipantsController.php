@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\BatchForceRecouting;
+use App\Admin\Actions\BatchGenerateParticipant;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportResultQualificationLikeFinal;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchResultQualificationLikeFinal;
@@ -13,6 +14,7 @@ use App\Models\Event;
 use App\Models\Participant;
 use App\Http\Controllers\Controller;
 use App\Models\ParticipantCategory;
+use App\Models\ResultFinalStage;
 use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\User;
@@ -22,7 +24,6 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
-use Encore\Admin\Show;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -41,17 +42,62 @@ class ParticipantsController extends Controller
         return $content
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+                $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
                 if($event) {
                     if($event->is_qualification_counting_like_final){
-                        $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
-                        $participant_users_id = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
-                        $participants = User::whereIn('id', $participant_users_id)->get();
-                        ResultRouteSemiFinalStageController::getUsersSorted($participants, $fields, $event, 'qualification_like_final', Admin::user()->id);
+                        if($event->is_additional_final) {
+                            $amount_the_best_participant = $event->amount_the_best_participant;
+                            $all_group_participants = array();
+                            $all_users = array();
+                            $users = array();
+                            foreach ($event->categories as $category) {
+                                $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
+                                $part_nt = Participant::where('event_id', '=', $event->id)->where('category_id', $category_id)->pluck('user_id');
+                                $all_group_participants['male'][$category] = User::whereIn('id', $part_nt)->where('gender','=', 'male')->get();
+                                $all_group_participants['female'][$category] = User::whereIn('id', $part_nt)->where('gender','=', 'female')->get();
+                            }
+                            foreach ($all_group_participants as $group_participants) {
+                                foreach ($group_participants as $participants) {
+                                    $user = ResultRouteSemiFinalStageController::getUsersSorted($participants, $fields, $event, 'qualification_like_final', Admin::user()->id);
+                                    if ($user !== []) {
+                                        $users[] = $user;
+                                    }
+                                }
+                            }
+                            foreach ($users as $user) {
+                                foreach ($user as $a) {
+                                    $all_users[] = $a;
+                                }
+                            }
+                            foreach ($all_users as $index => $user){
+                                $fields = ['gender', 'middlename', 'avatar','telegram_id','yandex_id','vkontakte_id'];
+                                $all_users[$index] = collect($user)->except($fields)->toArray();
+
+                                $final_result_stage = ResultFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
+                                if(!$final_result_stage){
+                                    $final_result_stage = new ResultFinalStage;
+                                }
+                                $category_id = ParticipantCategory::where('id', $all_users[$index]['category_id'])->where('event_id', $event->id)->first()->id;
+                                $final_result_stage->event_id = $all_users[$index]['event_id'];
+                                $final_result_stage->user_id = $all_users[$index]['user_id'];
+                                $final_result_stage->category_id = $category_id;
+                                $final_result_stage->owner_id = $all_users[$index]['owner_id'];
+                                $final_result_stage->amount_top = $all_users[$index]['amount_top'];
+                                $final_result_stage->amount_zone = $all_users[$index]['amount_zone'];
+                                $final_result_stage->amount_try_top = $all_users[$index]['amount_try_top'];
+                                $final_result_stage->amount_try_zone = $all_users[$index]['amount_try_zone'];
+                                $final_result_stage->place = $all_users[$index]['place'];
+                                $final_result_stage->save();
+                            }
+                        } else {
+                            $participant_users_id = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+                            $participants = User::whereIn('id', $participant_users_id)->get();
+                            ResultRouteSemiFinalStageController::getUsersSorted($participants, $fields, $event, 'qualification_like_final', Admin::user()->id);
+                        }
                         $row->column(20, $this->qualification_counting_like_final());
                     } else {
                         $row->column(20, $this->qualification_classic());
                     }
-
                 }
             });
     }
@@ -113,6 +159,7 @@ class ParticipantsController extends Controller
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchResultQualification);
             $tools->append(new BatchForceRecouting);
+            $tools->append(new BatchGenerateParticipant);
         });
         $grid->actions(function ($actions) {
             $actions->disableEdit();
@@ -173,6 +220,7 @@ class ParticipantsController extends Controller
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultQualificationLikeFinal);
             $tools->append(new BatchResultQualificationLikeFinal);
+            $tools->append(new BatchGenerateParticipant);
         });
         $grid->actions(function ($actions) {
             $actions->disableEdit();
@@ -189,12 +237,15 @@ class ParticipantsController extends Controller
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
         });
-        $grid->column('category_id', 'Категория')->display(function ($category_id) {
-            $owner_id = Admin::user()->id;
-            $event = Event::where('owner_id', '=', $owner_id)
-                ->where('active', 1)->first();
-            return ParticipantCategory::where('id', '=', $category_id)->where('event_id', $event->id)->first()->category;
-        })->sortable();
+//        $grid->column('category_id', 'Категория')->display(function ($category_id) {
+//            $owner_id = Admin::user()->id;
+//            $event = Event::where('owner_id', '=', $owner_id)
+//                ->where('active', 1)->first();
+//            return ParticipantCategory::where('id', '=', $category_id)->where('event_id', $event->id)->first()->category;
+//        })->sortable();
+        $grid->column('category_id', 'Категория')
+            ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
+            ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         $grid->column('place', __('Место'))->sortable();
         $grid->column('amount_top', __('Кол-во топов'));
         $grid->column('amount_try_top', __('Кол-во попыток на топ'));

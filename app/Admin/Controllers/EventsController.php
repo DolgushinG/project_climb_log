@@ -273,20 +273,40 @@ class EventsController extends Controller
             }
         });
         $form->saved(function (Form $form) {
-
-            ParticipantCategory::where('owner_id', '=', Admin::user()->id)
-                ->where('event_id', '=', $form->model()->id)->delete();
-
             if($form->categories){
-                foreach ($form->categories as $category){
-                    foreach ($category as $c){
-                        $participant_categories = new ParticipantCategory;
-                        $participant_categories->owner_id = Admin::user()->id;
-                        $participant_categories->event_id = $form->model()->id;
-                        $participant_categories->category = $c;
-                        $participant_categories->save();
+                $categories = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
+                    ->where('event_id', '=', $form->model()->id)->get();
+                if($categories->isNotEmpty()){
+                    foreach ($form->categories as $category){
+                        foreach ($category as $index => $c){
+                            $categories[$index]->category = $c;
+                        }
                     }
+                    foreach ($categories as $category){
+                        $participant_category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
+                            ->where('id', '=', $category->id)->first();
+                        if(!$participant_category){
+                            $participant_category = new ParticipantCategory;
+                        }
+                        $participant_category->category = $category->category;
+                        $participant_category->save();
+                    }
+                    $participant_category->category = $category->category;
+                    $participant_category->save();
+                } else {
+                    foreach ($form->categories as $category){
+                        foreach ($category as $c){
+                            $participant_categories = new ParticipantCategory;
+                            $participant_categories->owner_id = Admin::user()->id;
+                            $participant_categories->event_id = $form->model()->id;
+                            $participant_categories->category = $c;
+                            $participant_categories->save();
+                         }
+                    }
+
                 }
+
+
                 $exist_routes_list = Grades::where('owner_id', '=', Admin::user()->id)
                     ->where('event_id', '=', $form->model()->id)->first();
                 if(!$exist_routes_list){
@@ -309,6 +329,11 @@ class EventsController extends Controller
             return $form;
         });
         return $form;
+    }
+
+    public static function update_category_id($table)
+    {
+
     }
 
     /**
@@ -373,6 +398,8 @@ class EventsController extends Controller
             {
                  return
             }
+
+
       const submitButton = document.querySelector('.pull-right [type=\"submit\"]');
       const requiredInputs = document.querySelectorAll('input[required]');
       const requiredRadio = document.querySelectorAll('radio[required]');
@@ -752,10 +779,10 @@ class EventsController extends Controller
         }
         return null;
     }
-
-    if(getCookie('title') !== null){
-        document.getElementById('create-events-link').textContent = 'Черновик соревнования'
-    }
+//
+//    if(getCookie('title') !== null){
+//        document.getElementById('create-events-link').textContent = 'Черновик соревнования'
+//    }
 });");
     }
 }

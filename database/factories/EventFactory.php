@@ -61,10 +61,6 @@ class EventFactory extends Factory
     public function definition()
     {
 
-//        $transfer_to_text_category = [
-//            ['Категория участника' => '0', 'Кол-во трасс для перевода'=> '2','В какую категорию переводить' => '1', 'От какой категории будет перевод'=> '6C'],
-//            ['Категория участника' => '1', 'Кол-во трасс для перевода'=> '2','В какую категорию переводить' => '2', 'От какой категории будет перевод'=> '7B'],
-//        ];
         $routes = Grades::getRoutes();
         return [
             'image' => $this->faker->randomElement(['images/20231115_cea82537af86871a32344dcd5c6a23ba.jpeg','images/vT94mFyT9xU.jpg']),
@@ -87,37 +83,97 @@ class EventFactory extends Factory
             'amount_routes_in_semifinal' => $this->faker->randomElement([4,5]),
             'amount_routes_in_final' => 4,
             'amount_start_price' => 1800,
+            'amount_the_best_participant' => $this->faker->randomElement([6,8,10,20]),
             'categories' => $this->faker->randomElement([['Новичок', 'Общий зачет'], ['Новичок', 'Любители', 'Спортсмены']]),
 //            'transfer_to_next_category' => $transfer_to_text_category,
             'count_routes' => 30,
-            'mode' => $this->faker->randomElement([1, 2]),
-            'mode_amount_routes' => 15,
         ];
     }
-    public function withOwnerId($owner_id)
+    public function withOwnerId($value)
     {
         return $this->state([
-            'owner_id' => $owner_id,
+            'owner_id' => $value,
         ]);
     }
-    public function withSemiFinal($is_semifinal)
+    public function withSemiFinal($value)
     {
         return $this->state([
-            'is_semifinal' => $is_semifinal,
-        ]);
-    }
-    public function withClimbingGym($index)
-    {
-        return $this->state([
-            'climbing_gym_name' => $this->climbingGyms[$index],
-            'climbing_gym_name_eng' => (new \App\Models\Event)->translate_to_eng($this->climbingGyms[$index]),
+            'is_semifinal' => $value,
         ]);
     }
 
-    public function withCity($index)
+    public function is_additional_final($value)
     {
         return $this->state([
-            'city' => $this->cities[$index],
+            'is_additional_final' => $value,
+        ]);
+    }
+    public function is_qualification_counting_like_final($value)
+    {
+        return $this->state([
+            'is_qualification_counting_like_final' => $value,
+        ]);
+    }
+    public function amount_point_flash($value)
+    {
+        return $this->state([
+            'amount_point_flash' => $value,
+        ]);
+    }
+    public function amount_point_redpoint($value)
+    {
+        return $this->state([
+            'amount_point_redpoint' => $value,
+        ]);
+    }
+    public function mode($value)
+    {
+        return $this->state([
+            'mode' => $value,
+        ]);
+    }
+    public function mode_amount_routes($value)
+    {
+        return $this->state([
+            'mode_amount_routes' => $value,
+        ]);
+    }
+    public function count_routes($value)
+    {
+        return $this->state([
+            'count_routes' => $value,
+        ]);
+    }
+    public function amount_routes_in_qualification_like_final($value)
+    {
+        return $this->state([
+            'amount_routes_in_qualification_like_final' => $value,
+        ]);
+    }
+    public function is_input_birthday($value)
+    {
+        return $this->state([
+            'is_input_birthday' => $value,
+        ]);
+    }
+    public function is_need_sport_category($value)
+    {
+        return $this->state([
+            'is_need_sport_category' => $value,
+        ]);
+    }
+    public function withClimbingGym($value)
+    {
+        return $this->state([
+            'climbing_gym_name' => $this->climbingGyms[$value],
+            'climbing_gym_name_eng' => (new \App\Models\Event)->translate_to_eng($this->climbingGyms[$value]),
+        ]);
+    }
+
+    public function withCity($value)
+    {
+        return $this->state([
+            'city' => $this->cities[$value],
         ]);
     }
 
