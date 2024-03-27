@@ -39,9 +39,9 @@ class ResultRouteFinalStageController extends Controller
         return $content
             ->row(function(Row $row) {
 //                $amount_the_best_participant = 10;
-//                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
 //                $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
-//                if ($event) {
+                if ($event) {
 //                    if($event->is_additional_final){
 //                        # Если выбран режим что финал для всех то отдаем лучшех 6 участников каждый категории
 //                        $all_group_participants = array();
@@ -97,8 +97,9 @@ class ResultRouteFinalStageController extends Controller
 //                        $final_result_stage->amount_try_zone = $all_users[$index]['amount_try_zone'];
 //                        $final_result_stage->place = $all_users[$index]['place'];
 //                        $final_result_stage->save();
-//                    }
                     $row->column(12, $this->grid2());
+                }
+
             });
     }
 
