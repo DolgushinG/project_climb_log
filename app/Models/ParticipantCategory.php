@@ -17,7 +17,12 @@ class ParticipantCategory extends Model
     {
         $event = Event::where('owner_id', '=', $owner_id)
             ->where('active', 1)->first();
-        return ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('category', 'id')->toArray();
+        if($event){
+            return ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('category', 'id')->toArray();
+        } else {
+            return [];
+        }
+
     }
 
 }
