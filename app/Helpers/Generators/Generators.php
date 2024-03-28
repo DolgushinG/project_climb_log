@@ -12,6 +12,7 @@ use App\Models\ResultSemiFinalStage;
 use App\Models\User;
 use Database\Seeders\ParticipantSeeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Generators
 {
@@ -87,7 +88,7 @@ class Generators
         DB::table('participants')->insert($participants);
     }
 
-    public static function prepare_result_participant($owner_id, $event_id, $table)
+    public static function prepare_result_participant($owner_id, $event_id, $table, $count=30)
     {
         if($table === 'result_participant'){
             $active_participants = Participant::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
@@ -110,9 +111,16 @@ class Generators
 
         if($table === 'result_route_qualification_like_final') {
             $event = Event::find($event_id);
-            $participants = Participant::where('event_id', '=', $event_id)->get();
+            $event_categories = $event->categories;
+
             $result = array();
-            foreach ($participants as $participant) {
+            for ($user = 1; $user <= $count; $user++) {
+                $category = ParticipantCategory::where('category', '=', $event_categories[array_rand($event_categories)])->where('event_id', $event_id)->first();
+                if($category){
+                    $category_id = $category->id;
+                } else {
+                    Log::error('Category has not found '.$category.' category_random'.$event_categories[array_rand($event_categories)].' event_id'.$event_id);
+                }
                 for ($route = 1; $route <= $event->amount_routes_in_qualification_like_final; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {
@@ -131,7 +139,7 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $participant->user_id,'category_id' => $participant->category_id, 'route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $user,'category_id' => $category_id, 'route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
                 }
             }
             DB::table('result_route_qualification_like_final')->insert($result);
@@ -202,7 +210,7 @@ class Generators
             );
             $result = array();
             foreach ($users as $user) {
-                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                $participant = ResultQualificationLikeFinal::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {

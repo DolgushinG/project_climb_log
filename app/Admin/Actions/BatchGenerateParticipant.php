@@ -29,7 +29,7 @@ class BatchGenerateParticipant extends Action
         $count = intval($request->count);
         $event = Event::find($event_id);
         if($event->is_qualification_counting_like_final){
-            Generators::prepare_result_participant($owner_id, $event->id,'result_route_qualification_like_final');
+            Generators::prepare_result_participant($owner_id, $event->id,'result_route_qualification_like_final', $count);
         } else {
             $part_category = ParticipantCategory::where('event_id', $event->id)->get();
             $amount_categories = count($event->categories);

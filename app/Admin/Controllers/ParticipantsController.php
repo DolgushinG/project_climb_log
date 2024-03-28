@@ -52,7 +52,7 @@ class ParticipantsController extends Controller
                             $users = array();
                             foreach ($event->categories as $category) {
                                 $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-                                $part_nt = Participant::where('event_id', '=', $event->id)->where('category_id', $category_id)->pluck('user_id');
+                                $part_nt = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->where('category_id', $category_id)->distinct()->pluck('user_id');
                                 $all_group_participants['male'][$category] = User::whereIn('id', $part_nt)->where('gender','=', 'male')->get();
                                 $all_group_participants['female'][$category] = User::whereIn('id', $part_nt)->where('gender','=', 'female')->get();
                             }
@@ -216,6 +216,9 @@ class ParticipantsController extends Controller
         }
         $grid->model()->where(function ($query) {
             $query->has('event.result_qualification_like_final');
+        });
+        $grid->selector(function (Grid\Tools\Selector $selector) {
+            $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         });
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultQualificationLikeFinal);
