@@ -206,21 +206,20 @@ class EventsController extends Controller
                             $form->text('amount_point_flash','Балл за флэш')->value(1);
                             $form->text('amount_point_redpoint','Балл за редпоинт')->value(0.9);
                         });
+                    $form->radio('is_semifinal','Настройка финалов')
+                        ->options([
+                            1 =>'С полуфиналом',
+                            0 =>'Без полуфинала',
+                        ])->when(1, function (Form $form) {
+                            $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->attribute('inputmode', 'none')->value(5);
+                        })->when(0, function (Form $form) {
+                        })->required();
                 })->when(1, function (Form $form) {
                     $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->attribute('inputmode', 'none')->value(10);
                     $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
                         ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->attribute('inputmode', 'none')->value(6);
                 })->required();
-            $form->radio('is_semifinal','Настройка финалов')
-                ->options([
-                    1 =>'С полуфиналом',
-                    0 =>'Без полуфинала',
-                ])->when(1, function (Form $form) {
-                    $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->attribute('inputmode', 'none')->value(5);
-                    $form->number('amount_routes_in_final','Кол-во трасс в финале')->attribute('inputmode', 'none')->value(4);
-                })->when(0, function (Form $form) {
-                    $form->number('amount_routes_in_final','Кол-во трасс в финале')->attribute('inputmode', 'none')->value(4);
-                })->required();
+            $form->number('amount_routes_in_final','Кол-во трасс в финале')->attribute('inputmode', 'none')->value(4);
             $form->radio('is_additional_final','Финалы для разных групп')
                 ->options([
                     1 =>'С финалами для каждой категории групп',
@@ -249,6 +248,9 @@ class EventsController extends Controller
             $tools->disableView();
         });
         $form->saving(function (Form $form) {
+            if(!$form->is_semifinal){
+                $form->is_semifinal = 0;
+            }
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($events && $events->id != $form->model()->id){

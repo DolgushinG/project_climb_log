@@ -327,22 +327,28 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 )->where('category_id', '=', $this->category->id);
             }
         }
+
         $users = $users->get()->sortBy('place')->toArray();
         foreach ($users as $index => $user){
             if($table == 'result_final_stage'){
                 $final_result = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
-            } else {
-                if($table === "result_qualification_like_final"){
-                    $final_result = ResultRouteQualificationLikeFinal::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
-                } else {
-                    $final_result = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
-                }
+            }
+            if($table === "result_qualification_like_final"){
+                $final_result = ResultRouteQualificationLikeFinal::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+            }
+            if($table === "result_semifinal_stage"){
+                $final_result = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
             }
             foreach ($final_result as $result){
-                $users[$index]['amount_top_'.$result->final_route_id] = $result->amount_top;
-                $users[$index]['amount_try_top_'.$result->final_route_id] = $result->amount_try_top;
-                $users[$index]['amount_zone_'.$result->final_route_id] = $result->amount_zone;
-                $users[$index]['amount_try_zone_'.$result->final_route_id] = $result->amount_try_zone;
+                if($table == 'result_final_stage' || $table === "result_semifinal_stage"){
+                    $route_id = $result->final_route_id;
+                } else {
+                    $route_id = $result->route_id;
+                }
+                $users[$index]['amount_top_'.$route_id] = $result->amount_top;
+                $users[$index]['amount_try_top_'.$route_id] = $result->amount_try_top;
+                $users[$index]['amount_zone_'.$route_id] = $result->amount_zone;
+                $users[$index]['amount_try_zone_'.$route_id] = $result->amount_try_zone;
             }
             $users[$index] = collect($users[$index])->except('id', 'category_id');
         }
