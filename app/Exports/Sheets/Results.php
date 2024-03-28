@@ -124,8 +124,10 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                         switch ($this->type){
                             case 'Final':
                                 $count = ResultRouteFinalStage::count_route_in_final_stage($this->event_id);
+                                break;
                             case 'SemiFinal':
-                                $count = ResultRouteFinalStage::count_route_in_final_stage($this->event_id);
+                                $count = ResultRouteSemiFinalStage::count_route_in_semifinal_stage($this->event_id);
+                                break;
                             case 'QualificationLikeFinal':
                                 $count = ResultRouteQualificationLikeFinal::count_route_in_qualification_final($this->event_id);
                         }
@@ -153,13 +155,12 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     'Сумма попыток на ZONE',
                 ];
                 $count = ResultRouteFinalStage::count_route_in_final_stage($this->event_id);
-                for($i = 0; $i <= $count; $i++){
+                for($i = 1; $i <= $count; $i++){
                     $final[] = 'TOP';
                     $final[] = 'Попытки на TOP';
                     $final[] = 'ZONE';
                     $final[] = 'Попытки на ZONE';
                 }
-
                 return $final;
             case 'SemiFinal':
                 $final = [
@@ -300,11 +301,21 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
     }
 
     public function get_final($table){
+        $users = User::query()
+            ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+            ->where($table.'.event_id', '=', $this->event_id)
+            ->select(
+                $table.'.place',
+                'users.id',
+                'users.middlename',
+                $table.'.amount_top',
+                $table.'.amount_try_top',
+                $table.'.amount_zone',
+                $table.'.amount_try_zone',
+            )->where('gender', '=', $this->gender);
         if($table === "result_final_stage" || $table === "result_qualification_like_final"){
-            $users = User::query()
-                ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-                ->where($table.'.event_id', '=', $this->event_id)
-                ->select(
+            if($this->category){
+                $users = $users->select(
                     $table.'.place',
                     $table.'.category_id',
                     'users.id',
@@ -313,30 +324,10 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $table.'.amount_try_top',
                     $table.'.amount_zone',
                     $table.'.amount_try_zone',
-                )
-                ->where('gender', '=', $this->gender)
-                ->where('category_id', '=', $this->category->id)
-                ->get()
-                ->sortBy('place')
-                ->toArray();
-        } else {
-            $users = User::query()
-                ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-                ->where($table.'.event_id', '=', $this->event_id)
-                ->select(
-                    $table.'.place',
-                    'users.id',
-                    'users.middlename',
-                    $table.'.amount_top',
-                    $table.'.amount_try_top',
-                    $table.'.amount_zone',
-                    $table.'.amount_try_zone',
-                )
-                ->where('gender', '=', $this->gender)
-                ->get()
-                ->sortBy('place')
-                ->toArray();
+                )->where('category_id', '=', $this->category->id);
+            }
         }
+        $users = $users->get()->sortBy('place')->toArray();
         foreach ($users as $index => $user){
             if($table == 'result_final_stage'){
                 $final_result = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();

@@ -8,6 +8,7 @@ use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteQualificationLikeFinal;
+use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
 use App\Models\User;
 use Database\Seeders\ParticipantSeeder;
@@ -106,7 +107,6 @@ class Generators
                 }
                 DB::table('result_participant')->insert($result_participant);
             }
-//            Event::refresh_final_points_all_participant($event_id);
         }
 
         if($table === 'result_route_qualification_like_final') {
@@ -188,16 +188,23 @@ class Generators
 
             if($event->is_additional_final){
                 if($event->is_qualification_counting_like_final){
+                    $participant_from = 'qualification_counting_like_final';
                     $result_is_qualification_counting_like_final_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event_id, 'female', $amount_the_best_participant)->toArray();
                     $result_is_qualification_counting_like_final_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event_id, 'male', $amount_the_best_participant)->toArray();
                 } else {
                     $result_female = Participant::better_participants($event_id, 'female', $amount_the_best_participant)->toArray();
                     $result_male = Participant::better_participants($event_id, 'male', $amount_the_best_participant)->toArray();
+                    $participant_from = 'qualification';
                 }
             } else {
                 if($event->is_semifinal){
                     $result_semifinal_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', $amount_the_best_participant)->toArray();
                     $result_semifinal_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', $amount_the_best_participant)->toArray();
+                    $participant_from = 'qualification';
+                } else {
+                    $result_female = Participant::better_participants($event_id, 'female', $amount_the_best_participant)->toArray();
+                    $result_male = Participant::better_participants($event_id, 'male', $amount_the_best_participant)->toArray();
+                    $participant_from = 'qualification';
                 }
             }
             $users = array_merge(
@@ -210,7 +217,16 @@ class Generators
             );
             $result = array();
             foreach ($users as $user) {
-                $participant = ResultQualificationLikeFinal::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                switch ($participant_from){
+                    case 'qualification_counting_like_final':
+                        $participant = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                        break;
+                    case 'qualification':
+                        $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                        break;
+                    case 'semifinal':
+                        $participant = ResultRouteSemiFinalStage::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                }
                 for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {

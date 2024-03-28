@@ -27,7 +27,7 @@ class BatchExportResultSemiFinal extends Action
     public function form()
     {
         $this->modalSmall();
-        $events = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->get()->pluck('title','id');
+        $events = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->get()->pluck('title','id');
         $this->select('title', 'Сореванование')->options($events);
         $this->radio('format_export', 'Какой формат')->options(
             [
