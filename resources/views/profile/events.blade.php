@@ -80,17 +80,9 @@
                             </li>
                         @endif
 
-                        @if(!\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="{{route('listRoutesEvent', $event->title_eng)}}" class="btn btn-success">Внести результаты</a>
-                            </li>
-                        @else
-                            @if($event->active)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a class="badge rounded-pill bg-warning text-white" href="event/{{$event->climbing_gym_name_eng}}/{{$event->title_eng}}">Подробнее</a>
-                                </li>
-                            @endif
-                        @endif
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="event/{{$event->climbing_gym_name_eng}}/{{$event->title_eng}}" class="btn btn-success">Перейти на страницу с соревнованием</a>
+                        </li>
                     </ul><!-- End List With badges -->
                 </div>
             </div>
