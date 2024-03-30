@@ -16,6 +16,7 @@ use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use stdClass;
 
 class EventsController extends Controller
@@ -35,12 +36,18 @@ class EventsController extends Controller
         }
     }
     public function show(Request $request, $climbing_gym, $title){
-        if(\Encore\Admin\Facades\Admin::user()){
-            $event = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
+        $event_public_exist = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        $event_exist = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
+        $pre_show = false;
+        if($event_public_exist){
+            $event = $event_public_exist;
         } else {
-            $event = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('active', '=', 1)->first();
+            if($request->is('admin/event/*')){
+                $pre_show = true;
+                $event = $event_exist;
+            }
         }
-        if($event){
+        if($event_public_exist || $pre_show){
             $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
             foreach ($sets as $set){
                 $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set', '=', $set->number_set)->count();
@@ -64,73 +71,85 @@ class EventsController extends Controller
         } else {
             return view('404');
         }
-
     }
     public function get_participants(Request $request, $climbing_gym, $title){
-        $event = Event::where('title_eng', '=', $title)->first();
-        $participants = array();
-        $participant_event = Participant::where('event_id', '=',$event->id)->get();
-        $users_id = $participant_event->pluck('user_id')->toArray();
-        $users = User::whereIn('id', $users_id)->get()->toArray();
-        $users_event = $participant_event->toArray();
-        $days = Set::where('owner_id', '=', $event->owner_id)->select('day_of_week')->distinct()->get();
-        $sets = Set::where('owner_id', '=', $event->owner_id)->get();
-        $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('number_set');
-        foreach ($number_sets as $index => $set){
-            $sets[$index]->count_participant = Participant::where('event_id', '=',$event->id)->where('number_set', $set)->count();
-        }
-        $index = 0;
-        foreach($users_event as $set => $user) {
-            if ($index <= count($users)) {
-                $set = $sets->where('number_set', '=', $user['number_set'])->where('owner_id', '=',$event->owner_id)->first();
-                $participants[] = array(
-                    'middlename' => $users[$index]['middlename'],
-                    'city' => $users[$index]['city'],
-                    'team' => $users[$index]['team'],
-                    'number_set' => $user['number_set'],
-                    'time' => $set->time.' '.trans_choice('somewords.'.$set->day_of_week, 10),
-                    'gender' => $users[$index]['gender'],
-                    );
+        $event = Event::where('title_eng', '=', $title)->where('is_public', 1)->first();
+        if($event) {
+            $participants = array();
+            $participant_event = Participant::where('event_id', '=', $event->id)->get();
+            $users_id = $participant_event->pluck('user_id')->toArray();
+            $users = User::whereIn('id', $users_id)->get()->toArray();
+            $users_event = $participant_event->toArray();
+            $days = Set::where('owner_id', '=', $event->owner_id)->select('day_of_week')->distinct()->get();
+            $sets = Set::where('owner_id', '=', $event->owner_id)->get();
+            $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('number_set');
+            foreach ($number_sets as $index => $set) {
+                $sets[$index]->count_participant = Participant::where('event_id', '=', $event->id)->where('number_set', $set)->count();
             }
-            $index++;
+            $index = 0;
+            foreach ($users_event as $set => $user) {
+                if ($index <= count($users)) {
+                    $set = $sets->where('number_set', '=', $user['number_set'])->where('owner_id', '=', $event->owner_id)->first();
+                    $participants[] = array(
+                        'middlename' => $users[$index]['middlename'],
+                        'city' => $users[$index]['city'],
+                        'team' => $users[$index]['team'],
+                        'number_set' => $user['number_set'],
+                        'time' => $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10),
+                        'gender' => $users[$index]['gender'],
+                    );
+                }
+                $index++;
+            }
+        } else {
+            return view('404');
         }
         return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
     }
 
-    public function get_final_results(Request $request, $climbing_gym, $title){
-        $event = Event::where('title_eng', '=', $title)->first();
-        $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
-        $user_ids = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
-        $stats = new stdClass();
-        $female_categories = array();
-        $male_categories = array();
-        $stats->male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->get()->count();
-        $stats->female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->get()->count();
-        $categories = ParticipantCategory::where('event_id', $event->id)->get();
+    public function get_final_results(Request $request, $climbing_gym, $title)
+    {
+        $event = Event::where('title_eng', '=', $title)->where('is_public', 1)->first();
+        if($event){
+            $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
+            $user_ids = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+            $stats = new stdClass();
+            $female_categories = array();
+            $male_categories = array();
+            $stats->male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->get()->count();
+            $stats->female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->get()->count();
+            $categories = ParticipantCategory::where('event_id', $event->id)->get();
 
-        foreach ($categories as $category) {
-            $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
-            $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
-            $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('category_id', '=', $category->id)->get()->count();
-            $male_categories[$category->id] = Participant::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+            foreach ($categories as $category) {
+                $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
+                $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
+                $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('category_id', '=', $category->id)->get()->count();
+                $male_categories[$category->id] = Participant::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+            }
+            $stats->female_categories = $female_categories;
+            $stats->male_categories = $male_categories;
+            $result = [];
+            foreach ($final_results as $res) {
+                $user = User::where('id', '=', $res['user_id'])->first();
+                $participant = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $res['user_id'])->first();
+                $res['user_name'] = $user->middlename;
+                $res['gender'] = $user->gender;
+                $res['city'] = $user->city;
+                $res['category_id'] = $participant->category_id;
+                $result[] = $res;
+            }
+            $categories = $categories->toArray();
+        } else {
+            return view('404');
         }
-        $stats->female_categories = $female_categories;
-        $stats->male_categories = $male_categories;
-        $result = [];
-        foreach ($final_results as $res) {
-            $user = User::where('id', '=', $res['user_id'])->first();
-            $participant = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $res['user_id'])->first();
-            $res['user_name'] = $user->middlename;
-            $res['gender'] = $user->gender;
-            $res['city'] = $user->city;
-            $res['category_id'] = $participant->category_id;
-            $result[] = $res;
-        }
-        $categories = $categories->toArray();
         return view('event.final_result', compact(['event', 'result',  'categories', 'stats']));
     }
 
     public function store(StoreRequest $request) {
+        $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
+        if(!$event || !$event->is_registration_state ){
+            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+        }
         $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
         if($participant){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
@@ -161,6 +180,10 @@ class EventsController extends Controller
     }
 
     public function changeSet(Request $request) {
+        $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
+        if(!$event || !$event->is_registration_state){
+            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+        }
         $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
         $participant->number_set = $request->number_set;
         $participant->save();
@@ -172,6 +195,10 @@ class EventsController extends Controller
     }
 
     public function sendResultParticipant(Request $request) {
+        $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
+        if(!$event || !$event->is_send_result_state){
+            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+        }
         $user_id = $request->user_id;
         $participant_active = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
         if (!$participant_active){
@@ -265,7 +292,10 @@ class EventsController extends Controller
 
 
     public function listRoutesEvent(Request $request, $title) {
-        $event = Event::where('title_eng', '=', $title)->first();
+        $event = Event::where('title_eng', '=', $title)->where('is_public', 1)->first();
+        if(!$event){
+            return view('404');
+        }
         $grades = Grades::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
         $routes = [];
         $main_count = 1;

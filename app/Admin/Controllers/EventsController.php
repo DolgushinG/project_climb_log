@@ -23,6 +23,7 @@ use Encore\Admin\Widgets\Box;
 use Encore\Admin\Widgets\InfoBox;
 use Encore\Admin\Widgets\Tab;
 use Encore\Admin\Widgets\Table;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\MessageBag;
@@ -31,6 +32,15 @@ use Maatwebsite\Excel\Facades\Excel;
 class EventsController extends Controller
 {
     use HasResourceActions;
+
+    const STATES_BTN = [
+                'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
+                'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+            ];
+    const STATES_BTN_OPEN_AND_CLOSE = [
+                'on' => ['value' => 1, 'text' => 'Открыта', 'color' => 'success'],
+                'off' => ['value' => 0, 'text' => 'Закрыта', 'color' => 'default'],
+            ];
 
     /**
      * Index interface.
@@ -85,7 +95,7 @@ class EventsController extends Controller
         return $content
             ->header(trans('admin.edit'))
             ->description(trans('admin.description'))
-            ->body($this->form()->edit($id));
+            ->body($this->form($id)->edit($id));
     }
 
     /**
@@ -125,9 +135,31 @@ class EventsController extends Controller
         $grid->disableExport();
 //        $grid->disableColumnSelector();
         $grid->column('title', 'Название');
-        $grid->column('link', 'Ссылка')->link();
-        $grid->column('active', 'Опубликовано')->using([0 => 'Нет', 1 => 'Да'])->display(function ($title, $column) {
+        $grid->column('link', 'Ссылка для всех')->link();
+        $grid->column('admin_link', 'Ссылка на предпросмотр')->link();
+        $grid->column('active', 'Активировано для управления')->using([0 => 'Нет', 1 => 'Да'])->display(function ($title, $column) {
             If ($this->active == 0) {
+                return $column->label('default');
+            } else {
+                return $column->label('success');
+            }
+        });
+        $grid->column('is_registration_state', 'Регистрация')->using([0 => 'Закрыта', 1 => 'Открыта'])->display(function ($title, $column) {
+            If ($this->is_registration_state == 0) {
+                return $column->label('default');
+            } else {
+                return $column->label('success');
+            }
+        });
+        $grid->column('is_send_result_state', 'Отправка результатов')->using([0 => 'Закрыта', 1 => 'Открыта'])->display(function ($title, $column) {
+            If ($this->is_send_result_state == 0) {
+                return $column->label('default');
+            } else {
+                return $column->label('success');
+            }
+        });
+        $grid->column('is_public', 'Опубликовать для всех')->using([0 => 'Нет', 1 => 'Да'])->display(function ($title, $column) {
+            If ($this->is_public == 0) {
                 return $column->label('default');
             } else {
                 return $column->label('success');
@@ -141,10 +173,13 @@ class EventsController extends Controller
      *
      * @return Form
      */
-    protected function form()
+    protected function form($id = null)
     {
+
         $form = new Form(new Event);
+
         $form->tab('Общая информация о соревновании', function ($form) {
+
             $this->install_admin_script();
             $form->footer(function ($footer) {
 //                $footer->disableReset();
@@ -161,14 +196,17 @@ class EventsController extends Controller
             $form->hidden('climbing_gym_name_eng')->default('1');
             $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
             $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
-            $form->date('start_date', 'Дата старта')->attribute('inputmode', 'none')->placeholder('Дата старта')->required();
-            $form->date('end_date', 'Дата окончания')->attribute('inputmode', 'none')->placeholder('Дата окончания')->required();
+            $form->date('start_date', 'Дата старта')->attribute('inputmode', 'none')->placeholder('гггг:мм:дд')->required();
+            # Добавить в будущем автоматическое открытие регистрации
+//            $form->date('start_open_registration_date', 'Дата открытия регистрации')->attribute('inputmode', 'none')->placeholder('гггг:мм:дд');
+            $form->date('end_date', 'Дата окончания')->attribute('inputmode', 'none')->placeholder('гггг:мм:дд')->required();
             $form->time('start_time', 'Время старта')->attribute('inputmode', 'none')->placeholder('Время старта')->required();
             $form->time('end_time', 'Время окончания')->attribute('inputmode', 'none')->placeholder('Время окончания')->required();
             $form->image('image', 'Афиша')->placeholder('Афиша')->attribute('inputmode', 'none')->required();
             $form->summernote('description', 'Описание')->placeholder('Описание')->required();
             $form->text('contact', 'Контактная информация')->required();
             $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
+            $form->hidden('admin_link', 'Ссылка на сореванование')->placeholder('Ссылка');
 //            $form->disableSubmit();
         })->tab('Оплата', function ($form) {
             $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
@@ -226,15 +264,41 @@ class EventsController extends Controller
                     0 =>'Классика финал для лучших в квалификации',
                 ])->required();
             $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
-            $states = [
-                'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
-                'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
-            ];
-            $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states($states);
-            $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states($states);
-            $form->switch('active', 'Опубликовать')
-                ->help('Не обязательно сразу опубликовывать, после сохранения будет ссылка по которой можно будет посмотреть')
-                ->states($states);
+
+            $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states(self::STATES_BTN);
+            $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states(self::STATES_BTN);
+
+        })->tab('Управление соревнованием', function ($form) use ($id){
+            $form->switch('is_registration_state', 'Регистрация ')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            $form->datetime('datetime_registration_state', 'Дата закрытия регистрации [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
+            $form->switch('is_send_result_state', 'Отправка результатов')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            $form->datetime('datetime_send_result_state', 'Дата закрытия отправки результатов [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
+            $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+            if(!$events){
+                $help = 'Самая важная функция, чтобы текущие сореванование отображались во вкладках "Квалификация,полуфинал,финал"
+                нужно активировать';
+                $form->switch('active', 'Активировать для управления')
+                    ->help($help)
+                    ->states(self::STATES_BTN);
+            } else {
+                if($events->id != intval($id)){
+                    $help = 'Только одно соревнование может быть активировано для управление, если нельзя нажать значит какое-то соревнование уже активировано';
+                    $form->switch('active', 'Активировать для управления')
+                        ->help($help)
+                        ->states(self::STATES_BTN)
+                        ->readOnly();
+                } else {
+                    $help = 'Самая важная функция, чтобы текущие сореванование отображались во вкладках "Квалификация,полуфинал,финал"
+                нужно активировать';
+                    $form->switch('active', 'Активировать для управления')
+                        ->help($help)
+                        ->states(self::STATES_BTN);
+                }
+            }
+
+            $form->switch('is_public', 'Опубликовать для всех')
+                ->help('После включения, все смогут зайти на страницу с соревнованиями')
+                ->states(self::STATES_BTN);
         });
         $form->tools(function (Form\Tools $tools) {
 
@@ -272,6 +336,7 @@ class EventsController extends Controller
                 $form->climbing_gym_name_eng =  $climbing_gym_name_eng;
                 $form->title_eng = $title_eng;
                 $form->link = '/event/'.$climbing_gym_name_eng.'/'.$title_eng;
+                $form->admin_link = '/admin/event/'.$climbing_gym_name_eng.'/'.$title_eng;
             }
         });
         $form->saved(function (Form $form) {
@@ -321,21 +386,11 @@ class EventsController extends Controller
                 if(!$exist_sets) {
                     $this->install_set(Admin::user()->id);
                 }
-                $success = new MessageBag([
-                    'title'   => 'Соревнование успешно сохранено',
-                    'message' => '',
-                ]);
-
-                return back()->with(compact('success'));
+                return back()->isRedirect('events');
             }
             return $form;
         });
         return $form;
-    }
-
-    public static function update_category_id($table)
-    {
-
     }
 
     /**
@@ -759,9 +814,17 @@ class EventsController extends Controller
 
     // Очистка данных черновика при успешной отправке формы
     $('form').submit(function() {
+         if(window.location.href.indexOf(\"edit\") > -1)
+            {
+                 return
+            }
         clearDraft();
     });
      $('[type=submit]').on('click', function() {
+         if(window.location.href.indexOf(\"edit\") > -1)
+            {
+                 return
+            }
        clearDraft();
     });
     // Функция для очистки данных черновика

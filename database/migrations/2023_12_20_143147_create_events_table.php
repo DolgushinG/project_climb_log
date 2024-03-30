@@ -34,6 +34,7 @@ class CreateEventsTable extends Migration
             $table->string('title_eng');
             $table->string('subtitle')->nullable();
             $table->string('link');
+            $table->string('admin_link')->nullable();
             $table->string('link_payment')->nullable();
             $table->string('img_payment')->nullable();
             $table->longText('info_payment')->nullable();
@@ -55,6 +56,11 @@ class CreateEventsTable extends Migration
             $table->integer('mode')->nullable();
             $table->integer('mode_amount_routes')->nullable();
             $table->boolean('active');
+            $table->boolean('is_registration_state')->nullable();
+            $table->datetime('datetime_registration_state')->nullable();
+            $table->boolean('is_send_result_state')->nullable();
+            $table->datetime('datetime_send_result_state')->nullable();
+            $table->boolean('is_public')->nullable();
             $table->timestamps();
         });
     }

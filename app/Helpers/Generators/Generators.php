@@ -93,6 +93,7 @@ class Generators
     {
         if($table === 'result_participant'){
             $active_participants = Participant::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
+            $event = Event::find($event_id);
             foreach ($active_participants as $active_participant){
                 $result_participant = array();
                 $info_routes = Grades::where('event_id', $event_id)->get();
@@ -100,7 +101,9 @@ class Generators
                 $route_id = 1;
                 foreach ($info_routes as $route){
                     for($i = 1; $i <= $route->amount;$i++){
-                        (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route_id, $owner_id, $gender);
+                        if($event->mode == 2){
+                            (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route_id, $owner_id, $gender);
+                        }
                         $result_participant[] = array('owner_id' => $owner_id ,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route_id,'attempt' => rand(0,2),'grade' => $route->grade);
                         $route_id++;
                     }

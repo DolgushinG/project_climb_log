@@ -65,6 +65,8 @@ class EventFactory extends Factory
         return [
             'image' => $this->faker->randomElement(['images/20231115_cea82537af86871a32344dcd5c6a23ba.jpeg','images/vT94mFyT9xU.jpg']),
             'active' => true,
+            'is_registration_state' => true,
+            'is_send_result_state' => true,
             'start_date' => $this->faker->date(),
             'end_date' => $this->faker->date(),
             'start_time' => $this->faker->time(),
@@ -77,6 +79,7 @@ class EventFactory extends Factory
             'title_eng' => $this->faker->word(),
             'subtitle' => $this->faker->word(),
             'link' => $this->faker->url(),
+            'admin_link' => $this->faker->url(),
             'link_payment' => "https://www.tinkoff.ru/cf/1ZyTiSRkXmZ",
             'img_payment' => "images/qr.png",
             'info_payment' => $this->faker->paragraph(20),

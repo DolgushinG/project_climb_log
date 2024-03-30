@@ -33,6 +33,7 @@ Route::get('/competition', function () {
 
 //Route::get('/event/{id}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::get('/event/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
+Route::get('/admin/event/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::get('/event/{climbing_gym}/{title}/participants', [App\Http\Controllers\EventsController::class, 'get_participants'])->name('participants');
 Route::get('/event/{climbing_gym}/{title}/final/results', [App\Http\Controllers\EventsController::class, 'get_final_results'])->name('final_results');
 Route::middleware(['auth'])->group(function () {
