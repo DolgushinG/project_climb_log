@@ -50,11 +50,7 @@ class ResultRouteFinalSeeder extends Seeder
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $user['id'],'category_id' => $participant->category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
-//                    if($event_id == 3 &&  $user['id'] == 42){
-//                        dd($result);
-//                    }
-
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id,'gender' => $user['gender'], 'user_id' => $user['id'],'category_id' => $participant->category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
                 }
             }
             DB::table('result_route_final_stage')->insert($result);

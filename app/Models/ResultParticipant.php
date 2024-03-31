@@ -31,12 +31,12 @@ class ResultParticipant extends Model
             ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
             ->where('participants.event_id', '=', $event_id)
             ->where('participants.active', '=', 1)
-            ->where('gender', '=', $gender)
             ->select(
                 'users.id',
             )
             ->pluck('id');
         return count(ResultParticipant::whereIn('user_id', $users)
+            ->where('gender', '=', $gender)
             ->where('route_id', '=', $route_id)
             ->whereNotIn('attempt',[0])
             ->get()

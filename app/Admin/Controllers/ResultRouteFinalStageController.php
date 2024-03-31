@@ -168,11 +168,13 @@ class ResultRouteFinalStageController extends Controller
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+            $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
         });
         $grid->actions(function ($actions) {
             $actions->disableEdit();
             $actions->disableView();
         });
+        $grid->disableFilter();
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
@@ -193,14 +195,6 @@ class ResultRouteFinalStageController extends Controller
         $grid->column('amount_try_top', __('Кол-во попыток на топ'));
         $grid->column('amount_zone', __('Кол-во зон'));
         $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
-        $grid->filter(function($filter){
-            $filter->disableIdFilter();
-            $filter->in('user.gender', 'Пол')->checkbox([
-                'male'    => 'Мужчина',
-                'female'    => 'Женщина',
-            ]);
-            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-        });
         return $grid;
     }
 

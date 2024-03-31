@@ -29,23 +29,28 @@ class BatchGenerateParticipant extends Action
         $count = intval($request->count);
         $event = Event::find($event_id);
         if($event->is_qualification_counting_like_final){
-            Generators::prepare_result_participant($owner_id, $event->id,'result_route_qualification_like_final', $count);
+            $table_result = 'result_qualification_like_final';
+            $table_result_routes = 'result_route_qualification_like_final';
+            $text = 'готово';
+
         } else {
-            $part_category = ParticipantCategory::where('event_id', $event->id)->get();
-            $amount_categories = count($event->categories);
-            $parts = intval($count / $amount_categories);
-            $next = $parts;
-            $start = 1;
-            foreach($part_category as $category){
-                Generators::prepare_participant_with_owner($owner_id, $event->id, $next, $category->category, $start);
-                $next = $next+$parts;
-                $start = $start+$parts;
-            }
-            Generators::prepare_result_participant($owner_id, $event_id, 'result_participant');
-
+            $table_result = 'participants';
+            $table_result_routes = 'result_participant';
+            $text = 'Обязательно пересчитайте результаты для правильного расставление мест';
         }
-
-        return $this->response()->success('Готово')->refresh();
+        DB::table($table_result_routes)->truncate();
+        $part_category = ParticipantCategory::where('event_id', $event->id)->get();
+        $amount_categories = count($event->categories);
+        $parts = intval($count / $amount_categories);
+        $next = $parts;
+        $start = 1;
+        foreach($part_category as $category){
+            Generators::prepare_participant_with_owner($owner_id, $event->id, $next, $category->category, $start, $table_result);
+            $next = $next+$parts;
+            $start = $start+$parts;
+        }
+        Generators::prepare_result_participant($owner_id, $event->id,$table_result_routes, $count);
+        return $this->response()->success($text)->refresh();
     }
 
     public function form()

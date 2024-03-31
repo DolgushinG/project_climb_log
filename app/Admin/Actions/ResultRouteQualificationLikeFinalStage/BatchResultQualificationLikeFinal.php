@@ -6,6 +6,7 @@ use App\Admin\Controllers\ResultRouteSemiFinalStageController;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
+use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultRouteSemiFinalStage;
@@ -27,7 +28,7 @@ class BatchResultQualificationLikeFinal extends Action
     {
         $results = $request->toArray();
         $event = Event::find($results['event_id']);
-        $category_id = Participant::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first()->category_id;
+        $category_id = ResultQualificationLikeFinal::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first()->category_id;
         $data = array();
         for($i = 1; $i <= $event->amount_routes_in_qualification_like_final; $i++){
             if($results['amount_try_top_'.$i] > 0 || $results['amount_try_top_'.$i] != null){
@@ -51,7 +52,7 @@ class BatchResultQualificationLikeFinal extends Action
                 'amount_try_zone' => intval($results['amount_try_zone_'.$i]),
             );
         }
-        $participant = Participant::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+        $participant = ResultQualificationLikeFinal::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
         $participant->active = 1;
         $participant->save();
         DB::table('result_route_qualification_like_final')->insert($data);
@@ -63,12 +64,12 @@ class BatchResultQualificationLikeFinal extends Action
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $participant_users_id = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+        $participant_users_id = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
         $result = User::whereIn('id', $participant_users_id)->pluck( 'middlename','id');
         $result_qualification_like_final = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
             $user = User::where('middlename', $res)->first()->id;
-            $category_id = Participant::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
+            $category_id = ResultQualificationLikeFinal::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
             $category = ParticipantCategory::find($category_id)->category;
             $result[$index] = $res.' ['.$category.']';
             if(in_array($index, $result_qualification_like_final)){

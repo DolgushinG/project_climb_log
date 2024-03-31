@@ -16,6 +16,7 @@ class CreateResultParticipantTable extends Migration
         Schema::create('result_participant', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('owner_id');
+            $table->string('gender');
             $table->integer('user_id');
             $table->integer('event_id');
             $table->integer('route_id');

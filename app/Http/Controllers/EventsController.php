@@ -10,6 +10,7 @@ use App\Models\Grades;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultParticipant;
+use App\Models\ResultQualificationLikeFinal;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Admin;
@@ -50,7 +51,7 @@ class EventsController extends Controller
         if($event_public_exist || $pre_show){
             $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
             foreach ($sets as $set){
-                $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set', '=', $set->number_set)->count();
+                $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
                 $set->free = $set->max_participants - $participants_event;
                 $a = $set->max_participants;
                 $b = $set->free;
@@ -82,19 +83,19 @@ class EventsController extends Controller
             $users_event = $participant_event->toArray();
             $days = Set::where('owner_id', '=', $event->owner_id)->select('day_of_week')->distinct()->get();
             $sets = Set::where('owner_id', '=', $event->owner_id)->get();
-            $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('number_set');
+            $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('id');
             foreach ($number_sets as $index => $set) {
-                $sets[$index]->count_participant = Participant::where('event_id', '=', $event->id)->where('number_set', $set)->count();
+                $sets[$index]->count_participant = Participant::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
             }
             $index = 0;
             foreach ($users_event as $set => $user) {
                 if ($index <= count($users)) {
-                    $set = $sets->where('number_set', '=', $user['number_set'])->where('owner_id', '=', $event->owner_id)->first();
+                    $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
                     $participants[] = array(
                         'middlename' => $users[$index]['middlename'],
                         'city' => $users[$index]['city'],
                         'team' => $users[$index]['team'],
-                        'number_set' => $user['number_set'],
+                        'number_set' => $set->number_set,
                         'time' => $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10),
                         'gender' => $users[$index]['gender'],
                     );
@@ -150,10 +151,30 @@ class EventsController extends Controller
         if(!$event || !$event->is_registration_state ){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
-        $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
-        if($participant){
-            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+        $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
+        if($event->is_qualification_counting_like_final){
+            $participant = ResultQualificationLikeFinal::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+            if($participant){
+                return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+            }
+            $participant = new ResultQualificationLikeFinal;
+        } else {
+            $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+            if($participant){
+                return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+            }
+            $participant = new Participant;
         }
+        $set = Set::where('number_set', $request->number_set)->where('owner_id', $event->owner_id)->first();
+        $participant->event_id = $request->event_id;
+        $participant->gender = $request->gender;
+        $participant->user_id = $request->user_id;
+        $participant->number_set_id = $set->id;
+        $participant->category_id = $participant_categories->id;
+        $participant->owner_id = Event::find($request->event_id)->owner_id;
+        $participant->active = 0;
+        $participant->save();
+
         if($request->user_id){
             $user = User::find($request->user_id);
             $user->gender = $request->gender;
@@ -161,16 +182,6 @@ class EventsController extends Controller
             $user->birthday = $request->birthday;
             $user->save();
         }
-        $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
-        $participant = new Participant;
-        $participant->event_id = $request->event_id;
-        $participant->user_id = $request->user_id;
-        $participant->number_set = $request->number_set;
-        $participant->category_id = $participant_categories->id;
-        $participant->owner_id = Event::find($request->event_id)->owner_id;
-        $participant->active = 0;
-
-        $participant->save();
 
         if ($participant->save()) {
             return response()->json(['success' => true, 'message' => 'Успешная регистрация'], 201);
@@ -184,8 +195,13 @@ class EventsController extends Controller
         if(!$event || !$event->is_registration_state){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
-        $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
-        $participant->number_set = $request->number_set;
+        if($event->is_qualification_counting_like_final){
+            $participant = ResultQualificationLikeFinal::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        } else {
+            $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        }
+        $set = Set::where('number_set', $request->number_set)->where('owner_id', $event->owner_id)->first();
+        $participant->number_set_id = $set->id;
         $participant->save();
         if ($participant->save()) {
             return response()->json(['success' => true, 'message' => 'Успешно сохранено']);

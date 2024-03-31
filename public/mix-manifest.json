@@ -4,6 +4,7 @@
     "/js/welcome.js": "/js/welcome.js",
     "/js/profile.js": "/js/profile.js",
     "/js/ddata.js": "/js/ddata.js",
+    "/js/datepicker.js": "/js/datepicker.js",
     "/css/style.css": "/css/style.css",
     "/css/app.css": "/css/app.css"
 }

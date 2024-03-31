@@ -17,6 +17,7 @@ use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
 use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteQualificationLikeFinal;
+use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -26,6 +27,7 @@ use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use function Symfony\Component\String\s;
 
 class ParticipantsController extends Controller
 {
@@ -46,7 +48,6 @@ class ParticipantsController extends Controller
                 if($event) {
                     if($event->is_qualification_counting_like_final){
                         if($event->is_additional_final) {
-                            $amount_the_best_participant = $event->amount_the_best_participant;
                             $all_group_participants = array();
                             $all_users = array();
                             $users = array();
@@ -70,7 +71,7 @@ class ParticipantsController extends Controller
                                 }
                             }
                             foreach ($all_users as $index => $user){
-                                $fields = ['gender', 'middlename', 'avatar','telegram_id','yandex_id','vkontakte_id'];
+                                $fields = ['middlename', 'avatar','telegram_id','yandex_id','vkontakte_id'];
                                 $all_users[$index] = collect($user)->except($fields)->toArray();
 
                                 $final_result_stage = ResultFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
@@ -80,6 +81,7 @@ class ParticipantsController extends Controller
                                 $category_id = ParticipantCategory::where('id', $all_users[$index]['category_id'])->where('event_id', $event->id)->first()->id;
                                 $final_result_stage->event_id = $all_users[$index]['event_id'];
                                 $final_result_stage->user_id = $all_users[$index]['user_id'];
+                                $final_result_stage->gender = trans_choice('somewords.'.$all_users[$index]['gender'], 10);;
                                 $final_result_stage->category_id = $category_id;
                                 $final_result_stage->owner_id = $all_users[$index]['owner_id'];
                                 $final_result_stage->amount_top = $all_users[$index]['amount_top'];
@@ -90,9 +92,11 @@ class ParticipantsController extends Controller
                                 $final_result_stage->save();
                             }
                         } else {
-                            $participant_users_id = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
-                            $participants = User::whereIn('id', $participant_users_id)->get();
-                            ResultRouteSemiFinalStageController::getUsersSorted($participants, $fields, $event, 'qualification_like_final', Admin::user()->id);
+                            $participant_users_id = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+                            $participants_female = User::whereIn('id', $participant_users_id)->where('gender', 'female')->get();
+                            $participants_male = User::whereIn('id', $participant_users_id)->where('gender', 'male')->get();
+                            ResultRouteSemiFinalStageController::getUsersSorted($participants_female, $fields, $event, 'qualification_like_final', Admin::user()->id);
+                            ResultRouteSemiFinalStageController::getUsersSorted($participants_male, $fields, $event, 'qualification_like_final', Admin::user()->id);
                         }
                         $row->column(20, $this->qualification_counting_like_final());
                     } else {
@@ -129,7 +133,12 @@ class ParticipantsController extends Controller
         if ($event->is_qualification_counting_like_final) {
             $result = ResultQualificationLikeFinal::find($id);
             ResultRouteQualificationLikeFinal::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
-            ResultQualificationLikeFinal::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+            $model = ResultQualificationLikeFinal::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+            $model->amount_top = null;
+            $model->amount_try_top = null;
+            $model->amount_zone = null;
+            $model->amount_try_zone = null;
+            $model->save();
         }
     }
 
@@ -149,10 +158,12 @@ class ParticipantsController extends Controller
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+            $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
             $selector->select('active', 'Кто добавил', [ 1 => 'Добавил',  0 => 'Не добавил']);
-            $selector->select('is_paid', 'Кто оплатил', [ 1 => 'Да',  0 => 'Нет']);
+            $selector->select('is_paid', 'Есть оплата', [ 1 => 'Да',  0 => 'Нет']);
         });
         $grid->disableBatchActions();
+        $grid->disableFilter();
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
@@ -174,7 +185,8 @@ class ParticipantsController extends Controller
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-        $grid->column('number_set', 'Номер сета')->editable();
+        $grid->column('number_set_id', 'Номер сета')
+            ->select(Set::getParticipantSets(Admin::user()->id));
         $grid->column('user_place', 'Место в квалификации')
             ->help('При некорректном раставлением мест, необходимо пересчитать результаты')
             ->sortable();
@@ -191,14 +203,6 @@ class ParticipantsController extends Controller
             'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
         ];
         $grid->column('is_paid', 'Оплата')->switch($states);
-        $grid->filter(function($filter){
-            $filter->disableIdFilter();
-            $filter->in('user.gender', 'Пол')->checkbox([
-                'male'    => 'Мужчина',
-                'female'    => 'Женщина',
-            ]);
-            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-        });
         return $grid;
     }
 
@@ -219,6 +223,8 @@ class ParticipantsController extends Controller
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+            $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
+            $selector->select('is_paid', 'Есть оплата', [ 1 => 'Да',  0 => 'Нет']);
         });
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultQualificationLikeFinal);
@@ -232,6 +238,7 @@ class ParticipantsController extends Controller
         });
 
         $grid->disableExport();
+        $grid->disableFilter();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->disablePagination();
@@ -240,12 +247,8 @@ class ParticipantsController extends Controller
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
         });
-//        $grid->column('category_id', 'Категория')->display(function ($category_id) {
-//            $owner_id = Admin::user()->id;
-//            $event = Event::where('owner_id', '=', $owner_id)
-//                ->where('active', 1)->first();
-//            return ParticipantCategory::where('id', '=', $category_id)->where('event_id', $event->id)->first()->category;
-//        })->sortable();
+        $grid->column('number_set_id', 'Номер сета')
+            ->select(Participant::number_sets(Admin::user()->id));
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
@@ -254,14 +257,11 @@ class ParticipantsController extends Controller
         $grid->column('amount_try_top', __('Кол-во попыток на топ'));
         $grid->column('amount_zone', __('Кол-во зон'));
         $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
-        $grid->filter(function($filter){
-            $filter->disableIdFilter();
-            $filter->in('user.gender', 'Пол')->checkbox([
-                'male'    => 'Мужчина',
-                'female'    => 'Женщина',
-            ]);
-            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-        });
+        $states = [
+            'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
+            'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+        ];
+        $grid->column('is_paid', 'Оплата')->switch($states);
         return $grid;
     }
     /**
@@ -271,9 +271,10 @@ class ParticipantsController extends Controller
      */
     protected function form()
     {
+
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if($event->is_qualification_counting_like_final){
-            $form = new Form(new ResultRouteQualificationLikeFinal);
+            $form = new Form(new ResultQualificationLikeFinal);
             $form->display('ID');
             $form->hidden('owner_id')->value(Admin::user()->id);
             $form->text('event_id', 'event_id');
@@ -285,6 +286,10 @@ class ParticipantsController extends Controller
             $form->hidden('amount_top', 'amount_top');
             $form->display(trans('admin.created_at'));
             $form->display(trans('admin.updated_at'));
+            $form->text('number_set_id', 'number_set');
+            $form->text('category_id', 'category_id');
+            $form->switch('active', 'active');
+            $form->switch('is_paid', 'is_paid');
             $form->saving(function (Form $form) {
                 if($form->amount_try_top > 0){
                     $form->amount_top  = 1;
@@ -303,7 +308,7 @@ class ParticipantsController extends Controller
             $form->hidden('owner_id')->value(Admin::user()->id);
             $form->text('event_id');
             $form->text('number_set', 'number_set');
-            $form->text('category_id', 'number_set');
+            $form->text('category_id', 'category_id');
             $form->switch('active', 'active');
             $form->switch('is_paid', 'is_paid');
             $form->display(trans('admin.created_at'));

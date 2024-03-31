@@ -30,7 +30,7 @@ class ResultParticipantSeeder extends Seeder
                 foreach ($info_routes as $route){
                     for($i = 1; $i <= $route->amount;$i++){
                         (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route_id, $owner_id, $gender);
-                        $result_participant[] = array('owner_id' => $owner_id ,'user_id' => $user_id,'event_id' => $event_id,'route_id' => $route_id,'attempt' => rand(0,2),'grade' => $route->grade);
+                        $result_participant[] = array('owner_id' => $owner_id ,'gender' => $gender,'user_id' => $user_id,'event_id' => $event_id,'route_id' => $route_id,'attempt' => rand(0,2),'grade' => $route->grade);
                         $route_id++;
                     }
                 }

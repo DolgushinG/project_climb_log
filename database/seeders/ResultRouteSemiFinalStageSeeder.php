@@ -47,7 +47,7 @@ class ResultRouteSemiFinalStageSeeder extends Seeder
                             $amount_top = 0;
                             $amount_try_top = 0;
                         }
-                        $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $user['id'], 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
+                        $result[] = array('owner_id' => $owner_id, 'gender' => $user['gender'],'event_id' => $event_id, 'user_id' => $user['id'], 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
                     }
                 }
                 DB::table('result_route_semifinal_stage')->insert($result);

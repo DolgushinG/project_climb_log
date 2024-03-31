@@ -10,6 +10,7 @@ use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
+use App\Models\Set;
 use App\Models\User;
 use Database\Seeders\ParticipantSeeder;
 use Illuminate\Support\Facades\DB;
@@ -76,7 +77,7 @@ class Generators
         }
     }
 
-    public static function prepare_participant_with_owner($owner_id, $event_id, $users, $category, $start_user_id)
+    public static function prepare_participant_with_owner($owner_id, $event_id, $users, $category, $start_user_id, $table)
     {
         $participants = array();
         $category_id = ParticipantCategory::where('category', $category)->where('owner_id', $owner_id)->where('event_id', $event_id)->first()->id;
@@ -84,27 +85,29 @@ class Generators
             $user = User::find($i);
             $user->category = $category_id;
             $user->save();
-            $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'category_id' => $category_id, 'user_id' => $i, 'number_set' => rand(1, 6), 'active' => 1);
+            $sets = Set::where('owner_id', $owner_id)->pluck('id','number_set')->toArray();
+            $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'category_id' => $category_id,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1);
         }
-        DB::table('participants')->insert($participants);
+        DB::table($table)->insert($participants);
     }
 
     public static function prepare_result_participant($owner_id, $event_id, $table, $count=30)
     {
+
         if($table === 'result_participant'){
+            DB::table($table)->truncate();
             $active_participants = Participant::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
             $event = Event::find($event_id);
             foreach ($active_participants as $active_participant){
                 $result_participant = array();
                 $info_routes = Grades::where('event_id', $event_id)->get();
-                $gender = User::find($active_participant->user_id)->gender;
                 $route_id = 1;
                 foreach ($info_routes as $route){
                     for($i = 1; $i <= $route->amount;$i++){
                         if($event->mode == 2){
-                            (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route_id, $owner_id, $gender);
+                            (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route_id, $owner_id, $active_participant->gender);
                         }
-                        $result_participant[] = array('owner_id' => $owner_id ,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route_id,'attempt' => rand(0,2),'grade' => $route->grade);
+                        $result_participant[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route_id,'attempt' => rand(0,2),'grade' => $route->grade);
                         $route_id++;
                     }
                 }
@@ -113,11 +116,13 @@ class Generators
         }
 
         if($table === 'result_route_qualification_like_final') {
+            DB::table($table)->truncate();
             $event = Event::find($event_id);
             $event_categories = $event->categories;
-
+            $participants = ResultQualificationLikeFinal::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
             $result = array();
-            for ($user = 1; $user <= $count; $user++) {
+
+            foreach($participants as $participant) {
                 $category = ParticipantCategory::where('category', '=', $event_categories[array_rand($event_categories)])->where('event_id', $event_id)->first();
                 if($category){
                     $category_id = $category->id;
@@ -142,13 +147,14 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $user,'category_id' => $category_id, 'route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $participant->gender,'user_id' => $participant->user_id,'category_id' => $category_id, 'route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
                 }
             }
             DB::table('result_route_qualification_like_final')->insert($result);
         }
 
         if($table === 'result_route_semifinal_stage') {
+            DB::table($table)->truncate();
             $event = Event::find($event_id);
             $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
             if($event->is_qualification_counting_like_final){
@@ -179,13 +185,14 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'],'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
                 }
             }
             DB::table('result_route_semifinal_stage')->insert($result);
         }
 
         if($table === 'result_route_final_stage') {
+            DB::table($table)->truncate();
             $event = Event::find($event_id);
             $amount_the_best_participant = 10;
 
@@ -248,7 +255,7 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'user_id' => $user['id'],'category_id' => $participant->category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'], 'user_id' => $user['id'],'category_id' => $participant->category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
                 }
             }
             DB::table('result_route_final_stage')->insert($result);

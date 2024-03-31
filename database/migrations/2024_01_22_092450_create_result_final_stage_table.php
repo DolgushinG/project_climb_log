@@ -18,6 +18,7 @@ class CreateResultFinalStageTable extends Migration
             $table->integer('owner_id');
             $table->integer('category_id');
             $table->integer('event_id');
+            $table->string('gender');
             $table->integer('place');
             $table->integer('user_id');
             $table->integer('amount_top');

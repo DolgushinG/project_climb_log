@@ -6,7 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Set extends Model
 {
-    public function free_slots($set_id, $event_id){
-        return Participant::where('number_set', '=', $set_id)->where('event_id', '=', $event_id)->count();
+    public static function getParticipantSets($owner_id)
+    {
+        return Set::where('owner_id', $owner_id)->pluck('number_set', 'id')->toArray();
+    }
+    public function participant()
+    {
+        return $this->belongsTo(Participant::class);
+    }
+    public function result_qualification_like_final()
+    {
+        return $this->belongsTo(ResultQualificationLikeFinal::class);
     }
 }

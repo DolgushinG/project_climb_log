@@ -148,4 +148,13 @@ document.getElementById("floatingSelectCategory").addEventListener("change", (ev
         button_paticipant.style.display = 'block';
     }
 });
+document.getElementById("floatingSelectSportCategory").addEventListener("change", (ev) => {
+    var value = document.getElementById("floatingSelect").value;
+    var c_value = document.getElementById("floatingSelectCategory").value;
+    var c_value_sport = document.getElementById("floatingSelectSportCategory").value;
+    if (value !== "" && c_value !== "" && c_value_sport !== ""){
+        var button_paticipant = document.querySelector('#btn-participant');
+        button_paticipant.style.display = 'block';
+    }
+});
 

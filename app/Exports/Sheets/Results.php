@@ -8,6 +8,7 @@ use App\Models\ResultParticipant;
 use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultRouteSemiFinalStage;
+use App\Models\Set;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -263,16 +264,19 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 'participants.user_place',
                 'users.middlename',
                 'participants.points',
-                'participants.number_set',
+                'participants.owner_id',
+                'participants.number_set_id',
             )
-            ->where('gender', '=', $this->gender)->get()->sortBy('user_place')->toArray();
+            ->where('participants.gender', '=', $this->gender)->get()->sortBy('user_place')->toArray();
         foreach ($users as $index => $user){
             $qualification_result = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
             $amount_passed_flash = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 1)->get()->count();
             $amount_passed_redpoint = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 2)->get()->count();
             $amount_passed_routes = $amount_passed_flash+$amount_passed_redpoint;
             $place = Participant::get_places_participant_in_qualification($this->event_id, $user['id'], $this->gender, $this->category->id, true);
+            $set = Set::find($user['number_set_id']);
             $users[$index]['user_place'] = $place;
+            $users[$index]['number_set_id'] = $set->number_set;
             $users[$index]['amount_passed_routes'] = $amount_passed_routes;
             $users[$index]['amount_passed_flash'] = $amount_passed_flash;
             $users[$index]['amount_passed_redpoint'] = $amount_passed_redpoint;
@@ -289,8 +293,9 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                         $attempt = '-';
                 }
                 $users[$index]['route_result_'.$result->route_id] = $attempt;
+
             }
-            $users[$index] = collect($users[$index])->except('id');
+            $users[$index] = collect($users[$index])->except('id', 'owner_id');
         }
         $users_need_sorted = collect($users)->toArray();
         usort($users_need_sorted, function ($a, $b) {
@@ -312,7 +317,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $table.'.amount_try_top',
                 $table.'.amount_zone',
                 $table.'.amount_try_zone',
-            )->where('gender', '=', $this->gender);
+            )->where($table.'.gender', '=', $this->gender);
         if($table === "result_final_stage" || $table === "result_qualification_like_final"){
             if($this->category){
                 $users = $users->select(

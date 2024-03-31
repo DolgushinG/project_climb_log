@@ -78,8 +78,14 @@ class User extends Authenticatable
     ];
 
     public static function user_participant($event_id){
-        $participant = Participant::where('user_id', '=', Auth()->user()->id)
-            ->where('event_id', '=', $event_id)->first();
+        $event = Event::find($event_id);
+        $user_id = Auth()->user()->id;
+        if($event->is_qualification_counting_like_final){
+            $participant = ResultQualificationLikeFinal::where('user_id',  $user_id)->where('event_id', $event_id)->first();
+        } else {
+            $participant = Participant::where('user_id', '=', $user_id)
+                ->where('event_id', '=', $event_id)->first();
+        }
         if($participant){
             return true;
         } else {

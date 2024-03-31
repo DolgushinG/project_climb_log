@@ -19,7 +19,7 @@ class CreateSetsTable extends Migration
             $table->string('time');
             $table->integer('max_participants');
             $table->string('day_of_week');
-            $table->string('number_set');
+            $table->integer('number_set');
             $table->timestamps();
         });
     }

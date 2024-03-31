@@ -13,6 +13,7 @@ use App\Models\Format;
 use App\Models\Grades;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
+use App\Models\ResultQualificationLikeFinal;
 use App\Models\Set;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -53,17 +54,25 @@ class EventsController extends Controller
         return $content->row(function ($row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
                 if($event){
-                    $sum_participant = Participant::where('event_id', $event->id)->count();
-                    $participant_is_paid = Participant::where('event_id', $event->id)->where('is_paid', 1)->count();
-                    $participant_is_not_paid = Participant::where('event_id', $event->id)->where('is_paid', 0)->count();
-                    $participant_is_not_active = Participant::where('event_id', $event->id)->where('active', 0)->count();
-                    $participant_is_active = Participant::where('event_id', $event->id)->where('active', 1)->count();
+                    if($event->is_qualification_counting_like_final){
+                        $participant = ResultQualificationLikeFinal::where('event_id', $event->id);
+                    } else {
+                        $participant = Participant::where('event_id', $event->id);
+                    }
+                    $sum_participant = $participant->count();
+                    $participant_is_paid = $participant->where('is_paid', 1)->count();
+                    $participant_is_not_paid = $participant->where('is_paid', 0)->count();
+                    $participant_is_not_active = $participant->where('active', 0)->count();
+                    $participant_is_active = $participant->where('active', 1)->count();
                     $sum = $participant_is_not_paid + $participant_is_not_active;
                 }
                 $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/participants', $sum_participant ?? 0));
                 $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/participants', $participant_is_paid ?? 0));
-                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
-                $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
+                if(!$event->is_qualification_counting_like_final){
+                    $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
+                    $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
+                }
+
             })->body($this->grid());
 
     }
@@ -127,13 +136,10 @@ class EventsController extends Controller
             $actions->disableView();
             $actions->append(new ActionExport($actions->getKey(), 'all', 'excel'));
             $actions->append(new ActionExportCardParticipant($actions->getKey(), 'Карточка участника'));
-//            $actions->append(new ActionExport($actions->getKey(), 'all', 'csv'));
-//            $actions->append(new ActionExport($actions->getKey(), 'all', 'ods'));
         });
 
         $grid->disableFilter();
         $grid->disableExport();
-//        $grid->disableColumnSelector();
         $grid->column('title', 'Название');
         $grid->column('link', 'Ссылка для всех')->link();
         $grid->column('admin_link', 'Ссылка на предпросмотр')->link();

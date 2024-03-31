@@ -73,6 +73,52 @@ $(document).on('click', '#btn-participant', function (e) {
     }
   });
 });
+$(document).on('click', '#btn-participant-change-set', function (e) {
+  $.ajaxSetup({
+    headers: {
+      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    }
+  });
+  var value = document.getElementById("floatingSelectChangeSet").value;
+  var button = $('#btn-participant-change-set');
+  var event_id = document.getElementById('btn-participant-change-set').getAttribute('data-id');
+  var user_id = document.getElementById('btn-participant-change-set').getAttribute('data-user-id');
+  e.preventDefault();
+  $.ajax({
+    type: 'POST',
+    url: '/changeSet',
+    data: {
+      'number_set': value,
+      'event_id': event_id,
+      'user_id': user_id
+    },
+    success: function success(xhr, status, error) {
+      button.text('').append('<i id="spinner" style="margin-left: -12px;\n' + '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...');
+      setTimeout(function () {
+        button.text(xhr.message);
+      }, 3000);
+      setTimeout(function () {
+        button.text('Сет изменен');
+      }, 6000);
+      setTimeout(function () {
+        button.text('Изменить сет');
+      }, 6000);
+    },
+    error: function error(xhr, status, _error2) {
+      button.text('').append('<i id="spinner" style="margin-left: -12px;\n' + '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...');
+      setTimeout(function () {
+        button.removeClass('btn-save-change');
+        button.addClass('btn-failed-change');
+        button.text(xhr.message);
+      }, 3000);
+      setTimeout(function () {
+        button.removeClass('btn-failed-change');
+        button.addClass('btn-save-change');
+        button.text('Изменить сет');
+      }, 6000);
+    }
+  });
+});
 document.getElementById("floatingSelect").addEventListener("change", function (ev) {
   var value = document.getElementById("floatingSelect").value;
   var c_value = document.getElementById("floatingSelectCategory").value;
@@ -85,6 +131,15 @@ document.getElementById("floatingSelectCategory").addEventListener("change", fun
   var value = document.getElementById("floatingSelect").value;
   var c_value = document.getElementById("floatingSelectCategory").value;
   if (value !== "" && c_value !== "") {
+    var button_paticipant = document.querySelector('#btn-participant');
+    button_paticipant.style.display = 'block';
+  }
+});
+document.getElementById("floatingSelectSportCategory").addEventListener("change", function (ev) {
+  var value = document.getElementById("floatingSelect").value;
+  var c_value = document.getElementById("floatingSelectCategory").value;
+  var c_value_sport = document.getElementById("floatingSelectSportCategory").value;
+  if (value !== "" && c_value !== "" && c_value_sport !== "") {
     var button_paticipant = document.querySelector('#btn-participant');
     button_paticipant.style.display = 'block';
   }

@@ -145,6 +145,9 @@ class ResultRouteSemiFinalStageController extends Controller
             $tools->append(new BatchResultSemiFinal);
             $tools->append(new BatchGenerateResultSemiFinalParticipant);
         });
+        $grid->selector(function (Grid\Tools\Selector $selector) {
+            $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
+        });
 //        $grid->batchActions(function ($batch) {
 //            $batch->add(new CustomSemiFinalActionsDelete());
 //        });
@@ -154,6 +157,7 @@ class ResultRouteSemiFinalStageController extends Controller
             $actions->disableView();
         });
 
+        $grid->disableFilter();
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
@@ -169,14 +173,6 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->column('amount_try_top', __('Кол-во попыток на топ'));
         $grid->column('amount_zone', __('Кол-во зон'));
         $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
-        $grid->filter(function($filter){
-            $filter->disableIdFilter();
-            $filter->in('user.gender', 'Пол')->checkbox([
-                'male'    => 'Мужчина',
-                'female'    => 'Женщина',
-            ]);
-            $filter->in('category_id', 'Категория')->checkbox((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-        });
         return $grid;
     }
 
@@ -297,7 +293,6 @@ class ResultRouteSemiFinalStageController extends Controller
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
         }
-//        dd($users_with_result);
         $users_sorted = Participant::counting_final_place($model->id, $users_with_result, $type);
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
@@ -331,6 +326,7 @@ class ResultRouteSemiFinalStageController extends Controller
             }
             $result->event_id = $users_sorted[$index]['event_id'];
             $result->user_id = $users_sorted[$index]['user_id'];
+            $result->gender = trans_choice('somewords.'.$users_sorted[$index]['gender'], 10);
             $result->owner_id = $users_sorted[$index]['owner_id'];
             $result->amount_top = $users_sorted[$index]['amount_top'];
             $result->amount_zone = $users_sorted[$index]['amount_zone'];

@@ -15,6 +15,11 @@ class Participant extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public static function number_sets($owner_id)
+    {
+        return Set::where('owner_id', $owner_id)->pluck('number_set', 'id')->toArray();
+    }
     public static function counting_final_place($event_id, $result_final, $type='final'){
 //        dd($result_final);
         // Сортировка по amount_top в убывающем порядке, затем по amount_try_top в возрастающем порядке,
@@ -167,7 +172,13 @@ class Participant extends Model
 
     public static function participant_number_set($user_id, $event_id){
         if($user_id && $event_id){
-            return Participant::where('user_id', $user_id)->where('event_id', $event_id)->first()->number_set ?? null;
+            $event = Event::find($event_id);
+            if($event->is_qualification_counting_like_final){
+                $number_set_id = ResultQualificationLikeFinal::where('user_id', $user_id)->where('event_id', $event_id)->first()->number_set_id ?? null;
+            } else {
+                $number_set_id = Participant::where('user_id', $user_id)->where('event_id', $event_id)->first()->number_set_id ?? null;
+            }
+            return Set::find($number_set_id)->number_set;
         }
         return null;
     }
@@ -179,5 +190,9 @@ class Participant extends Model
 
     public function category(){
         return $this->belongsTo(ParticipantCategory::class);
+    }
+
+    public function number_set(){
+        return $this->belongsTo(Set::class);
     }
 }

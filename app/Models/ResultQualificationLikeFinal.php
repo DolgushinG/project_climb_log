@@ -13,6 +13,10 @@ class ResultQualificationLikeFinal extends Model
         return $this->belongsTo(Event::class)->where('active', '=', 1);
     }
 
+    public function number_set(){
+        return $this->belongsTo(Set::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

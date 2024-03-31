@@ -23,6 +23,7 @@ class BatchForceRecouting extends Action
     {
         $event_id = $request->title;
         Event::refresh_final_points_all_participant(intval($event_id));
+        Event::refresh_final_points_all_participant(intval($event_id));
         return $this->response()->success('Пересчитано')->refresh();
     }
 

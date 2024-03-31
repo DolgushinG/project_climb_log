@@ -27,12 +27,12 @@ class ParticipantSeeder extends Seeder
         foreach ($events as $event){
             $amount_categories = count($event->categories);
             if($amount_categories == 2){
-                Generators::prepare_participant_with_owner($event->id, $event->id, 60, 'Новичок', 1);
-                Generators::prepare_participant_with_owner($event->id, $event->id, 120, 'Общий зачет', 61);
+                Generators::prepare_participant_with_owner($event->id, $event->id, 60, 'Новичок', 1, 'participants');
+                Generators::prepare_participant_with_owner($event->id, $event->id, 120, 'Общий зачет', 61, 'participants');
             } else {
-                Generators::prepare_participant_with_owner($event->id, $event->id, 40, 'Новичок', 1);
-                Generators::prepare_participant_with_owner($event->id, $event->id, 80, 'Любители', 41);
-                Generators::prepare_participant_with_owner($event->id, $event->id, 120, 'Спортсмены', 81);
+                Generators::prepare_participant_with_owner($event->id, $event->id, 40, 'Новичок', 1, 'participants');
+                Generators::prepare_participant_with_owner($event->id, $event->id, 80, 'Любители', 41, 'participants');
+                Generators::prepare_participant_with_owner($event->id, $event->id, 120, 'Спортсмены', 81,'participants');
             }
         }
 

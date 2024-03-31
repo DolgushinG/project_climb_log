@@ -67,7 +67,7 @@ class Event extends Model
     }
     public function result_qualification_like_final()
     {
-        return $this->hasOne(ResultRouteQualificationLikeFinal::class);
+        return $this->hasOne(ResultQualificationLikeFinal::class);
     }
 
     public function result_final_stage()
@@ -139,24 +139,19 @@ class Event extends Model
             ->where('user_id', $participant->id)
             ->whereNotIn('attempt', [0])
             ->get();
-
         foreach ($routes as $route){
             $value = Grades::where('grade','=', $route->grade)->where('event_id','=', $event->id)->first()->value;
             $route->value = (new \App\Models\ResultParticipant)->get_value_route($route->attempt, $value, $event->mode);
         }
         $routes_id_passed_with_red_point = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultParticipant::STATUS_PASSED_REDPOINT)->pluck('route_id');
         if($routes_id_passed_with_red_point->isNotEmpty()){
-            $routes_id_passed_with_red_point_sum_value = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultParticipant::STATUS_PASSED_REDPOINT)->sum('value');
-            $sum_all_coefficients_rp = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_'.$participant->gender);
-            $finish_red_point_result = ($routes_id_passed_with_red_point_sum_value * $sum_all_coefficients_rp )/ $routes_id_passed_with_red_point->count();
+            $finish_red_point_result = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultParticipant::STATUS_PASSED_REDPOINT)->sum('value');
         } else {
             $finish_red_point_result = 0;
         }
         $routes_id_passed_with_flash = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultParticipant::STATUS_PASSED_FLASH)->pluck('route_id');
         if($routes_id_passed_with_flash->isNotEmpty()){
-            $routes_id_passed_with_flash_sum_value = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultParticipant::STATUS_PASSED_FLASH)->sum('value');
-            $sum_all_coefficients_flash = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_flash)->get()->sum('coefficient_'.$participant->gender);
-            $finish_flash_result = ($routes_id_passed_with_flash_sum_value * $sum_all_coefficients_flash) / $routes_id_passed_with_flash->count();
+            $finish_flash_result = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultParticipant::STATUS_PASSED_FLASH)->sum('value');
         } else {
             $finish_flash_result = 0;
         }

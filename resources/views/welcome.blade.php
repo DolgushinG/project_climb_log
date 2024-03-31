@@ -20,13 +20,13 @@
                                             @if(!\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
                                                 <div class="form-floating mb-3">
                                                     <select class="form-select" id="floatingSelectChangeSet"
-                                                            aria-label="Floating label select example" required>
+                                                            aria-label="Floating label select example" autocomplete="off" required>
                                                         @foreach($sets as $set)
                                                             @php
                                                                 $number_set = \App\Models\Participant::participant_number_set(Auth()->user()->id, $event->id);
                                                             @endphp
-                                                            @if($set->number_set == $number_set)
-                                                                <option selected value="{{$number_set}}">Сет {{$number_set}} (@lang('somewords.'.$set->day_of_week)) {{$set->time}} (еще
+                                                            @if($set->number_set === $number_set)
+                                                                <option selected value="{{$set->number_set}}">Сет {{$set->number_set}} (@lang('somewords.'.$set->day_of_week)) {{$set->time}} (еще
                                                                     мест {{$set->free}})</option>
                                                             @else
                                                                 @if($set->free != 0)
@@ -76,7 +76,7 @@
                                                 @if(!Auth::user()->sport_category)
                                                     <div class="form-floating mb-3">
                                                         <select class="form-select" id="floatingSelectSportCategory"
-                                                                aria-label="Floating label select example" required>
+                                                                aria-label="Floating label select example" autocomplete="off" required>
                                                             <option selected disabled value="">Открыть для выбора разряда
                                                             </option>
                                                             @foreach ($sport_categories as $category)
@@ -99,7 +99,7 @@
                                         @if(!Auth::user()->gender)
                                             <div class="form-floating mb-3">
                                                 <select class="form-select" id="floatingSelectGender"
-                                                        aria-label="Floating label select example" required>
+                                                        aria-label="Floating label select example" autocomplete="off" required>
                                                     <option selected disabled value="">Отметить пол
                                                     </option>
                                                         <option value="male">M</option>
@@ -141,7 +141,7 @@
                                         </div>
                                         <div class="form-floating mb-3">
                                             <select class="form-select" id="floatingSelectCategory"
-                                                    aria-label="Floating label select example" required>
+                                                    aria-label="Floating label select example" autocomplete="off" required>
                                                 <option selected disabled value="">Открыть для выбора категории
                                                 </option>
                                                 @foreach($event->categories as $category)
