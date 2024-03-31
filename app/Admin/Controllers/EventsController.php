@@ -68,10 +68,16 @@ class EventsController extends Controller
                 }
                 $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/participants', $sum_participant ?? 0));
                 $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/participants', $participant_is_paid ?? 0));
-                if(!$event->is_qualification_counting_like_final){
+                if($event){
+                    if(!$event->is_qualification_counting_like_final){
+                        $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
+                        $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
+                    }
+                } else {
                     $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
                     $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
                 }
+
 
             })->body($this->grid());
 
