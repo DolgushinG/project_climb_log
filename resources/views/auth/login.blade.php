@@ -4,10 +4,10 @@
         <main id="main" class="main">
             <div class="container">
                 <section
-                    class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+                    class="section register min-vh-100 d-flex flex-column justify-content-center py-4">
                     <div class="container">
                         <div class="row justify-content-center">
-                            <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+                            <div class="col-lg-4 col-md-6 d-flex flex-column justify-content-center">
 
                                 <div class="card mb-3">
 
@@ -71,7 +71,7 @@
 
                                             <div class="col-12">
                                                 <a href="/auth/yandex/redirect" class="w-100" type="button">
-                                                    <svg width="400" height="56" viewBox="0 0 567 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <svg width="100%" height="100%" viewBox="0 0 567 56" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <path d="M0 24C0 12.6863 0 7.02944 3.51472 3.51472C7.02944 0 12.6863 0 24 0H543C554.314 0 559.971 0 563.485 3.51472C567 7.02944 567 12.6863 567 24V32C567 43.3137 567 48.9706 563.485 52.4853C559.971 56 554.314 56 543 56H24C12.6863 56 7.02944 56 3.51472 52.4853C0 48.9706 0 43.3137 0 32V24Z" fill="black"></path>
                                                         <rect x="197.5" y="16" width="24" height="24" rx="12" fill="#FC3F1D"></rect>
                                                         <path d="M211.191 35.212H213.698V20.812H210.051C206.384 20.812 204.457 22.6975 204.457 25.4739C204.457 27.6909 205.514 28.9962 207.399 30.3429L204.126 35.212H206.84L210.487 29.7628L209.223 28.9133C207.689 27.8773 206.944 27.0693 206.944 25.3288C206.944 23.7956 208.021 22.7596 210.072 22.7596H211.191V35.212Z" fill="white"></path>
@@ -92,6 +92,13 @@
                                                     </svg>
                                                 </a>
                                             </div>
+                                            <style>
+                                                .svg{
+                                                    width: 375px;
+                                                    height: 50px;
+                                                    font-size: 20px;
+                                                }
+                                            </style>
                                             <div class="col-12">
                                                 @if (Route::has('password.request'))
                                                     <a href="{{ route('password.request') }}"

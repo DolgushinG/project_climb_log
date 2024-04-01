@@ -37,20 +37,20 @@
                                             @csrf
 
                                             <!-- Name -->
-                                            <div class="col-12">
-                                                <label for="firstname" class="form-label">Ваше Имя</label>
+                                            <div class="col-12 form-group required">
+                                                <label for="firstname" class="control-label">Ваше Имя</label>
                                                 <input type="text" name="firstname" placeholder="Имя" class="form-control" id="firstname"
                                                        value="{{old('firstname')}}" required autofocus>
                                                 <div class="invalid-feedback">Пожалуйста введите ваше имя</div>
                                             </div>
-                                            <div class="col-12">
-                                                <label for="lastname" class="form-label">Ваша Фамилия</label>
+                                            <div class="col-12 form-group required">
+                                                <label for="lastname" class="control-label">Ваша Фамилия</label>
                                                 <input type="text" name="lastname" placeholder="Фамилия" class="form-control" id="lastname"
                                                        value="{{old('lastname')}}" required autofocus>
                                                 <div class="invalid-feedback">Пожалуйста введите вашу фамилию</div>
                                             </div>
-                                            <div class="col-12">
-                                                <label for="gender" class="form-label">Пол</label>
+                                            <div class="col-12 form-group required">
+                                                <label for="gender" class="control-label">Пол</label>
                                                 <select class="form-select" name="gender" id="gender" required>
                                                     <option selected disabled value="">Укажите пол...</option>
                                                     <option id="male" value="male">
@@ -64,7 +64,7 @@
                                             <div class="col-12">
                                                 <label for="birthday" class="form-label">Дата рождения</label>
                                                 <div class="input-group has-validation">
-                                                    <input type="date" name="birthday" placeholder="гг-мм-дд" class="form-control" id="birthday"
+                                                    <input type="date" name="birthday" placeholder="yyyy-mm-dd" class="form-control" id="birthday"
                                                            value="{{old('birthday')}}" required autofocus>
                                                     <div class="invalid-feedback">Введите дату рождения</div>
                                                 </div>
@@ -86,33 +86,34 @@
                                                 </div>
                                             </div>
                                             <!-- Email Address -->
-                                            <div class="col-12">
-                                                <label for="email" class="form-label">Email</label>
+                                            <div class="col-12 form-group required">
+                                                <label for="email" class="control-label">Email</label>
                                                 <input type="email" name="email" placeholder="Почта" class="form-control" id="email"
                                                        value="{{old('email')}}" required autofocus>
                                                 <div class="invalid-feedback">Введите email</div>
                                             </div>
 
-                                            <div class="col-12">
-                                                <label for="password" class="form-label">Пароль</label>
-                                                <input type="password" name="password" placeholder="Пароль" class="form-control"
+                                            <div class="col-12 form-group required">
+                                                <label for="password" class="control-label">Пароль</label>
+                                                <input type="password" name="password" placeholder="Минимальня длина 8 сиволов" class="form-control"
                                                        id="password" required>
                                                 <div class="invalid-feedback">Введите пароль</div>
                                             </div>
-                                            <div class="col-12">
-                                                <label for="password_confirmation" class="form-label">Подтверждение
+                                            <div class="col-12 form-group required">
+                                                <label for="password_confirmation" class="control-label">Подтверждение
                                                     пароля</label>
                                                 <input type="password" name="password_confirmation" placeholder="Подтверждение пароля" class="form-control"
                                                        id="password_confirmation" required>
                                                 <div class="invalid-feedback">Введите пароль</div>
                                             </div>
-                                            {{--                                    <div class="col-12">--}}
-                                            {{--                                        <div class="form-check">--}}
-                                            {{--                                            <input class="form-check-input" name="terms" type="checkbox" value="" id="acceptTerms" required>--}}
-                                            {{--                                            <label class="form-check-label" for="acceptTerms">Я подтверждаю с ознакомлением <a href="#">моих </a></label>--}}
-                                            {{--                                            <div class="invalid-feedback">You must agree before submitting.</div>--}}
-                                            {{--                                        </div>--}}
-                                            {{--                                    </div>--}}
+                                            <div class="col-12">
+                                                <div class="form-check form-group required">
+                                                    <input class="form-check-input" name="terms" type="checkbox" value="" id="acceptTerms" required>
+                                                    <label class="form-check-label control-label" for="acceptTerms">Я даю согласие на обработку моих
+                                                        персональных данных в порядке и на условиях, указанных в  <a href="#">согласии</a></label>
+                                                    <div class="invalid-feedback">You must agree before submitting.</div>
+                                                </div>
+                                            </div>
                                             <div class="col-12">
                                                 <button id="submit" class="btn btn-primary w-100" type="submit">Создать аккаунт
                                                 </button>
@@ -135,14 +136,6 @@
             </div>
         </main>
         <script>
-            // $( function() {
-            //     $( "#birthday" ).datepicker({
-            //         dateFormat: 'yy-mm-dd' // Формат даты, который вы хотите использовать
-            //     });
-            // });
         </script>
-    @endguest<!-- End #main -->
-    <!-- подключил календарь -->
-
-{{--    <script src="{{ asset('js/datepicker.js') }}"></script>--}}
+    @endguest
 @endsection

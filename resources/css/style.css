@@ -13,7 +13,10 @@ body {
   font-family: "Open Sans", sans-serif;
   color: #444444;
 }
-
+.form-group.required .control-label:after {
+    content:"*";
+    color:red;
+}
 a {
   color: #106eea;
   text-decoration: none;
