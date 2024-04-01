@@ -28,7 +28,7 @@ class BatchResultQualificationLikeFinal extends Action
     {
         $results = $request->toArray();
         $event = Event::find($results['event_id']);
-        $category_id = ResultQualificationLikeFinal::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first()->category_id;
+        $result_qualification_like = ResultQualificationLikeFinal::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
         $data = array();
         for($i = 1; $i <= $event->amount_routes_in_qualification_like_final; $i++){
             if($results['amount_try_top_'.$i] > 0 || $results['amount_try_top_'.$i] != null){
@@ -43,9 +43,10 @@ class BatchResultQualificationLikeFinal extends Action
             }
             $data[] = array('owner_id' => \Encore\Admin\Facades\Admin::user()->id,
                 'user_id' => intval($results['user_id']),
-                'category_id' => $category_id,
+                'category_id' => $result_qualification_like->category_id,
                 'event_id' => intval($results['event_id']),
                 'route_id' => intval($results['route_id_'.$i]),
+                'gender' => $result_qualification_like->gender,
                 'amount_top' => $amount_top,
                 'amount_try_top' => intval($results['amount_try_top_'.$i]),
                 'amount_zone' => $amount_zone,

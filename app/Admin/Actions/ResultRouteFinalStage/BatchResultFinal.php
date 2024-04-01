@@ -6,7 +6,9 @@ use App\Admin\Controllers\ResultRouteSemiFinalStageController;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
+use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteFinalStage;
+use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
 use App\Models\User;
@@ -26,7 +28,13 @@ class BatchResultFinal extends Action
     {
         $results = $request->toArray();
         $event = Event::find($results['event_id']);
-        $category_id = Participant::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first()->category_id;
+        if($event->is_qualification_counting_like_final){
+            $participant = ResultQualificationLikeFinal::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+        } else {
+            $participant = Participant::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+        }
+        $category_id = $participant->category_id;
+        $gender = $participant->gender;
         $data = array();
         for($i = 1; $i <= $event->amount_routes_in_final; $i++){
             if($results['amount_try_top_'.$i] > 0 || $results['amount_try_top_'.$i] != null){
@@ -43,6 +51,7 @@ class BatchResultFinal extends Action
                 'user_id' => intval($results['user_id']),
                 'category_id' => $category_id,
                 'event_id' => intval($results['event_id']),
+                'gender' => $gender,
                 'final_route_id' => intval($results['final_route_id_'.$i]),
                 'amount_top' => $amount_top,
                 'amount_try_top' => intval($results['amount_try_top_'.$i]),
@@ -59,14 +68,20 @@ class BatchResultFinal extends Action
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-
+        $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
         if($event->is_additional_final){
-            # Если выбран режим что финал для всех то отдаем лучшех 6 участников каждый категории
             $all_group_participants = array();
             foreach ($event->categories as $category){
                 $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-                $all_group_participants[] = Participant::better_participants($event->id, 'male', 6, $category_id);
-                $all_group_participants[] = Participant::better_participants($event->id, 'female', 6, $category_id);
+                if($event->is_qualification_counting_like_final) {
+                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant, $category_id)->toArray();
+                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant, $category_id)->toArray();
+                    $participant_from = 'qualification_counting_like_final';
+                } else {
+                    $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount_the_best_participant, $category_id);
+                    $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount_the_best_participant, $category_id);
+                    $participant_from = 'qualification';
+                }
             }
             $merged_users = collect();
             foreach ($all_group_participants as $participant) {
@@ -76,11 +91,19 @@ class BatchResultFinal extends Action
             }
         } else {
             if($event->is_semifinal){
-                $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', 6);
-                $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', 6);
+                $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', $amount_the_best_participant)->toArray();
+                $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', $amount_the_best_participant)->toArray();
+                $participant_from = 'qualification';
             } else {
-                $users_male = Participant::better_participants($event->id, 'male', 6);
-                $users_female = Participant::better_participants($event->id, 'female', 6);
+                if($event->is_qualification_counting_like_final) {
+                    $users_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant)->toArray();
+                    $users_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant)->toArray();
+                    $participant_from = 'qualification_counting_like_final';
+                } else {
+                    $users_female = Participant::better_participants($event->id, 'female', $amount_the_best_participant)->toArray();
+                    $users_male = Participant::better_participants($event->id, 'male', $amount_the_best_participant)->toArray();
+                    $participant_from = 'qualification';
+                }
             }
             $merged_users = $users_male->merge($users_female);
         }
@@ -88,7 +111,14 @@ class BatchResultFinal extends Action
         $result_semifinal = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
             $user = User::where('middlename', $res)->first()->id;
-            $category_id = Participant::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
+            switch ($participant_from){
+                case 'qualification_counting_like_final':
+                    $category_id = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
+                    break;
+                case 'qualification':
+                    $category_id = Participant::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
+                    break;
+            }
             $category = ParticipantCategory::find($category_id)->category;
             $result[$index] = $res.' ['.$category.']';
             if(in_array($index, $result_semifinal)){
