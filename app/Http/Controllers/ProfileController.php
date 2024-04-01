@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
+use App\Models\ResultFinalStage;
 use App\Models\ResultParticipant;
+use App\Models\ResultQualificationLikeFinal;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,20 +54,9 @@ class ProfileController extends Controller
         }
         $activities = Activity::where('causer_id', '=', $user->id)->orderBy('updated_at')->take(5)->get();
         $state_participant = array();
-        $all = Participant::where('user_id', $user->id)->where('active', 1)->get()->count();
-        $best_place = Participant::where('user_id', $user->id)
-            ->where('active', 1)
-            ->select('user_place')
-            ->orderBy('user_place')
-            ->first();
-        if($best_place){
-            $best_place = $best_place->user_place;
-        } else {
-            $best_place = null;
-        }
-        $state_participant['amount_event'] = $all;
-        $state_participant['bestd_place'] = $best_place;
-
+        $all_like_final = ResultQualificationLikeFinal::where('user_id', $user->id)->where('active', 1)->get()->count();
+        $all_classic = Participant::where('user_id', $user->id)->where('active', 1)->get()->count();
+        $state_participant['amount_event'] = $all_classic + $all_like_final;
         return view('profile.overview', compact(['user', 'activities', 'state_participant']));
     }
     public function getTabContentSetting() {
@@ -95,35 +86,24 @@ class ProfileController extends Controller
     public function getTabContentEdit() {
         $user = User::find(Auth()->user()->id);
         $sport_categories = User::sport_categories;
-        return view('profile.edit-profile', compact(['sport_categories', 'user']));
+        $genders = ['male','female'];
+        return view('profile.edit-profile', compact(['sport_categories', 'user', 'genders']));
     }
 
     public function getTabContentEvents() {
         $user_id = Auth()->user()->id;
-        $events_id = Participant::where('user_id', '=', $user_id)->pluck('event_id');
-        $events = Event::whereIn('id', $events_id)->get();
+        $participant = Participant::where('user_id', '=', $user_id)->pluck('event_id');
+        $res_qualification_like_final = ResultQualificationLikeFinal::where('user_id', '=', $user_id)->pluck('event_id');
+        $events_ids = $res_qualification_like_final->merge($participant);
+        $events = Event::whereIn('id', $events_ids->toArray())->get();
         foreach ($events as $event){
-            $event['amount_participant'] = Participant::where('event_id', '=', $event->id)->get()->count();
-            $participant = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
-            if($participant->active){
-                $user_place = $participant->user_place;
-                $status = "Результаты добавлены";
-            }else{
-                $status = "Необходимо добавить результаты";
-                $user_place = 'Нет результата';
+            if($event->is_qualification_counting_like_final){
+                $event['amount_participant'] = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->get()->count();
+            } else {
+                $event['amount_participant'] = Participant::where('event_id', '=', $event->id)->get()->count();
             }
-            $event['participant_active'] = $status;
-            $event['user_place'] = $user_place;
-            $res_par = ResultParticipant::where('event_id', '=', $event->id)->where('user_id','=',$user_id)->get();
-            $result = array();
-            foreach ($res_par as $res){
-                if (isset($result[$res['grade']])){
-                    $result[$res['grade']] += 1;
-                } else {
-                    $result[$res['grade']] = 1;
-                }
-            }
-            $event['amount_passed_grades'] = json_encode(array_values($result));
+            $participant = ResultFinalStage::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+            $event['user_place'] = $participant->user_place ?? 'Нет результата';
         }
         return view('profile.events', compact(['events']));
     }

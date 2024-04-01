@@ -55,6 +55,7 @@
 {{--                                        </li>--}}
                                     </ul>
                                     <div class="row text-center mt-4">
+                                        <h4> Статистика только по фестивалям </h4>
                                         <div class="col p-2">
                                             <h4 class="mb-1 line-height-5">{{$state_user['flash']}}</h4>
                                             <small class="mb-0 font-weight-bold">% Flash</small>

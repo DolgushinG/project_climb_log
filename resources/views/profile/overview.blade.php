@@ -4,28 +4,42 @@
             <div class="col-md-6">
                 <h6>Команда</h6>
                 <p>
-                    {{$user->team  ?? ''}}
+                    @if($user->team)
+                        {{$user->team}}
+                    @else
+                        Не указан
+                    @endif
+
                 </p>
                 <h6>Пол</h6>
                 <p>
-                    @lang('somewords.'.$user->gender  ?? '')
+                    @if($user->gender)
+                        @lang('somewords.'.$user->gender)
+                    @else
+                        Не указан
+                    @endif
                 </p>
                 <h6>Год рождения</h6>
                 <p>
-                    {{$user->birthday ?? ''}}
+                    @if($user->birthday)
+                        {{$user->birthday}}
+                    @else
+                        Не указан
+                    @endif
                 </p>
                 <h6>Разряд</h6>
                 <p>
-                    {{$user->sport_category ?? ''}}
+                    @if($user->sport_category)
+                        {{$user->sport_category}}
+                    @else
+                        Не указана
+                    @endif
                 </p>
             </div>
             <div class="col-md-6">
                 <h6>Общая статистика</h6>
                 <span class="badge bg-primary"><i class="fa fa-user"></i> Участие в соревнованиях </span>
                 <span class="badge bg-primary">{{$state_participant['amount_event'] ?? ''}}</span>
-                <br>
-                <span class="badge bg-success"><i class="fa fa-play-circle"></i>  Лучшее место</span>
-                <span class="badge bg-success">{{$state_participant['best_place'] ?? '' }}</span>
             </div>
             <div class="col-md-12">
                 <h5 class="mt-2 mb-3"><span class="fa fa-clock-o ion-clock float-right"></span> Недавняя активность</h5>

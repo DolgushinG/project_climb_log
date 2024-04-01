@@ -69,17 +69,6 @@
                             <span class="badge bg-primary rounded-pill">{{$event->amount_participant}}</span>
                         </li>
 
-                        @if($event->participant_active == "Внес результаты")
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span class="badge rounded-pill bg-success text-white">{{$event->participant_active}}</span>
-                            </li>
-
-                        @else
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span class="badge rounded-pill bg-success text-white">{{$event->participant_active}}</span>
-                            </li>
-                        @endif
-
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <a href="event/{{$event->climbing_gym_name_eng}}/{{$event->title_eng}}" class="btn btn-success">Перейти на страницу с соревнованием</a>
                         </li>

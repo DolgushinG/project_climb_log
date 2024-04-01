@@ -276,7 +276,7 @@ class EventsController extends Controller
                     0 =>'Классика финал для лучших в квалификации',
                 ])->required();
             $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
-
+            $form->html('<h4 id="warning-category" style="color: red" >Обязательно проверьте заполнение категорий и обязательных полей</h4>');
             $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states(self::STATES_BTN);
             $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states(self::STATES_BTN);
 
@@ -311,7 +311,9 @@ class EventsController extends Controller
             $form->switch('is_public', 'Опубликовать для всех')
                 ->help('После включения, все смогут зайти на страницу с соревнованиями')
                 ->states(self::STATES_BTN);
+
         });
+
         $form->tools(function (Form\Tools $tools) {
 
             // Disable `List` btn.
@@ -609,8 +611,15 @@ class EventsController extends Controller
         return results;
     }
     var addButton = document.querySelector('.categories-add');
+    document.querySelector('[type=submit][class=\"btn btn-primary\"]').setAttribute('disabled', '')
     // Добавляем обработчик события для отслеживания клика
     addButton.addEventListener('click', function() {
+
+    document.querySelector('[type=submit][class=\"btn btn-primary\"]').removeAttribute('disabled', '')
+    let warning = document.querySelector('#warning-category')
+        if(warning){
+            document.querySelector('#warning-category').remove()
+        }
        $('.list-categories-table').find('input').on('input change', function() {
        let index = 0
         getElementsByXPath('//input[contains(@name, \"categories[values][]\")]').forEach(input => {
@@ -783,6 +792,7 @@ class EventsController extends Controller
           value = cookiearray[i].split('=')[1];
           if(name.startsWith(\"categories\") || name.startsWith(\" categories\")){
              var isSafari = window.safari !== undefined;
+
              if(isSafari){
                 var name1 = decodeURIComponent(name);
                 addRowToTable(name1, value)
@@ -822,6 +832,11 @@ class EventsController extends Controller
         newRow.appendChild(secondTd);
         var tableBody = document.querySelector('.list-categories-table');
         tableBody.appendChild(newRow);
+        let warning = document.querySelector('#warning-category')
+        if(warning){
+            document.querySelector('#warning-category').remove()
+        }
+
    }
 
     // Очистка данных черновика при успешной отправке формы

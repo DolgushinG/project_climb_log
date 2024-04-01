@@ -127,15 +127,19 @@
             <div class="col-md-8 col-lg-9">
                 <select class="form-select" name="gender" id="gender" required>
                     <option disabled value="">Укажите пол...</option>
-                @if($user->gender == "male")
-                    <option selected value="{{$user->gender}}">
-                        @lang('somewords.'.$user->gender  ?? '')
-                    </option>
-                @else
-                    <option value="{{$user->gender}}">
-                        @lang('somewords.'.$user->gender  ?? '')
-                    </option>
-                @endif
+                    @if($user->gender)
+                        @foreach($genders as $gender)
+                            @if($user->gender == $gender)
+                                <option selected value="{{$user->gender}}">
+                                    @lang('somewords.'.$user->gender)
+                                </option>
+                            @else
+                                <option value="{{$gender}}">
+                                    @lang('somewords.'.$gender)
+                                </option>
+                            @endif
+                        @endforeach
+                    @endif
             </select>
             </div>
         </div>
