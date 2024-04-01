@@ -31,12 +31,13 @@ class BatchResultSemiFinal extends Action
             } else {
                 $amount_zone  = 0;
             }
+            $gender = Participant::where('user_id', intval($results['user_id']))->where('event_id', intval($results['event_id']))->first()->gender;
             $data[] = array('owner_id' => \Encore\Admin\Facades\Admin::user()->id,
                 'user_id' => intval($results['user_id']),
                 'event_id' => intval($results['event_id']),
                 'final_route_id' => intval($results['final_route_id_'.$i]),
                 'amount_top' => $amount_top,
-                'gender' => intval($results['gender']),
+                'gender' => $gender,
                 'amount_try_top' => intval($results['amount_try_top_'.$i]),
                 'amount_zone' => $amount_zone,
                 'amount_try_zone' => intval($results['amount_try_zone_'.$i]),
@@ -61,10 +62,8 @@ class BatchResultSemiFinal extends Action
                 $result[$index] = $res.' [Уже добавлен]';
             }
         }
-        $gender = Participant::where('event_id, $event->id)->where('user_id, $user->id)->first()->gender;
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
-        $this->hidden('gender', '')->value($gender);
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
             $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
             $this->integer('amount_try_top_'.$i, 'Попытки на топ');
