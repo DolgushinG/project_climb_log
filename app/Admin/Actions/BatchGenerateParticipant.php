@@ -38,6 +38,7 @@ class BatchGenerateParticipant extends Action
             $table_result_routes = 'result_participant';
             $text = 'Обязательно пересчитайте результаты для правильного расставление мест';
         }
+        DB::table($table_result)->truncate();
         DB::table($table_result_routes)->truncate();
         $part_category = ParticipantCategory::where('event_id', $event->id)->get();
         $amount_categories = count($event->categories);
