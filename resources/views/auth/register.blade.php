@@ -64,8 +64,16 @@
                                             <div class="col-12">
                                                 <label for="birthday" class="form-label">Дата рождения</label>
                                                 <div class="input-group has-validation">
-                                                    <input type="date" name="birthday" placeholder="yyyy-mm-dd" class="form-control" id="birthday"
-                                                           value="{{old('birthday')}}" required autofocus>
+                                                    <input
+                                                        placeholder="yyyy-mm-dd"
+                                                        class="form-control"
+                                                        type="date"
+                                                        value="{{old('birthday')}}"
+                                                        name="birthday"
+                                                        id="birthday"
+                                                        required
+                                                        autofocus
+                                                    />
                                                     <div class="invalid-feedback">Введите дату рождения</div>
                                                 </div>
                                             </div>
