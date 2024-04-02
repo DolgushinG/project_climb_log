@@ -51,6 +51,7 @@ class BatchGenerateParticipant extends Action
             $start = $start+$parts;
         }
         Generators::prepare_result_participant($owner_id, $event->id,$table_result_routes, $count);
+        Event::refresh_final_points_all_participant(intval($event_id));
         return $this->response()->success($text)->refresh();
     }
 
@@ -64,7 +65,13 @@ class BatchGenerateParticipant extends Action
 
     public function html()
     {
-        return "<a class='generate-participant btn btn-sm btn-warning'><i class='fa fa-gears'></i> Сгенерировать участников [beta](Ожидание до ~ 2 мин)</a>";
+        return "<a class='generate-participant btn btn-sm btn-warning '><i class='fa fa-gears'></i> Сгенерировать участников [beta](Ожидание до ~ 2 мин)</a>
+            <style>
+                @media screen and (max-width: 767px) {
+                    .generate-participant {margin-top:8px;}
+                    }
+            </style>
+        ";
     }
 
 }

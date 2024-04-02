@@ -60,6 +60,7 @@ class BatchResultFinal extends Action
             );
         }
         DB::table('result_route_final_stage')->insert($data);
+        Event::refresh_final_points_all_participant_in_final($event->id, $event->owner_id);
         return $this->response()->success('Результат успешно внесен')->refresh();
     }
 
@@ -68,18 +69,18 @@ class BatchResultFinal extends Action
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
+        $amount_the_best_participant_to_go_final = $event->amount_the_best_participant_to_go_final ?? 10;
         if($event->is_additional_final){
             $all_group_participants = array();
             foreach ($event->categories as $category){
                 $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
                 if($event->is_qualification_counting_like_final) {
-                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant, $category_id)->toArray();
-                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant, $category_id)->toArray();
+                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id)->toArray();
+                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id)->toArray();
                     $participant_from = 'qualification_counting_like_final';
                 } else {
-                    $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount_the_best_participant, $category_id);
-                    $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount_the_best_participant, $category_id);
+                    $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id);
+                    $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id);
                     $participant_from = 'qualification';
                 }
             }
@@ -91,17 +92,17 @@ class BatchResultFinal extends Action
             }
         } else {
             if($event->is_semifinal){
-                $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', $amount_the_best_participant)->toArray();
-                $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', $amount_the_best_participant)->toArray();
+                $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', $amount_the_best_participant_to_go_final);
+                $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', $amount_the_best_participant_to_go_final);
                 $participant_from = 'qualification';
             } else {
                 if($event->is_qualification_counting_like_final) {
-                    $users_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant)->toArray();
-                    $users_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant)->toArray();
+                    $users_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant_to_go_final);
+                    $users_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant_to_go_final);
                     $participant_from = 'qualification_counting_like_final';
                 } else {
-                    $users_female = Participant::better_participants($event->id, 'female', $amount_the_best_participant)->toArray();
-                    $users_male = Participant::better_participants($event->id, 'male', $amount_the_best_participant)->toArray();
+                    $users_female = Participant::better_participants($event->id, 'female', $amount_the_best_participant_to_go_final);
+                    $users_male = Participant::better_participants($event->id, 'male', $amount_the_best_participant_to_go_final);
                     $participant_from = 'qualification';
                 }
             }

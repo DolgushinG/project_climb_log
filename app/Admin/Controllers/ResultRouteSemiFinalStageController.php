@@ -62,7 +62,6 @@ class ResultRouteSemiFinalStageController extends Controller
                         'telegram_id','yandex_id','vkontakte_id'];
                     self::getUsersSorted($result_male, $fields, $event, 'semifinal', Admin::user()->id);
                     self::getUsersSorted($result_female, $fields, $event, 'semifinal', Admin::user()->id);
-//                    $row->column(10, $this->grid2());
                     $row->column(10, $this->grid());
                 }
             });

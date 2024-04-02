@@ -246,8 +246,6 @@ class EventsController extends Controller
                     0 =>'Считаем по классике',
                     1 =>'Считаем как финальный раунд (кол-во топов и зон)',
                 ])->when(0, function (Form $form) {
-                    $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд(полуфинал/финал)')
-                        ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
                     $formats = Format::all()->pluck('format', 'id');
                     $form->radio('mode','Настройка формата')
                         ->options($formats)->when(1, function (Form $form) {
@@ -261,14 +259,16 @@ class EventsController extends Controller
                             1 =>'С полуфиналом',
                             0 =>'Без полуфинала',
                         ])->when(1, function (Form $form) {
+                            $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд полуфинал')
+                                ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
                             $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->attribute('inputmode', 'none')->value(5);
                         })->when(0, function (Form $form) {
                         })->required();
                 })->when(1, function (Form $form) {
                     $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->attribute('inputmode', 'none')->value(10);
-                    $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд')
-                        ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->attribute('inputmode', 'none')->value(6);
                 })->required();
+            $form->number('amount_the_best_participant_to_go_final','Кол-во лучших участников идут в след раунд финал')
+                ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
             $form->number('amount_routes_in_final','Кол-во трасс в финале')->attribute('inputmode', 'none')->value(4);
             $form->radio('is_additional_final','Финалы для разных групп')
                 ->options([
@@ -855,6 +855,7 @@ class EventsController extends Controller
        clearDraft();
     });
     // Функция для очистки данных черновика
+
 
     function clearDraft() {
         var cookies = document.cookie.split(';');

@@ -22,7 +22,7 @@ class ResultRouteSemiFinalStageSeeder extends Seeder
         function prepare_with_owner($owner_id, $event_id)
         {
             $event = Event::find($event_id);
-
+            #!!! НЕ АКТУАЛЬНО НА ДАННЫЙ МОМЕНТ ПОДУМАТЬ НАД УДАЛЕНИМ
             if($event->is_semifinal){
                 $result_female = Participant::better_participants($event_id, 'female', 10)->toArray();
                 $result_male = Participant::better_participants($event_id, 'male', 10)->toArray();

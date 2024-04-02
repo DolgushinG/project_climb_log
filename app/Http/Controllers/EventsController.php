@@ -77,7 +77,11 @@ class EventsController extends Controller
         $event = Event::where('title_eng', '=', $title)->where('is_public', 1)->first();
         if($event) {
             $participants = array();
-            $participant_event = Participant::where('event_id', '=', $event->id)->get();
+            if($event->is_qualification_counting_like_final){
+                $participant_event = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->get();
+            } else {
+                $participant_event = Participant::where('event_id', '=', $event->id)->get();
+            }
             $users_id = $participant_event->pluck('user_id')->toArray();
             $users = User::whereIn('id', $users_id)->get()->toArray();
             $users_event = $participant_event->toArray();
@@ -85,7 +89,12 @@ class EventsController extends Controller
             $sets = Set::where('owner_id', '=', $event->owner_id)->get();
             $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('id');
             foreach ($number_sets as $index => $set) {
-                $sets[$index]->count_participant = Participant::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
+                if($event->is_qualification_counting_like_final){
+                    $sets[$index]->count_participant = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
+                } else {
+                    $sets[$index]->count_participant = Participant::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
+                }
+
             }
             $index = 0;
             foreach ($users_event as $set => $user) {
@@ -112,34 +121,36 @@ class EventsController extends Controller
     {
         $event = Event::where('title_eng', '=', $title)->where('is_public', 1)->first();
         if($event){
-            $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
-            $user_ids = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
-            $stats = new stdClass();
-            $female_categories = array();
-            $male_categories = array();
-            $stats->male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->get()->count();
-            $stats->female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->get()->count();
-            $categories = ParticipantCategory::where('event_id', $event->id)->get();
+            if(!$event->is_qualification_counting_like_final){
+                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
+                $user_ids = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+                $stats = new stdClass();
+                $female_categories = array();
+                $male_categories = array();
+                $stats->male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->get()->count();
+                $stats->female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->get()->count();
+                $categories = ParticipantCategory::where('event_id', $event->id)->get();
 
-            foreach ($categories as $category) {
-                $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
-                $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
-                $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('category_id', '=', $category->id)->get()->count();
-                $male_categories[$category->id] = Participant::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                foreach ($categories as $category) {
+                    $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
+                    $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
+                    $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('category_id', '=', $category->id)->get()->count();
+                    $male_categories[$category->id] = Participant::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                }
+                $stats->female_categories = $female_categories;
+                $stats->male_categories = $male_categories;
+                $result = [];
+                foreach ($final_results as $res) {
+                    $user = User::where('id', '=', $res['user_id'])->first();
+                    $participant = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $res['user_id'])->first();
+                    $res['user_name'] = $user->middlename;
+                    $res['gender'] = $user->gender;
+                    $res['city'] = $user->city;
+                    $res['category_id'] = $participant->category_id;
+                    $result[] = $res;
+                }
+                $categories = $categories->toArray();
             }
-            $stats->female_categories = $female_categories;
-            $stats->male_categories = $male_categories;
-            $result = [];
-            foreach ($final_results as $res) {
-                $user = User::where('id', '=', $res['user_id'])->first();
-                $participant = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $res['user_id'])->first();
-                $res['user_name'] = $user->middlename;
-                $res['gender'] = $user->gender;
-                $res['city'] = $user->city;
-                $res['category_id'] = $participant->category_id;
-                $result[] = $res;
-            }
-            $categories = $categories->toArray();
         } else {
             return view('404');
         }

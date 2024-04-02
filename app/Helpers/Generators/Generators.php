@@ -194,26 +194,26 @@ class Generators
         if($table === 'result_route_final_stage') {
             DB::table($table)->truncate();
             $event = Event::find($event_id);
-            $amount_the_best_participant = 10;
+            $amount_the_best_participant_to_go_final = $event->amount_the_best_participant_to_go_final ?? 10;
 
             if($event->is_additional_final){
                 if($event->is_qualification_counting_like_final){
                     $participant_from = 'qualification_counting_like_final';
-                    $result_is_qualification_counting_like_final_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event_id, 'female', $amount_the_best_participant)->toArray();
-                    $result_is_qualification_counting_like_final_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event_id, 'male', $amount_the_best_participant)->toArray();
+                    $result_is_qualification_counting_like_final_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event_id, 'female', $amount_the_best_participant_to_go_final)->toArray();
+                    $result_is_qualification_counting_like_final_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event_id, 'male', $amount_the_best_participant_to_go_final)->toArray();
                 } else {
-                    $result_female = Participant::better_participants($event_id, 'female', $amount_the_best_participant)->toArray();
-                    $result_male = Participant::better_participants($event_id, 'male', $amount_the_best_participant)->toArray();
+                    $result_female = Participant::better_participants($event_id, 'female', $amount_the_best_participant_to_go_final)->toArray();
+                    $result_male = Participant::better_participants($event_id, 'male', $amount_the_best_participant_to_go_final)->toArray();
                     $participant_from = 'qualification';
                 }
             } else {
                 if($event->is_semifinal){
-                    $result_semifinal_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', $amount_the_best_participant)->toArray();
-                    $result_semifinal_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', $amount_the_best_participant)->toArray();
+                    $result_semifinal_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', $amount_the_best_participant_to_go_final)->toArray();
+                    $result_semifinal_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', $amount_the_best_participant_to_go_final)->toArray();
                     $participant_from = 'qualification';
                 } else {
-                    $result_female = Participant::better_participants($event_id, 'female', $amount_the_best_participant)->toArray();
-                    $result_male = Participant::better_participants($event_id, 'male', $amount_the_best_participant)->toArray();
+                    $result_female = Participant::better_participants($event_id, 'female', $amount_the_best_participant_to_go_final)->toArray();
+                    $result_male = Participant::better_participants($event_id, 'male', $amount_the_best_participant_to_go_final)->toArray();
                     $participant_from = 'qualification';
                 }
             }

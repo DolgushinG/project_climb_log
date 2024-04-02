@@ -45,6 +45,7 @@ class CreateEventsTable extends Migration
             $table->float('amount_point_flash')->nullable();
             $table->float('amount_point_redpoint')->nullable();
             $table->integer('amount_the_best_participant')->nullable();
+            $table->integer('amount_the_best_participant_to_go_final')->nullable();
             $table->json('categories');
             $table->integer('is_input_birthday')->nullable();
             $table->integer('is_need_sport_category')->nullable();

@@ -21,6 +21,7 @@ class ResultParticipantSeeder extends Seeder
     {
         function prepare_result_participant($owner_id, $event_id)
         {
+            #!!! НЕ АКТУАЛЬНО НА ДАННЫЙ МОМЕНТ ПОДУМАТЬ НАД УДАЛЕНИМ
             $count_user = ParticipantSeeder::USERS;
             for ($user_id = 1; $user_id <= $count_user; $user_id++){
                 $result_participant = array();

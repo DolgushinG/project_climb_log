@@ -167,7 +167,11 @@ class ResultRouteFinalStageController extends Controller
             $tools->append(new BatchGenerateResultFinalParticipant);
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {
-            $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+
+            if($event->is_additional_final) {
+                $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+            }
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
         });
         $grid->actions(function ($actions) {
@@ -270,22 +274,6 @@ class ResultRouteFinalStageController extends Controller
         });
         return $form;
     }
-
-    protected function getUsersFinal($event_id)
-    {
-        $participants_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', 6);
-        $participants_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', 6);
-        $new = $participants_female->merge($participants_male);
-        return User::whereIn('id', $new->pluck('id'))->pluck('middlename', 'id')->toArray();
-    }
-    protected function getUsersPartipants($event_id)
-    {
-        $participants_male = Participant::better_participants($event_id, 'male', 6);
-        $participants_female = Participant::better_participants($event_id, 'female', 6);
-        $new = $participants_female->merge($participants_male);
-        return User::whereIn('id', $new->pluck('id'))->pluck('middlename', 'id')->toArray();
-    }
-
 
     public function exportFinalExcel(Request $request)
     {

@@ -57,6 +57,7 @@ class BatchResultQualificationLikeFinal extends Action
         $participant->active = 1;
         $participant->save();
         DB::table('result_route_qualification_like_final')->insert($data);
+
         return $this->response()->success('Результат успешно внесен')->refresh();
     }
 

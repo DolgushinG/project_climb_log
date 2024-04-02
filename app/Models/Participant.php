@@ -116,9 +116,13 @@ class Participant extends Model
     public static function get_place_participant_in_semifinal($event_id, $user_id){
         return ResultSemiFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
     }
-    public static function get_places_participant_in_qualification($event_id, $user_id, $gender, $category_id, $get_place_user = false){
+    public static function get_places_participant_in_qualification($event_id, $user_id, $gender, $category_id=null, $get_place_user = false){
         $users_id = User::where('gender', '=', $gender)->pluck('id');
-        $all_participant_event = Participant::whereIn('user_id', $users_id)->where('category_id', '=', $category_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
+        if($category_id){
+            $all_participant_event = Participant::whereIn('user_id', $users_id)->where('category_id', '=', $category_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
+        } else {
+            $all_participant_event = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
+        }
         $user_places = array();
         foreach ($all_participant_event as $index => $user){
             $user_places[$user->user_id] = $index+1;

@@ -19,6 +19,8 @@ class ResultRouteFinalSeeder extends Seeder
     {
         function prepare_data_result_route_passed_with_owner($owner_id, $event_id)
         {
+
+            #!!! НЕ АКТУАЛЬНО НА ДАННЫЙ МОМЕНТ ПОДУМАТЬ НАД УДАЛЕНИМ
             $event = Event::find($event_id);
             if($event->is_semifinal){
                 $result_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', 6)->toArray();

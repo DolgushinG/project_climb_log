@@ -14,7 +14,7 @@ class Event extends Model
 {
     use HasFactory;
 
-    const DEFAULT_SEMIFINAL_PARTICIPANT = 10;
+    const DEFAULT_SEMIFINAL_PARTICIPANT = 20;
     const DEFAULT_FINAL_PARTICIPANT = 6;
 
     protected $casts = [
@@ -185,7 +185,11 @@ class Event extends Model
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $participant->id;
             $final_participant_result->save();
-            $place = Participant::get_places_participant_in_qualification($event_id, $participant->id, $participant->gender, $participant->category_id,true);
+            if($event->additional_final){
+                $place = Participant::get_places_participant_in_qualification($event_id, $participant->id, $participant->gender, $participant->category_id,true);
+            } else {
+                $place = Participant::get_places_participant_in_qualification(event_id: $event_id, user_id: $participant->id, gender: $participant->gender, get_place_user: true);
+            }
             $participant_result = Participant::where('user_id', '=', $participant->id)->where('event_id', '=', $event_id)->first();
             $participant_result->user_place = $place;
             $participant_result->save();
@@ -193,25 +197,26 @@ class Event extends Model
     }
     public static function refresh_final_points_all_participant_in_semifinal($event_id, $owner_id) {
         $event = Event::find($event_id);
-        $amount_routes_in_semifinal = $event->amount_routes_in_semifinal ?? self::DEFAULT_SEMIFINAL_PARTICIPANT;
-        $result_female = Participant::better_participants($event_id, 'female', $amount_routes_in_semifinal);
-        $result_male = Participant::better_participants($event_id, 'male', $amount_routes_in_semifinal);
+        $amount_the_best_participant = $event->amount_the_best_participant ?? self::DEFAULT_SEMIFINAL_PARTICIPANT;
+        $result_female = Participant::better_participants($event_id, 'female', $amount_the_best_participant);
+        $result_male = Participant::better_participants($event_id, 'male', $amount_the_best_participant);
         $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
         ResultRouteSemiFinalStageController::getUsersSorted($result_female, $fields, $event, 'semifinal', $owner_id);
         ResultRouteSemiFinalStageController::getUsersSorted($result_male, $fields, $event, 'semifinal', $owner_id);
     }
+
     public static function refresh_final_points_all_participant_in_final($event_id, $owner_id){
         $event = Event::find($event_id);
-        $amount_routes_in_final = $event->amount_routes_in_final ?? self::DEFAULT_FINAL_PARTICIPANT;
-        $amount_routes_in_semifinal = $event->amount_routes_in_semifinal ?? self::DEFAULT_SEMIFINAL_PARTICIPANT;
+        $amount_the_best_participant_to_go_final = $event->amount_the_best_participant_to_go_final ?? self::DEFAULT_FINAL_PARTICIPANT;
+        $amount_the_best_participant = $event->amount_the_best_participant ?? self::DEFAULT_SEMIFINAL_PARTICIPANT;
         $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
         if($event->is_additional_final){
             # Если выбран режим что финал для всех то отдаем лучшех 6 участников каждый категории
             $all_group_participants = array();
             foreach ($event->categories as $category){
                 $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-                $all_group_participants['male'][$category] = Participant::better_participants($event->id, 'male', $amount_routes_in_final, $category_id);
-                $all_group_participants['female'][$category] = Participant::better_participants($event->id, 'female', $amount_routes_in_final, $category_id);
+                $all_group_participants['male'][$category] = Participant::better_participants($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id);
+                $all_group_participants['female'][$category] = Participant::better_participants($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id);
             }
             foreach ($all_group_participants as $group_participants){
                 foreach ($group_participants as $participants){
@@ -220,11 +225,11 @@ class Event extends Model
             }
         } else {
             if($event->is_semifinal){
-                $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', $amount_routes_in_semifinal);
-                $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', $amount_routes_in_semifinal);
+                $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', $amount_the_best_participant);
+                $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', $amount_the_best_participant);
             } else {
-                $users_female = Participant::better_participants($event_id, 'female', $amount_routes_in_semifinal);
-                $users_male = Participant::better_participants($event_id, 'male', $amount_routes_in_semifinal);
+                $users_female = Participant::better_participants($event_id, 'female', $amount_the_best_participant);
+                $users_male = Participant::better_participants($event_id, 'male', $amount_the_best_participant);
             }
             ResultRouteSemiFinalStageController::getUsersSorted($users_female, $fields, $event, 'final', $owner_id);
             ResultRouteSemiFinalStageController::getUsersSorted($users_male, $fields, $event, 'final', $owner_id);
