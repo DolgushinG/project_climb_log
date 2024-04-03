@@ -44,60 +44,8 @@ class ParticipantsController extends Controller
         return $content
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-                $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
                 if($event) {
                     if($event->is_qualification_counting_like_final){
-                        if($event->is_additional_final) {
-                            $all_group_participants = array();
-                            $all_users = array();
-                            $users = array();
-                            foreach ($event->categories as $category) {
-                                $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-                                $part_nt = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->where('category_id', $category_id)->distinct()->pluck('user_id');
-                                $all_group_participants['male'][$category] = User::whereIn('id', $part_nt)->where('gender','=', 'male')->get();
-                                $all_group_participants['female'][$category] = User::whereIn('id', $part_nt)->where('gender','=', 'female')->get();
-                            }
-                            foreach ($all_group_participants as $group_participants) {
-                                foreach ($group_participants as $participants) {
-                                    $user = ResultRouteSemiFinalStageController::getUsersSorted($participants, $fields, $event, 'qualification_like_final', Admin::user()->id);
-                                    if ($user !== []) {
-                                        $users[] = $user;
-                                    }
-                                }
-                            }
-                            foreach ($users as $user) {
-                                foreach ($user as $a) {
-                                    $all_users[] = $a;
-                                }
-                            }
-                            foreach ($all_users as $index => $user){
-                                $fields = ['middlename', 'avatar','telegram_id','yandex_id','vkontakte_id'];
-                                $all_users[$index] = collect($user)->except($fields)->toArray();
-
-                                $final_result_stage = ResultFinalStage::where('event_id', '=', $all_users[$index]['event_id'])->where('user_id', '=', $all_users[$index]['user_id'])->first();
-                                if(!$final_result_stage){
-                                    $final_result_stage = new ResultFinalStage;
-                                }
-                                $category_id = ParticipantCategory::where('id', $all_users[$index]['category_id'])->where('event_id', $event->id)->first()->id;
-                                $final_result_stage->event_id = $all_users[$index]['event_id'];
-                                $final_result_stage->user_id = $all_users[$index]['user_id'];
-                                $final_result_stage->gender = trans_choice('somewords.'.$all_users[$index]['gender'], 10);;
-                                $final_result_stage->category_id = $category_id;
-                                $final_result_stage->owner_id = $all_users[$index]['owner_id'];
-                                $final_result_stage->amount_top = $all_users[$index]['amount_top'];
-                                $final_result_stage->amount_zone = $all_users[$index]['amount_zone'];
-                                $final_result_stage->amount_try_top = $all_users[$index]['amount_try_top'];
-                                $final_result_stage->amount_try_zone = $all_users[$index]['amount_try_zone'];
-                                $final_result_stage->place = $all_users[$index]['place'];
-                                $final_result_stage->save();
-                            }
-                        } else {
-                            $participant_users_id = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
-                            $participants_female = User::whereIn('id', $participant_users_id)->where('gender', 'female')->get();
-                            $participants_male = User::whereIn('id', $participant_users_id)->where('gender', 'male')->get();
-                            ResultRouteSemiFinalStageController::getUsersSorted($participants_female, $fields, $event, 'qualification_like_final', Admin::user()->id);
-                            ResultRouteSemiFinalStageController::getUsersSorted($participants_male, $fields, $event, 'qualification_like_final', Admin::user()->id);
-                        }
                         $row->column(20, $this->qualification_counting_like_final());
                     } else {
                         $row->column(20, $this->qualification_classic());

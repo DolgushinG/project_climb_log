@@ -52,6 +52,7 @@ class BatchGenerateParticipant extends Action
         }
         Generators::prepare_result_participant($owner_id, $event->id,$table_result_routes, $count);
         Event::refresh_final_points_all_participant(intval($event_id));
+        Event::refresh_final_points_all_participant(intval($event_id));
         return $this->response()->success($text)->refresh();
     }
 

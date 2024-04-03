@@ -10,7 +10,7 @@ class ResultFinalStage extends Model
 
     public function event()
     {
-        return $this->belongsTo(Event::class)->where('active', '=', 1);
+        return $this->belongsTo(Event::class)->where('active', 1);
     }
 
     public function user()

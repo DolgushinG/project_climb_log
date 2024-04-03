@@ -189,7 +189,6 @@ class EventsController extends Controller
     {
 
         $form = new Form(new Event);
-
         $form->tab('Общая информация о соревновании', function ($form) {
 
             $this->install_admin_script();
@@ -243,7 +242,7 @@ class EventsController extends Controller
             $form->html('<p>*Как финальный раунд - то есть квалификация будет считаться как по кол-ву топов и зон </p>');
             $form->radio('is_qualification_counting_like_final','Настройка подсчета квалификации')
                 ->options([
-                    0 =>'Считаем по классике',
+                    0 =>'Считаем по классике(Баллы и коэфициенты)',
                     1 =>'Считаем как финальный раунд (кол-во топов и зон)',
                 ])->when(0, function (Form $form) {
                     $formats = Format::all()->pluck('format', 'id');
@@ -262,20 +261,30 @@ class EventsController extends Controller
                             $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд полуфинал')
                                 ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
                             $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->attribute('inputmode', 'none')->value(5);
+                            $form->hidden('is_additional_final','Финалы для разных групп')
+                                ->options([
+                                    1 =>'С финалами для каждой категории групп',
+                                    0 =>'Классика финал для лучших в квалификации',
+                                ])->value(0)->required();
                         })->when(0, function (Form $form) {
+                            $form->radio('is_additional_final','Финалы для разных групп')
+                                ->options([
+                                    1 =>'Подсчет результатов в финале по каждой категории групп',
+                                    0 =>'Подсчет результатов в финале по лучшим в квалификации',
+                                ])->required();
                         })->required();
                 })->when(1, function (Form $form) {
+                    $form->radio('is_additional_final','Финалы для разных групп')
+                        ->options([
+                            1 =>'Подсчет результатов в финале по каждой категории групп',
+                            0 =>'Подсчет результатов в финале по лучшим в квалификации',
+                        ])->value(1)->required();
                     $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->attribute('inputmode', 'none')->value(10);
                 })->required();
             $form->number('amount_the_best_participant_to_go_final','Кол-во лучших участников идут в след раунд финал')
                 ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
             $form->number('amount_routes_in_final','Кол-во трасс в финале')->attribute('inputmode', 'none')->value(4);
-            $form->radio('is_additional_final','Финалы для разных групп')
-                ->options([
-                    1 =>'С финалами для каждой категории групп',
-                    0 =>'Классика финал для лучших в квалификации',
-                ])->required();
-            $form->list('categories', 'Категории участников')->value(['Новички', 'Общий зачет'])->rules('required|min:2')->required();
+            $form->list('categories', 'Категории участников')->rules('required|min:2')->required();
             $form->html('<h4 id="warning-category" style="color: red" >Обязательно проверьте заполнение категорий и обязательных полей</h4>');
             $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states(self::STATES_BTN);
             $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states(self::STATES_BTN);
@@ -507,375 +516,160 @@ class EventsController extends Controller
 
     });");
         Admin::script(
+
             "
-                $(document).ready(function() {
-                if(window.location.href.indexOf(\"edit\") > -1)
+            $(document).ready(function() {
+
+            if(window.location.href.indexOf(\"edit\") > -1)
             {
+                const warning = document.querySelector('#warning-category');
+                if (warning) {
+                    warning.remove();
+                }
                  return
             }
-//    var editingAreas = $('.note-editable');
-//
-//    editingAreas.each(function(index) {
-//        $(this).attr('data-id', 'editableArea_' + (index + 1));
-//    });
-//
-//    // Отслеживание изменений в тексте каждой редактируемой области
-//    editingAreas.on('input', function() {
-//        var content = $(this).html();
-//        var areaId = $(this).attr('data-id');
-//        saveDraft(areaId, content);
-//    });
-//
-//    // Восстановление данных редактируемой области из cookies при загрузке страницы
-//    editingAreas.each(function() {
-//        var areaId = $(this).attr('data-id');
-//        var savedContent = getCookie(areaId);
-//        if (savedContent) {
-//            $(this).html(savedContent); // Восстановление данных
-//        }
-//    });
-
-    document.querySelectorAll('#is_qualification_counting_like_final').forEach(input => {
-            input.addEventListener('click', radio_button);
-      });
-      function radio_button() {
-            var inputName = $(this).attr('id');
-            var inputClass = $(this).attr('class');
-            var existingValue = getCookie(inputName);
-            if (existingValue !== inputClass) {
-                Cookies.set(inputName, inputClass, { expires: 7 })
-//                saveDraft(inputName, inputClass);
-            }
-        };
-    document.querySelectorAll('#is_semifinal').forEach(input => {
-            input.addEventListener('click', radio_button);
-            });
-    document.querySelectorAll('#is_additional_final').forEach(input => {
-            input.addEventListener('click', radio_button);
-            });
-    document.querySelectorAll('#mode').forEach(input => {
-            input.addEventListener('click', radio_button);
-            });
-     function radio_button() {
-            var inputName = $(this).attr('id');
-            var inputClass = $(this).attr('class');
-            var existingValue = getCookie(inputName);
-            if (existingValue !== inputClass) {
-                Cookies.set(inputName, inputClass, { expires: 7 })
-//                saveDraft(inputName, inputClass);
-            }
-        };
-    restoreSwitch('active')
-    restoreSwitch('is_input_birthday')
-    restoreSwitch('is_need_sport_category')
-    function getElementByXpath(path) {
-        return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    }
-
-    function restoreSwitch(name){
-        var value = getCookie(name);
-        if(value === 'on'){
-            getElementByXpath('//input[contains(@class, \"'+name+'\")]/..//span[contains(@class, \"bootstrap-switch-handle-off bootstrap-switch-default\")]').click()
+    const radioButtonHandler = function() {
+        const inputName = $(this).attr('id');
+        const inputClass = $(this).attr('class');
+        const existingValue = Cookies.get(inputName);
+        if (existingValue !== inputClass) {
+            Cookies.set(inputName, inputClass, { expires: 7 });
         }
-    }
-    restoreRadioButtons('is_semifinal')
-    restoreRadioButtons('is_qualification_counting_like_final')
-    restoreRadioButtons('is_additional_final')
-    restoreRadioButtons('mode')
-    function restoreRadioButtons (name) {
-        var inputClass = getCookie(name)
-        let radio0 = name+'0'
-        let radio1 = name+'1'
-         if(!inputClass){
-            document.querySelector('.'+ radio1).click()
+    };
+
+    const restoreSwitch = function(name) {
+        const value = Cookies.get(name);
+        if (value === 'on') {
+            const xpath = `//input[contains(@class, \"\${name}\")]`;
+            const switchElements = getElementsByXPath(xpath);
+            if (switchElements.length > 0) {
+                switchElements[0].click(); // Кликаем на первый найденный элемент
+            }
+        }
+    };
+
+    const restoreRadioButtons = function(name) {
+        const inputClass = Cookies.get(name);
+        const radio0 = name + '0';
+        const radio1 = name + '1';
+        const radio1Element = document.querySelector('.' + radio1);
+        const radio0Element = document.querySelector('.' + radio0);
+
+        if (!inputClass) {
+            if (radio1Element) {
+                radio1Element.click();
+            }
         } else {
-            if(inputClass == radio1){
-                document.querySelector('.'+ radio1).click()
-            } else {
-                document.querySelector('.'+ radio1).click()
-                let r = document.querySelector('.'+ radio0)
-                if(r){
-                    document.querySelector('.'+ radio0).click()
-                }
+            if (radio1Element) {
+                radio1Element.click();
+            }
+            if (radio0Element && inputClass === radio0) {
+                radio0Element.click();
             }
         }
-    }
-    function getElementsByXPath(xpath) {
-      let results = [];
-      let query = document.evaluate(xpath, document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+    };
 
-      for (let i = 0; i < query.snapshotLength; i++) {
-        results.push(query.snapshotItem(i));
-      }
-
-        return results;
-    }
-    var addButton = document.querySelector('.categories-add');
-    document.querySelector('[type=submit][class=\"btn btn-primary\"]').setAttribute('disabled', '')
-    // Добавляем обработчик события для отслеживания клика
-    addButton.addEventListener('click', function() {
-
-    document.querySelector('[type=submit][class=\"btn btn-primary\"]').removeAttribute('disabled', '')
-    let warning = document.querySelector('#warning-category')
-        if(warning){
-            document.querySelector('#warning-category').remove()
-        }
-       $('.list-categories-table').find('input').on('input change', function() {
-       let index = 0
-        getElementsByXPath('//input[contains(@name, \"categories[values][]\")]').forEach(input => {
-            var existingValue = getCookieValue(input.name);
-            if (existingValue !== input.name) {
-                var inputName = input.name + index;
-                Cookies.set(inputName, input.value, { expires: 7 })
-//                saveDraft2(inputName,input.value)
+    const restoreInputValues = function() {
+        $('form').find('input:not([type=\"file\"]), select, textarea').each(function() {
+            const inputName = $(this).attr('name');
+            if (!inputName) return; // Проверяем, существует ли атрибут name
+            const savedValue = Cookies.get(inputName);
+            if (savedValue) {
+                $(this).val(savedValue);
             }
-            index = index + 1
+        });
+    };
+
+    restoreSwitch('active');
+    restoreSwitch('is_input_birthday');
+    restoreSwitch('is_need_sport_category');
+    restoreRadioButtons('is_semifinal');
+    restoreRadioButtons('is_qualification_counting_like_final');
+    restoreRadioButtons('is_additional_final');
+    restoreRadioButtons('mode');
+    restoreInputValues();
+
+    $('.categories-add').on('click', function() {
+        document.querySelector('[type=submit][class=\"btn btn-primary\"]').removeAttribute('disabled');
+        const warning = document.querySelector('#warning-category');
+        if (warning) {
+            warning.remove();
+        }
+
+        $('.list-categories-table').find('input').on('input change', function() {
+            let index = 0;
+            getElementsByXPath('//input[contains(@name, \"categories[values][]\")]')
+                .forEach(input => {
+                    const existingValue = getCookieValue(input.name);
+                    if (existingValue !== input.name) {
+                        const inputName = input.name + index;
+                        Cookies.set(inputName, input.value, { expires: 7 });
+                    }
+                    index++;
+                });
         });
     });
-    });
-    function getCookieValue(name) {
-        var allcookies = document.cookie;
 
-       // Get all the cookies pairs in an array
-       cookiearray  = allcookies.split(';');
-
-       // Now take key value pair out of this array
-       for(var i=0; i<cookiearray.length; i++){
-          let get_name = cookiearray[i].split('=')[0];
-          let get_value = cookiearray[i].split('=')[1];
-          if(get_name.startsWith(\"categories\") || get_name.startsWith(\" categories\")){
-            if(name == get_name.trim()){
-                return get_name.trim()
-            }
-          }
-       }
-    }
-
-
-    // Отслеживание изменений в input и select элементах формы
     $('form').find('input, select').on('input change click', function() {
-        var inputName = $(this).attr('name');
-        if(name.startsWith(\"categories\") || name.startsWith(\" categories\")){
-             return
-          }
-        var inputValue = $(this).val();
-        Cookies.set(inputName, inputValue, { expires: 7 })
-//        saveDraft(inputName, inputValue);
-    });
-    $('form').find('textarea').on('input change', function() {
-        var inputName = $(this).attr('name');
-        var inputValue = $(this).val();
-//        saveDraft(inputName, inputValue);
-        Cookies.set(inputName, inputValue, { expires: 7 })
-    });
-    $('#start_time').on('click', function() {
-        var inputName = $(this).attr('name');
-        var inputValue = $(this).val();
-//        saveDraft(inputName, inputValue);
-        Cookies.set(inputName, inputValue, { expires: 7 })
-    });
-    // Отслеживание кликов по input элементам для выбора дат и других выборов
-      $('#start_time').on('click', function() {
-        var inputName = $(this).attr('name');
-        var inputValue = $(this).val();
-//        saveDraft(inputName, inputValue);
-        Cookies.set(inputName, inputValue, { expires: 7 })
-    });
-    $('#start_date').on('click', function() {
-        var inputName = $(this).attr('name');
-        var inputValue = $(this).val();
-//        saveDraft(inputName, inputValue);
-        Cookies.set(inputName, inputValue, { expires: 7 })
-    });
-    $('#end_time').on('click', function() {
-        var inputName = $(this).attr('name');
-        var inputValue = $(this).val();
-//        saveDraft(inputName, inputValue);
-    Cookies.set(inputName, inputValue, { expires: 7 })
-    });
-    $('#end_date').on('click', function() {
-        var inputName = $(this).attr('name');
-        var inputValue = $(this).val();
-//        saveDraft(inputName, inputValue);
-        Cookies.set(inputName, inputValue, { expires: 7 })
-    });
-
-    // Функция для сохранения данных каждого инпута и селекта в cookies
-    function saveDraft(inputName, inputValue) {
-        var existingValue = getCookie(inputName);
-        if (existingValue !== inputValue) {
-            document.cookie = encodeURIComponent(inputName) + '=' + encodeURIComponent(inputValue);
-        }
-    }
-    function saveDraft2(inputName, inputValue) {
-        var existingValue = getCookie(inputName);
-        if (existingValue !== inputValue) {
-            var isSafari = window.safari !== undefined;
-            if(isSafari){
-                var year = 1000 * 60 * 60 * 2;
-                var expires = new Date((new Date()).valueOf() + year);
-                document.cookie = encodeURIComponent(inputName.trim()) + '=' + encodeURIComponent(inputValue) + ';expires=' + expires.toUTCString() + '; path=/; SameSite=Lax';
-            } else {
-                var expires = '';
-                var date = new Date();
-                date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
-                expires = '; expires=' + date.toUTCString();
-                document.cookie = inputName.trim() + '=' + inputValue + expires + '; path=/;Secure';
-            }
-
-        }
-    }
-    // Восстановление данных каждого инпута и селекта из cookies при загрузке страницы
-    $('form').find('input:not([type=\"file\"]), input:not([type=\"radio\"]), select, textarea').each(function() {
-        var inputName = $(this).attr('name');
-        if(inputName === 'is_qualification_counting_like_final'){
+        const inputName = $(this).attr('name');
+        if (!inputName || inputName.startsWith(\"categories\") || inputName.startsWith(\" categories\")) {
             return;
         }
-        if(inputName === 'is_semifinal'){
-            return;
-        }
-        if(inputName === 'is_additional_final'){
-            return;
-        }
-        if(inputName === 'mode'){
-            return;
-        }
-        if(inputName === 'categories[values][]'){
-            let table = document.querySelectorAll('.list-categories-table > tr');
-            if(table){
-                table.forEach(input => {
-                        input.remove();
-                    });
-            }
-
-            for(let i = 0; i <= 10; i++){
-                if(Cookies.get(inputName+i) !== undefined){
-                    let input_n = Cookies.get(inputName+i)
-                    addRowToTable(inputName+i, input_n)
-                }
-            }
-//            readCookie()
-             // Функция для удаления куки по имени
-            var removeButtons = document.querySelectorAll('.categories-remove');
-            removeButtons.forEach(function(button) {
-                button.addEventListener('click', function() {
-                    var dataId = button.getAttribute('data-id');
-                    dataId = dataId.trim();
-                    Cookies.remove(dataId)
-//                    var isSafari = window.safari !== undefined;
-//                    if(isSafari){
-//                        document.cookie = encodeURIComponent(dataId) + \"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;\";
-//                    } else {
-//                        document.cookie = dataId + \"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;\";
-//                    }
-
-                });
-            });
-            return;
-        }
-        var savedValue = Cookies.get(inputName);
-        if (savedValue) {
-            $(this).val(savedValue); // Восстановление данных
-        }
+        const inputValue = $(this).val();
+        Cookies.set(inputName, inputValue, { expires: 7 });
     });
 
-    function readCookie()
-    {
-       var allcookies = document.cookie;
+    $('#start_time, #start_date, #end_time, #end_date').on('click', function() {
+        const inputName = $(this).attr('name');
+        const inputValue = $(this).val();
+        Cookies.set(inputName, inputValue, { expires: 7 });
+    });
 
-       // Get all the cookies pairs in an array
-       cookiearray  = allcookies.split(';');
+    $('.categories-remove').on('click', function() {
+        const dataId = $(this).attr('data-id').trim();
+        Cookies.remove(dataId);
+    });
 
-       // Now take key value pair out of this array
-       for(var i=0; i<cookiearray.length; i++){
-          name = cookiearray[i].split('=')[0];
-          value = cookiearray[i].split('=')[1];
-          if(name.startsWith(\"categories\") || name.startsWith(\" categories\")){
-             var isSafari = window.safari !== undefined;
-
-             if(isSafari){
-                var name1 = decodeURIComponent(name);
-                addRowToTable(name1, value)
-             } else {
-                addRowToTable(name.trim(), value)
-             }
-          }
-
-       }
-    }
-
-   function addRowToTable(name, value) {
-        var newRow = document.createElement('tr');
-        var firstTd = document.createElement('td');
-        var formGroupDiv = document.createElement('div');
-        formGroupDiv.className = 'form-group';
-        var colDiv = document.createElement('div');
-        colDiv.className = 'col-sm-12';
-        var inputElement = document.createElement('input');
-        inputElement.setAttribute('name', name);
-        inputElement.setAttribute('value', value);
-        inputElement.className = 'form-control';
-        colDiv.appendChild(inputElement);
-        formGroupDiv.appendChild(colDiv);
-        firstTd.appendChild(formGroupDiv);
-        var secondTd = document.createElement('td');
-        secondTd.setAttribute('style', 'width: 75px;');
-        var removeButtonDiv = document.createElement('div');
-        removeButtonDiv.setAttribute('data-id', name);
-        removeButtonDiv.className = 'categories-remove btn btn-warning btn-sm pull-right';
-        var trashIcon = document.createElement('i');
-        trashIcon.className = 'fa fa-trash';
-        trashIcon.innerHTML = '&nbsp;Удалить';
-        removeButtonDiv.appendChild(trashIcon);
-        secondTd.appendChild(removeButtonDiv);
-        newRow.appendChild(firstTd);
-        newRow.appendChild(secondTd);
-        var tableBody = document.querySelector('.list-categories-table');
-        tableBody.appendChild(newRow);
-        let warning = document.querySelector('#warning-category')
-        if(warning){
-            document.querySelector('#warning-category').remove()
-        }
-
-   }
-
-    // Очистка данных черновика при успешной отправке формы
     $('form').submit(function() {
-         if(window.location.href.indexOf(\"edit\") > -1)
-            {
-                 return
-            }
-        clearDraft();
+        if (window.location.href.indexOf(\"edit\") === -1) {
+            clearDraft();
+        }
     });
-     $('[type=submit]').on('click', function() {
-         if(window.location.href.indexOf(\"edit\") > -1)
-            {
-                 return
-            }
-       clearDraft();
-    });
-    // Функция для очистки данных черновика
 
+    $('[type=submit]').on('click', function() {
+        if (window.location.href.indexOf(\"edit\") === -1) {
+            clearDraft();
+        }
+    });
 
     function clearDraft() {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            let get_name = cookies[i].split('=')[0];
-             Cookies.remove(get_name.trim())
+        document.cookie.split(';').forEach(cookie => {
+            const cookieName = cookie.split('=')[0].trim();
+            Cookies.remove(cookieName);
+        });
+    }
+
+    function getCookieValue(name) {
+        const allcookies = document.cookie;
+        const cookiearray = allcookies.split(';');
+        for (let i = 0; i < cookiearray.length; i++) {
+            const get_name = cookiearray[i].split('=')[0].trim();
+            if ((get_name.startsWith(\"categories\") || get_name.startsWith(\" categories\")) && name === get_name) {
+                return get_name;
+            }
         }
     }
-    // Вспомогательная функция для получения значения cookie по имени
-    function getCookie(name) {
-        var match = document.cookie.match(new RegExp('(^| )' + encodeURIComponent(name) + '=([^;]+)'));
-        if (match) {
-            return decodeURIComponent(match[2]);
+
+    function getElementsByXPath(xpath) {
+        const results = [];
+        const query = document.evaluate(xpath, document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+        for (let i = 0; i < query.snapshotLength; i++) {
+            results.push(query.snapshotItem(i));
         }
-        return null;
+        return results;
     }
-//
-//    if(getCookie('title') !== null){
-//        document.getElementById('create-events-link').textContent = 'Черновик соревнования'
-//    }
-});");
+});
+
+");
     }
 }
