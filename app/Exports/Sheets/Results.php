@@ -313,24 +313,14 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $table.'.place',
                 'users.id',
                 'users.middlename',
+                $table.'.category_id',
                 $table.'.amount_top',
                 $table.'.amount_try_top',
                 $table.'.amount_zone',
                 $table.'.amount_try_zone',
             )->where($table.'.gender', '=', $this->gender);
-        if($table === "result_final_stage" || $table === "result_qualification_like_final"){
-            if($this->category){
-                $users = $users->select(
-                    $table.'.place',
-                    $table.'.category_id',
-                    'users.id',
-                    'users.middlename',
-                    $table.'.amount_top',
-                    $table.'.amount_try_top',
-                    $table.'.amount_zone',
-                    $table.'.amount_try_zone',
-                )->where('category_id', '=', $this->category->id);
-            }
+        if($this->category){
+            $users = $users->where('category_id', '=', $this->category->id);
         }
 
         $users = $users->get()->sortBy('place')->toArray();

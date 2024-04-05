@@ -58,6 +58,7 @@ class HasMany extends Field
         'tab' => 'admin::form.hasmanytab',
         'table' => 'admin::form.hasmanytable',
         'tableCustom' => 'admin::form.hasmanytablecustom',
+        'customList' => 'admin::form.hasmanycustomlist',
     ];
 
     /**

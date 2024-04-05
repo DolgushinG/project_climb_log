@@ -4,7 +4,13 @@ namespace App\Admin\Actions\ResultRouteSemiFinalStage;
 
 use App\Models\Event;
 use App\Models\Participant;
+use App\Models\ParticipantCategory;
+use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultRouteFinalStage;
+use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultRouteSemiFinalStage;
+use App\Models\ResultSemiFinalStage;
+use App\Models\User;
 use Encore\Admin\Actions\Action;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,11 +37,18 @@ class BatchResultSemiFinal extends Action
             } else {
                 $amount_zone  = 0;
             }
-            $gender = Participant::where('user_id', intval($results['user_id']))->where('event_id', intval($results['event_id']))->first()->gender;
+            if($event->is_qualification_counting_like_final){
+                $participant = ResultQualificationLikeFinal::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+            } else {
+                $participant = Participant::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+            }
+            $category_id = $participant->category_id;
+            $gender = $participant->gender;
             $data[] = array('owner_id' => \Encore\Admin\Facades\Admin::user()->id,
                 'user_id' => intval($results['user_id']),
                 'event_id' => intval($results['event_id']),
                 'final_route_id' => intval($results['final_route_id_'.$i]),
+                'category_id' => $category_id,
                 'amount_top' => $amount_top,
                 'gender' => $gender,
                 'amount_try_top' => intval($results['amount_try_top_'.$i]),
@@ -44,6 +57,7 @@ class BatchResultSemiFinal extends Action
                 );
         }
         DB::table('result_route_semifinal_stage')->insert($data);
+        Event::refresh_final_points_all_participant_in_semifinal($event->id);
         return $this->response()->success('Результат успешно внесен')->refresh();
     }
 
@@ -52,11 +66,37 @@ class BatchResultSemiFinal extends Action
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $users_male = Participant::better_participants($event->id, 'male', 10);
-        $users_female = Participant::better_participants($event->id, 'female', 10);
-        $merged_users = $users_male->merge($users_female);
+        $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
+        if($event->is_additional_semifinal){
+            $all_group_participants = array();
+            foreach ($event->categories as $category){
+                $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
+                if($event->is_qualification_counting_like_final) {
+                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant, $category_id)->toArray();
+                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant, $category_id)->toArray();
+                } else {
+                    $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount_the_best_participant, $category_id);
+                    $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount_the_best_participant, $category_id);
+                }
+            }
+            $merged_users = collect();
+            foreach ($all_group_participants as $participant) {
+                foreach ($participant as $a){
+                    $merged_users[] = $a;
+                }
+            }
+        } else {
+            if($event->is_qualification_counting_like_final) {
+                $users_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant);
+                $users_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant);
+            } else {
+                $users_female = Participant::better_participants($event->id, 'female', $amount_the_best_participant);
+                $users_male = Participant::better_participants($event->id, 'male', $amount_the_best_participant);
+            }
+            $merged_users = $users_male->merge($users_female);
+        }
         $result = $merged_users->pluck( 'middlename','id');
-        $result_semifinal = ResultRouteSemiFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
+        $result_semifinal = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
             if(in_array($index, $result_semifinal)){
                 $result[$index] = $res.' [Уже добавлен]';

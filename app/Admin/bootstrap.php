@@ -40,6 +40,7 @@ Encore\Admin\Grid\Column::define('actions', app\Admin\CustomAction\CustomActions
 app('view')->prependNamespace('admin', resource_path('views/admin'));
 //Admin::js('/vendor/chart.js/chart.js');
 Form::extend('tablecustom', CustomTable::class);
+Form::extend('customlist', \App\Admin\Extensions\CustomList::class);
 Admin::js('/vendor/dadata/ddata.js');
 Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
     $navbar->right(new \App\Admin\Extensions\Links());

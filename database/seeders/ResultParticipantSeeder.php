@@ -41,7 +41,8 @@ class ResultParticipantSeeder extends Seeder
         for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
             prepare_result_participant($i, $i);
         }
-        Event::refresh_final_points_all_participant($i);
+        $event = Event::find($i);
+        Event::refresh_final_points_all_participant($event);
 
     }
 }

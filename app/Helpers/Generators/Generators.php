@@ -162,13 +162,24 @@ class Generators
             if($event->is_qualification_counting_like_final){
                 $result_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event_id, 'female', $amount_the_best_participant)->toArray();
                 $result_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event_id, 'male', $amount_the_best_participant)->toArray();
+                $participant_from = 'qualification_counting_like_final';
+
             } else {
                 $result_female = Participant::better_participants($event_id, 'female', $amount_the_best_participant)->toArray();
                 $result_male = Participant::better_participants($event_id, 'male', $amount_the_best_participant)->toArray();
+                $participant_from = 'qualification';
             }
             $users = array_merge($result_female, $result_male);
             $result = array();
             foreach ($users as $user) {
+                switch ($participant_from){
+                    case 'qualification_counting_like_final':
+                        $participant = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                        break;
+                    case 'qualification':
+                        $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                        break;
+                }
                 for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {
@@ -187,10 +198,11 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'],'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'],'category_id' => $participant->category_id,'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
                 }
             }
             DB::table('result_route_semifinal_stage')->insert($result);
+            Event::refresh_final_points_all_participant_in_semifinal($event_id);
         }
 
         if($table === 'result_route_final_stage') {
@@ -255,7 +267,7 @@ class Generators
                 }
             }
             DB::table('result_route_final_stage')->insert($result);
-            Event::refresh_final_points_all_participant_in_final($event_id, $owner_id);
+            Event::refresh_final_points_all_participant_in_final($event_id);
         }
     }
 }

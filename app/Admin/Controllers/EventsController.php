@@ -13,7 +13,9 @@ use App\Models\Format;
 use App\Models\Grades;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
+use App\Models\ResultParticipant;
 use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\Set;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -224,7 +226,7 @@ class EventsController extends Controller
             $form->image('img_payment', 'QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
             $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
-        })->tab('Настройка Трасс', function ($form) {
+        })->tab('Настройка трасс', function ($form) {
             $routes = Grades::getRoutes();
             $form->html('<h4>Ценность трассы учитывается только в формате соревнований n лучших трасс, там необходимо искать лучшие трассы по баллам <br>
                                 Для других режимов ценность не учитывается, можно просто игнорировать это поле</h4>');
@@ -237,7 +239,7 @@ class EventsController extends Controller
                 $table->disableButton();
             })->value($routes);
 
-        })->tab('Параметры соревнования', function ($form) {
+        })->tab('Параметры соревнования', function ($form) use ($id) {
             $form->html('<p>*Классика - квалификация и полуфинал/финал для лучших в квалификации, </p>');
             $form->html('<p>*Как финальный раунд - то есть квалификация будет считаться как по кол-ву топов и зон </p>');
             $form->radio('is_qualification_counting_like_final','Настройка подсчета квалификации')
@@ -253,7 +255,7 @@ class EventsController extends Controller
                             $form->text('amount_point_flash','Балл за флэш')->value(1);
                             $form->text('amount_point_redpoint','Балл за редпоинт')->value(0.9);
                         });
-                    $form->radio('is_semifinal','Настройка финалов')
+                    $form->radio('is_semifinal','Настройка кол-ва стадий соревнований')
                         ->options([
                             1 =>'С полуфиналом',
                             0 =>'Без полуфинала',
@@ -261,31 +263,48 @@ class EventsController extends Controller
                             $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд полуфинал')
                                 ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
                             $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->attribute('inputmode', 'none')->value(5);
-                            $form->hidden('is_additional_final','Финалы для разных групп')
+                            $form->radio('is_additional_semifinal','Полуфиналы для разных групп')
                                 ->options([
-                                    1 =>'С финалами для каждой категории групп',
-                                    0 =>'Классика финал для лучших в квалификации',
+                                    1 =>'Подсчет результатов полуфинала по полу и по категории участников',
+                                    0 =>'Подсчет результатов полуфинала по полу',
                                 ])->value(0)->required();
+                            $form->radio('is_additional_final','Финалы для разных групп')
+                                ->options([
+                                    1 =>'Подсчет результатов финала по полу и по категории участников',
+                                    0 =>'Подсчет результатов финала по полу',
+                                ])->required();
                         })->when(0, function (Form $form) {
                             $form->radio('is_additional_final','Финалы для разных групп')
                                 ->options([
-                                    1 =>'Подсчет результатов в финале по каждой категории групп',
-                                    0 =>'Подсчет результатов в финале по лучшим в квалификации',
+                                    1 =>'Подсчет результатов финала по полу и по категории участников',
+                                    0 =>'Подсчет результатов финала по полу',
                                 ])->required();
-                        })->required();
+                        })->value(1)->required();
                 })->when(1, function (Form $form) {
                     $form->radio('is_additional_final','Финалы для разных групп')
                         ->options([
-                            1 =>'Подсчет результатов в финале по каждой категории групп',
-                            0 =>'Подсчет результатов в финале по лучшим в квалификации',
-                        ])->value(1)->required();
+                            1 =>'Подсчет результатов финала по полу и по категории участников',
+                            0 =>'Подсчет результатов финала по полу',
+                        ])->required();
                     $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->attribute('inputmode', 'none')->value(10);
                 })->required();
+
             $form->number('amount_the_best_participant_to_go_final','Кол-во лучших участников идут в след раунд финал')
                 ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
             $form->number('amount_routes_in_final','Кол-во трасс в финале')->attribute('inputmode', 'none')->value(4);
-            $form->list('categories', 'Категории участников')->rules('required|min:2')->required();
-            $form->html('<h4 id="warning-category" style="color: red" >Обязательно проверьте заполнение категорий и обязательных полей</h4>');
+            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+            if(!$event){
+                $form->list('categories', 'Категории участников')->rules('required|min:2');
+                $form->html('<h4 id="warning-category" style="color: red" >Обязательно проверьте заполнение категорий и обязательных полей</h4>');
+            } else {
+                if($this->is_fill_results(intval($id))){
+                    $form->html('<h5> Доступно только изменение категорий, так как были добавлены результаты, нельзя удалить или добавить новые</h5>');
+                    $form->customlist('categories', 'Категории участников');
+                } else {
+                    $form->list('categories', 'Категории участников')->rules('required|min:2');
+                    $form->html('<h4 id="warning-category" style="color: red" >Обязательно проверьте заполнение категорий и обязательных полей</h4>');
+                }
+            }
             $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states(self::STATES_BTN);
             $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states(self::STATES_BTN);
 
@@ -366,23 +385,33 @@ class EventsController extends Controller
             if($form->categories){
                 $categories = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
                     ->where('event_id', '=', $form->model()->id)->get();
+                #  Заменяем если категории которые уже были не изменяя ID
                 if($categories->isNotEmpty()){
-                    foreach ($form->categories as $category){
-                        foreach ($category as $index => $c){
-                            $categories[$index]->category = $c;
+                    foreach ($form->categories['values'] as $index => $category){
+                        if(isset($categories[$index])){
+                            $categories[$index]->category = $category;
+                        } else {
+                            $participant_category = new ParticipantCategory;
+                            $participant_category->category = $category;
+                            $categories->push($participant_category);
                         }
                     }
                     foreach ($categories as $category){
                         $participant_category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
-                            ->where('id', '=', $category->id)->first();
+                            ->where('event_id', '=', $form->model()->id)->where('id', '=', $category->id)->first();
+                        # Если в входящей форме пришли значение которых нет в БД до значит их удалили
+                        if(array_search($category->category, $form->categories['values']) === false){
+                            ParticipantCategory::where('owner_id', '=', Admin::user()->id)
+                                ->where('event_id', '=', $form->model()->id)->where('category', '=', $category->category)->delete();
+                        }
                         if(!$participant_category){
                             $participant_category = new ParticipantCategory;
+                            $participant_category->owner_id = Admin::user()->id;
+                            $participant_category->event_id = $form->model()->id;
                         }
                         $participant_category->category = $category->category;
                         $participant_category->save();
                     }
-                    $participant_category->category = $category->category;
-                    $participant_category->save();
                 } else {
                     foreach ($form->categories as $category){
                         foreach ($category as $c){
@@ -451,6 +480,17 @@ class EventsController extends Controller
         ]);
     }
 
+    public function is_fill_results($event_id)
+    {
+        $result = false;
+        if(Participant::where('event_id',$event_id)->first()){
+            $result = true;
+        }
+        if(ResultRouteQualificationLikeFinal::where('event_id',$event_id)->first()){
+            $result = true;
+        }
+        return $result;
+    }
     public function install_set($owner_id){
         $sets = array(
             ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'friday','number_set' => 1],
@@ -586,6 +626,7 @@ class EventsController extends Controller
     restoreRadioButtons('is_semifinal');
     restoreRadioButtons('is_qualification_counting_like_final');
     restoreRadioButtons('is_additional_final');
+    restoreRadioButtons('is_additional_semifinal');
     restoreRadioButtons('mode');
     restoreInputValues();
 

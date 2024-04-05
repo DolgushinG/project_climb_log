@@ -2,9 +2,14 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchForceRecoutingResultFinalGender;
+use App\Admin\Actions\BatchForceRecoutingResultFinalGroup;
+use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGender;
+use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGroup;
 use App\Admin\Actions\BatchGenerateResultSemiFinalParticipant;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
+use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustom;
 use App\Exports\SemiFinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
@@ -48,20 +53,6 @@ class ResultRouteSemiFinalStageController extends Controller
                     ->where('is_semifinal', '=', 1)
                     ->first();
                 if($event) {
-                    $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
-                    if($event->is_qualification_counting_like_final){
-                        $result_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant);
-                        $result_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant);
-                    } else {
-                        $result_female = Participant::better_participants($event->id, 'female', $amount_the_best_participant);
-                        $result_male = Participant::better_participants($event->id, 'male', $amount_the_best_participant);
-                    }
-                    $fields = ['firstname',
-                        'id', 'category', 'avatar','active', 'team', 'city',
-                        'email', 'year', 'lastname', 'skill', 'sport_category', 'email_verified_at', 'created_at', 'updated_at',
-                        'telegram_id','yandex_id','vkontakte_id'];
-                    self::getUsersSorted($result_male, $fields, $event, 'semifinal', Admin::user()->id);
-                    self::getUsersSorted($result_female, $fields, $event, 'semifinal', Admin::user()->id);
                     $row->column(10, $this->grid());
                 }
             });
@@ -141,15 +132,27 @@ class ResultRouteSemiFinalStageController extends Controller
         });
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultSemiFinal);
-            $tools->append(new BatchResultSemiFinal);
+//            $tools->append(new BatchResultSemiFinal);
+            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+            if($event->is_additional_semifinal){
+                $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
+                foreach ($categories as $category){
+                    $tools->append(new BatchResultSemiFinalCustom($category));
+                }
+            } else {
+                $tools->append(new BatchResultSemiFinal);
+            }
+            $tools->append(new BatchForceRecoutingSemiFinalResultGroup);
+            $tools->append(new BatchForceRecoutingSemiFinalResultGender);
             $tools->append(new BatchGenerateResultSemiFinalParticipant);
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {
+            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+            if($event->is_additional_semifinal) {
+                $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+            }
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
         });
-//        $grid->batchActions(function ($batch) {
-//            $batch->add(new CustomSemiFinalActionsDelete());
-//        });
         $grid->actions(function ($actions) {
             $actions->disableEdit();
 //            $actions->disableDelete();
@@ -167,6 +170,15 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
         });
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if($event->is_additional_semifinal) {
+            $grid->column('category_id', 'Категория')->display(function ($category_id) {
+                $owner_id = Admin::user()->id;
+                $event = Event::where('owner_id', '=', $owner_id)
+                    ->where('active', 1)->first();
+                return ParticipantCategory::where('id', '=', $category_id)->where('event_id', $event->id)->first()->category;
+            })->sortable();
+        }
         $grid->column('place', __('Место'))->sortable();
         $grid->column('amount_top', __('Кол-во топов'));
         $grid->column('amount_try_top', __('Кол-во попыток на топ'));
@@ -310,18 +322,18 @@ class ResultRouteSemiFinalStageController extends Controller
                         $result = new ResultFinalStage;
                     }
                 }
-                $category_id = ParticipantCategory::where('id', $users_sorted[$index]['category_id'])->where('event_id', $model->id)->first();
-                if($category_id){
-                    $category_id = $category_id->id;
-                    $result->category_id = $category_id;
-                } else {
-                    Log::error('It has not found category_id '.$users_sorted[$index]['category_id'].' '.$model->id);
-                }
             } else {
                 $result = ResultSemiFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
                 if (!$result){
                     $result = new ResultSemiFinalStage;
                 }
+            }
+            $category_id = ParticipantCategory::where('id', $users_sorted[$index]['category_id'])->where('event_id', $model->id)->first();
+            if($category_id){
+                $category_id = $category_id->id;
+                $result->category_id = $category_id;
+            } else {
+                Log::error('It has not found category_id '.$users_sorted[$index]['category_id'].' '.$model->id);
             }
             $result->event_id = $users_sorted[$index]['event_id'];
             $result->user_id = $users_sorted[$index]['user_id'];

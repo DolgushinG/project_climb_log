@@ -46,6 +46,7 @@ class UpdateResultParticipants implements ShouldQueue
      */
     public function handle()
     {
-        Event::refresh_final_points_all_participant($this->event_id);
+        $event = Event::find($this->event_id);
+        Event::refresh_final_points_all_participant($event);
     }
 }

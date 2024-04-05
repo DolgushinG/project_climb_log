@@ -239,17 +239,17 @@ class EventsController extends Controller
             if (str_contains($result[0], 'flash') && $result[1] == "true") {
                 $route_id = str_replace("flash-","", $result[0]);
                 $attempt = 1;
-                $data[] = array('grade' => $category, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'redpoint') && $result[1] == "true") {
                 $route_id = str_replace("redpoint-","", $result[0]);
                 $attempt = 2;
-                $data[] = array('grade' => $category, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'failed') && $result[1] == "true") {
                 $route_id = str_replace("failed-","", $result[0]);
                 $attempt = 0;
-                $data[] = array('grade' => $category, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
         };
         $final_data = array();
@@ -292,7 +292,6 @@ class EventsController extends Controller
         foreach ($final_data as $index => $data){
             $final_data[$index] = collect($data)->except('points')->toArray();
         }
-
         $result = ResultParticipant::insert($final_data);
 
         $participants = User::query()
@@ -305,7 +304,7 @@ class EventsController extends Controller
         foreach ($participants as $participant) {
             Event::update_participant_place($request->event_id, $participant->id, $participant->gender);
         }
-        Event::refresh_final_points_all_participant($request->event_id);
+        Event::refresh_final_points_all_participant($event);
         if ($result) {
             $event = Event::find($request->event_id);
             return response()->json(['success' => true, 'message' => 'Успешная внесение результатов', 'link' => $event->link], 201);

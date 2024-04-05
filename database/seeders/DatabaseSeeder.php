@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
             }
         }
         $genders = ['male', 'female','male', 'female'];
-        for($i = 1; $i <= 120; $i++){
+        for($i = 1; $i <= 300; $i++){
             \App\Models\User::factory()->count(1)->withGender($genders[array_rand($genders)])->create();
         }
         $this->call([

@@ -5,6 +5,8 @@ namespace App\Admin\Actions;
 use App\Admin\CustomAction\ActionExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
+use App\Models\ResultFinalStage;
+use App\Models\ResultRouteFinalStage;
 use App\Models\ResultSemiFinalStage;
 use Encore\Admin\Actions\Action;
 use Encore\Admin\Actions\BatchAction;
@@ -13,17 +15,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
-class BatchForceRecouting extends Action
+class BatchForceRecoutingSemiFinalResultGender extends Action
 {
-    public $name = 'Пересчитать результаты';
+    public $name = 'Пересчитать результаты c учетом только пола';
 
-    protected $selector = '.recouting';
+    protected $selector = '.recouting-gender';
 
     public function handle(Request $request)
     {
         $event_id = $request->title;
-        $event = Event::find($event_id);
-        Event::refresh_final_points_all_participant($event);
+        $event = Event::find(intval($event_id));
+        $event->is_additional_semifinal = 0;
+        $event->save();
+        ResultSemiFinalStage::where('event_id', intval($event_id))->delete();
+        Event::refresh_final_points_all_participant_in_semifinal(intval($event_id));
         return $this->response()->success('Пересчитано')->refresh();
     }
 
@@ -36,7 +41,13 @@ class BatchForceRecouting extends Action
 
     public function html()
     {
-        return "<a class='recouting btn btn-sm btn-success'><i class='fa fa-refresh'></i> Результаты</a>";
+        return "<a class='recouting-gender btn btn-sm btn-success'><i class='fa fa-female'></i><i class='fa fa-male'></i> Результаты<</a>
+         <style>
+              @media screen and (max-width: 767px) {
+                    .recouting-gender {margin-top:8px;}
+                }
+            </style>
+        ";
     }
 
 }

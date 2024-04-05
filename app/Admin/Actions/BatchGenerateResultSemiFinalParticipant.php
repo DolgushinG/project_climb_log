@@ -45,11 +45,13 @@ class BatchGenerateResultSemiFinalParticipant extends Action
 
     public function html()
     {
-        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
-            ->where('active', '=', 1)->first();
-        if(!$event->is_additional_final){
-            return "<a class='generate-result-semifinal-participant btn btn-sm btn-warning'><i class='fa fa-gears'></i> Сгенерировать результаты полуфинала участников[beta]</a>";
-        }
+        return "<a class='generate-result-semifinal-participant btn btn-sm btn-warning'><i class='fa fa-trophy'></i> Сгенерировать результаты[beta]</a>
+            <style>
+                 @media screen and (max-width: 767px) {
+                    .generate-result-semifinal-participant {margin-top:8px;}
+                    }
+            </style>
+        ";
     }
 
 }

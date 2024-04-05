@@ -37,8 +37,17 @@ class AllResultExport implements WithMultipleSheets
                 $sheets[] = new Results($this->event_id, $stage, $gender, $category);
             }
         }
-        foreach ($genders as $gender) {
-            $sheets[] = new Results($this->event_id, 'SemiFinal', $gender);
+        if($event->is_additional_semifinal){
+            $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
+            foreach ($genders as $gender) {
+                foreach ($categories as $category) {
+                    $sheets[] = new Results($this->event_id, 'SemiFinal', $gender, $category);
+                }
+            }
+        } else {
+            foreach ($genders as $gender) {
+                $sheets[] = new Results($this->event_id, 'SemiFinal', $gender);
+            }
         }
         if($event->is_additional_final){
             $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
@@ -54,4 +63,6 @@ class AllResultExport implements WithMultipleSheets
         }
         return $sheets;
     }
+
+
 }

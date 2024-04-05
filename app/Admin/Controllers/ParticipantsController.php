@@ -189,8 +189,6 @@ class ParticipantsController extends Controller
         $grid->disableFilter();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
-        $grid->disablePagination();
-        $grid->disablePerPageSelector();
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);

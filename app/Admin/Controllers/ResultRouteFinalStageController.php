@@ -2,9 +2,17 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchForceRecoutingResultFinalGender;
+use App\Admin\Actions\BatchForceRecoutingResultFinalGroup;
+use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGender;
+use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGroup;
 use App\Admin\Actions\BatchGenerateResultFinalParticipant;
+use App\Admin\Actions\BatchGenerateResultSemiFinalParticipant;
 use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
+use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustom;
+use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
+use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustom;
 use App\Exports\FinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
@@ -105,7 +113,17 @@ class ResultRouteFinalStageController extends Controller
         });
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultFinal);
-            $tools->append(new BatchResultFinal);
+            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+            if($event->is_additional_final){
+                $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
+                foreach ($categories as $category){
+                    $tools->append(new BatchResultFinalCustom($category));
+                }
+            } else {
+                $tools->append(new BatchResultFinal);
+            }
+            $tools->append(new BatchForceRecoutingResultFinalGender);
+            $tools->append(new BatchForceRecoutingResultFinalGroup);
             $tools->append(new BatchGenerateResultFinalParticipant);
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {
@@ -130,12 +148,15 @@ class ResultRouteFinalStageController extends Controller
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
         });
-        $grid->column('category_id', 'Категория')->display(function ($category_id) {
-            $owner_id = Admin::user()->id;
-            $event = Event::where('owner_id', '=', $owner_id)
-                ->where('active', 1)->first();
-            return ParticipantCategory::where('id', '=', $category_id)->where('event_id', $event->id)->first()->category;
-        })->sortable();
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if($event->is_additional_final) {
+            $grid->column('category_id', 'Категория')->display(function ($category_id) {
+                $owner_id = Admin::user()->id;
+                $event = Event::where('owner_id', '=', $owner_id)
+                    ->where('active', 1)->first();
+                return ParticipantCategory::where('id', '=', $category_id)->where('event_id', $event->id)->first()->category;
+            })->sortable();
+        }
         $grid->column('place', __('Место'))->sortable();
         $grid->column('amount_top', __('Кол-во топов'));
         $grid->column('amount_try_top', __('Кол-во попыток на топ'));

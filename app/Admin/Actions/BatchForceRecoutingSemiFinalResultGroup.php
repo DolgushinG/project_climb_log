@@ -13,17 +13,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
-class BatchForceRecouting extends Action
+class BatchForceRecoutingSemiFinalResultGroup extends Action
 {
-    public $name = 'Пересчитать результаты';
+    public $name = 'Пересчитать результаты c учетом пола и категории участников';
 
-    protected $selector = '.recouting';
+    protected $selector = '.recouting-group';
 
     public function handle(Request $request)
     {
         $event_id = $request->title;
-        $event = Event::find($event_id);
-        Event::refresh_final_points_all_participant($event);
+        $event = Event::find(intval($event_id));
+        $event->is_additional_semifinal = 1;
+        $event->save();
+        ResultSemiFinalStage::where('event_id', intval($event_id))->delete();
+        Event::refresh_final_points_all_participant_in_semifinal(intval($event_id));
         return $this->response()->success('Пересчитано')->refresh();
     }
 
@@ -36,7 +39,13 @@ class BatchForceRecouting extends Action
 
     public function html()
     {
-        return "<a class='recouting btn btn-sm btn-success'><i class='fa fa-refresh'></i> Результаты</a>";
+        return "<a class='recouting-group btn btn-sm btn-success'><i class='fa fa-users'></i></i> Результаты<</a>
+         <style>
+                @media screen and (max-width: 767px) {
+                        .recouting-group {margin-top:8px;}
+                    }
+            </style>
+        ";
     }
 
 }

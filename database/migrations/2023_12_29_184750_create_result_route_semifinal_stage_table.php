@@ -17,6 +17,7 @@ class CreateResultRouteSemiFinalStageTable extends Migration
             $table->increments('id');
             $table->integer('owner_id');
             $table->integer('event_id');
+            $table->string('category_id');
             $table->string('gender');
             $table->integer('user_id');
             $table->integer('final_route_id');

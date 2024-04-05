@@ -41,7 +41,13 @@ class BatchGenerateResultFinalParticipant extends Action
 
     public function html()
     {
-        return "<a class='generate-result-final-participant btn btn-sm btn-warning'><i class='fa fa-gears'></i> Сгенерировать результаты финала участников[beta]</a>";
+        return "<a class='generate-result-final-participant btn btn-sm btn-warning'><i class='fa fa-trophy'></i> Сгенерировать результаты[beta]</a>
+            <style>
+                 @media screen and (max-width: 767px) {
+                    .generate-result-final-participant {margin-top:8px;}
+                    }
+            </style>
+            ";
     }
 
 }

@@ -41,6 +41,7 @@ class CreateEventsTable extends Migration
             $table->integer('amount_start_price')->nullable();
             $table->integer('is_semifinal');
             $table->integer('is_additional_final')->nullable();
+            $table->integer('is_additional_semifinal')->nullable();
             $table->integer('is_qualification_counting_like_final')->nullable();
             $table->float('amount_point_flash')->nullable();
             $table->float('amount_point_redpoint')->nullable();
