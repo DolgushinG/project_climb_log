@@ -41,7 +41,7 @@ class BatchForceRecoutingSemiFinalResultGender extends Action
 
     public function html()
     {
-        return "<a class='recouting-gender btn btn-sm btn-success'><i class='fa fa-female'></i><i class='fa fa-male'></i> Результаты<</a>
+        return "<a class='recouting-gender btn btn-sm btn-success'><i class='fa fa-female'></i><i class='fa fa-male'></i> Результаты </a>
          <style>
               @media screen and (max-width: 767px) {
                     .recouting-gender {margin-top:8px;}
