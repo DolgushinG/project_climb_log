@@ -71,7 +71,6 @@
                                                         value="{{old('birthday')}}"
                                                         name="birthday"
                                                         id="birthday"
-                                                        required
                                                         autofocus
                                                     />
                                                     <div class="invalid-feedback">Введите дату рождения</div>
@@ -81,7 +80,7 @@
                                                 <label for="city" class="form-label">Город</label>
                                                 <div class="input-group has-validation">
                                                     <input type="text" name="city" placeholder="Город" class="form-control" id="city"
-                                                           value="{{old('city')}}" required autofocus>
+                                                           value="{{old('city')}}" autofocus>
                                                     <div class="invalid-feedback">Введите город</div>
                                                 </div>
                                             </div>
@@ -89,7 +88,7 @@
                                                 <label for="team" class="form-label">Команда</label>
                                                 <div class="input-group has-validation">
                                                     <input type="text" name="team" placeholder="Команда" class="form-control" id="team"
-                                                           value="{{old('team')}}" required autofocus>
+                                                           value="{{old('team')}}" autofocus>
                                                     <div class="invalid-feedback">Введите команда</div>
                                                 </div>
                                             </div>
