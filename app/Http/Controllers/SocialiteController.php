@@ -4,20 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialiteController extends Controller
 {
-//    public function callback_vkontakte(){
-//        $socialite_user =  Socialite::driver('vkontakte')->user();
-//        $user = $this->saving_callback($socialite_user, 'vkontakte');
-//        \Illuminate\Support\Facades\Auth::login($user);
-//        return redirect('/profile');
-//    }
     public function callback_vkontakte(){
         try {
             $socialite_user =  Socialite::driver('vkontakte')->stateless()->user();
         } catch (\Exception $e) {
+            Log::error('Socialize - vkontakte - error - '.$e->getMessage());
             return redirect('/login')->with('error','Что то пошло не так обратитесь к администратору');
         }
         $existingUser = User::where('vkontakte_id', $socialite_user->getId())->first();
@@ -31,16 +27,36 @@ class SocialiteController extends Controller
     }
 
     public function callback_telegram(){
-        $socialite_user =  Socialite::driver('telegram')->stateless()->user();
-        $user = $this->saving_callback($socialite_user, 'telegram');
-        \Illuminate\Support\Facades\Auth::login($user);
+        try {
+            $socialite_user =  Socialite::driver('telegram')->stateless()->user();
+        } catch (\Exception $e) {
+            Log::error('Socialize -  telegram - error - '.$e->getMessage());
+            return redirect('/login')->with('error','Что то пошло не так обратитесь к администратору');
+        }
+        $existingUser = User::where('telegram_id', $socialite_user->getId())->first();
+        if($existingUser){
+            \Illuminate\Support\Facades\Auth::login($existingUser);
+        } else {
+            $user = $this->saving_callback($socialite_user, 'telegram');
+            \Illuminate\Support\Facades\Auth::login($user);
+        }
         return redirect('/profile');
     }
 
     public function callback_yandex(){
-        $socialite_user =  Socialite::driver('yandex')->stateless()->user();
-        $user = $this->saving_callback($socialite_user, 'yandex');
-        \Illuminate\Support\Facades\Auth::login($user);
+        try {
+            $socialite_user =  Socialite::driver('yandex')->stateless()->user();
+        } catch (\Exception $e) {
+            Log::error('Socialize - yandex - error - '.$e->getMessage());
+            return redirect('/login')->with('error','Что то пошло не так обратитесь к администратору');
+        }
+        $existingUser = User::where('yandex_id', $socialite_user->getId())->first();
+        if($existingUser){
+            \Illuminate\Support\Facades\Auth::login($existingUser);
+        } else {
+            $user = $this->saving_callback($socialite_user, 'yandex');
+            \Illuminate\Support\Facades\Auth::login($user);
+        }
         return redirect('/profile');
     }
     public function saving_callback($socialite_user, $socialite){
