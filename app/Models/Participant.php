@@ -59,8 +59,13 @@ class Participant extends Model
                 }
             } else {
                 $gender = User::find($d_array['user_id'])->gender;
-                $category_id = Participant::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
-                $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
+                if($type == "qualification_like_final"){
+                    $place = Participant::get_place_participant_in_qualification_like_final($event_id, $d_array['user_id']);
+                } else {
+                    $category_id = Participant::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
+                    $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
+                }
+
             }
             $index_user_final_in_res = self::findIndexBy($result_final, $d_array['user_id'], 'user_id');
             $user_places[] = array('user_id' => $d_array['user_id'], 'place' => $place, 'index' => $index_user_final_in_res);
@@ -116,6 +121,10 @@ class Participant extends Model
     public static function get_place_participant_in_semifinal($event_id, $user_id){
         return ResultSemiFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
     }
+    public static function get_place_participant_in_qualification_like_final($event_id, $user_id){
+        return ResultQualificationLikeFinal::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
+    }
+
     public static function get_places_participant_in_qualification($event_id, $user_id, $gender, $category_id=null, $get_place_user = false){
         $users_id = User::where('gender', '=', $gender)->pluck('id');
         if($category_id){

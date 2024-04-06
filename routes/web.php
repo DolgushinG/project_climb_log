@@ -19,13 +19,13 @@ Route::get('/auth/telegram/callback', [App\Http\Controllers\SocialiteController:
 Route::get('/auth/vkontakte/callback', [App\Http\Controllers\SocialiteController::class, 'callback_vkontakte']);
 Route::get('/auth/yandex/callback', [App\Http\Controllers\SocialiteController::class, 'callback_yandex']);
 Route::get('/auth/telegram/redirect', function (){
-    return Socialite::driver('telegram')->redirect();
+    return Socialite::driver('telegram')->stateless()->redirect();
 });
 Route::get('/auth/vkontakte/redirect', function (){
-    return Socialite::driver('vkontakte')->redirect();
+    return Socialite::driver('vkontakte')->stateless()->redirect();
 });
 Route::get('/auth/yandex/redirect', function (){
-    return Socialite::driver('yandex')->redirect();
+    return Socialite::driver('yandex')->stateless()->redirect();
 });
 Route::get('/competition', function () {
     return view('welcome');
