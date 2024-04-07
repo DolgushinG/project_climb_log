@@ -54,7 +54,7 @@ $(document).ready(function () {
     var btn_saveChanges = $('#saveChanges');
     var data = $("#editForm").serialize();
     e.preventDefault();
-    var tab = 'Overview';
+    var tab = 'Edit';
     $.ajax({
       type: 'POST',
       url: 'editChanges',

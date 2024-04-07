@@ -48,7 +48,7 @@ $(document).ready(function () {
         let btn_saveChanges = $('#saveChanges')
         let data = $("#editForm").serialize();
         e.preventDefault();
-        let tab = 'Overview';
+        let tab = 'Edit';
         $.ajax({
             type: 'POST',
             url: 'editChanges',

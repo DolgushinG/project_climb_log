@@ -2,11 +2,6 @@
 @section('content')
     <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js"></script>
-    <!--добавил библиотеки jQuery UI -->
-
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     @guest
         <section class="d-flex align-items-center">
             <div class="container" data-aos="zoom-out" data-aos-delay="100">
@@ -117,7 +112,7 @@
                                                 <div class="form-check form-group required">
                                                     <input class="form-check-input" name="terms" type="checkbox" value="" id="acceptTerms" required>
                                                     <label class="form-check-label control-label" for="acceptTerms">Я даю согласие на обработку моих
-                                                        персональных данных в порядке и на условиях, указанных в  <a href="#">согласии</a></label>
+                                                        персональных данных </label>
                                                     <div class="invalid-feedback">You must agree before submitting.</div>
                                                 </div>
                                             </div>
@@ -142,7 +137,7 @@
                 </section>
             </div>
         </main>
-        <script>
-        </script>
     @endguest
+    <script type="text/javascript" src="{{ asset('js/ddata.js') }}"></script>
 @endsection
+

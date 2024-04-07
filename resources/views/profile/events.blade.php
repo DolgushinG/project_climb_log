@@ -1,7 +1,7 @@
 <div class="tab-pane fade active show pt-3" id="tab-events">
 @if(count($events) == 0)
     <div class="event-wrap">
-        <h5>Вы не принимали участие ни в каких соревнованиях</h5>
+        <h5>Вы еще не принимали участие в соревнованиях</h5>
     </div>
 @else
     @foreach($events as $event)
