@@ -11,6 +11,7 @@ use App\Admin\Actions\BatchGenerateResultSemiFinalParticipant;
 use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustom;
+use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustomFillOneRoute;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustom;
 use App\Exports\FinalResultExport;
@@ -117,6 +118,7 @@ class ResultRouteFinalStageController extends Controller
             if($event->is_additional_final){
                 $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
                 foreach ($categories as $category){
+                    $tools->append(new BatchResultFinalCustomFillOneRoute($category));
                     $tools->append(new BatchResultFinalCustom($category));
                 }
             } else {

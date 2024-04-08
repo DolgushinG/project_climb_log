@@ -10,6 +10,7 @@ use App\Admin\Actions\BatchGenerateResultSemiFinalParticipant;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustom;
+use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustomFillOneRoute;
 use App\Exports\SemiFinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
@@ -53,7 +54,7 @@ class ResultRouteSemiFinalStageController extends Controller
                     ->where('is_semifinal', '=', 1)
                     ->first();
                 if($event) {
-                    $row->column(10, $this->grid());
+                    $row->column(12, $this->grid());
                 }
             });
     }
@@ -137,6 +138,7 @@ class ResultRouteSemiFinalStageController extends Controller
             if($event->is_additional_semifinal){
                 $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
                 foreach ($categories as $category){
+                    $tools->append(new BatchResultSemiFinalCustomFillOneRoute($category));
                     $tools->append(new BatchResultSemiFinalCustom($category));
                 }
             } else {
