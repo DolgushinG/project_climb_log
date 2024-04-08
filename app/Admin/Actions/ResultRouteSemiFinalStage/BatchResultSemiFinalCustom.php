@@ -73,47 +73,15 @@ class BatchResultSemiFinalCustom extends Action
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
         $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
-        if($event->is_additional_semifinal){
-            $all_group_participants = array();
-            if($event->is_qualification_counting_like_final) {
-                $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant, $this->category->id)->toArray();
-                $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant, $this->category->id)->toArray();
-                $participant_from = 'qualification_counting_like_final';
-            } else {
-                $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount_the_best_participant, $this->category->id);
-                $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount_the_best_participant, $this->category->id);
-                $participant_from = 'qualification';
-            }
-            $merged_users = collect();
-            foreach ($all_group_participants as $participant) {
-                foreach ($participant as $a){
-                    $merged_users[] = $a;
-                }
-            }
-        } else {
-            if($event->is_qualification_counting_like_final) {
-                $users_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant);
-                $users_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant);
-                $participant_from = 'qualification_counting_like_final';
-            } else {
-                $users_female = Participant::better_participants($event->id, 'female', $amount_the_best_participant);
-                $users_male = Participant::better_participants($event->id, 'male', $amount_the_best_participant);
-                $participant_from = 'qualification';
-            }
-            $merged_users = $users_male->merge($users_female);
-        }
+        $merged_users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant, $this->category);
         $result = $merged_users->pluck( 'middlename','id');
-//
         $result_semifinal = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
             $user = User::where('middlename', $res)->first()->id;
-            switch ($participant_from){
-                case 'qualification_counting_like_final':
-                    $category_id = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
-                    break;
-                case 'qualification':
-                    $category_id = Participant::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
-                    break;
+            if($event->is_qualification_counting_like_final) {
+                $category_id = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
+            } else {
+                $category_id = Participant::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
             }
             $category = ParticipantCategory::find($category_id)->category;
             $result[$index] = $res.' ['.$category.']';
@@ -170,7 +138,6 @@ class BatchResultSemiFinalCustom extends Action
         ");
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
-        $this->hidden('category_id', '')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
             $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
             $this->integer('amount_try_top_'.$i, 'Попытки на топ');

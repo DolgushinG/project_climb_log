@@ -213,8 +213,8 @@ class EventsController extends Controller
             # Добавить в будущем автоматическое открытие регистрации
 //            $form->date('start_open_registration_date', 'Дата открытия регистрации')->attribute('inputmode', 'none')->placeholder('гггг:мм:дд');
             $form->date('end_date', 'Дата окончания')->attribute('inputmode', 'none')->placeholder('гггг:мм:дд')->required();
-            $form->time('start_time', 'Время старта')->attribute('inputmode', 'none')->placeholder('Время старта')->required();
-            $form->time('end_time', 'Время окончания')->attribute('inputmode', 'none')->placeholder('Время окончания')->required();
+//            $form->time('start_time', 'Время старта')->attribute('inputmode', 'none')->placeholder('Время старта')->required();
+//            $form->time('end_time', 'Время окончания')->attribute('inputmode', 'none')->placeholder('Время окончания')->required();
             $form->image('image', 'Афиша')->placeholder('Афиша')->attribute('inputmode', 'none')->required();
             $form->summernote('description', 'Описание')->placeholder('Описание')->required();
             $form->text('contact', 'Контактная информация')->required();

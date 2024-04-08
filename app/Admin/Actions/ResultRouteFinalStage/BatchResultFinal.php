@@ -6,6 +6,7 @@ use App\Admin\Controllers\ResultRouteSemiFinalStageController;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
+use App\Models\ResultFinalStage;
 use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteQualificationLikeFinal;
@@ -69,40 +70,7 @@ class BatchResultFinal extends Action
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $amount_the_best_participant_to_go_final = $event->amount_the_best_participant_to_go_final ?? 10;
-        if($event->is_additional_final){
-            $all_group_participants = array();
-            foreach ($event->categories as $category){
-                $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-                if($event->is_qualification_counting_like_final) {
-                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id)->toArray();
-                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id)->toArray();
-                } else {
-                    $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id);
-                    $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id);
-                }
-            }
-            $merged_users = collect();
-            foreach ($all_group_participants as $participant) {
-                foreach ($participant as $a){
-                    $merged_users[] = $a;
-                }
-            }
-        } else {
-            if($event->is_semifinal){
-                $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', $amount_the_best_participant_to_go_final);
-                $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', $amount_the_best_participant_to_go_final);
-            } else {
-                if($event->is_qualification_counting_like_final) {
-                    $users_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant_to_go_final);
-                    $users_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant_to_go_final);
-                } else {
-                    $users_female = Participant::better_participants($event->id, 'female', $amount_the_best_participant_to_go_final);
-                    $users_male = Participant::better_participants($event->id, 'male', $amount_the_best_participant_to_go_final);
-                }
-            }
-            $merged_users = $users_male->merge($users_female);
-        }
+        $merged_users = ResultFinalStage::get_final_participant($event);
         $result = $merged_users->pluck( 'middlename','id');
         $result_semifinal = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){

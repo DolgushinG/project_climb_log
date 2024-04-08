@@ -298,6 +298,7 @@ class Event extends Model
                         $all_group_participants['male'][$category] = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id);
                         $all_group_participants['female'][$category] = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id);
                     }
+
                     foreach ($all_group_participants as $group_participants) {
                         foreach ($group_participants as $participants) {
                             ResultRouteSemiFinalStageController::getUsersSorted($participants, $fields, $event, 'final', $event->owner_id);

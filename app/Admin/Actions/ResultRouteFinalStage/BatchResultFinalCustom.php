@@ -5,6 +5,7 @@ namespace App\Admin\Actions\ResultRouteFinalStage;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
+use App\Models\ResultFinalStage;
 use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteQualificationLikeFinal;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 class BatchResultFinalCustom extends Action
 {
-    protected $selector = '.result-add';
+    protected $selector = '.result-add-final';
 
     public $category;
 
@@ -72,64 +73,24 @@ class BatchResultFinalCustom extends Action
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $amount_the_best_participant_to_go_final = $event->amount_the_best_participant_to_go_final ?? 10;
-        if($event->is_additional_final){
-            $all_group_participants = array();
-            foreach ($event->categories as $category){
-                $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-                if($event->is_qualification_counting_like_final) {
-                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id)->toArray();
-                    $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id)->toArray();
-                    $participant_from = 'qualification_counting_like_final';
-                } else {
-                    $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id);
-                    $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id);
-                    $participant_from = 'qualification';
-                }
-            }
-            $merged_users = collect();
-            foreach ($all_group_participants as $participant) {
-                foreach ($participant as $a){
-                    $merged_users[] = $a;
-                }
-            }
-        } else {
-            if($event->is_semifinal){
-                $users_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', $amount_the_best_participant_to_go_final);
-                $users_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', $amount_the_best_participant_to_go_final);
-                $participant_from = 'qualification';
-            } else {
-                if($event->is_qualification_counting_like_final) {
-                    $users_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount_the_best_participant_to_go_final);
-                    $users_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount_the_best_participant_to_go_final);
-                    $participant_from = 'qualification_counting_like_final';
-                } else {
-                    $users_female = Participant::better_participants($event->id, 'female', $amount_the_best_participant_to_go_final);
-                    $users_male = Participant::better_participants($event->id, 'male', $amount_the_best_participant_to_go_final);
-                    $participant_from = 'qualification';
-                }
-            }
-            $merged_users = $users_male->merge($users_female);
-        }
+        $merged_users = ResultFinalStage::get_final_participant($event, $this->category);
         $result = $merged_users->pluck( 'middlename','id');
-        $result_semifinal = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
+        $result_final = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
             $user = User::where('middlename', $res)->first()->id;
-            switch ($participant_from){
-                case 'qualification_counting_like_final':
-                    $category_id = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
-                    break;
-                case 'qualification':
-                    $category_id = Participant::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
-                    break;
+            if($event->is_qualification_counting_like_final) {
+                $category_id = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
+            }
+            if($event->is_additional_final){
+                $category_id = Participant::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
             }
             $category = ParticipantCategory::find($category_id)->category;
             $result[$index] = $res.' ['.$category.']';
-            if(in_array($index, $result_semifinal)){
+            if(in_array($index, $result_final)){
                 $result[$index] = $res.' ['.$category.']'.' [Уже добавлен]';
             }
         }
-        $this->select('user_id', 'Участник')->options($result)->required(true);
+        $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_final; $i++){
             $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
@@ -187,19 +148,13 @@ class BatchResultFinalCustom extends Action
 
     public function html()
     {
-        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
-            ->where('active', '=', 1)->first();
-        if($event->is_semifinal){
-            return "<a class='result-add btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category}</a>
+       return "<a class='result-add-final btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category}</a>
                  <style>
                  @media screen and (max-width: 767px) {
                         .result-add {margin-top:8px;}
                     }
                 </style>
             ";
-        } else {
-            return "<a disabled class='result-add btn btn-sm btn-warning' style='display: none'><i class='fa fa-info-circle'></i></a>";
-        }
     }
 
 }

@@ -62,55 +62,65 @@ class ResultParticipant extends Model
         }
     }
 
-    public static function get_increase_category($user_model, $format_transfer_category){
-
-        $categories_for_increase = array();
-        $categories = ['6A+','6B','6B+','6C', '6C+', '7A', '7A+', '7B', '7C', '7C+', '8A', '8A+', '8B+', '8C', '8C+', '9A'];
-        for($i = array_search($format_transfer_category["От какой категории будет перевод"], $categories); $i < count($categories);$i++){
-            $categories_for_increase[] = $categories[$i];
-        }
-//        ['Категория участника' => '0', 'Кол-во трасс для перевода'=> '2','В какую категорию переводить' => '1', 'От какой категории будет перевод'=> '6C'],
-
-        switch ($format_transfer_category["Категория участника"]){
-                case "1":
-//                    if($user_model->grade == "6C"){
-//                        if($user_model->attempt == 1 || $user_model->attempt == 2){
-//                            dd(11);
-//                        }
-//                    }
-                    if(in_array($user_model->grade, $categories_for_increase)){
-
-                        if($user_model->attempt == 1 || $user_model->attempt == 2){
-
-                            return array('user_id' => $user_model->user_id, 'increase_category' => true, 'next_category' => "2");
-                        } else {
-                            return null;
-                        }
-
-                        }
-                    break;
-                case "2":
-//                    if($user_model->grade == "6C"){
-//                        if($user_model->attempt == 1 || $user_model->attempt == 2){
-//                            dd($user_model);
-//                        }
-//                    }
-                    if(in_array($user_model->grade, $categories_for_increase)){
-
-                        if($user_model->attempt == 1 || $user_model->attempt == 2){
-                            return array('user_id' => $user_model->user_id, 'increase_category' => true, 'next_category' => "3");
-                        } else {
-                            return null;
-                        }
-                    }
-            }
-    }
-
     public static function participant_with_result($user_id, $event_id) {
         return 0 < count(ResultParticipant::where('event_id', '=', $event_id)
             ->where('user_id', '=', $user_id)
             ->get()
             ->toArray());
 
+    }
+
+    public static function get_participant_qualification_group($event, $amount)
+    {
+        $all_group_participants = array();
+        foreach ($event->categories as $category){
+            $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
+            if($event->is_qualification_counting_like_final) {
+                $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount, $category_id)->toArray();
+                $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount, $category_id)->toArray();
+            } else {
+                $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount, $category_id);
+                $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount, $category_id);
+            }
+        }
+        $merged_users = collect();
+        foreach ($all_group_participants as $participant) {
+            foreach ($participant as $a){
+                $merged_users[] = $a;
+            }
+        }
+
+        return $merged_users;
+    }
+
+    public static function get_participant_qualification_only_one_group($event, $amount, $group)
+    {
+        $all_group_participants = array();
+        if($event->is_qualification_counting_like_final) {
+            $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount, $group->id)->toArray();
+            $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount, $group->id)->toArray();
+        } else {
+            $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount, $group->id);
+            $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount, $group->id);
+        }
+        $merged_users = collect();
+        foreach ($all_group_participants as $participant) {
+            foreach ($participant as $a){
+                $merged_users[] = $a;
+            }
+        }
+
+        return $merged_users;
+    }
+    public static function get_participant_qualification_gender($event, $amount)
+    {
+        if($event->is_qualification_counting_like_final) {
+            $users_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount);
+            $users_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount);
+        } else {
+            $users_female = Participant::better_participants($event->id, 'female', $amount);
+            $users_male = Participant::better_participants($event->id, 'male', $amount);
+        }
+        return $users_male->merge($users_female);
     }
 }
