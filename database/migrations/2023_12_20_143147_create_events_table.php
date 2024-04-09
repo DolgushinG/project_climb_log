@@ -48,6 +48,7 @@ class CreateEventsTable extends Migration
             $table->integer('amount_the_best_participant')->nullable();
             $table->integer('amount_the_best_participant_to_go_final')->nullable();
             $table->json('categories');
+            $table->boolean('is_auto_categories')->nullable();
             $table->integer('is_input_birthday')->nullable();
             $table->integer('is_need_sport_category')->nullable();
             $table->integer('choice_transfer')->nullable();
@@ -58,6 +59,7 @@ class CreateEventsTable extends Migration
             $table->integer('mode')->nullable();
             $table->integer('mode_amount_routes')->nullable();
             $table->boolean('active');
+            $table->boolean('is_input_set')->nullable();
             $table->boolean('is_registration_state')->nullable();
             $table->datetime('datetime_registration_state')->nullable();
             $table->boolean('is_send_result_state')->nullable();

@@ -151,7 +151,7 @@ class EventsController extends Controller
         $grid->column('title', 'Название');
         $grid->column('link', 'Ссылка для всех')->link();
         $grid->column('admin_link', 'Ссылка на предпросмотр')->link();
-        $grid->column('active', 'Активировано для управления')->using([0 => 'Нет', 1 => 'Да'])->display(function ($title, $column) {
+        $grid->column('active', 'Активировать соревнование для просмотра и управления')->using([0 => 'Нет', 1 => 'Да'])->display(function ($title, $column) {
             If ($this->active == 0) {
                 return $column->label('default');
             } else {
@@ -317,20 +317,20 @@ class EventsController extends Controller
             if(!$events){
                 $help = 'Самая важная функция, чтобы текущие сореванование отображались во вкладках "Квалификация,полуфинал,финал"
                 нужно активировать';
-                $form->switch('active', 'Активировать для управления')
+                $form->switch('active', 'Активировать соревнование для просмотра и управления')
                     ->help($help)
                     ->states(self::STATES_BTN);
             } else {
                 if($events->id != intval($id)){
                     $help = 'Только одно соревнование может быть активировано для управление, если нельзя нажать значит какое-то соревнование уже активировано';
-                    $form->switch('active', 'Активировать для управления')
+                    $form->switch('active', 'Активировать соревнование для просмотра и управления')
                         ->help($help)
                         ->states(self::STATES_BTN)
                         ->readOnly();
                 } else {
                     $help = 'Самая важная функция, чтобы текущие сореванование отображались во вкладках "Квалификация,полуфинал,финал"
                 нужно активировать';
-                    $form->switch('active', 'Активировать для управления')
+                    $form->switch('active', 'Активировать соревнование для просмотра и управления')
                         ->help($help)
                         ->states(self::STATES_BTN);
                 }
@@ -493,14 +493,14 @@ class EventsController extends Controller
     }
     public function install_set($owner_id){
         $sets = array(
-            ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'friday','number_set' => 1],
-            ['owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'friday','number_set' => 2],
-            ['owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'saturday','number_set' => 6],
-            ['owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'friday','number_set' => 3],
-            ['owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'saturday','number_set' => 7],
-            ['owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'friday','number_set' => 4],
-            ['owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'saturday','number_set' => 8],
-            ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'saturday','number_set' => 5],
+            ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 1],
+            ['owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 2],
+            ['owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 6],
+            ['owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 3],
+            ['owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 7],
+            ['owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 4],
+            ['owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 8],
+            ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 5],
         );
         DB::table('sets')->insert($sets);
     }

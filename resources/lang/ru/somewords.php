@@ -1,9 +1,13 @@
 <?php
 
-return [
-    'friday' => 'Пятница',
-    'sunday' => 'Воскресенье',
-    'saturday' => 'Суббота',
+$some = [
+    'Monday' => 'Понедельник',
+    'Tuesday' => 'Вторник',
+    'Wednesday' => 'Среда',
+    'Thursday' => 'Четверг',
+    'Friday' => 'Пятница',
+    'Saturday' => 'Суббота',
+    'Sunday' => 'Воскресенье',
     'female' => 'Жен',
     'Жен' => 'female',
     'male' => 'Муж',
@@ -14,3 +18,4 @@ return [
     'QualificationLikeFinal' => 'Квалификация',
     'Final' => 'Финал',
 ];
+return $some;

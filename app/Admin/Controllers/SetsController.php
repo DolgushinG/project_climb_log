@@ -17,7 +17,15 @@ class SetsController extends Controller
 {
     use HasResourceActions;
 
-    const DAYS = [ 'friday' => 'Пятница', 'saturday' => 'Суббота','sunday' => 'Воскресенье'];
+    const DAYS = [
+        'Monday' => 'Понедельник',
+        'Tuesday' => 'Вторник',
+        'Wednesday' => 'Среда',
+        'Thursday' => 'Четверг',
+        'Friday' => 'Пятница',
+        'Saturday' => 'Суббота',
+        'Sunday' => 'Воскресенье',
+    ];
 
     /**
      * Index interface.
@@ -116,11 +124,8 @@ class SetsController extends Controller
         });
         $grid->column('time', 'Время слота')->editable();
         $grid->column('max_participants', 'Макс. число участников')->editable();
-        $grid->column('day_of_week', 'День слота')->select(self::DAYS)->sortable();
+        $grid->column('day_of_week', 'День слота')->help('Дни недели зависят от даты старта соревнований')->select(self::DAYS)->sortable();
         $grid->column('number_set', 'Номер сета')->editable();
-
-//        $grid->created_at(trans('admin.created_at'));
-//        $grid->updated_at(trans('admin.updated_at'));
 
         return $grid;
     }

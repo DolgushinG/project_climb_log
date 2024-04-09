@@ -3,6 +3,7 @@
 namespace App\Exports\Sheets;
 
 use App\Models\Event;
+use App\Models\EventAndCoefficientRoute;
 use App\Models\Participant;
 use App\Models\ResultParticipant;
 use App\Models\ResultRouteFinalStage;
@@ -268,38 +269,68 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 'participants.number_set_id',
             )
             ->where('participants.gender', '=', $this->gender)->get()->sortBy('user_place')->toArray();
+        $event = Event::find($this->event_id);
+        if($event->mode == 2){
+            $users['empty_row'] = array(
+                "id" => "",
+                "user_place" => "",
+                "middlename" => "",
+                "points" => "",
+                "owner_id" => "",
+                "number_set_id" => "",
+            );
+        }
         foreach ($users as $index => $user){
-            $qualification_result = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
-            $amount_passed_flash = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 1)->get()->count();
-            $amount_passed_redpoint = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 2)->get()->count();
-            $amount_passed_routes = $amount_passed_flash+$amount_passed_redpoint;
-            $place = Participant::get_places_participant_in_qualification($this->event_id, $user['id'], $this->gender, $this->category->id, true);
-            $set = Set::find($user['number_set_id']);
-            $users[$index]['user_place'] = $place;
-            $users[$index]['number_set_id'] = $set->number_set;
-            $users[$index]['amount_passed_routes'] = $amount_passed_routes;
-            $users[$index]['amount_passed_flash'] = $amount_passed_flash;
-            $users[$index]['amount_passed_redpoint'] = $amount_passed_redpoint;
-            foreach ($qualification_result as $result){
-                switch ($result->attempt){
-                    case 1:
-                        $attempt = 'F';
-                        break;
-                    case 2:
-                        $attempt = 'R';
-
-                        break;
-                    case 0:
-                        $attempt = '-';
+            if($index == 'empty_row'){
+                $count = Event::find($this->event_id)->count_routes;
+                $users[$index]['user_place'] = '';
+                $users[$index]['number_set_id'] = '';
+                $users[$index]['amount_passed_routes'] = '';
+                $users[$index]['amount_passed_flash'] = '';
+                $users[$index]['amount_passed_redpoint'] = '';
+                $coefficient = EventAndCoefficientRoute::where('event_id', $this->event_id)->select('route_id', 'coefficient_'.$this->gender)->pluck('coefficient_'.$this->gender, 'route_id');
+                for ($i = 1; $i <= $count; $i++){
+                    $users[$index]['route_result_'.$i] = $coefficient[$i];
                 }
-                $users[$index]['route_result_'.$result->route_id] = $attempt;
+            } else {
+                $qualification_result = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+                $amount_passed_flash = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 1)->get()->count();
+                $amount_passed_redpoint = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 2)->get()->count();
+                $amount_passed_routes = $amount_passed_flash+$amount_passed_redpoint;
+                $place = Participant::get_places_participant_in_qualification($this->event_id, $user['id'], $this->gender, $this->category->id, true);
+                $set = Set::find($user['number_set_id']);
+                $users[$index]['user_place'] = $place;
+                $users[$index]['number_set_id'] = $set->number_set;
+                $users[$index]['amount_passed_routes'] = $amount_passed_routes;
+                $users[$index]['amount_passed_flash'] = $amount_passed_flash;
+                $users[$index]['amount_passed_redpoint'] = $amount_passed_redpoint;
+                foreach ($qualification_result as $result){
+                    switch ($result->attempt){
+                        case 1:
+                            $attempt = 'F';
+                            break;
+                        case 2:
+                            $attempt = 'R';
 
+                            break;
+                        case 0:
+                            $attempt = '-';
+                    }
+                    $users[$index]['route_result_'.$result->route_id] = $attempt;
+                }
             }
             $users[$index] = collect($users[$index])->except('id', 'owner_id');
         }
         $users_need_sorted = collect($users)->toArray();
         usort($users_need_sorted, function ($a, $b) {
-            return $a['user_place'] <=> $b['user_place'];
+            // Проверяем, если значение 'user_place' пустое, перемещаем его в конец
+            if (empty($a['user_place'])) {
+                return 1; // $a должно быть после $b
+            } elseif (empty($b['user_place'])) {
+                return -1; // $a должно быть перед $b
+            } else {
+                return $a['user_place'] <=> $b['user_place'];
+            }
         });
         return collect($users_need_sorted);
 

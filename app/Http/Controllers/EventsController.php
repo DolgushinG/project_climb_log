@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helpers;
 use App\Http\Requests\StoreRequest;
 use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
@@ -36,6 +37,10 @@ class EventsController extends Controller
             return floor($value);
         }
     }
+
+    /**
+     * @throws \Exception
+     */
     public function show(Request $request, $climbing_gym, $title){
         $event_public_exist = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         $event_exist = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
@@ -49,7 +54,7 @@ class EventsController extends Controller
             }
         }
         if($event_public_exist || $pre_show){
-            $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
+            $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('number_set')->get();
             foreach ($sets as $set){
                 $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
                 $set->free = $set->max_participants - $participants_event;
@@ -66,6 +71,7 @@ class EventsController extends Controller
                     $percent = $diff / $a * 100;
                 }
                 $set->procent = intval($percent);
+                $set->date = Helpers::getDatesByDayOfWeek($event_exist->start_date, $event_exist->end_date);
             }
             $sport_categories = User::sport_categories;
             return view('welcome', compact(['event', 'sport_categories', 'sets']));
