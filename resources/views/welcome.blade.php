@@ -26,12 +26,12 @@
                                                                 $number_set = \App\Models\Participant::participant_number_set(Auth()->user()->id, $event->id);
                                                             @endphp
                                                             @if($set->number_set === $number_set)
-                                                                <option selected value="{{$set->number_set}}">Сет {{$set->number_set}} (@lang('somewords.'.$set->day_of_week)) ({{$set->date[$set->day_of_week]}}) {{$set->time}} (еще
+                                                                <option selected value="{{$set->number_set}}">Сет {{$set->number_set}} @lang('somewords.'.$set->day_of_week) {{$set->date[$set->day_of_week]}} {{$set->time}} (еще
                                                                     мест {{$set->free}})</option>
                                                             @else
                                                                 @if($set->free != 0)
                                                                     <option value="{{$set->number_set}}">Сет {{$set->number_set}}
-                                                                        (@lang('somewords.'.$set->day_of_week))({{$set->date[$set->day_of_week]}}) {{$set->time}} (еще
+                                                                        @lang('somewords.'.$set->day_of_week){{$set->date[$set->day_of_week]}} {{$set->time}} (еще
                                                                         мест {{$set->free}})
                                                                     </option>
                                                                 @endif
@@ -131,7 +131,7 @@
                                                 @foreach($sets as $set)
                                                     @if($set->free != 0)
                                                         <option value="{{$set->number_set}}">Сет {{$set->number_set}}
-                                                            (@lang('somewords.'.$set->day_of_week))({{$set->date[$set->day_of_week]}}) {{$set->time}} (еще
+                                                            @lang('somewords.'.$set->day_of_week){{$set->date[$set->day_of_week]}} {{$set->time}} (еще
                                                             мест {{$set->free}})
                                                         </option>
                                                     @endif
@@ -211,13 +211,13 @@
                                                 @foreach($sets as $set)
                                                     @if($set->free != 0)
                                                         <label>Сет {{$set->number_set}}-{{$set->time}}
-                                                            <span class="badge bg-success text-white">(@lang('somewords.'.$set->day_of_week))</span>
-                                                            <span class="badge bg-info text-dark">({{$set->date[$set->day_of_week]}})</span>
+                                                            <span class="badge bg-success text-white">@lang('somewords.'.$set->day_of_week)</span>
+                                                            <span class="badge bg-info text-dark">{{$set->date[$set->day_of_week]}}</span>
                                                             (Свободно - {{100 - $set->procent}}%)</label>
                                                     @else
                                                         <label>Сет {{$set->number_set}}-{{$set->time}}
-                                                            <span class="badge bg-success text-white">(@lang('somewords.'.$set->day_of_week))</span>
-                                                            <span class="badge bg-info text-dark">({{$set->date[$set->day_of_week]}})</span>
+                                                            <span class="badge bg-success text-white">@lang('somewords.'.$set->day_of_week)</span>
+                                                            <span class="badge bg-info text-dark">{{$set->date[$set->day_of_week]}}</span>
                                                              (Полностью забит)</label>
                                                     @endif
                                                         <div class="container">
