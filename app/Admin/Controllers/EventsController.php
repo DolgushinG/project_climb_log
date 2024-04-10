@@ -244,8 +244,8 @@ class EventsController extends Controller
             $form->html('<p>*Как финальный раунд - то есть квалификация будет считаться как по кол-ву топов и зон </p>');
             $form->radio('is_qualification_counting_like_final','Настройка подсчета квалификации')
                 ->options([
-                    0 =>'Считаем по классике(Баллы и коэфициенты)',
-                    1 =>'Считаем как финальный раунд (кол-во топов и зон)',
+                    0 =>'Фестивальная система(Баллы и коэффициенты)',
+                    1 =>'Француская система(Топ и Зона)',
                 ])->when(0, function (Form $form) {
                     $formats = Format::all()->pluck('format', 'id');
                     $form->radio('mode','Настройка формата')
@@ -267,28 +267,18 @@ class EventsController extends Controller
                                 ->options([
                                     1 =>'Подсчет результатов полуфинала по полу и по категории участников',
                                     0 =>'Подсчет результатов полуфинала по полу',
-                                ])->value(0)->required();
-                            $form->radio('is_additional_final','Финалы для разных групп')
-                                ->options([
-                                    1 =>'Подсчет результатов финала по полу и по категории участников',
-                                    0 =>'Подсчет результатов финала по полу',
-                                ])->required();
+                                ])->default(0)->required();
                         })->when(0, function (Form $form) {
-                            $form->radio('is_additional_final','Финалы для разных групп')
-                                ->options([
-                                    1 =>'Подсчет результатов финала по полу и по категории участников',
-                                    0 =>'Подсчет результатов финала по полу',
-                                ])->required();
+
                         })->value(1)->required();
                 })->when(1, function (Form $form) {
-                    $form->radio('is_additional_final','Финалы для разных групп')
-                        ->options([
-                            1 =>'Подсчет результатов финала по полу и по категории участников',
-                            0 =>'Подсчет результатов финала по полу',
-                        ])->required();
                     $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->attribute('inputmode', 'none')->value(10);
-                })->required();
-
+                })->value(1)->required();
+            $form->radio('is_additional_final','Финалы для разных групп')
+                ->options([
+                    1 =>'Подсчет результатов финала по полу и по категории участников',
+                    0 =>'Подсчет результатов финала по полу',
+                ])->value(0)->required();
             $form->number('amount_the_best_participant_to_go_final','Кол-во лучших участников идут в след раунд финал')
                 ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
             $form->number('amount_routes_in_final','Кол-во трасс в финале')->attribute('inputmode', 'none')->value(4);
