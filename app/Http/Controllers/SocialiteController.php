@@ -61,13 +61,13 @@ class SocialiteController extends Controller
     }
     public function saving_callback($socialite_user, $socialite){
 
-        $email = $socialite_user->user['email'] ?? null;
+        $email = $socialite_user->getEmail() ?? null;
         if(!$email){
             $email = $socialite_user->getId().'@'.$socialite.'.com';
         }
         $user = User::where('email', $email)->first();
         if($user){
-            $user = User::where('email', $email)->update([$socialite.'_id' => $socialite_user->getId()]);
+            User::where('email', $email)->update([$socialite.'_id' => $socialite_user->getId()]);
         } else {
             $user = \App\Models\User::updateOrCreate([
                 $socialite.'_id' => $socialite_user->getId()
