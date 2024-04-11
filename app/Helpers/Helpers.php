@@ -81,4 +81,15 @@ class Helpers
         return $dates_by_day_of_week;
     }
 
+
+    public static function arrayValuesRecursive($arr)
+    {
+        $result = [];
+        foreach ($arr as $res){
+            foreach ($res as $r){
+                $result[] = $r;
+            }
+        }
+        return $result;
+    }
 }

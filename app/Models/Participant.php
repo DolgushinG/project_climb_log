@@ -208,4 +208,42 @@ class Participant extends Model
     public function number_set(){
         return $this->belongsTo(Set::class);
     }
+
+    public static function get_sorted_group_participant($event_id, $gender, $category_id)
+    {
+        $users = User::query()
+            ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
+            ->where('participants.event_id', '=', $event_id)
+            ->where('participants.category_id', '=', $category_id)
+            ->select(
+                'users.id',
+                'users.city',
+                'participants.user_place',
+                'users.middlename',
+                'participants.points',
+                'participants.owner_id',
+                'participants.gender',
+                'participants.category_id',
+                'participants.number_set_id',
+            )
+            ->where('participants.gender', '=', $gender)->get()->sortBy('user_place')->toArray();
+        foreach ($users as $index => $user){
+            $place = Participant::get_places_participant_in_qualification($event_id, $user['id'], $gender, $category_id, true);
+            $set = Set::find($user['number_set_id']);
+            $users[$index]['user_place'] = $place;
+            $users[$index]['number_set_id'] = $set->number_set;
+        }
+        $users_need_sorted = collect($users)->toArray();
+        usort($users_need_sorted, function ($a, $b) {
+            // Проверяем, если значение 'user_place' пустое, перемещаем его в конец
+            if (empty($a['user_place'])) {
+                return 1; // $a должно быть после $b
+            } elseif (empty($b['user_place'])) {
+                return -1; // $a должно быть перед $b
+            } else {
+                return $a['user_place'] <=> $b['user_place'];
+            }
+        });
+        return collect($users_need_sorted);
+    }
 }

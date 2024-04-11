@@ -2073,6 +2073,7 @@ section {
 }
 /*Nav Tabs & Pills */
 .nav-tabs .nav-link {
+
     color: #223035;
     font-size: 12px;
     text-align: center;
@@ -2080,6 +2081,7 @@ section {
     font-weight: 600;
     margin: 2px;
     margin-bottom: 0;
+    background-color: rgba(128, 128, 128, 0.46);
     padding: 12px 20px;
     text-transform: uppercase;
     border: 1px solid transparent;
@@ -2318,7 +2320,8 @@ section {
     letter-spacing: 1px;
     font-weight: 600;
     text-transform: uppercase;
-    margin: 3px;
+    margin: 4px;
+    background-color: rgba(128, 128, 128, 0.18);
     padding: 12px 20px;
     -webkit-transition: all 0.3s ease;
     -moz-transition: all 0.3s ease;
@@ -2639,4 +2642,8 @@ section {
 
 .js-ag-hide {
     display: none;
+}
+
+.table{
+    font-size: calc(8px + 1vw);
 }

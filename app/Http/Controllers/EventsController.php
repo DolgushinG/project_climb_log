@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use stdClass;
+use function Symfony\Component\String\s;
 
 class EventsController extends Controller
 {
@@ -127,35 +128,32 @@ class EventsController extends Controller
     public function get_final_results(Request $request, $climbing_gym, $title)
     {
         $event = Event::where('title_eng', '=', $title)->where('is_public', 1)->first();
+        $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
         if($event){
             if(!$event->is_qualification_counting_like_final){
-                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
+//                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
                 $user_ids = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
                 $stats = new stdClass();
                 $female_categories = array();
                 $male_categories = array();
                 $stats->male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->get()->count();
                 $stats->female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->get()->count();
+                $result_male = array();
+                $result_female = array();
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
-
                 foreach ($categories as $category) {
+                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
                     $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
-                    $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('category_id', '=', $category->id)->get()->count();
+                    $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
                     $male_categories[$category->id] = Participant::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
                 }
+                $result_male_final = Helpers::arrayValuesRecursive($result_male);
+                $result_female_final = Helpers::arrayValuesRecursive($result_female);
+                $result = array_merge($result_male_final, $result_female_final);
                 $stats->female_categories = $female_categories;
                 $stats->male_categories = $male_categories;
-                $result = [];
-                foreach ($final_results as $res) {
-                    $user = User::where('id', '=', $res['user_id'])->first();
-                    $participant = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $res['user_id'])->first();
-                    $res['user_name'] = $user->middlename;
-                    $res['gender'] = $user->gender;
-                    $res['city'] = $user->city;
-                    $res['category_id'] = $participant->category_id;
-                    $result[] = $res;
-                }
                 $categories = $categories->toArray();
             }
         } else {
@@ -163,6 +161,9 @@ class EventsController extends Controller
         }
         return view('event.final_result', compact(['event', 'result',  'categories', 'stats']));
     }
+
+
+
 
     public function store(StoreRequest $request) {
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
