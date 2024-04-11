@@ -2644,6 +2644,9 @@ section {
     display: none;
 }
 
-.table{
-    font-size: calc(8px + 1vw);
+@media screen and (max-width: 768px) {
+    .table{
+        font-size: calc(8px + 1vw);
+    }
 }
+

@@ -2,26 +2,25 @@
 @section('content')
     <section id="contact" class="d-flex align-items-center">
         <div class="container" data-aos="zoom-out" data-aos-delay="100">
-            <h1>Предворительные участники</h1>
         </div>
     </section><!-- End Hero -->
     <main id="main">
         <section class="section contact">
-            <div class="row">
+            <div class="row m-2">
                 @foreach($days as $day)
-                <div class="col">
+                <div class="col-xl-12">
                     <div class="card">
                         <div class="card-body">
                             <!-- Bordered Tabs Justified -->
                             <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
                                 @foreach($sets as $set)
                                     @if($day->day_of_week === $set->day_of_week)
-                                        <li class="nav-item flex-fill" role="presentation">
+                                        <li class="nav-item flex-fill" role="presentation" style="margin-right: 8px">
                                             <button class="nav-link w-100" id="{{$set->id}}-tab"
                                                     data-bs-toggle="tab"
                                                     data-bs-target="#bordered-justified-{{$set->id}}" type="button"
                                                     role="tab" aria-controls="{{$set->id}}"
-                                                    aria-selected="true">{{$set->time}} @lang('somewords.'.$set->day_of_week)<span
+                                                    aria-selected="true">{{$set->time}} @lang('somewords.'.ucfirst($set->day_of_week))<span
                                                     style="margin-left: 5px;" class="badge bg-dark text-light">{{$set->count_participant}}</span></button>
                                         </li>
                                     @endif
@@ -32,7 +31,7 @@
                                     @if($day->day_of_week == $set->day_of_week)
                                         <div class="tab-pane fade show" id="bordered-justified-{{$set->id}}"
                                              role="tabpanel" aria-labelledby="{{$set->id}}-tab">
-                                                <table class="table table-sm">
+                                                <table class="table table-sm table-striped">
                                                     <thead>
                                                     <tr>
                                                         <th scope="col">Участник</th>
