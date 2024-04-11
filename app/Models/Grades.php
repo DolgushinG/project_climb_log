@@ -85,7 +85,6 @@ class Grades extends Model
                 }
             }
         }
-//        $routes = Route::where('event_id', 3)->get()->toArray();
         DB::table('routes')->insert($res);
     }
 

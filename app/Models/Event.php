@@ -138,6 +138,11 @@ class Event extends Model
             ->get();
         foreach ($routes as $route){
             $value = Route::where('grade','=', $route->grade)->where('event_id','=', $event->id)->first()->value;
+            if(!$value){
+                Log::error('При создание соревнований было указано один формат все трасс или француская система, а были с
+                сгенерировано трассы, потом изменен формат и пытаемся сгенерироват результат
+                ');
+            }
             $route->value = (new \App\Models\ResultParticipant)->get_value_route($route->attempt, $value, $event->mode);
         }
         $routes_id_passed_with_red_point = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultParticipant::STATUS_PASSED_REDPOINT)->pluck('route_id');
