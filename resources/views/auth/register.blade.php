@@ -90,14 +90,14 @@
                                             <!-- Email Address -->
                                             <div class="col-12 form-group required">
                                                 <label for="email" class="control-label">Email</label>
-                                                <input type="email" name="email" placeholder="Почта" class="form-control" id="email"
-                                                       value="{{old('email')}}" required autofocus>
+                                                <input type="text" name="email" placeholder="Почта" class="form-control" id="email"
+                                                       value="{{old('email')}}" required autocomplete="off">
                                                 <div class="invalid-feedback">Введите email</div>
                                             </div>
 
                                             <div class="col-12 form-group required">
                                                 <label for="password" class="control-label">Пароль</label>
-                                                <input type="password" name="password" placeholder="Минимальня длина 8 сиволов" class="form-control"
+                                                <input type="password" name="password" placeholder="Минимальная длина 8 символов" class="form-control"
                                                        id="password" required>
                                                 <div class="invalid-feedback">Введите пароль</div>
                                             </div>
@@ -128,16 +128,14 @@
 
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
-
                 </section>
             </div>
         </main>
     @endguest
+
     <script type="text/javascript" src="{{ asset('js/ddata.js') }}"></script>
 @endsection
 

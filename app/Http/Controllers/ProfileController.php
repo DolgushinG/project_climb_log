@@ -111,15 +111,23 @@ class ProfileController extends Controller
         $messages = array(
             'firstname.string' => 'Поле Имя нужно вводить только текст',
             'lastname.string' => 'Поле Фамилия нужно вводить только текст',
+            'email.string' => 'Поле email не корректно',
+            'email.email' => 'Поле email не корректно',
+            'email.max:255' => 'Поле email не корректно',
         );
         $validator = Validator::make($request->all(), [
             'firstname' => 'string',
             'lastname' => 'string',
+            'email' => 'email|string|max:255',
         ],$messages);
         if ($validator->fails())
         {
-            return response()->json(['error' => true,'message'=>$validator->errors()->all()],422);
+            return response()->json(['error' => true,'message'=> $validator->errors()->all()],422);
         }
+        if (!filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json(['error' => true,'message'=> ['Поле email не корректно']],422);
+        }
+
         $user = User::find(Auth()->user()->id);
         $user->firstname = $request->firstname;
         $user->email = $request->email;
