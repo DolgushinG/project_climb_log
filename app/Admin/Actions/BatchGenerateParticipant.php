@@ -34,17 +34,18 @@ class BatchGenerateParticipant extends Action
             $table_result = 'result_qualification_like_final';
             $table_result_routes = 'result_route_qualification_like_final';
             $text = 'готово';
+            $exist_participants = ResultQualificationLikeFinal::where('event_id',  $event->id)->first();
         } else {
             $table_result = 'participants';
             $table_result_routes = 'result_participant';
             $text = 'Обязательно пересчитайте результаты для правильного расставление мест';
+            $exist_participants = Participant::where('event_id',  $event->id)->first();
         }
         $part_category = ParticipantCategory::where('event_id', $event->id)->get();
         $amount_categories = count($event->categories);
         $parts = intval($count / $amount_categories);
         $next = $parts;
         $start = 1;
-        $exist_participants = Participant::where('event_id',  $event->id)->first();
         if(!$exist_participants){
             foreach($part_category as $category){
                 Generators::prepare_participant_with_owner($owner_id, $event->id, $next, $category->category, $start, $table_result);
@@ -52,6 +53,7 @@ class BatchGenerateParticipant extends Action
                 $start = $start+$parts;
             }
         }
+
         Generators::prepare_result_participant($owner_id, $event->id, $table_result_routes, $count);
         if($event->is_qualification_counting_like_final){
             Event::refresh_qualification_counting_like_final($event);

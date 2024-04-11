@@ -116,7 +116,6 @@ class Generators
         }
 
         if($table === 'result_route_qualification_like_final') {
-            ResultQualificationLikeFinal::where('event_id', $event_id)->delete();
             ResultRouteQualificationLikeFinal::where('event_id', $event_id)->delete();
             $event = Event::find($event_id);
             $event_categories = $event->categories;
@@ -155,7 +154,6 @@ class Generators
         }
 
         if($table === 'result_route_semifinal_stage') {
-            ResultSemiFinalStage::where('event_id', $event_id)->delete();
             ResultRouteSemiFinalStage::where('event_id', $event_id)->delete();
             $event = Event::find($event_id);
             $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
@@ -192,7 +190,6 @@ class Generators
         }
 
         if($table === 'result_route_final_stage') {
-            ResultFinalStage::where('event_id', $event_id)->delete();
             ResultRouteFinalStage::where('event_id', $event_id)->delete();
             $event = Event::find($event_id);
 
