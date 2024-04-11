@@ -17,9 +17,9 @@ class GradesSeeder extends Seeder
      */
     public function run()
     {
-        $routes = Grades::getRoutes();
         for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
-            Event::generation_route($i, $i, $routes);
+            $event = Event::find($i);
+            Grades::settings_routes($event->owner_id, $event->id, $event->count_routes);
         }
 
 

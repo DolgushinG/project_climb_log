@@ -61,7 +61,6 @@ class EventFactory extends Factory
     public function definition()
     {
 
-        $routes = Grades::getRoutes();
         return [
             'image' => $this->faker->randomElement(['images/20231115_cea82537af86871a32344dcd5c6a23ba.jpeg','images/vT94mFyT9xU.jpg']),
             'active' => true,
@@ -69,12 +68,10 @@ class EventFactory extends Factory
             'is_send_result_state' => true,
             'start_date' => $this->faker->date(),
             'end_date' => $this->faker->date(),
-            'start_time' => $this->faker->time(),
-            'end_time' => $this->faker->time(),
             'description' => $this->faker->paragraph(20),
             'contact' => '+7(932)-782-22-11',
             'address' => $this->faker->address(),
-            'grade_and_amount' => $routes,
+//            'grade_and_amount' => $routes,
             'title' => $this->faker->word(),
             'title_eng' => $this->faker->word(),
             'subtitle' => $this->faker->word(),

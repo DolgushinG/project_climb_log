@@ -64,9 +64,9 @@
             <script>
                 var table = document.getElementById('has-many-grade_and_amount');
                 var label = document.getElementById('count_routes_label');
+                updateTotal()
                 $('a[data-toggle="tab"]').on('click', function() {
                     // Проверяем, содержит ли ссылка атрибут href
-                    console.log($(this).innerText)
                     if ($(this).attr('href')) {
                         updateTotal(); // Выполняем метод update с передачей ID вкладки
                     }

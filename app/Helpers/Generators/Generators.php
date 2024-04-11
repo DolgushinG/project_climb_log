@@ -13,6 +13,7 @@ use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
+use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
 use Database\Seeders\ParticipantSeeder;
@@ -103,22 +104,19 @@ class Generators
             $event = Event::find($event_id);
             foreach ($active_participants as $active_participant){
                 $result_participant = array();
-                $info_routes = Grades::where('event_id', $event_id)->get();
-                $route_id = 1;
+                $info_routes = Route::where('event_id', $event_id)->get();
                 foreach ($info_routes as $route){
-                    for($i = 1; $i <= $route->amount;$i++){
-                        if($event->mode == 2){
-                            (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route_id, $owner_id, $active_participant->gender);
-                        }
-                        $result_participant[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route_id,'attempt' => rand(0,2),'grade' => $route->grade);
-                        $route_id++;
+                    if($event->mode == 2){
+                        (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route->route_id, $owner_id, $active_participant->gender);
                     }
+                    $result_participant[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route->route_id,'attempt' => rand(0,2),'grade' => $route->grade);
                 }
                 DB::table('result_participant')->insert($result_participant);
             }
         }
 
         if($table === 'result_route_qualification_like_final') {
+            ResultQualificationLikeFinal::where('event_id', $event_id)->delete();
             ResultRouteQualificationLikeFinal::where('event_id', $event_id)->delete();
             $event = Event::find($event_id);
             $event_categories = $event->categories;
@@ -157,16 +155,16 @@ class Generators
         }
 
         if($table === 'result_route_semifinal_stage') {
+            ResultSemiFinalStage::where('event_id', $event_id)->delete();
             ResultRouteSemiFinalStage::where('event_id', $event_id)->delete();
             $event = Event::find($event_id);
             $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
             $users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant, null, true);
             $result = array();
             foreach ($users as $user) {
+                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 if($event->is_qualification_counting_like_final){
                     $participant = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
-                } else {
-                    $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 }
                 for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
                     $amount_zone = rand(0, 1);
@@ -194,17 +192,16 @@ class Generators
         }
 
         if($table === 'result_route_final_stage') {
+            ResultFinalStage::where('event_id', $event_id)->delete();
             ResultRouteFinalStage::where('event_id', $event_id)->delete();
             $event = Event::find($event_id);
 
             $users = ResultFinalStage::get_final_participant($event, null, true);
             $result = array();
             foreach ($users as $user) {
+                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 if($event->is_qualification_counting_like_final){
                     $participant = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
-                }
-                if($event->is_additional_final){
-                    $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 }
                 for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
                     $amount_zone = rand(0, 1);

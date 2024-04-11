@@ -149,7 +149,7 @@ class AdminTablesSeeder extends Seeder
                 [
                     "parent_id" => 0,
                     "order" => 6,
-                    "title" => "Генератор трасс",
+                    "title" => "Настройка трасс",
                     "icon" => "fa-codepen",
                     "uri" => "grades",
                     "permission" => "owner.grades"
@@ -379,6 +379,10 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "role_id" => 2,
+                    "menu_id" => 17
+                ],
+                [
+                    "role_id" => 2,
                     "menu_id" => 19
                 ],
                 [
@@ -418,6 +422,10 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 2,
                     "permission_id" => 10
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 11
                 ],
                 [
                     "role_id" => 2,

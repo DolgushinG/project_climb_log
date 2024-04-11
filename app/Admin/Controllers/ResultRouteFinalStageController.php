@@ -140,6 +140,7 @@ class ResultRouteFinalStageController extends Controller
             $actions->disableEdit();
             $actions->disableView();
         });
+        $grid->disableBatchActions();
         $grid->disableFilter();
         $grid->disableExport();
         $grid->disableCreateButton();

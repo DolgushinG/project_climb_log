@@ -164,7 +164,7 @@ class User extends Authenticatable
                 (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
                 $coefficient = ResultParticipant::get_coefficient($route['event_id'], $route['route_id'], $gender);
                 # Варианты форматов подсчета баллов
-                $value_category = Grades::where('grade','=',$route['grade'])->where('owner_id','=', 1)->first()->value;
+                $value_category = Route::where('grade','=',$route['grade'])->where('owner_id','=', 1)->first()->value;
                 $value_route = (new \App\Models\ResultParticipant)->get_value_route($route['attempt'], $value_category, 2);
                 $route['points'] = $coefficient * $value_route;
                 # Формат все трассы считаем сразу

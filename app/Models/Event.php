@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use stdClass;
 
 class Event extends Model
 {
@@ -41,24 +42,21 @@ class Event extends Model
         'active'
     ];
 
-    public static function generation_route($owner_id, $event_id, $routes){
-        $grades = array();
-        foreach ($routes as $route){
-            if(isset($route['Ценность'])){
-                $grades[] = array('owner_id' => $owner_id ,'event_id' => $event_id, 'grade' => $route['Категория'], 'amount' => $route['Кол-во'], 'value' => $route['Ценность']);
-            } else {
-                $grades[] = array('owner_id' => $owner_id ,'event_id' => $event_id, 'grade' => $route['Категория'], 'amount' => $route['Кол-во']);
-            }
-        }
-        DB::table('grades')->insert($grades);
-    }
-
     public static function exist_events($owner_id){
         return boolval(Event::where('owner_id', '=', $owner_id)->where('active', '=', 1)->first());
     }
     public function participant()
     {
         return $this->hasOne(Participant::class);
+    }
+
+    public function grades()
+    {
+        return $this->hasOne(Grades::class);
+    }
+    public function routes()
+    {
+        return $this->hasOne(Grades::class);
     }
 
     public function result_semifinal_stage()
@@ -139,7 +137,7 @@ class Event extends Model
             ->whereNotIn('attempt', [0])
             ->get();
         foreach ($routes as $route){
-            $value = Grades::where('grade','=', $route->grade)->where('event_id','=', $event->id)->first()->value;
+            $value = Route::where('grade','=', $route->grade)->where('event_id','=', $event->id)->first()->value;
             $route->value = (new \App\Models\ResultParticipant)->get_value_route($route->attempt, $value, $event->mode);
         }
         $routes_id_passed_with_red_point = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultParticipant::STATUS_PASSED_REDPOINT)->pluck('route_id');

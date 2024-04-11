@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
             FormatsSeeder::class,
             SetsSeeder::class,
 //            ParticipantSeeder::class,
-            GradesSeeder::class,
+//            GradesSeeder::class,
 //            ResultParticipantSeeder::class,
 //            ResultRouteSemiFinalStageSeeder::class,
 //            ResultRouteFinalSeeder::class,

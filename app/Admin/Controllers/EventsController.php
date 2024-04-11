@@ -226,19 +226,6 @@ class EventsController extends Controller
             $form->image('img_payment', 'QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
             $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
-        })->tab('Настройка трасс', function ($form) {
-            $routes = Grades::getRoutes();
-            $form->html('<h4>Ценность трассы учитывается только в формате соревнований n лучших трасс, там необходимо искать лучшие трассы по баллам <br>
-                                Для других режимов ценность не учитывается, можно просто игнорировать это поле</h4>');
-            $form->hidden('count_routes', '');
-            $form->tablecustom('grade_and_amount', '', function ($table) {
-                $grades = $this->getGrades();
-                $table->select('Категория')->options($grades)->readonly();
-                $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
-                $table->text('Ценность')->width('50px');
-                $table->disableButton();
-            })->value($routes);
-
         })->tab('Параметры соревнования', function ($form) use ($id) {
             $form->html('<p>*Классика - квалификация и полуфинал/финал для лучших в квалификации, </p>');
             $form->html('<p>*Как финальный раунд - то есть квалификация будет считаться как по кол-ву топов и зон </p>');
@@ -333,14 +320,8 @@ class EventsController extends Controller
         });
 
         $form->tools(function (Form\Tools $tools) {
-
-            // Disable `List` btn.
             $tools->disableList();
-
-            // Disable `Delete` btn.
             $tools->disableDelete();
-
-            // Disable `Veiw` btn.
             $tools->disableView();
         });
         $form->saving(function (Form $form) {
@@ -353,15 +334,15 @@ class EventsController extends Controller
                     throw new \Exception('Только одно соревнование может быть опубликовано');
                 }
             }
-            if($form->grade_and_amount){
-                $main_count = 0;
-                foreach ($form->grade_and_amount as $route){
-                    for ($count = 1; $count <= $route['Кол-во']; $count++){
-                        $main_count++;
-                    }
-                }
-                $form->count_routes = $main_count;
-            }
+//            if($form->grade_and_amount){
+//                $main_count = 0;
+//                foreach ($form->grade_and_amount as $route){
+//                    for ($count = 1; $count <= $route['Кол-во']; $count++){
+//                        $main_count++;
+//                    }
+//                }
+//                $form->count_routes = $main_count;
+//            }
             if($form->climbing_gym_name){
                 $climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
                 $title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
@@ -414,16 +395,6 @@ class EventsController extends Controller
                     }
 
                 }
-
-
-                $exist_routes_list = Grades::where('owner_id', '=', Admin::user()->id)
-                    ->where('event_id', '=', $form->model()->id)->first();
-                if(!$exist_routes_list){
-                    if ($form->grade_and_amount){
-                        Event::generation_route(Admin::user()->id, $form->model()->id, $form->grade_and_amount);
-                    }
-
-                }
                 $exist_sets = Set::where('owner_id', '=', Admin::user()->id)->first();
                 if(!$exist_sets) {
                     $this->install_set(Admin::user()->id);
@@ -435,15 +406,7 @@ class EventsController extends Controller
         return $form;
     }
 
-    /**
-     * @return array[]
-     */
-    protected function getGrades(): array
-    {
-        $grades = ['4' => '4','5' => '5', '5+' => '5+','6A' => '6A','6A+' => '6A+', '6B' => '6B', '6B+' => '6B+','6C' => '6C',
-            '6C+' => '6C+','7A' => '7A','7A+' => '7A+','7B' => '7B','7B+' => '7B+','7C' => '7C','7C+' => '7C+','8A' => '8A'];
-        return $grades;
-    }
+
 
     public function exportAllExcel(Request $request)
     {

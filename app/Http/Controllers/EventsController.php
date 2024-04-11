@@ -12,6 +12,7 @@ use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultParticipant;
 use App\Models\ResultQualificationLikeFinal;
+use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Admin;
@@ -262,7 +263,7 @@ class EventsController extends Controller
         $final_data_only_passed_route = array();
         foreach ($data as $route){
             # Варианты форматов подсчета баллов
-            $value_category = Grades::where('grade','=',$route['grade'])->where('owner_id','=', $request->owner_id)->first()->value;
+            $value_category = Route::where('grade','=',$route['grade'])->where('owner_id','=', $request->owner_id)->first()->value;
             $value_route = (new \App\Models\ResultParticipant)->get_value_route($route['attempt'], $value_category, $format);
             # Формат все трассы считаем сразу
             if($format == 2) {
@@ -328,18 +329,15 @@ class EventsController extends Controller
         if(!$event){
             return view('404');
         }
-        $grades = Grades::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
+        $grades = Route::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
         $routes = [];
-        $main_count = 1;
         foreach ($grades as $route){
-            for ($count = 1; $count <= $route->amount; $count++){
-                $route_class = new stdClass();
-                $route_class->grade = $route->grade;
-                $route_class->count = $main_count;
-                $routes[$main_count] = $route_class;
-                $main_count++;
-            }
+            $route_class = new stdClass();
+            $route_class->grade = $route->grade;
+            $route_class->count = $route->route_id;
+            $routes[$route->route_id] = $route_class;
         }
+        array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
         return view('result-page', compact('routes', 'event'));
     }
 

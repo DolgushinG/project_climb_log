@@ -19,13 +19,10 @@ class CreateEventsTable extends Migration
             $table->string('address')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->time('start_time')->nullable();
-            $table->time('end_time')->nullable();
             $table->string('document')->nullable();
             $table->longText('description')->nullable();
             $table->text('contact')->nullable();
             $table->string('image')->nullable();
-            $table->json('grade_and_amount')->nullable();
             $table->string('climbing_gym_name');
             $table->string('climbing_gym_name_eng');
             $table->string('city');

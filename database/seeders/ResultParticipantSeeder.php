@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Grades;
 use App\Models\Participant;
 use App\Models\ResultParticipant;
+use App\Models\Route;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ class ResultParticipantSeeder extends Seeder
             $count_user = ParticipantSeeder::USERS;
             for ($user_id = 1; $user_id <= $count_user; $user_id++){
                 $result_participant = array();
-                $info_routes = Grades::where('event_id', $event_id)->get();
+                $info_routes = Route::where('event_id', $event_id)->get();
                 $gender = User::find($user_id)->gender;
                 $route_id = 1;
                 foreach ($info_routes as $route){
