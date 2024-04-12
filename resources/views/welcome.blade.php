@@ -17,43 +17,45 @@
                                 @auth
 
                                     @if(\App\Models\User::user_participant($event->id))
-                                            @if(!\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
-                                                <div class="form-floating mb-3">
-                                                    <select class="form-select" id="floatingSelectChangeSet"
-                                                            aria-label="Floating label select example" autocomplete="off" required>
-                                                        @foreach($sets as $set)
-                                                            @php
-                                                                $number_set = \App\Models\Participant::participant_number_set(Auth()->user()->id, $event->id);
-                                                            @endphp
-                                                            @if($set->number_set === $number_set)
-                                                                <option selected value="{{$set->number_set}}">Сет {{$set->number_set}} @lang('somewords.'.$set->day_of_week)
-                                                                    @isset($set->date[$set->day_of_week])
-                                                                    {{$set->date[$set->day_of_week]}}
-                                                                    @endisset
-                                                                        {{$set->time}} (еще мест {{$set->free}})</option>
-                                                            @else
-                                                                @if($set->free != 0)
-                                                                    <option value="{{$set->number_set}}">Сет {{$set->number_set}}
-                                                                        @lang('somewords.'.$set->day_of_week)
+                                            @if($event->is_input_set != 1)
+                                                @if(!\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
+                                                    <div class="form-floating mb-3">
+                                                        <select class="form-select" id="floatingSelectChangeSet"
+                                                                aria-label="Floating label select example" autocomplete="off" required>
+                                                            @foreach($sets as $set)
+                                                                @php
+                                                                    $number_set = \App\Models\Participant::participant_number_set(Auth()->user()->id, $event->id);
+                                                                @endphp
+                                                                @if($set->number_set === $number_set)
+                                                                    <option selected value="{{$set->number_set}}">Сет {{$set->number_set}} @lang('somewords.'.$set->day_of_week)
                                                                         @isset($set->date[$set->day_of_week])
                                                                         {{$set->date[$set->day_of_week]}}
                                                                         @endisset
-                                                                        {{$set->time}} (еще
-                                                                        мест {{$set->free}})
-                                                                    </option>
+                                                                            {{$set->time}} (еще мест {{$set->free}})</option>
+                                                                @else
+                                                                    @if($set->free != 0)
+                                                                        <option value="{{$set->number_set}}">Сет {{$set->number_set}}
+                                                                            @lang('somewords.'.$set->day_of_week)
+                                                                            @isset($set->date[$set->day_of_week])
+                                                                            {{$set->date[$set->day_of_week]}}
+                                                                            @endisset
+                                                                            {{$set->time}} (еще
+                                                                            мест {{$set->free}})
+                                                                        </option>
+                                                                    @endif
                                                                 @endif
-                                                            @endif
-                                                        @endforeach
-                                                    </select>
-                                                    <label for="floatingSelectChangeSet">Выбрать время для сета</label>
-                                                </div>
-                                                <button id="btn-participant-change-set" data-id="{{$event->id}}"
-                                                        data-title="{{$event->title_eng}}" data-user-id="{{Auth()->user()->id}}"
-                                                        class="btn btn-dark rounded-pill">Изменить сет</button>
+                                                            @endforeach
+                                                        </select>
+                                                        <label for="floatingSelectChangeSet">Выбрать время для сета</label>
+                                                    </div>
+                                                    <button id="btn-participant-change-set" data-id="{{$event->id}}"
+                                                            data-title="{{$event->title_eng}}" data-user-id="{{Auth()->user()->id}}"
+                                                            class="btn btn-dark rounded-pill">Изменить сет</button>
+                                                @endif
+                                                <button href="{{route('takePart')}}" disabled
+                                                        class="btn border-t-neutral-500 rounded-pill">Вы принимаете участие
+                                                </button>
                                             @endif
-                                        <button href="{{route('takePart')}}" disabled
-                                                class="btn border-t-neutral-500 rounded-pill">Вы принимаете участие
-                                        </button>
                                         @if(!$event->is_qualification_counting_like_final)
                                             @if(\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
                                                 <button href="#" class="btn border-t-neutral-500 rounded-pill" disabled>Вы
@@ -79,30 +81,30 @@
                                                 </div>
                                             @endif
                                         @endif
-                                            @if($event->is_need_sport_category)
-                                                @if(!Auth::user()->sport_category)
-                                                    <div class="form-floating mb-3">
-                                                        <select class="form-select" id="floatingSelectSportCategory"
-                                                                aria-label="Floating label select example" autocomplete="off" required>
-                                                            <option selected disabled value="">Открыть для выбора разряда
-                                                            </option>
-                                                            @foreach ($sport_categories as $category)
-                                                                <option value="{{$category}}">{{$category}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                        <label for="floatingSelectSportCategory">Требуется указать разряд</label>
-                                                    </div>
-                                                @else
+                                        @if($event->is_need_sport_category)
+                                            @if(!Auth::user()->sport_category)
+                                                <div class="form-floating mb-3">
                                                     <select class="form-select" id="floatingSelectSportCategory"
-                                                            aria-label="Floating label select example" required style="display: none">
+                                                            aria-label="Floating label select example" autocomplete="off" required>
                                                         <option selected disabled value="">Открыть для выбора разряда
                                                         </option>
                                                         @foreach ($sport_categories as $category)
                                                             <option value="{{$category}}">{{$category}}</option>
                                                         @endforeach
                                                     </select>
-                                                @endif
+                                                    <label for="floatingSelectSportCategory">Требуется указать разряд</label>
+                                                </div>
+                                            @else
+                                                <select class="form-select" id="floatingSelectSportCategory"
+                                                        aria-label="Floating label select example" required style="display: none">
+                                                    <option selected disabled value="">Открыть для выбора разряда
+                                                    </option>
+                                                    @foreach ($sport_categories as $category)
+                                                        <option value="{{$category}}">{{$category}}</option>
+                                                    @endforeach
+                                                </select>
                                             @endif
+                                        @endif
                                         @if(!Auth::user()->gender)
                                             <div class="form-floating mb-3">
                                                 <select class="form-select" id="floatingSelectGender"
@@ -131,25 +133,27 @@
                                                     <label for="floatingSelectGender">Отметить пол</label>
                                                 </div>
                                         @endif
-                                        <div class="form-floating mb-3">
-                                            <select class="form-select" id="floatingSelect"
-                                                    aria-label="Floating label select example" required>
-                                                <option selected disabled value="">Открыть для выбора сета</option>
-                                                @foreach($sets as $set)
-                                                    @if($set->free != 0)
-                                                        <option value="{{$set->number_set}}">Сет {{$set->number_set}}
-                                                            @lang('somewords.'.$set->day_of_week)
-                                                            @isset($set->date[$set->day_of_week])
-                                                            {{$set->date[$set->day_of_week]}}
-                                                            @endisset
-                                                            {{$set->time}} (еще
-                                                            мест {{$set->free}})
-                                                        </option>
-                                                    @endif
-                                                @endforeach
-                                            </select>
-                                            <label for="floatingSelect">Выбрать время для сета</label>
-                                        </div>
+                                        @if($event->is_input_set != 1)
+                                            <div class="form-floating mb-3">
+                                                <select class="form-select" id="floatingSelect"
+                                                        aria-label="Floating label select example" required>
+                                                    <option selected disabled value="">Открыть для выбора сета</option>
+                                                    @foreach($sets as $set)
+                                                        @if($set->free != 0)
+                                                            <option value="{{$set->number_set}}">Сет {{$set->number_set}}
+                                                                @lang('somewords.'.$set->day_of_week)
+                                                                @isset($set->date[$set->day_of_week])
+                                                                {{$set->date[$set->day_of_week]}}
+                                                                @endisset
+                                                                {{$set->time}} (еще
+                                                                мест {{$set->free}})
+                                                            </option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                                <label for="floatingSelect">Выбрать время для сета</label>
+                                            </div>
+                                        @endif
                                         <div class="form-floating mb-3">
                                             <select class="form-select" id="floatingSelectCategory"
                                                     aria-label="Floating label select example" autocomplete="off" required>
@@ -162,9 +166,12 @@
                                             </select>
                                             <label for="floatingSelectCategory">Выбрать категорию</label>
                                         </div>
+                                        <div id="error-message" class="text-danger"></div>
                                         <button id="btn-participant" data-id="{{$event->id}}"
-                                           data-title="{{$event->title_eng}}" data-format="{{$event->is_qualification_counting_like_final}}" data-user-id="{{Auth()->user()->id}}"
-                                           class="btn btn-dark rounded-pill" style="display: none">Участвовать</button>
+                                           data-title="{{$event->title_eng}}"
+                                                data-sets="{{$event->is_need_set}}"
+                                                data-format="{{$event->is_qualification_counting_like_final}}" data-user-id="{{Auth()->user()->id}}"
+                                           class="btn btn-dark rounded-pill">Участвовать</button>
 
                                     @endif
                                 @endauth
@@ -187,25 +194,25 @@
                         <div class="card-body">
                             <!-- Bordered Tabs Justified -->
                             <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
-                                <li class="nav-item flex-fill" role="presentation">
+                                <li class="nav-item flex-fill" role="presentation" style="margin-right: 8px!important;">
                                     <button class="nav-link w-100 active" id="info-tab" data-bs-toggle="tab"
                                             data-bs-target="#bordered-justified-info" type="button" role="tab"
                                             aria-controls="info" aria-selected="true">Общая информация
                                     </button>
                                 </li>
-                                <li class="nav-item flex-fill" role="presentation">
-                                    <button class="nav-link w-100" id="home-tab" data-bs-toggle="tab"
-                                            data-bs-target="#bordered-justified-home" type="button" role="tab"
-                                            aria-controls="home" aria-selected="true">Сеты
-                                    </button>
-                                </li>
-                                <li class="nav-item flex-fill" role="presentation">
+{{--                                <li class="nav-item flex-fill" role="presentation">--}}
+{{--                                    <button class="nav-link w-100" id="home-tab" data-bs-toggle="tab"--}}
+{{--                                            data-bs-target="#bordered-justified-home" type="button" role="tab"--}}
+{{--                                            aria-controls="home" aria-selected="true">Сеты--}}
+{{--                                    </button>--}}
+{{--                                </li>--}}
+                                <li class="nav-item flex-fill" role="presentation" style="margin-right: 8px!important;">
                                     <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab"
                                             data-bs-target="#bordered-justified-profile" type="button" role="tab"
                                             aria-controls="profile" aria-selected="false">Положение
                                     </button>
                                 </li>
-                                <li class="nav-item flex-fill" role="presentation">
+                                <li class="nav-item flex-fill" role="presentation" style="margin-right: 8px!important;">
                                     <button class="nav-link w-100" id="contact-tab" data-bs-toggle="tab"
                                             data-bs-target="#bordered-justified-contact" type="button" role="tab"
                                             aria-controls="contact" aria-selected="false">Стартовый взнос
@@ -213,40 +220,40 @@
                                 </li>
                             </ul>
                             <div class="tab-content pt-2" id="borderedTabJustifiedContent">
-                                <div class="tab-pane fade show" id="bordered-justified-home" role="tabpanel"
-                                     aria-labelledby="home-tab">
-                                    <div class="info-box card z-depth-3">
-                                        <div class="container">
-                                            <div class="row">
-                                                <h5 class="card-title">Заполняемость сетов</h5>
-                                                @foreach($sets as $set)
-                                                    @if($set->free != 0)
-                                                        <label>Сет {{$set->number_set}}-{{$set->time}}
-                                                            <span class="badge bg-success text-white">@lang('somewords.'.$set->day_of_week)</span>
-                                                            @isset($set->date[$set->day_of_week])
-                                                            <span class="badge bg-info text-dark">{{$set->date[$set->day_of_week]}}</span>
-                                                            @endisset
-                                                            (Свободно - {{100 - $set->procent}}%)</label>
-                                                    @else
-                                                        <label>Сет {{$set->number_set}}-{{$set->time}}
-                                                            <span class="badge bg-success text-white">@lang('somewords.'.$set->day_of_week)</span>
-                                                            @isset($set->date[$set->day_of_week])
-                                                            <span class="badge bg-info text-dark">{{$set->date[$set->day_of_week]}}</span>
-                                                            @endisset
-                                                             (Полностью забит)</label>
-                                                    @endif
-                                                        <div class="container">
-                                                            <div class="progress mt-1 pl-3">
-                                                                <div class="progress-bar" role="progressbar"
-                                                                     style="width: {{$set->procent}}%" aria-valuenow="{{$set->free}}"
-                                                                     aria-valuemin="0" aria-valuemax="{{$set->max_participants}}"></div>
-                                                            </div>
-                                                        </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+{{--                                <div class="tab-pane fade show" id="bordered-justified-home" role="tabpanel"--}}
+{{--                                     aria-labelledby="home-tab">--}}
+{{--                                    <div class="info-box card z-depth-3">--}}
+{{--                                        <div class="container">--}}
+{{--                                            <div class="row">--}}
+{{--                                                <h5 class="card-title">Заполняемость сетов</h5>--}}
+{{--                                                @foreach($sets as $set)--}}
+{{--                                                    @if($set->free != 0)--}}
+{{--                                                        <label>Сет {{$set->number_set}}-{{$set->time}}--}}
+{{--                                                            <span class="badge bg-success text-white">@lang('somewords.'.$set->day_of_week)</span>--}}
+{{--                                                            @isset($set->date[$set->day_of_week])--}}
+{{--                                                            <span class="badge bg-info text-dark">{{$set->date[$set->day_of_week]}}</span>--}}
+{{--                                                            @endisset--}}
+{{--                                                            (Свободно - {{100 - $set->procent}}%)</label>--}}
+{{--                                                    @else--}}
+{{--                                                        <label>Сет {{$set->number_set}}-{{$set->time}}--}}
+{{--                                                            <span class="badge bg-success text-white">@lang('somewords.'.$set->day_of_week)</span>--}}
+{{--                                                            @isset($set->date[$set->day_of_week])--}}
+{{--                                                            <span class="badge bg-info text-dark">{{$set->date[$set->day_of_week]}}</span>--}}
+{{--                                                            @endisset--}}
+{{--                                                             (Полностью забит)</label>--}}
+{{--                                                    @endif--}}
+{{--                                                        <div class="container">--}}
+{{--                                                            <div class="progress mt-1 pl-3">--}}
+{{--                                                                <div class="progress-bar" role="progressbar"--}}
+{{--                                                                     style="width: {{$set->procent}}%" aria-valuenow="{{$set->free}}"--}}
+{{--                                                                     aria-valuemin="0" aria-valuemax="{{$set->max_participants}}"></div>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                @endforeach--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
                                 <div class="tab-pane fade show active" id="bordered-justified-info" role="tabpanel"
                                      aria-labelledby="info-tab">
                                     <section id="services" class="services">

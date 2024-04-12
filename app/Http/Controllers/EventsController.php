@@ -93,29 +93,44 @@ class EventsController extends Controller
             $users_id = $participant_event->pluck('user_id')->toArray();
             $users = User::whereIn('id', $users_id)->get()->toArray();
             $users_event = $participant_event->toArray();
-            $days = Set::where('owner_id', '=', $event->owner_id)->select('day_of_week')->distinct()->get();
-            $sets = Set::where('owner_id', '=', $event->owner_id)->get();
-            $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('id');
-            foreach ($number_sets as $index => $set) {
-                if($event->is_qualification_counting_like_final){
-                    $sets[$index]->count_participant = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
-                } else {
-                    $sets[$index]->count_participant = Participant::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
+            if($event->is_input_set != 1){
+                $days = Set::where('owner_id', '=', $event->owner_id)->select('day_of_week')->distinct()->get();
+                $sets = Set::where('owner_id', '=', $event->owner_id)->get();
+                $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('id');
+                foreach ($number_sets as $index => $set) {
+                    if($event->is_qualification_counting_like_final){
+                        $sets[$index]->count_participant = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
+                    } else {
+                        $sets[$index]->count_participant = Participant::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
+                    }
                 }
-
+            } else {
+                $days = null;
+                $sets = null;
             }
             $index = 0;
             foreach ($users_event as $set => $user) {
                 if ($index <= count($users)) {
-                    $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
-                    $participants[] = array(
-                        'middlename' => $users[$index]['middlename'],
-                        'city' => $users[$index]['city'],
-                        'team' => $users[$index]['team'],
-                        'number_set' => $set->number_set,
-                        'time' => $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10),
-                        'gender' => $users[$index]['gender'],
-                    );
+                    if($event->is_input_set == 1){
+                        $array_for_set = array(
+                            'middlename' => $users[$index]['middlename'],
+                            'city' => $users[$index]['city'],
+                            'team' => $users[$index]['team'],
+                            'gender' => $users[$index]['gender'],
+                        );
+                    } else {
+                        $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
+                        $array_for_set = array(
+                            'middlename' => $users[$index]['middlename'],
+                            'city' => $users[$index]['city'],
+                            'team' => $users[$index]['team'],
+                            'number_set' => $set->number_set,
+                            'time' => $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10),
+                            'gender' => $users[$index]['gender'],
+                        );
+                    }
+
+                    $participants[] = $array_for_set;
                 }
                 $index++;
             }
@@ -184,13 +199,18 @@ class EventsController extends Controller
             }
             $participant = new Participant;
         }
-        $set = Set::where('number_set', $request->number_set)->where('owner_id', $event->owner_id)->first();
+        $event = Event::find($request->event_id);
+        if($event->is_input_set != 1){
+            $number_set = $request->number_set;
+            $set = Set::where('number_set', $number_set)->where('owner_id', $event->owner_id)->first();
+            $participant->number_set_id = $set->id;
+        }
+
         $participant->event_id = $request->event_id;
         $participant->gender = $request->gender;
         $participant->user_id = $request->user_id;
-        $participant->number_set_id = $set->id;
         $participant->category_id = $participant_categories->id;
-        $participant->owner_id = Event::find($request->event_id)->owner_id;
+        $participant->owner_id = $event->owner_id;
         $participant->active = 0;
         $participant->save();
 
@@ -219,7 +239,9 @@ class EventsController extends Controller
         } else {
             $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
         }
-        $set = Set::where('number_set', $request->number_set)->where('owner_id', $event->owner_id)->first();
+        $event = Event::find($request->event_id);
+        $number_set = $request->number_set;
+        $set = Set::where('number_set', $number_set)->where('owner_id', $event->owner_id)->first();
         $participant->number_set_id = $set->id;
         $participant->save();
         if ($participant->save()) {

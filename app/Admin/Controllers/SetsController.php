@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchDisableSets;
 use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
 use App\Models\Set;
@@ -104,15 +105,13 @@ class SetsController extends Controller
             $actions->disableEdit();
             $actions->disableView();
         });
+        $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new BatchDisableSets);
+        });
 //        $grid->id('ID');
         $grid->filter(function($filter){
-
-            // Remove the default id filter
             $filter->disableIdFilter();
-
-            // Add a column filter
             $filter->in('day_of_week', 'День слота')->checkbox(self::DAYS);
-
         });
         $grid->quickCreate(function (Grid\Tools\QuickCreate $create) {
             $admin_id = \Encore\Admin\Facades\Admin::user()->id;

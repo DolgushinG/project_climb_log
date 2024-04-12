@@ -1,7 +1,7 @@
 @extends('layouts.main_page.app')
 @section('content')
-    <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js"></script>
+    <link href="{{asset('vendor/helpers/css_suggestions.css')}}" rel="stylesheet" />
+    <script src="{{asset('vendor/helpers/jquery.suggestions.js')}}"></script>
     @guest
         <section class="d-flex align-items-center">
             <div class="container" data-aos="zoom-out" data-aos-delay="100">

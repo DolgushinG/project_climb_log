@@ -6,5 +6,12 @@
     "/js/ddata.js": "/js/ddata.js",
     "/js/datepicker.js": "/js/datepicker.js",
     "/css/style.css": "/css/style.css",
-    "/css/app.css": "/css/app.css"
+    "/css/app.css": "/css/app.css",
+    "/css/font-awesome.min.css": "/css/font-awesome.min.css",
+    "/fonts/fontawesome-webfont.eot": "/fonts/fontawesome-webfont.eot",
+    "/fonts/fontawesome-webfont.svg": "/fonts/fontawesome-webfont.svg",
+    "/fonts/fontawesome-webfont.ttf": "/fonts/fontawesome-webfont.ttf",
+    "/fonts/fontawesome-webfont.woff": "/fonts/fontawesome-webfont.woff",
+    "/fonts/fontawesome-webfont.woff2": "/fonts/fontawesome-webfont.woff2",
+    "/fonts/FontAwesome.otf": "/fonts/FontAwesome.otf"
 }

@@ -133,8 +133,11 @@ class ParticipantsController extends Controller
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-        $grid->column('number_set_id', 'Номер сета')
-            ->select(Set::getParticipantSets(Admin::user()->id));
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!$event->is_input_set){
+            $grid->column('number_set_id', 'Номер сета')
+                ->select(Set::getParticipantSets(Admin::user()->id));
+        }
         $grid->column('user_place', 'Место в квалификации')
             ->help('При некорректном раставлением мест, необходимо пересчитать результаты')
             ->sortable();

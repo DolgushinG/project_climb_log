@@ -227,11 +227,15 @@ class Participant extends Model
                 'participants.number_set_id',
             )
             ->where('participants.gender', '=', $gender)->get()->sortBy('user_place')->toArray();
+        $event = Event::find($event_id);
         foreach ($users as $index => $user){
             $place = Participant::get_places_participant_in_qualification($event_id, $user['id'], $gender, $category_id, true);
             $set = Set::find($user['number_set_id']);
             $users[$index]['user_place'] = $place;
-            $users[$index]['number_set_id'] = $set->number_set;
+            if($event->is_input_set != 1){
+                $users[$index]['number_set_id'] = $set->number_set;
+            }
+
         }
         $users_need_sorted = collect($users)->toArray();
         usort($users_need_sorted, function ($a, $b) {

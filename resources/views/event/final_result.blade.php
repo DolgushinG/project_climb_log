@@ -18,7 +18,7 @@
                             <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
                                 @foreach($categories as $category)
                                     <li class="nav-item mr-2 flex-fill" role="presentation" style="margin-right: 8px!important;">
-                                        <button class="nav-link  w-100" id="{{$category['id']}}-tab"
+                                        <button class="nav-link w-100" id="{{$category['id']}}-tab"
                                                 data-bs-toggle="tab"
                                                 data-bs-target="#bordered-justified-{{$category['id']}}" type="button"
                                                 role="tab" aria-controls="{{$category['id']}}"

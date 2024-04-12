@@ -4,16 +4,74 @@ $(document).on('click','#btn-participant', function(e) {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+    let sets = document.getElementById("floatingSelect");
+    let category = document.getElementById("floatingSelectCategory");
+    let sport_category = document.getElementById("floatingSelectSportCategory");
+    let birthday = document.getElementById("birthday");
+    let gender = document.getElementById("floatingSelectGender");
 
-    var value = document.getElementById("floatingSelect").value
-    var category_value = document.getElementById("floatingSelectCategory").value
-    var gender_value = document.getElementById("floatingSelectGender").value
-    if(document.getElementById("floatingSelectSportCategory")){
-        var sport_category_value = document.getElementById("floatingSelectSportCategory").value
+    // Проверяем, что каждый селект присутствует на странице
+    if (sets) {
+        // Получаем значение выбранного элемента
+        var setsValue = sets.value.trim();
+
+        // Проверяем, что значение не пустое
+        if (setsValue === "") {
+            // Выводим сообщение об ошибке
+            document.getElementById("error-message").innerText = "Пожалуйста выберите сет для участия";
+            return; // Прерываем выполнение функции
+        }
     }
-    if(document.getElementById("birthday")){
-        var birthday_value = document.getElementById("birthday").value
+
+    if (birthday) {
+        // Получаем значение выбранного элемента
+        var birthdayValue = sets.value.trim();
+
+        // Проверяем, что значение не пустое
+        if (birthdayValue === "") {
+            // Выводим сообщение об ошибке
+            document.getElementById("error-message").innerText = "Пожалуйста установить дата рождения для участия";
+            return; // Прерываем выполнение функции
+        }
     }
+
+    if (category) {
+        // Получаем значение выбранного элемента
+        var categoryValue = category.value.trim();
+
+        // Проверяем, что значение не пустое
+        if (categoryValue === "") {
+            // Выводим сообщение об ошибке
+            document.getElementById("error-message").innerText = "Пожалуйста выберите категорию для участия";
+            return; // Прерываем выполнение функции
+        }
+    }
+
+    if (sport_category) {
+        // Получаем значение выбранного элемента
+        var sportCategoryValue = sport_category.value.trim();
+
+        // Проверяем, что значение не пустое
+        if (sportCategoryValue === "") {
+            // Выводим сообщение об ошибке
+            document.getElementById("error-message").innerText = "Пожалуйста выберите разряд для участия";
+            return; // Прерываем выполнение функции
+        }
+    }
+    if (gender) {
+        // Получаем значение выбранного элемента
+        var genderValue = gender.value.trim();
+
+        // Проверяем, что значение не пустое
+        if (genderValue === "") {
+            // Выводим сообщение об ошибке
+            document.getElementById("error-message").innerText = "Пожалуйста выберите разряд для участия";
+            return; // Прерываем выполнение функции
+        }
+    }
+    // Если все селекты заполнены, очищаем сообщение об ошибке
+    document.getElementById("error-message").innerText = "";
+
     let button = $('#btn-participant')
     let event_id = document.getElementById('btn-participant').getAttribute('data-id')
     let event_title = document.getElementById('btn-participant').getAttribute('data-title')
@@ -25,13 +83,13 @@ $(document).on('click','#btn-participant', function(e) {
         type: 'POST',
         url: '/takePart',
         data: {
-            'number_set': value,
+            'number_set': setsValue,
             'event_id': event_id,
             'user_id': user_id,
-            'category': category_value,
-            'gender': gender_value,
-            'sport_category': sport_category_value,
-            'birthday': birthday_value,
+            'category': categoryValue,
+            'gender': genderValue,
+            'sport_category': sportCategoryValue,
+            'birthday': birthdayValue,
         },
         success: function(xhr, status, error) {
             button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
@@ -130,31 +188,46 @@ $(document).on('click','#btn-participant-change-set', function(e) {
 
     });
 });
+// let sets = document.getElementById("floatingSelect");
+// let category = document.getElementById("floatingSelectCategory");
+// let sport_category = document.getElementById("floatingSelectSportCategory");
+// if(sets){
+//     document.getElementById("floatingSelect").addEventListener("change", (ev) => {
+//         var value = document.getElementById("floatingSelect").value;
+//         var c_value = document.getElementById("floatingSelectCategory").value;
+//         if (value !== "" && c_value !== ""){
+//             var button_paticipant = document.querySelector('#btn-participant');
+//             button_paticipant.style.display = 'block';
+//         }
+//     });
+// }
+// if(category){
+//     document.getElementById("floatingSelectCategory").addEventListener("change", (ev) => {
+//         var select = document.getElementById("floatingSelect");
+//         let is_input_set = document.getElementById('btn-participant').getAttribute('data-sets')
+//         if(is_input_set === 1){
+//             select.value = 'show_button'
+//         }
+//         var c_value = document.getElementById("floatingSelectCategory").value;
+//         if (select !== "" && c_value !== ""){
+//             var button_paticipant = document.querySelector('#btn-participant');
+//             button_paticipant.style.display = 'block';
+//         }
+//     });
+// }
+// if(sport_category){
+//     document.getElementById("floatingSelectSportCategory").addEventListener("change", (ev) => {
+//         var value = document.getElementById("floatingSelect").value;
+//         var c_value = document.getElementById("floatingSelectCategory").value;
+//         var c_value_sport = document.getElementById("floatingSelectSportCategory").value;
+//         if (value !== "" && c_value !== "" && c_value_sport !== ""){
+//             var button_paticipant = document.querySelector('#btn-participant');
+//             button_paticipant.style.display = 'block';
+//         }
+//     });
+// }
 
-document.getElementById("floatingSelect").addEventListener("change", (ev) => {
-    var value = document.getElementById("floatingSelect").value;
-    var c_value = document.getElementById("floatingSelectCategory").value;
-    if (value !== "" && c_value !== ""){
-        var button_paticipant = document.querySelector('#btn-participant');
-        button_paticipant.style.display = 'block';
-    }
-});
 
-document.getElementById("floatingSelectCategory").addEventListener("change", (ev) => {
-    var value = document.getElementById("floatingSelect").value;
-    var c_value = document.getElementById("floatingSelectCategory").value;
-    if (value !== "" && c_value !== ""){
-        var button_paticipant = document.querySelector('#btn-participant');
-        button_paticipant.style.display = 'block';
-    }
-});
-document.getElementById("floatingSelectSportCategory").addEventListener("change", (ev) => {
-    var value = document.getElementById("floatingSelect").value;
-    var c_value = document.getElementById("floatingSelectCategory").value;
-    var c_value_sport = document.getElementById("floatingSelectSportCategory").value;
-    if (value !== "" && c_value !== "" && c_value_sport !== ""){
-        var button_paticipant = document.querySelector('#btn-participant');
-        button_paticipant.style.display = 'block';
-    }
-});
+
+
 

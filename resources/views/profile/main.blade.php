@@ -4,8 +4,8 @@
         <div class="container" data-aos="zoom-out" data-aos-delay="100">
         </div>
     </section><!-- End Hero -->
-    <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js"></script>
+    <link href="{{asset('vendor/helpers/css_suggestions.css')}}" rel="stylesheet" />
+    <script src="{{asset('vendor/helpers/jquery.suggestions.js')}}"></script>
     <main id="main" class="main">
         <section class="section profile">
             <div class="container">
@@ -16,7 +16,7 @@
                                 <div class="card-body text-center bg-primary rounded-top">
                                     <div class="user-box">
                                     @if ($user->avatar === null)
-                                            <img src="https://eu.ui-avatars.com/api/?name={{ $user->middlename }}&background=random&color=050202&font-size=0.33"
+                                            <img src="images/avatar.jpeg"
                                                  alt="Profile" class="img-fluid rounded-circle">
                                     @else
                                         <img src="{{$user->avatar}}" class="img-fluid rounded-circle" alt="user avatar">
@@ -78,22 +78,22 @@
                             <div class="card-body">
 
                                 <ul class="nav nav-pills nav-pills-primary nav-justified">
-                                    <li class="nav-item">
+                                    <li class="nav-item" style="margin-right: 8px!important;">
                                         <button id="overview" data-target="#profile-overview" data-toggle="pill"
                                                 class="nav-link active"><i class="icon-user"></i> <span
                                                 class="hidden-xs">Профиль</span></button>
                                     </li>
-                                    <li class="nav-item">
+                                    <li class="nav-item" style="margin-right: 8px!important;">
                                         <button id="events" data-target="#profile-events" data-toggle="pill"
                                                 class="nav-link"><i class="icon-envelope-open"></i> <span
                                                 class="hidden-xs">Соревнования</span></button>
                                     </li>
-                                    <li class="nav-item">
+                                    <li class="nav-item" style="margin-right: 8px!important;">
                                         <button id="setting" data-target="#profile-settings" data-toggle="pill"
                                                 class="nav-link"><i class="icon-note"></i> <span class="hidden-xs">Пароль</span>
                                         </button>
                                     </li>
-                                    <li class="nav-item">
+                                    <li class="nav-item" style="margin-right: 8px!important;">
                                         <button id="edit" data-target="#profile-edit" data-toggle="pill"
                                                 class="nav-link"><i class="icon-note"></i> <span class="hidden-xs">Изменить</span>
                                         </button>
