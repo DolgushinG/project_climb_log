@@ -43,6 +43,7 @@ class BatchForceRecoutingSemiFinalResultGender extends Action
     {
         return "<a class='recouting-gender btn btn-sm btn-success'><i class='fa fa-female'></i><i class='fa fa-male'></i> Результаты </a>
          <style>
+               .recouting-gender {margin-top:8px;}
               @media screen and (max-width: 767px) {
                     .recouting-gender {margin-top:8px;}
                 }

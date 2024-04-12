@@ -90,7 +90,14 @@ class BatchResultFinal extends Action
 
     public function html()
     {
-        return "<a class='send-add btn btn-sm btn-success'><i class='fa fa-arrow-down'></i> Внести результат</a>";
+        return "<a class='send-add btn btn-sm btn-primary'><i class='fa fa-arrow-down'></i> Внести результат</a>
+                <style>
+                  .send-add {margin-top:8px;}
+                 @media screen and (max-width: 767px) {
+                         .send-add {margin-top:8px;}
+                    }
+                </style>
+            ";
     }
 
 }

@@ -90,7 +90,17 @@ class BatchResultSemiFinal extends Action
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
         if($event->is_semifinal){
-            return "<a class='result-add btn btn-sm btn-primary'><i class='fa fa-arrow-down'></i> Внести результат</a>";
+            return "<a class='result-add btn btn-sm btn-primary'><i class='fa fa-arrow-down'></i> Внести результат</a>
+                <style>
+                  .result-add {margin-top:8px;}
+                 @media screen and (max-width: 767px) {
+                         .result-add {margin-top:8px;}
+                    }
+                </style>
+
+                ";
+
+
         } else {
             return "<a disabled class='result-add btn btn-sm btn-warning' style='display: none'><i class='fa fa-info-circle'></i> Внести результат</a>";
         }

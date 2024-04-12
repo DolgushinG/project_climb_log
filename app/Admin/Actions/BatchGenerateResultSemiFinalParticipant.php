@@ -47,6 +47,7 @@ class BatchGenerateResultSemiFinalParticipant extends Action
     {
         return "<a class='generate-result-semifinal-participant btn btn-sm btn-warning'><i class='fa fa-trophy'></i> Сгенерировать результаты[beta]</a>
             <style>
+                 .generate-result-semifinal-participant {margin-top:8px;}
                  @media screen and (max-width: 767px) {
                     .generate-result-semifinal-participant {margin-top:8px;}
                     }

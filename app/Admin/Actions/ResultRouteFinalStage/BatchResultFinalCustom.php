@@ -150,6 +150,7 @@ class BatchResultFinalCustom extends Action
     {
        return "<a class='result-add-final btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category}</a>
                  <style>
+                 .result-add-final {margin-top:8px;}
                  @media screen and (max-width: 767px) {
                         .result-add-final {margin-top:8px;}
                     }

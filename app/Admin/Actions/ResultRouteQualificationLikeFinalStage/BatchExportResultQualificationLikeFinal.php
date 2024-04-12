@@ -37,7 +37,14 @@ class BatchExportResultQualificationLikeFinal extends Action
 
     public function html()
     {
-        return "<a class='export btn btn-sm btn-primary'><i class='fa fa-arrow-up'></i> Экспорт</a>";
+        return "<a class='export btn btn-sm btn-primary'><i class='fa fa-arrow-up'></i> Экспорт</a>
+                   <style>
+                    .export {margin-top:8px;}
+                 @media screen and (max-width: 767px) {
+                        .export {margin-top:8px;}
+                    }
+                </style>
+                ";
     }
 
 }

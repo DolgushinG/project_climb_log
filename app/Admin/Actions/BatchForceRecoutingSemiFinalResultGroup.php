@@ -41,6 +41,7 @@ class BatchForceRecoutingSemiFinalResultGroup extends Action
     {
         return "<a class='recouting-group btn btn-sm btn-success'><i class='fa fa-users'></i></i> Результаты </a>
          <style>
+                 .recouting-group {margin-top:8px;}
                 @media screen and (max-width: 767px) {
                         .recouting-group {margin-top:8px;}
                     }

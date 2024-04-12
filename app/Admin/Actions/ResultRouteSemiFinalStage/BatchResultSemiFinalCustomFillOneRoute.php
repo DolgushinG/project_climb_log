@@ -163,6 +163,7 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
         if($event->is_semifinal){
             return "<a class='result-add-one-route btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category} по одной трассе</a>
                  <style>
+                  .result-add-one-route {margin-top:8px;}
                  @media screen and (max-width: 767px) {
                         .result-add-one-route {margin-top:8px;}
                     }

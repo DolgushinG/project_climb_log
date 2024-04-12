@@ -36,7 +36,14 @@ class BatchForceRecouting extends Action
 
     public function html()
     {
-        return "<a class='recouting btn btn-sm btn-success'><i class='fa fa-refresh'></i> Результаты</a>";
+        return "<a class='recouting btn btn-sm btn-success'><i class='fa fa-refresh'></i> Результаты</a>
+                    <style>
+                .recouting {margin-top:8px;}
+                 @media screen and (max-width: 767px) {
+                        .recouting {margin-top:8px;}
+                    }
+                </style>
+                ";
     }
 
 }

@@ -153,6 +153,7 @@ class BatchResultSemiFinalCustom extends Action
         if($event->is_semifinal){
             return "<a class='result-add btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category}</a>
                  <style>
+                 .result-add {margin-top:8px;}
                  @media screen and (max-width: 767px) {
                         .result-add {margin-top:8px;}
                     }

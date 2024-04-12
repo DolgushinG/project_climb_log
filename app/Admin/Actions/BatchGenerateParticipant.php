@@ -77,6 +77,7 @@ class BatchGenerateParticipant extends Action
     {
         return "<a class='generate-participant btn btn-sm btn-warning '><i class='fa fa-trophy'></i> Сгенерировать участников [beta](Ожидание до ~ 2 мин)</a>
             <style>
+                 .generate-participant {margin-top:8px;}
                 @media screen and (max-width: 767px) {
                     .generate-participant {margin-top:8px;}
                     }
