@@ -15,12 +15,8 @@
                             <div class="card">
                                 <div class="card-body text-center bg-primary rounded-top">
                                     <div class="user-box">
-                                    @if ($user->avatar === null)
-                                            <img src="images/avatar.jpeg"
-                                                 alt="Profile" class="img-fluid rounded-circle">
-                                    @else
-                                        <img src="{{$user->avatar}}" class="img-fluid rounded-circle" alt="user avatar">
-                                    @endif
+                                        <img src="images/avatar.jpeg"
+                                             alt="Profile" class="img-fluid rounded-circle">
                                     </div>
                                     <h5 class="mb-1 text-white">{{$user->middlename}}</h5>
                                 </div>
