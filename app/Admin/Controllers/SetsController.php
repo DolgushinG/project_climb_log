@@ -101,6 +101,7 @@ class SetsController extends Controller
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
+        $grid->disableFilter();
         $grid->actions(function ($actions) {
             $actions->disableEdit();
             $actions->disableView();
