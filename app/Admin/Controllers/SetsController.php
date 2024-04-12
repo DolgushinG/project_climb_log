@@ -109,10 +109,10 @@ class SetsController extends Controller
             $tools->append(new BatchDisableSets);
         });
 //        $grid->id('ID');
-        $grid->filter(function($filter){
-            $filter->disableIdFilter();
-            $filter->in('day_of_week', 'День слота')->checkbox(self::DAYS);
-        });
+//        $grid->filter(function($filter){
+//            $filter->disableIdFilter();
+//            $filter->in('day_of_week', 'День слота')->checkbox(self::DAYS);
+//        });
         $grid->quickCreate(function (Grid\Tools\QuickCreate $create) {
             $admin_id = \Encore\Admin\Facades\Admin::user()->id;
             $create->integer('owner_id', $admin_id)->default($admin_id)->style('display', 'None');
