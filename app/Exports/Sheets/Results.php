@@ -4,6 +4,7 @@ namespace App\Exports\Sheets;
 
 use App\Models\Event;
 use App\Models\EventAndCoefficientRoute;
+use App\Models\Grades;
 use App\Models\Participant;
 use App\Models\ResultParticipant;
 use App\Models\ResultRouteFinalStage;
@@ -208,7 +209,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     'Кол-во FLASH',
                     'Кол-во REDPOINT'
                 ];
-                $count = Event::find($this->event_id)->count_routes;
+                $count = Grades::where('event_id', $this->event_id)->first()->count_routes;
                 for($i = 1; $i <= $count; $i++){
                     $qualification[] = 'Трасса '.$i;
                 }

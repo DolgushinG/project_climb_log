@@ -154,6 +154,8 @@
                                                 <label for="floatingSelect">Выбрать время для сета</label>
                                             </div>
                                         @endif
+
+                                        @if(!$event->is_auto_categories)
                                         <div class="form-floating mb-3">
                                             <select class="form-select" id="floatingSelectCategory"
                                                     aria-label="Floating label select example" autocomplete="off" required>
@@ -166,6 +168,7 @@
                                             </select>
                                             <label for="floatingSelectCategory">Выбрать категорию</label>
                                         </div>
+                                        @endif
                                         <div id="error-message" class="text-danger"></div>
                                         <button id="btn-participant" data-id="{{$event->id}}"
                                            data-title="{{$event->title_eng}}"

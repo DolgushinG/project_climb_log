@@ -104,8 +104,13 @@ class ParticipantsController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.participant');
         });
-        $grid->selector(function (Grid\Tools\Selector $selector) {
-            $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        $grid->selector(function (Grid\Tools\Selector $selector) use ($event) {
+            $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
+            $p_categories = Participant::where('event_id', $event->id)->whereIn('category_id', $category)->get();
+            if($p_categories->isNotEmpty()){
+                $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+            }
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
             $selector->select('active', 'Кто добавил', [ 1 => 'Добавил',  0 => 'Не добавил']);
             $selector->select('is_paid', 'Есть оплата', [ 1 => 'Да',  0 => 'Нет']);
@@ -130,10 +135,15 @@ class ParticipantsController extends Controller
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
         });
-        $grid->column('category_id', 'Категория')
-            ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
-            ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
+        $p_categories = Participant::where('event_id', $event->id)->whereIn('category_id', $category)->get();
+
+        if($p_categories->isNotEmpty()){
+            $grid->column('category_id', 'Категория')
+                ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
+                ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+        }
+
         if(!$event->is_input_set){
             $grid->column('number_set_id', 'Номер сета')
                 ->select(Set::getParticipantSets(Admin::user()->id));

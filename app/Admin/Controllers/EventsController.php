@@ -269,18 +269,23 @@ class EventsController extends Controller
             $form->number('amount_the_best_participant_to_go_final','Кол-во лучших участников идут в след раунд финал')
                 ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
             $form->number('amount_routes_in_final','Кол-во трасс в финале')->attribute('inputmode', 'none')->value(4);
-            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-            if(!$event){
-                $form->list('categories', 'Категории участников')->rules('required|min:2');
-                $form->html('<h4 id="warning-category" style="color: red" >Обязательно проверьте заполнение категорий и обязательных полей</h4>');
+            if($this->is_fill_results(intval($id))){
+                $form->html('<h5> Доступно только изменение категорий, так как были добавлены результаты, нельзя удалить или добавить новые</h5>');
+                $form->customlist('categories', 'Категории участников');
             } else {
-                if($this->is_fill_results(intval($id))){
-                    $form->html('<h5> Доступно только изменение категорий, так как были добавлены результаты, нельзя удалить или добавить новые</h5>');
-                    $form->customlist('categories', 'Категории участников');
-                } else {
-                    $form->list('categories', 'Категории участников')->rules('required|min:2');
-                    $form->html('<h4 id="warning-category" style="color: red" >Обязательно проверьте заполнение категорий и обязательных полей</h4>');
-                }
+                $form->list('categories', 'Категории участников')->rules('required|min:2');
+                $form->radio('is_auto_categories','Настройка категорий')
+                    ->options([0 => 'Сами участники выбирают категорию при регистрации', 1 => 'Автоопределение категории по параметрам'])
+                    ->when(0, function (Form $form) {
+                    })->when(1, function (Form $form) {
+                        $form->table('options_categories', '', function ($table) use ($form){
+                            $table->select('Категория участника')->options($form->model()->categories)->readonly();
+                            $table->select('От какой категории сложности определять эту категорию')->options(Grades::getGrades())->width('30px');
+                            $table->select('До какой категории сложности определять эту категорию')->options(Grades::getGrades())->width('30px');
+                            $table->number('Кол-во трасс для определения')->width('50px');
+                        });
+                    })->value(0)->required();
+                $form->html('<h4 id="warning-category" style="color: red" >Обязательно проверьте заполнение категорий и обязательных полей</h4>');
             }
             $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states(self::STATES_BTN);
             $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states(self::STATES_BTN);
@@ -334,15 +339,6 @@ class EventsController extends Controller
                     throw new \Exception('Только одно соревнование может быть опубликовано');
                 }
             }
-//            if($form->grade_and_amount){
-//                $main_count = 0;
-//                foreach ($form->grade_and_amount as $route){
-//                    for ($count = 1; $count <= $route['Кол-во']; $count++){
-//                        $main_count++;
-//                    }
-//                }
-//                $form->count_routes = $main_count;
-//            }
             if($form->climbing_gym_name){
                 $climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
                 $title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));

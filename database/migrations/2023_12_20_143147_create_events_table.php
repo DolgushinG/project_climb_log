@@ -46,6 +46,7 @@ class CreateEventsTable extends Migration
             $table->integer('amount_the_best_participant_to_go_final')->nullable();
             $table->json('categories');
             $table->boolean('is_auto_categories')->nullable();
+            $table->json('options_categories')->nullable();
             $table->integer('is_input_birthday')->nullable();
             $table->integer('is_need_sport_category')->nullable();
             $table->integer('choice_transfer')->nullable();

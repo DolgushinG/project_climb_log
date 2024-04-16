@@ -16,6 +16,11 @@ class Grades extends Model
         'grade_and_amount' =>'json',
     ];
 
+    const BEGINNER = 'beginner';
+    const MIDDLE = 'middle';
+    const PRO = 'pro';
+
+
     public static function getRoutes()
     {
 
@@ -112,4 +117,96 @@ class Grades extends Model
             '6C+' => '6C+','7A' => '7A','7A+' => '7A+','7B' => '7B','7B+' => '7B+','7C' => '7C','7C+' => '7C+','8A' => '8A'];
         return $grades;
     }
+
+    /**
+     * @return array[]
+     */
+    public static function grades(): array
+    {
+        $grades = ['4', '5', '5+', '6A','6A+', '6B', '6B+', '6C', '6C+', '7A', '7A+', '7B', '7B+', '7C', '7C+', '8A'];
+        return $grades;
+    }
+
+    public static function getAttemptFromGrades($grade, $type_participant)
+    {
+
+        switch ($type_participant){
+            case self::BEGINNER:
+                return self::getGradesPartBeginner($grade);
+            case self::MIDDLE:
+                return self::getGradesPartMiddle($grade);
+            case self::PRO:
+                return self::getGradesPartPro($grade);
+        }
+    }
+
+    public static function getGradesPartBeginner($grade): int
+    {
+        if(in_array($grade, ['4', '5', '5+', '6A','6A+', '6B', '6B+'])){
+            $attempt = rand(0,2);
+        }
+        if(in_array($grade, ['6C', '6C+', '7A', '7A+', '7B'])){
+            $attempt = 0;
+        }
+        if(in_array($grade, ['7B+', '7C', '7C+', '8A'])){
+            $attempt = 0;
+        }
+
+        return $attempt;
+    }
+
+    public static function getGradesPartMiddle($grade): int
+    {
+        if(in_array($grade, ['4', '5', '5+', '6A','6A+', '6B', '6B+']) != false){
+            $attempt = rand(1,2);
+        }
+        if(in_array($grade, ['6C', '6C+', '7A', '7A+', '7B']) != false){
+            $attempt = rand(0,2);
+        }
+        if(in_array($grade, ['7B+', '7C', '7C+', '8A']) != false){
+            $attempt = 0;
+        }
+
+        return $attempt;
+    }
+    public static function getGradesPartPro($grade): int
+    {
+        if(in_array($grade, ['4', '5', '5+', '6A','6A+', '6B', '6B+'])){
+            $attempt = rand(1,2);
+        }
+        if(in_array($grade, ['6C', '6C+', '7A', '7A+', '7B'])){
+            $attempt = rand(1,2);
+        }
+        if(in_array($grade, ['7B+', '7C', '7C+', '8A'])){
+            $attempt = rand(0,2);
+        }
+
+        return $attempt;
+    }
+
+    public static function findMaxIndices($searchArray, $targetArray, $count) {
+        $maxIndices = [];
+        $indexesFound = 0;
+
+        foreach ($targetArray as $searchItem) {
+            $index = array_search($searchItem, $searchArray);
+            if ($index !== false) {
+                if ($indexesFound < $count) {
+                    $maxIndices[] = $index;
+                    $indexesFound++;
+                } else {
+                    sort($maxIndices); // Сортировка массива индексов по возрастанию
+                    if ($index > $maxIndices[0]) {
+                        $maxIndices[0] = $index;
+                    }
+                }
+            }
+        }
+        $res = [];
+        foreach ($maxIndices as $index){
+            $res[] = self::grades()[$index];
+        }
+        return $res;
+    }
+
 }

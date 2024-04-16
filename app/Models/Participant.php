@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use function Symfony\Component\String\s;
 
 class Participant extends Model
 {
@@ -139,6 +140,7 @@ class Participant extends Model
         if ($get_place_user){
             return $user_places[$user_id];
         }
+
         return $user_places;
     }
 
@@ -249,5 +251,94 @@ class Participant extends Model
             }
         });
         return collect($users_need_sorted);
+    }
+
+    public static function get_list_passed_route($event_id, $user_id)
+    {
+        return ResultParticipant::where('event_id', $event_id)->where('user_id', $user_id)->whereIn('attempt', [1,2])->pluck('grade');
+    }
+
+    public static function find_grade($list_grades, $grade)
+    {
+        return in_array($grade, $list_grades);
+    }
+
+    public static function findMaxKey($array) {
+        $maxValue = null;
+        $maxKey = null;
+
+        foreach ($array as $key => $value) {
+            if ($maxValue === null || $value > $maxValue) {
+                $maxValue = $value;
+                $maxKey = $key;
+            }
+        }
+
+        return $maxKey;
+    }
+
+    public static function get_category_from_result($event, $the_best_route)
+    {
+        $participant_categories = ParticipantCategory::where('event_id', $event->id)->get()->pluck('category')->toArray();
+        $new_convert_options = self::convert_categories($event->options_categories, $participant_categories);
+        $next = [];
+        foreach ($new_convert_options as $opt){
+            $next[] = self::values_in_range(Grades::grades(), $opt['from'], $opt['to']);
+        }
+
+        $result = array();
+        # Бежим по лучшим трассам (6C, 7A, 7A+)
+        foreach ($the_best_route as $route){
+            foreach ($new_convert_options as $index => $opt){
+                 if(self::find_grade($next[$index], $route)){
+                     if (array_key_exists($opt['category'], $result)) {
+                         $result[$opt['category']]++;
+                     } else {
+                         $result[$opt['category']] = 1;
+                     }
+                 }
+            }
+        }
+        return self::findMaxKey($result);
+    }
+
+    public static function values_in_range($array, $start, $end)
+    {
+        $startPrinting = false;
+        $valuesInRange = [];
+
+        foreach ($array as $value) {
+            if ($value == $start) {
+                $startPrinting = true;
+            }
+
+            if ($startPrinting) {
+                $valuesInRange[] = $value;
+            }
+
+            if ($value == $end) {
+                break;
+            }
+        }
+
+        if (!in_array($end, $valuesInRange)) {
+            // If end value not found in the array, add it to the end
+            $valuesInRange[] = $end;
+        }
+
+        return $valuesInRange;
+    }
+
+    public static function convert_categories($array, $categories)
+    {
+        $res = [];
+        foreach ($array as $el){
+            $res[] = array(
+                'category' => $categories[$el['Категория участника']],
+                'amount_route' => $el['Кол-во трасс для определения'],
+                'to' => $el['До какой категории сложности определять эту категорию'],
+                'from' => $el['От какой категории сложности определять эту категорию']);
+        }
+        return $res;
     }
 }

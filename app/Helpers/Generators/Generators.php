@@ -19,6 +19,7 @@ use App\Models\User;
 use Database\Seeders\ParticipantSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use stdClass;
 
 class Generators
 {
@@ -81,35 +82,48 @@ class Generators
         }
     }
 
-    public static function prepare_participant_with_owner($owner_id, $event_id, $users, $category, $start_user_id, $table)
+    public static function prepare_participant_with_owner($owner_id, $event_id, $users, $table, $start_user_id=null, $category=null)
     {
         $participants = array();
-        $category_id = ParticipantCategory::where('category', $category)->where('owner_id', $owner_id)->where('event_id', $event_id)->first()->id;
-        for ($i = $start_user_id; $i <= $users; $i++) {
-            $user = User::find($i);
-            $user->category = $category_id;
-            $user->save();
-            $sets = Set::where('owner_id', $owner_id)->pluck('id','number_set')->toArray();
-            $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'category_id' => $category_id,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1);
+        if($category){
+            $category_id = ParticipantCategory::where('category', $category)->where('owner_id', $owner_id)->where('event_id', $event_id)->first()->id;
+            for ($i = $start_user_id; $i <= $users; $i++) {
+                $user = User::find($i);
+                $user->category = $category_id;
+                $user->save();
+                $sets = Set::where('owner_id', $owner_id)->pluck('id','number_set')->toArray();
+                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'category_id' => $category_id,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1);
+            }
+        } else {
+            for ($i = 1; $i <= $users; $i++) {
+                $user = User::find($i);
+                $sets = Set::where('owner_id', $owner_id)->pluck('id','number_set')->toArray();
+                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1);
+            }
         }
+
         DB::table($table)->insert($participants);
     }
 
     public static function prepare_result_participant($owner_id, $event_id, $table, $count=30)
     {
-
         if($table === 'result_participant'){
             ResultParticipant::where('event_id', $event_id)->delete();
             $active_participants = Participant::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
             $event = Event::find($event_id);
+
+            $type_group_routes = ['beginner', 'middle', 'pro'];
+
             foreach ($active_participants as $active_participant){
                 $result_participant = array();
                 $info_routes = Route::where('event_id', $event_id)->get();
+                $group = $type_group_routes[rand(0,2)];
                 foreach ($info_routes as $route){
                     if($event->mode == 2){
                         (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route->route_id, $owner_id, $active_participant->gender);
                     }
-                    $result_participant[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route->route_id,'attempt' => rand(0,2),'grade' => $route->grade);
+                    $attempt = Grades::getAttemptFromGrades($route->grade, $group);
+                    $result_participant[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route->route_id,'attempt' => $attempt,'grade' => $route->grade);
                 }
                 DB::table('result_participant')->insert($result_participant);
             }

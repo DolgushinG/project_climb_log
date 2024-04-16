@@ -205,11 +205,15 @@ class EventsController extends Controller
             $set = Set::where('number_set', $number_set)->where('owner_id', $event->owner_id)->first();
             $participant->number_set_id = $set->id;
         }
+        if($event->is_auto_categories){
+            $participant->category_id = 0;
+        }else{
+            $participant->category_id = $participant_categories->id;
+        }
 
         $participant->event_id = $request->event_id;
         $participant->gender = $request->gender;
         $participant->user_id = $request->user_id;
-        $participant->category_id = $participant_categories->id;
         $participant->owner_id = $event->owner_id;
         $participant->active = 0;
         $participant->save();
@@ -332,7 +336,7 @@ class EventsController extends Controller
                 'users.gender',
             )->get();
         foreach ($participants as $participant) {
-            Event::update_participant_place($request->event_id, $participant->id, $participant->gender);
+            Event::update_participant_place($event, $participant->id, $participant->gender);
         }
         Event::refresh_final_points_all_participant($event);
         if ($result) {

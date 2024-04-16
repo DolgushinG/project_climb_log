@@ -39,27 +39,29 @@ class BatchGenerateParticipant extends Action
             $table_result = 'participants';
             $table_result_routes = 'result_participant';
             $text = 'Обязательно пересчитайте результаты для правильного расставление мест';
-            $exist_participants = Participant::where('event_id',  $event->id)->first();
+            Participant::where('event_id',  $event->id)->delete();
+            ResultParticipant::where('event_id',  $event->id)->delete();
         }
-        $part_category = ParticipantCategory::where('event_id', $event->id)->get();
-        $amount_categories = count($event->categories);
-        $parts = intval($count / $amount_categories);
-        $next = $parts;
-        $start = 1;
-        if(!$exist_participants){
+        if($event->is_auto_categories){
+            Generators::prepare_participant_with_owner($owner_id, $event->id, $count, $table_result);
+        } else {
+            $part_category = ParticipantCategory::where('event_id', $event->id)->get();
+            $amount_categories = count($event->categories);
+            $parts = intval($count / $amount_categories);
+            $next = $parts;
+            $start = 1;
             foreach($part_category as $category){
-                Generators::prepare_participant_with_owner($owner_id, $event->id, $next, $category->category, $start, $table_result);
+                Generators::prepare_participant_with_owner($owner_id, $event->id, $next, $table_result, $start, $category->category);
                 $next = $next+$parts;
                 $start = $start+$parts;
             }
         }
-
         Generators::prepare_result_participant($owner_id, $event->id, $table_result_routes, $count);
         if($event->is_qualification_counting_like_final){
             Event::refresh_qualification_counting_like_final($event);
         } else {
             Event::refresh_final_points_all_participant($event);
-            Event::refresh_final_points_all_participant($event);
+//            Event::refresh_final_points_all_participant($event);
         }
 
         return $this->response()->success($text)->refresh();
