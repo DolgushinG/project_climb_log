@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Helpers\Helpers;
 use App\Models\Event;
+use App\Models\Grades;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\WithDrawings;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
@@ -80,7 +81,7 @@ class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAut
                 $sheet->getStyle('I1')->applyFromArray($style);
                 $sheet->mergeCells('L1:O1');
                 $sheet->getStyle('L1')->applyFromArray($style);
-                $count_routes = Event::find($this->event_id)->count_routes;
+                $count_routes = Grades::where('event_id', $this->event_id)->first()->count_routes;
                 $max_part = ExportHelpers::countCell($count_routes);
                 $title_array = ExportHelpers::prepare(2, $count_routes, $max_part);
                 $title_array_flash_rp = ExportHelpers::prepare(3, $count_routes, $max_part);

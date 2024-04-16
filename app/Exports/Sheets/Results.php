@@ -283,7 +283,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         }
         foreach ($users as $index => $user){
             if($index == 'empty_row'){
-                $count = Event::find($this->event_id)->count_routes;
+                $count = Grades::where('event_id', $this->event_id)->first()->count_routes;
                 $users[$index]['user_place'] = '';
                 $users[$index]['number_set_id'] = '';
                 $users[$index]['amount_passed_routes'] = '';
