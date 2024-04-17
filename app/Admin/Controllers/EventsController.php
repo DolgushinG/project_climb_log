@@ -282,7 +282,6 @@ class EventsController extends Controller
                             $table->select('Категория участника')->options($form->model()->categories)->readonly();
                             $table->select('От какой категории сложности определять эту категорию')->options(Grades::getGrades())->width('30px');
                             $table->select('До какой категории сложности определять эту категорию')->options(Grades::getGrades())->width('30px');
-                            $table->number('Кол-во трасс для определения')->width('50px');
                         });
                     })->value(0)->required();
                 $form->html('<h4 id="warning-category" style="color: red" >Обязательно проверьте заполнение категорий и обязательных полей</h4>');
