@@ -34,7 +34,7 @@ class Helpers
 
     public static function save_qr_code($event)
     {
-        $link = $event->link.'/list-routes-event';
+        $link = $event->link.'/routes';
         $image = QrCode::format('png')
             ->size(150)
             ->generate($link);
