@@ -183,7 +183,7 @@ class Event extends Model
             }
             $final_participant_result = Participant::where('user_id', '=', $participant->id)->where('event_id', '=', $event->id)->first();
             $category_id = $participant->category_id;
-            if($event->is_auto_categories){
+            if($event->is_auto_categories && $category_id == null){
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), Participant::get_list_passed_route($event->id, $participant->id), 3);
                 $category = Participant::get_category_from_result($event, $the_best_route_passed);
                 $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
@@ -354,7 +354,7 @@ class Event extends Model
 
     public static function update_participant_place($event, $user_id, $gender){
         $final_participant_result = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
-        if(!$event->is_auto_categories){
+        if(!$event->is_auto_categories && $final_participant_result->category_id == null){
             $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), Participant::get_list_passed_route($event->id, $user_id), 3);
             $category = Participant::get_category_from_result($event, $the_best_route_passed);
             $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
