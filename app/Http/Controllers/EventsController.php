@@ -25,27 +25,12 @@ use function Symfony\Component\String\s;
 
 class EventsController extends Controller
 {
-    public function counting($method, $value) {
-        if ("ceil" == $method) {
-            return ceil($value);
-        }
-        if ("round" == $method) {
-            return round($value);
-        }
-        if ("int" == $method) {
-            return intval($value);
-        }
-        if ("floor" == $method) {
-            return floor($value);
-        }
-    }
-
     /**
      * @throws \Exception
      */
-    public function show(Request $request, $climbing_gym, $title){
-        $event_public_exist = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-        $event_exist = Event::where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
+    public function show(Request $request, $start_date, $climbing_gym, $title){
+        $event_public_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        $event_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
         $pre_show = false;
         if($event_public_exist){
             $event = $event_public_exist;
@@ -81,8 +66,8 @@ class EventsController extends Controller
             return view('404');
         }
     }
-    public function get_participants(Request $request, $climbing_gym, $title){
-        $event = Event::where('title_eng', '=', $title)->where('is_public', 1)->first();
+    public function get_participants(Request $request, $start_date, $climbing_gym, $title){
+        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if($event) {
             $participants = array();
             if($event->is_qualification_counting_like_final){
@@ -140,10 +125,10 @@ class EventsController extends Controller
         return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
     }
 
-    public function get_final_results(Request $request, $climbing_gym, $title)
+    public function get_final_results(Request $request, $start_date, $climbing_gym, $title)
     {
-        $event = Event::where('title_eng', '=', $title)->where('is_public', 1)->first();
-        $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
+        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+//        $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
         if($event){
             if(!$event->is_qualification_counting_like_final){
 //                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
@@ -351,8 +336,8 @@ class EventsController extends Controller
 
 
 
-    public function listRoutesEvent(Request $request, $title) {
-        $event = Event::where('title_eng', '=', $title)->where('is_public', 1)->first();
+    public function listRoutesEvent(Request $request, $start_date, $climbing_gym, $title) {
+        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if(!$event){
             return view('404');
         }

@@ -74,7 +74,7 @@ $(document).on('click','#btn-participant', function(e) {
 
     let button = $('#btn-participant')
     let event_id = document.getElementById('btn-participant').getAttribute('data-id')
-    let event_title = document.getElementById('btn-participant').getAttribute('data-title')
+    let link = document.getElementById('btn-participant').getAttribute('data-link')
     let is_qualification_counting_like_final = document.getElementById('btn-participant').getAttribute('data-format')
 
     let user_id = document.getElementById('btn-participant').getAttribute('data-user-id')
@@ -105,7 +105,7 @@ $(document).on('click','#btn-participant', function(e) {
                     button.addClass('btn btn-success rounded-pill')
                     button.attr("id", "listRoutesEvent");
                     document.getElementById("listRoutesEvent").onclick = function () {
-                        location.href = "/routes/event/"+event_title+"/list-routes-event";
+                        location.href = link+"/routes";
                     };
                 } else {
                     button.text('Вы принимаете участие')

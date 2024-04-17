@@ -62,7 +62,7 @@
                                                     внесли результаты
                                                 </button>
                                             @else
-                                                <a href="{{route('listRoutesEvent', $event->title_eng)}}"
+                                                <a href="{{route('listRoutesEvent', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                                    class="btn btn-success rounded-pill">Внести результаты</a>
                                             @endif
                                         @endif
@@ -171,18 +171,18 @@
                                         @endif
                                         <div id="error-message" class="text-danger"></div>
                                         <button id="btn-participant" data-id="{{$event->id}}"
-                                           data-title="{{$event->title_eng}}"
+                                           data-link="{{$event->link}}"
                                                 data-sets="{{$event->is_need_set}}"
                                                 data-format="{{$event->is_qualification_counting_like_final}}" data-user-id="{{Auth()->user()->id}}"
                                            class="btn btn-dark rounded-pill">Участвовать</button>
 
                                     @endif
                                 @endauth
-                                <a href="{{route('participants', [$event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('participants', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Список участников</a>
 
                                 @if(!$event->is_qualification_counting_like_final)
-                                    <a href="{{route('final_results',[$event->climbing_gym_name_eng, $event->title_eng])}}"
+                                    <a href="{{route('final_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                        class="btn btn-primary rounded-pill">Предворительные результаты</a>
                                 @endif
                             </div>

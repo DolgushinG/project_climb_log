@@ -32,10 +32,10 @@ Route::get('/competition', function () {
 });
 
 //Route::get('/event/{id}', [App\Http\Controllers\EventsController::class, 'show']);
-Route::get('/event/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
-Route::get('/admin/event/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
-Route::get('/event/{climbing_gym}/{title}/participants', [App\Http\Controllers\EventsController::class, 'get_participants'])->name('participants');
-Route::get('/event/{climbing_gym}/{title}/final/results', [App\Http\Controllers\EventsController::class, 'get_final_results'])->name('final_results');
+Route::get('/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
+Route::get('/admin/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
+Route::get('/event/{start_date}/{climbing_gym}/{title}/participants', [App\Http\Controllers\EventsController::class, 'get_participants'])->name('participants');
+Route::get('/event/{start_date}/{climbing_gym}/{title}/final/results', [App\Http\Controllers\EventsController::class, 'get_final_results'])->name('final_results');
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile');
     Route::get('/getProfileOverview', [App\Http\Controllers\ProfileController::class, 'getTabContentOverview'])->name('getProfileOverview');
@@ -47,7 +47,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/takePart', [App\Http\Controllers\EventsController::class, 'store'])->name('takePart');
     Route::post('/changeSet', [App\Http\Controllers\EventsController::class, 'changeSet'])->name('changeSet');
     Route::post('/sendResultParticipant', [App\Http\Controllers\EventsController::class, 'sendResultParticipant'])->name('sendResultParticipant');
-    Route::get('/routes/event/{title}/list-routes-event', [App\Http\Controllers\EventsController::class, 'listRoutesEvent'])->name('listRoutesEvent');
+    Route::get('/event/{start_date}/{climbing_gym}/{title}/routes', [App\Http\Controllers\EventsController::class, 'listRoutesEvent'])->name('listRoutesEvent');
 });
 
 require __DIR__.'/auth.php';

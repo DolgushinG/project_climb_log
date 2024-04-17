@@ -335,7 +335,6 @@ class Participant extends Model
         foreach ($array as $el){
             $res[] = array(
                 'category' => $categories[$el['Категория участника']],
-                'amount_route' => $el['Кол-во трасс для определения'],
                 'to' => $el['До какой категории сложности определять эту категорию'],
                 'from' => $el['От какой категории сложности определять эту категорию']);
         }

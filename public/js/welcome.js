@@ -20,20 +20,21 @@ $(document).on('click', '#btn-participant', function (e) {
   }
   var button = $('#btn-participant');
   var event_id = document.getElementById('btn-participant').getAttribute('data-id');
-  var event_title = document.getElementById('btn-participant').getAttribute('data-title');
+  var link = document.getElementById('btn-participant').getAttribute('data-link');
+  var is_qualification_counting_like_final = document.getElementById('btn-participant').getAttribute('data-format');
   var user_id = document.getElementById('btn-participant').getAttribute('data-user-id');
   e.preventDefault();
   $.ajax({
     type: 'POST',
     url: '/takePart',
     data: {
-      'number_set': value,
+      'number_set': setsValue,
       'event_id': event_id,
       'user_id': user_id,
-      'category': category_value,
-      'gender': gender_value,
-      'sport_category': sport_category_value,
-      'birthday': birthday_value
+      'category': categoryValue,
+      'gender': genderValue,
+      'sport_category': sportCategoryValue,
+      'birthday': birthdayValue
     },
     success: function success(xhr, status, error) {
       button.text('').append('<i id="spinner" style="margin-left: -12px;\n' + '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...');
@@ -41,14 +42,13 @@ $(document).on('click', '#btn-participant', function (e) {
         button.text(xhr.message);
       }, 3000);
       setTimeout(function () {
-        var is_qualification_counting_like_final = "<?php echo $event->is_qualification_counting_like_final; ?>";
-        if (!is_qualification_counting_like_final) {
+        if (!Number(is_qualification_counting_like_final)) {
           button.text('Внести результат');
           button.removeClass('btn btn-dark rounded-pill');
           button.addClass('btn btn-success rounded-pill');
           button.attr("id", "listRoutesEvent");
           document.getElementById("listRoutesEvent").onclick = function () {
-            location.href = "/routes/event/" + event_title + "/list-routes-event";
+            location.href = link + "/routes";
           };
         } else {
           button.text('Вы принимаете участие');
@@ -119,30 +119,43 @@ $(document).on('click', '#btn-participant-change-set', function (e) {
     }
   });
 });
-document.getElementById("floatingSelect").addEventListener("change", function (ev) {
-  var value = document.getElementById("floatingSelect").value;
-  var c_value = document.getElementById("floatingSelectCategory").value;
-  if (value !== "" && c_value !== "") {
-    var button_paticipant = document.querySelector('#btn-participant');
-    button_paticipant.style.display = 'block';
-  }
-});
-document.getElementById("floatingSelectCategory").addEventListener("change", function (ev) {
-  var value = document.getElementById("floatingSelect").value;
-  var c_value = document.getElementById("floatingSelectCategory").value;
-  if (value !== "" && c_value !== "") {
-    var button_paticipant = document.querySelector('#btn-participant');
-    button_paticipant.style.display = 'block';
-  }
-});
-document.getElementById("floatingSelectSportCategory").addEventListener("change", function (ev) {
-  var value = document.getElementById("floatingSelect").value;
-  var c_value = document.getElementById("floatingSelectCategory").value;
-  var c_value_sport = document.getElementById("floatingSelectSportCategory").value;
-  if (value !== "" && c_value !== "" && c_value_sport !== "") {
-    var button_paticipant = document.querySelector('#btn-participant');
-    button_paticipant.style.display = 'block';
-  }
-});
+// let sets = document.getElementById("floatingSelect");
+// let category = document.getElementById("floatingSelectCategory");
+// let sport_category = document.getElementById("floatingSelectSportCategory");
+// if(sets){
+//     document.getElementById("floatingSelect").addEventListener("change", (ev) => {
+//         var value = document.getElementById("floatingSelect").value;
+//         var c_value = document.getElementById("floatingSelectCategory").value;
+//         if (value !== "" && c_value !== ""){
+//             var button_paticipant = document.querySelector('#btn-participant');
+//             button_paticipant.style.display = 'block';
+//         }
+//     });
+// }
+// if(category){
+//     document.getElementById("floatingSelectCategory").addEventListener("change", (ev) => {
+//         var select = document.getElementById("floatingSelect");
+//         let is_input_set = document.getElementById('btn-participant').getAttribute('data-sets')
+//         if(is_input_set === 1){
+//             select.value = 'show_button'
+//         }
+//         var c_value = document.getElementById("floatingSelectCategory").value;
+//         if (select !== "" && c_value !== ""){
+//             var button_paticipant = document.querySelector('#btn-participant');
+//             button_paticipant.style.display = 'block';
+//         }
+//     });
+// }
+// if(sport_category){
+//     document.getElementById("floatingSelectSportCategory").addEventListener("change", (ev) => {
+//         var value = document.getElementById("floatingSelect").value;
+//         var c_value = document.getElementById("floatingSelectCategory").value;
+//         var c_value_sport = document.getElementById("floatingSelectSportCategory").value;
+//         if (value !== "" && c_value !== "" && c_value_sport !== ""){
+//             var button_paticipant = document.querySelector('#btn-participant');
+//             button_paticipant.style.display = 'block';
+//         }
+//     });
+// }
 /******/ })()
 ;
