@@ -17,10 +17,8 @@
                                     @if(\App\Models\User::user_participant($event->id))
                                         @if(\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
                                                 @if($event->is_qualification_counting_like_final)
-                                                    @include('event.selects.sets_participant')
                                                     @include('event.buttons.participant_already')
                                                 @else
-                                                    @include('event.selects.sets_participant')
                                                     @include('event.buttons.participant_already')
                                                     @include('event.buttons.results_have_been_sent_already')
                                                 @endif
