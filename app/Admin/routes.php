@@ -39,7 +39,7 @@ Route::group([
         $router->get('exports/events/excel/all/{id}', 'EventsController@exportAllExcel')->name('exportAllExcel');
         $router->get('exports/events/csv/all/{id}', 'EventsController@exportAllCsv')->name('exportAllCsv');
         $router->get('exports/events/ods/all/{id}', 'EventsController@exportAllOds')->name('exportAllOds');
-
+        $router->get('reject/bill/event/{event_id}/participant/{id}', 'ParticipantsController@rejectBill')->name('rejectBill');
     });
 
 });

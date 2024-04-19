@@ -98,10 +98,12 @@ $(document).on('click','#btn-participant', function(e) {
                 button.text(xhr.message)
             }, 3000);
             setTimeout(function () {
-                button.text('Необходимо оплатить участие в разделе стартовый взнос')
+                button.text('Оплатить')
                 button.removeClass('btn btn-dark rounded-pill')
+                button.attr('id', '#btn')
                 button.addClass('btn btn-warning rounded-pill')
-                button.attr('disabled', 'disabled')
+                button.attr('data-bs-toggle', 'modal')
+                button.attr('data-bs-target', '#payModal')
             }, 6000);
         },
         error: function(xhr, status, error) {
@@ -233,9 +235,9 @@ $("#crop").click(function () {
         reader.readAsDataURL(blob);
         reader.onloadend = function () {
             var base64data = reader.result;
-            let block_attach_bill = document.getElementById('attachBill')
-            let event_id = document.getElementById('attachBill').getAttribute('data-event-id')
-            let block_checking_bill = document.getElementById('checkingBill')
+            var block_attach_bill = document.getElementById('attachBill')
+            var event_id = document.getElementById('attachBill').getAttribute('data-event-id')
+            var block_checking_bill = document.getElementById('checkingBill')
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

@@ -1,3 +1,11 @@
-<button href="#" class="btn btn-warning rounded-pill" disabled>
-    Необходимо оплатить участие в разделе стартовый взнос
-</button>
+@if(\App\Models\ResultParticipant::is_sended_bill(Auth()->user()->id, $event->id))
+    <button href="#" data-bs-toggle="modal" data-bs-target="#scrollingModal" class="btn btn-warning rounded-pill" disabled>
+        Чек отправлен (На проверке..)
+    </button>
+@else
+    <button href="#" data-bs-toggle="modal" data-bs-target="#scrollingModal" class="btn btn-warning rounded-pill">
+         Оплатить
+    </button>
+@endif
+
+

@@ -1,6 +1,5 @@
 @extends('layouts.main_page.app')
 @section('content')
-
     <!-- Slider Start -->
     <main id="main" class="main">
         <section class="section contact">
@@ -58,6 +57,18 @@
                                         <div id="error-message" class="text-danger"></div>
                                     @endif
                                 @endauth
+                                <div class="modal fade" id="scrollingModal" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                @include('event.tab.payment')
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <a href="{{route('participants', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Список участников</a>
                                 @if(!$event->is_qualification_counting_like_final)
@@ -102,40 +113,6 @@
                                 </li>
                             </ul>
                             <div class="tab-content pt-2" id="borderedTabJustifiedContent">
-{{--                                <div class="tab-pane fade show" id="bordered-justified-home" role="tabpanel"--}}
-{{--                                     aria-labelledby="home-tab">--}}
-{{--                                    <div class="info-box card z-depth-3">--}}
-{{--                                        <div class="container">--}}
-{{--                                            <div class="row">--}}
-{{--                                                <h5 class="card-title">Заполняемость сетов</h5>--}}
-{{--                                                @foreach($sets as $set)--}}
-{{--                                                    @if($set->free != 0)--}}
-{{--                                                        <label>Сет {{$set->number_set}}-{{$set->time}}--}}
-{{--                                                            <span class="badge bg-success text-white">@lang('somewords.'.$set->day_of_week)</span>--}}
-{{--                                                            @isset($set->date[$set->day_of_week])--}}
-{{--                                                            <span class="badge bg-info text-dark">{{$set->date[$set->day_of_week]}}</span>--}}
-{{--                                                            @endisset--}}
-{{--                                                            (Свободно - {{100 - $set->procent}}%)</label>--}}
-{{--                                                    @else--}}
-{{--                                                        <label>Сет {{$set->number_set}}-{{$set->time}}--}}
-{{--                                                            <span class="badge bg-success text-white">@lang('somewords.'.$set->day_of_week)</span>--}}
-{{--                                                            @isset($set->date[$set->day_of_week])--}}
-{{--                                                            <span class="badge bg-info text-dark">{{$set->date[$set->day_of_week]}}</span>--}}
-{{--                                                            @endisset--}}
-{{--                                                             (Полностью забит)</label>--}}
-{{--                                                    @endif--}}
-{{--                                                        <div class="container">--}}
-{{--                                                            <div class="progress mt-1 pl-3">--}}
-{{--                                                                <div class="progress-bar" role="progressbar"--}}
-{{--                                                                     style="width: {{$set->procent}}%" aria-valuenow="{{$set->free}}"--}}
-{{--                                                                     aria-valuemin="0" aria-valuemax="{{$set->max_participants}}"></div>--}}
-{{--                                                            </div>--}}
-{{--                                                        </div>--}}
-{{--                                                @endforeach--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
                                 <div class="tab-pane fade show active" id="bordered-justified-info" role="tabpanel"
                                      aria-labelledby="info-tab">
                                     <section id="services" class="services">

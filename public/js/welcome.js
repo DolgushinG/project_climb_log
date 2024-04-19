@@ -42,20 +42,12 @@ $(document).on('click', '#btn-participant', function (e) {
         button.text(xhr.message);
       }, 3000);
       setTimeout(function () {
-        if (!Number(is_qualification_counting_like_final)) {
-          button.text('Внести результат');
-          button.removeClass('btn btn-dark rounded-pill');
-          button.addClass('btn btn-success rounded-pill');
-          button.attr("id", "listRoutesEvent");
-          document.getElementById("listRoutesEvent").onclick = function () {
-            location.href = link + "/routes";
-          };
-        } else {
-          button.text('Вы принимаете участие');
-          button.removeClass('btn btn-dark rounded-pill');
-          button.addClass('btn btn-secondary rounded-pill');
-          button.attr('disabled', 'disabled');
-        }
+        button.text('Оплатить');
+        button.removeClass('btn btn-dark rounded-pill');
+        button.attr('id', '#btn');
+        button.addClass('btn btn-warning rounded-pill');
+        button.attr('data-bs-toggle', 'modal');
+        button.attr('data-bs-target', '#payModal');
       }, 6000);
     },
     error: function error(xhr, status, _error) {

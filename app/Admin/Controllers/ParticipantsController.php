@@ -7,6 +7,8 @@ use App\Admin\Actions\BatchGenerateParticipant;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportResultQualificationLikeFinal;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchResultQualificationLikeFinal;
+use App\Admin\CustomAction\ActionExport;
+use App\Admin\CustomAction\ActionRejectBill;
 use App\Exports\ExportCardParticipant;
 use App\Exports\QualificationLikeFinalResultExport;
 use App\Exports\QualificationResultExport;
@@ -110,7 +112,7 @@ class ParticipantsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if ($event->is_qualification_counting_like_final) {
@@ -160,8 +162,9 @@ class ParticipantsController extends Controller
             $tools->append(new BatchForceRecouting);
             $tools->append(new BatchGenerateParticipant);
         });
-        $grid->actions(function ($actions) {
+        $grid->actions(function ($actions) use ($event) {
 //            $actions->disableEdit();
+            $actions->append(new ActionRejectBill($actions->getKey(), $event->id));
             $actions->disableView();
             $actions->disableDelete();
         });
@@ -275,20 +278,23 @@ class ParticipantsController extends Controller
         ];
         if($event->is_need_pay_for_reg){
             $grid->column('is_paid', 'Оплата')->switch($states);
+
             \Encore\Admin\Admin::style('
-                         img {
-                            position: relative;
-                            transition: transform 0.25s ease;
-//                             transform-origin: center center;
-                        }
-                        img:hover {
-                            -webkit-transform: scale(5.5);
-                            transform: scale(5.5);
-                            margin-top: -50px; /* половина высоты изображения */
-                            margin-left: -50px; /* половина ширины изображения */
-                            z-index: 9999;
-                            position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
-                            z-index: 9999;
+                        @media only screen and (min-width: 1025px) {
+                                         img {
+                                        position: relative;
+                                        transition: transform 0.25s ease;
+        //                             transform-origin: center center;
+                                }
+                                img:hover {
+                                    -webkit-transform: scale(5.5);
+                                    transform: scale(5.5);
+                                    margin-top: -50px; /* половина высоты изображения */
+                                    margin-left: -50px; /* половина ширины изображения */
+                                    z-index: 9999;
+                                    position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
+                                    z-index: 9999;
+                                }
                         }
 
             ');
@@ -435,5 +441,17 @@ class ParticipantsController extends Controller
         return User::whereIn('id', $participant)->pluck('middlename', 'id');
     }
 
+
+    public function rejectBill(Request $request)
+    {
+        $event = Event::find($request->event_id);
+        if($event->is_qualification_counting_like_final){
+            $participant = ResultQualificationLikeFinal::find($request->id);
+        } else {
+            $participant = Participant::find($request->id);
+        }
+        $participant->bill = null;
+        $participant->save();
+    }
 
 }
