@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchDisableSets;
 use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
+use App\Models\Event;
 use App\Models\Set;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Facades\Admin;
@@ -12,6 +13,7 @@ use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
+use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 
 class SetsController extends Controller
@@ -37,7 +39,12 @@ class SetsController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->body($this->grid());
+            ->row(function(Row $row) {
+                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+                if($event) {
+                        $row->column(20, $this->grid());
+                    }
+            });
     }
 
     /**

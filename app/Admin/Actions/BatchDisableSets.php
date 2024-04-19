@@ -29,12 +29,15 @@ class BatchDisableSets extends Action
     {
         $owner_id = Admin::user()->id;
         $event = Event::where('owner_id', $owner_id)->where('active', 1)->first();
-        if($event->is_input_set == 1){
-            $event->is_input_set = 0;
-        } else {
-            $event->is_input_set = 1;
+        if($event){
+            if($event->is_input_set == 1){
+                $event->is_input_set = 0;
+            } else {
+                $event->is_input_set = 1;
+            }
+            $event->save();
         }
-        $event->save();
+
         return $this->response()->success('готово')->refresh();
     }
 
