@@ -317,7 +317,7 @@ class ParticipantsController extends Controller
      *
      * @return Form
      */
-    protected function form($type, $value)
+    protected function form($type, $value=null)
     {
 
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
