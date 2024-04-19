@@ -12,6 +12,11 @@ class Participant extends Model
 
     protected $table = 'participants';
 
+    protected $casts = [
+        'result_for_edit' =>'json',
+    ];
+
+
     public function owner()
     {
         return $this->belongsTo(User::class);

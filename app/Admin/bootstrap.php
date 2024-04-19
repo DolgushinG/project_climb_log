@@ -28,7 +28,9 @@ use Encore\Admin\Grid;
 //Admin::js('/plugins/jquery/jquery.min.js');
 Encore\Admin\Form::forget(['map', 'editor']);
 Admin::css('/plugins/jquery/suggestions.min.css');
+
 Admin::js('/plugins/jquery/jquery.suggestions.min.js');
+
 Admin::js('js/pages/js.cookie.js');
 Grid::init(function (Grid $grid) {
     $grid->actions(function (Grid\Displayers\Actions $actions) {

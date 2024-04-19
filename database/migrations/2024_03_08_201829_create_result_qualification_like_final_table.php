@@ -28,6 +28,7 @@ class CreateResultQualificationLikeFinalTable extends Migration
             $table->integer('place')->nullable();
             $table->boolean('active')->nullable();
             $table->boolean('is_paid')->nullable();
+            $table->string('bill')->nullable();
             $table->timestamps();
         });
     }

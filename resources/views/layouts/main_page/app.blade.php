@@ -16,6 +16,8 @@
 {{--    <script src="{{ mix('js/app.js') }}"></script>--}}
 {{--    <link rel="stylesheet" href="{{ mix('css/app.css') }}" />--}}
     <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.6/cropper.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.6/cropper.js"></script>
     <!-- Vendor CSS Files -->
     <link href="{{asset('vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
     <link href="{{asset('vendor/bootstrap-icons/bootstrap-icons.css')}}" rel="stylesheet">

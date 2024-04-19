@@ -291,6 +291,10 @@ class EventsController extends Controller
 
         })->tab('Управление соревнованием', function ($form) use ($id){
             $form->switch('is_registration_state', 'Регистрация ')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            $form->switch('is_need_pay_for_reg', 'Включить оплату для регистрации')
+                ->help('Например оплата будет происходит в другом месте или оплачивается только вход')
+                ->states(self::STATES_BTN)->default(1);
+            $form->number('registration_time_expired', 'Через сколько дней сгорит регистрации без оплаты')->help('Если 0 то сгорать не будет')->default(0);
             $form->datetime('datetime_registration_state', 'Дата закрытия регистрации [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
             $form->switch('is_send_result_state', 'Отправка результатов')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->datetime('datetime_send_result_state', 'Дата закрытия отправки результатов [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
@@ -316,7 +320,6 @@ class EventsController extends Controller
                         ->states(self::STATES_BTN);
                 }
             }
-
             $form->switch('is_public', 'Опубликовать для всех')
                 ->help('После включения, все смогут зайти на страницу с соревнованиями')
                 ->states(self::STATES_BTN);

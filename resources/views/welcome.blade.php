@@ -15,172 +15,51 @@
                                     <a href="{{route('login')}}" class="btn btn-dark rounded-pill">Войти для участия</a>
                                 @endguest
                                 @auth
-
                                     @if(\App\Models\User::user_participant($event->id))
-                                            @if($event->is_input_set != 1)
-                                                @if(!\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
-                                                    <div class="form-floating mb-3">
-                                                        <select class="form-select" id="floatingSelectChangeSet"
-                                                                aria-label="Floating label select example" autocomplete="off" required>
-                                                            @foreach($sets as $set)
-                                                                @php
-                                                                    $number_set = \App\Models\Participant::participant_number_set(Auth()->user()->id, $event->id);
-                                                                @endphp
-                                                                @if($set->number_set === $number_set)
-                                                                    <option selected value="{{$set->number_set}}">Сет {{$set->number_set}} @lang('somewords.'.$set->day_of_week)
-                                                                        @isset($set->date[$set->day_of_week])
-                                                                        {{$set->date[$set->day_of_week]}}
-                                                                        @endisset
-                                                                            {{$set->time}} (еще мест {{$set->free}})</option>
-                                                                @else
-                                                                    @if($set->free != 0)
-                                                                        <option value="{{$set->number_set}}">Сет {{$set->number_set}}
-                                                                            @lang('somewords.'.$set->day_of_week)
-                                                                            @isset($set->date[$set->day_of_week])
-                                                                            {{$set->date[$set->day_of_week]}}
-                                                                            @endisset
-                                                                            {{$set->time}} (еще
-                                                                            мест {{$set->free}})
-                                                                        </option>
-                                                                    @endif
-                                                                @endif
-                                                            @endforeach
-                                                        </select>
-                                                        <label for="floatingSelectChangeSet">Выбрать время для сета</label>
-                                                    </div>
-                                                    <button id="btn-participant-change-set" data-id="{{$event->id}}"
-                                                            data-title="{{$event->title_eng}}" data-user-id="{{Auth()->user()->id}}"
-                                                            class="btn btn-dark rounded-pill">Изменить сет</button>
+                                        @if(\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
+                                                @if($event->is_qualification_counting_like_final)
+                                                    @include('event.selects.sets_participant')
+                                                    @include('event.buttons.participant_already')
+                                                @else
+                                                    @include('event.selects.sets_participant')
+                                                    @include('event.buttons.participant_already')
+                                                    @include('event.buttons.results_have_been_sent_already')
                                                 @endif
-                                                <button href="{{route('takePart')}}" disabled
-                                                        class="btn border-t-neutral-500 rounded-pill">Вы принимаете участие
-                                                </button>
-                                            @endif
-                                        @if(!$event->is_qualification_counting_like_final)
-                                            @if(\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
-                                                <button href="#" class="btn border-t-neutral-500 rounded-pill" disabled>Вы
-                                                    внесли результаты
-                                                </button>
-                                            @else
-                                                <a href="{{route('listRoutesEvent', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
-                                                   class="btn btn-success rounded-pill">Внести результаты</a>
-                                            @endif
-                                        @endif
-
-                                    @else
-
-                                        @if($event->is_input_birthday)
-                                            @if(!Auth::user()->birthday)
-                                            <label for="inputDate" class="col col-form-label">Укажите дату рождения</label>
-                                            <div class="col-sm-10">
-                                                <input name="birthday" id="birthday" type="date" class="form-control">
-                                            </div>
-                                            @else
-                                                <div class="col-sm-10" style="display: none">
-                                                    <input name="birthday" id="birthday" type="date" class="form-control">
-                                                </div>
-                                            @endif
-                                        @endif
-                                        @if($event->is_need_sport_category)
-                                            @if(!Auth::user()->sport_category)
-                                                <div class="form-floating mb-3">
-                                                    <select class="form-select" id="floatingSelectSportCategory"
-                                                            aria-label="Floating label select example" autocomplete="off" required>
-                                                        <option selected disabled value="">Открыть для выбора разряда
-                                                        </option>
-                                                        @foreach ($sport_categories as $category)
-                                                            <option value="{{$category}}">{{$category}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    <label for="floatingSelectSportCategory">Требуется указать разряд</label>
-                                                </div>
-                                            @else
-                                                <select class="form-select" id="floatingSelectSportCategory"
-                                                        aria-label="Floating label select example" required style="display: none">
-                                                    <option selected disabled value="">Открыть для выбора разряда
-                                                    </option>
-                                                    @foreach ($sport_categories as $category)
-                                                        <option value="{{$category}}">{{$category}}</option>
-                                                    @endforeach
-                                                </select>
-                                            @endif
-                                        @endif
-                                        @if(!Auth::user()->gender)
-                                            <div class="form-floating mb-3">
-                                                <select class="form-select" id="floatingSelectGender"
-                                                        aria-label="Floating label select example" autocomplete="off" required>
-                                                    <option selected disabled value="">Отметить пол
-                                                    </option>
-                                                        <option value="male">M</option>
-                                                        <option value="female">Ж</option>
-                                                </select>
-                                                <label for="floatingSelectGender">Отметить пол</label>
-                                            </div>
-                                            @else
-                                                <div class="form-floating mb-3" style="display: none">
-                                                    <select class="form-select" id="floatingSelectGender"
-                                                            aria-label="Floating label select example" required>
-                                                        @if(Auth::user()->gender == 'male')
-                                                            <option disabled value="">Отметить пол</option>
-                                                            <option selected value="male">M</option>
-                                                            <option value="female">Ж</option>
+                                        @else
+                                            @include('event.selects.sets_participant')
+                                            {{--Нужна оплата?--}}
+                                            @if($event->is_need_pay_for_reg)
+                                                @if(\App\Models\ResultParticipant::is_pay_participant(Auth()->user()->id, $event->id))
+                                                        @if($event->is_qualification_counting_like_final)
+                                                            @include('event.buttons.participant_already')
                                                         @else
-                                                            <option disabled value="">Отметить пол</option>
-                                                            <option value="male">M</option>
-                                                            <option selected value="female">Ж</option>
+                                                            @include('event.buttons.send_result')
                                                         @endif
-                                                    </select>
-                                                    <label for="floatingSelectGender">Отметить пол</label>
-                                                </div>
-                                        @endif
-                                        @if($event->is_input_set != 1)
-                                            <div class="form-floating mb-3">
-                                                <select class="form-select" id="floatingSelect"
-                                                        aria-label="Floating label select example" required>
-                                                    <option selected disabled value="">Открыть для выбора сета</option>
-                                                    @foreach($sets as $set)
-                                                        @if($set->free != 0)
-                                                            <option value="{{$set->number_set}}">Сет {{$set->number_set}}
-                                                                @lang('somewords.'.$set->day_of_week)
-                                                                @isset($set->date[$set->day_of_week])
-                                                                {{$set->date[$set->day_of_week]}}
-                                                                @endisset
-                                                                {{$set->time}} (еще
-                                                                мест {{$set->free}})
-                                                            </option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                                <label for="floatingSelect">Выбрать время для сета</label>
-                                            </div>
-                                        @endif
+                                                @else
+                                                        @include('event.buttons.pay')
+                                                @endif
+                                            @else
+                                                {{-- Француская система в ней результаты вносят судьи--}}
+                                                @if($event->is_qualification_counting_like_final)
+                                                        @include('event.buttons.participant_already')
+                                                @else
+                                                    {{-- Фестивальная система вносят результаты сами участники--}}
+                                                        @include('event.buttons.send_result')
+                                                @endif
+                                            @endif
 
-                                        @if(!$event->is_auto_categories)
-                                        <div class="form-floating mb-3">
-                                            <select class="form-select" id="floatingSelectCategory"
-                                                    aria-label="Floating label select example" autocomplete="off" required>
-                                                <option selected disabled value="">Открыть для выбора категории
-                                                </option>
-                                                @foreach($event->categories as $category)
-                                                    <option
-                                                        value="{{$category}}">{{$category}}</option>
-                                                @endforeach
-                                            </select>
-                                            <label for="floatingSelectCategory">Выбрать категорию</label>
-                                        </div>
                                         @endif
+                                    @else
+                                        @include('event.selects.birthday')
+                                        @include('event.selects.genders')
+                                        @include('event.selects.categories')
+                                        @include('event.selects.sets_take_part')
+                                        @include('event.buttons.take_part')
                                         <div id="error-message" class="text-danger"></div>
-                                        <button id="btn-participant" data-id="{{$event->id}}"
-                                           data-link="{{$event->link}}"
-                                                data-sets="{{$event->is_need_set}}"
-                                                data-format="{{$event->is_qualification_counting_like_final}}" data-user-id="{{Auth()->user()->id}}"
-                                           class="btn btn-dark rounded-pill">Участвовать</button>
-
                                     @endif
                                 @endauth
                                 <a href="{{route('participants', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Список участников</a>
-
                                 @if(!$event->is_qualification_counting_like_final)
                                     <a href="{{route('final_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                        class="btn btn-primary rounded-pill">Предворительные результаты</a>
@@ -283,21 +162,7 @@
                                      aria-labelledby="contact-tab">
                                     <div class="container">
                                         <div class="row">
-                                            <div class="container text-center pt-2 pb-2">
-                                                 <label> Сумма к оплате: </label>
-                                                <span class="badge bg-success" style="font-size: 22px"> {{$event->amount_start_price}} руб </span><br>
-                                            </div>
-                                            @if($event->info_payment)
-                                                <p>{!! $event->info_payment !!}</p>
-                                            @endif
-                                            @if($event->link_payment)
-                                            <div class="container text-center pt-2 pb-2">
-                                                <a class="btn btn-primary" style="font-size: 22px" href="{{$event->link_payment}}">Оплатить</a><br>
-                                            </div>
-                                            @endif
-                                            @if($event->img_payment)
-                                                <img class="img-fluid img-responsive" src="{{asset('storage/'.$event->img_payment)}}" alt="qr">
-                                            @endif
+                                            @include('event.tab.payment')
                                         </div>
                                     </div>
                                 </div>

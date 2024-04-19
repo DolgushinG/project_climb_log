@@ -162,15 +162,18 @@
     });
 
     const radios_auto_categories = document.querySelector('[id="is_auto_categories"][class="is_auto_categories1"]');
-    radios_auto_categories.addEventListener('click', function () {
-        let inputs_for_categories_all = document.querySelectorAll('select.form-control.options_categories.Категория.участника')
-        inputs_for_categories_all.forEach((category) => {
-            remove_option(category)
-        })
-        inputs_for_categories_all.forEach((category) => {
-            update_list('input[name="categories[values][]"]', category)
-        })
-    });
+    if(radios_auto_categories){
+        radios_auto_categories.addEventListener('click', function () {
+            let inputs_for_categories_all = document.querySelectorAll('select.form-control.options_categories.Категория.участника')
+            inputs_for_categories_all.forEach((category) => {
+                remove_option(category)
+            })
+            inputs_for_categories_all.forEach((category) => {
+                update_list('input[name="categories[values][]"]', category)
+            })
+        });
+    }
+
 
     function update_list(element, category){
         const categories = [...document.querySelectorAll(element)].map(input => input.value);

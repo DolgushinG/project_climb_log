@@ -366,5 +366,4 @@ class Event extends Model
         }
         $final_participant_result->save();
     }
-
 }

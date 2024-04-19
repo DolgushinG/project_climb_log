@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 
 class ResultParticipant extends Model
@@ -63,11 +64,63 @@ class ResultParticipant extends Model
     }
 
     public static function participant_with_result($user_id, $event_id) {
-        return 0 < count(ResultParticipant::where('event_id', '=', $event_id)
-            ->where('user_id', '=', $user_id)
-            ->get()
-            ->toArray());
+        $event = Event::find($event_id);
+        if($event->is_qualification_counting_like_final){
+            $participant = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)
+                ->where('user_id', '=', $user_id)
+                ->first();
 
+        } else {
+            $participant = ResultParticipant::where('event_id', '=', $event_id)
+                ->where('user_id', '=', $user_id)
+                ->first();
+        }
+
+        return boolval($participant);
+    }
+
+    public static function is_pay_participant($user_id, $event_id)
+    {
+
+        $event = Event::find($event_id);
+        if($event->is_qualification_counting_like_final){
+            $participant = ResultQualificationLikeFinal::where('event_id', '=', $event_id)
+                ->where('user_id', '=', $user_id)
+                ->first();
+        } else {
+            $participant = Participant::where('event_id', '=', $event_id)
+                ->where('user_id', '=', $user_id)
+                ->first();
+        }
+        if($participant){
+            return boolval($participant->is_paid);
+        } else {
+            Log::error('Не нашелся участник - user_id'.$user_id.'event_id'.$event_id.', причем эта кнопка должна появится только после того как он зарегистрировался');
+        }
+    }
+
+    public static function is_sended_bill($user_id, $event_id)
+    {
+        $event = Event::find($event_id);
+        if($event->is_qualification_counting_like_final){
+            $participant = ResultQualificationLikeFinal::where('event_id', '=', $event_id)
+                ->where('user_id', '=', $user_id)
+                ->first();
+        } else {
+            $participant = Participant::where('event_id', '=', $event_id)
+                ->where('user_id', '=', $user_id)
+                ->first();
+        }
+
+        if($participant){
+            if($participant->bill){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            Log::error('Не нашелся участник - user_id'.$user_id.'event_id'.$event_id.', причем эта кнопка должна появится только после того как он зарегистрировался');
+        }
     }
 
     public static function get_participant_qualification_group($event, $amount)

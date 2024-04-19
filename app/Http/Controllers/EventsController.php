@@ -311,6 +311,13 @@ class EventsController extends Controller
         foreach ($final_data as $index => $data){
             $final_data[$index] = collect($data)->except('points')->toArray();
         }
+
+        # Добавление json результатов для редактирование в админке
+        $participant = Participant::where('event_id', $request->event_id)->where('user_id', $request->user_id)->first();
+        $participant->result_for_edit = $final_data;
+        $participant->save();
+
+
         $result = ResultParticipant::insert($final_data);
 
         $participants = User::query()

@@ -11,10 +11,12 @@ use App\Exports\ExportCardParticipant;
 use App\Exports\QualificationLikeFinalResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
+use App\Models\Grades;
 use App\Models\Participant;
 use App\Http\Controllers\Controller;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
+use App\Models\ResultParticipant;
 use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\Set;
@@ -25,8 +27,10 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
+use Encore\Admin\Widgets\Table;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Nette\Utils\Image;
 use function Symfony\Component\String\s;
 
 class ParticipantsController extends Controller
@@ -65,7 +69,38 @@ class ParticipantsController extends Controller
         return $content
             ->header(trans('admin.create'))
             ->description(trans('admin.description'))
-            ->body($this->form());
+            ->body($this->form('create'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function update($id, Request $request)
+    {
+        $type = 'edit';
+        if($request->result_for_edit){
+            $type = 'update';
+        }
+        return $this->form($type)->update($id);
+    }
+
+    /**
+     * Edit interface.
+     *
+     * @param mixed $id
+     * @param Content $content
+     * @return Content
+     */
+    public function edit($id, Content $content)
+    {
+        return $content
+            ->header(trans('admin.edit'))
+            ->description(trans('admin.description'))
+            ->body($this->form('edit')->edit($id));
     }
 
     /**
@@ -126,7 +161,7 @@ class ParticipantsController extends Controller
             $tools->append(new BatchGenerateParticipant);
         });
         $grid->actions(function ($actions) {
-            $actions->disableEdit();
+//            $actions->disableEdit();
             $actions->disableView();
             $actions->disableDelete();
         });
@@ -163,7 +198,24 @@ class ParticipantsController extends Controller
             'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
             'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
         ];
-        $grid->column('is_paid', 'Оплата')->switch($states);
+        if($event->is_need_pay_for_reg){
+            $grid->column('is_paid', 'Оплата')->switch($states);
+            \Encore\Admin\Admin::style('
+                         img {
+                            position: relative;
+                            transition: transform 0.25s ease;
+                        }
+
+                        img:hover {
+                            -webkit-transform: scale(5.5);
+                            transform: scale(5.5);
+                            position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
+                            z-index: 9999;
+                        }
+
+            ');
+            $grid->column('bill', 'Чек участника')->image('',100, 100);
+        }
         return $grid;
     }
 
@@ -182,6 +234,7 @@ class ParticipantsController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.result_qualification_like_final');
         });
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
@@ -220,7 +273,27 @@ class ParticipantsController extends Controller
             'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
             'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
         ];
-        $grid->column('is_paid', 'Оплата')->switch($states);
+        if($event->is_need_pay_for_reg){
+            $grid->column('is_paid', 'Оплата')->switch($states);
+            \Encore\Admin\Admin::style('
+                         img {
+                            position: relative;
+                            transition: transform 0.25s ease;
+//                             transform-origin: center center;
+                        }
+                        img:hover {
+                            -webkit-transform: scale(5.5);
+                            transform: scale(5.5);
+                            margin-top: -50px; /* половина высоты изображения */
+                            margin-left: -50px; /* половина ширины изображения */
+                            z-index: 9999;
+                            position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
+                            z-index: 9999;
+                        }
+
+            ');
+            $grid->column('bill', 'Чек участника')->image('',100, 100);
+        }
         return $grid;
     }
     /**
@@ -228,7 +301,7 @@ class ParticipantsController extends Controller
      *
      * @return Form
      */
-    protected function form()
+    protected function form($type)
     {
 
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
@@ -263,17 +336,53 @@ class ParticipantsController extends Controller
             });
         } else {
             $form = new Form(new Participant);
-            $form->display('ID');
-            $form->hidden('owner_id')->value(Admin::user()->id);
-            $form->text('event_id');
-            $form->text('number_set', 'number_set');
-            $form->text('category_id', 'category_id');
-            $form->switch('active', 'active');
-            $form->switch('is_paid', 'is_paid');
-            $form->display(trans('admin.created_at'));
-            $form->display(trans('admin.updated_at'));
-        }
+            Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
+                display: None;
+                }
+                .add.btn.btn-success.btn-sm {
+                display: None;
+                }
+                .input-group-addon{
+                display: None;
+                }
+            ");
 
+//            $form->hidden('owner_id')->value(Admin::user()->id);
+//            $form->hidden('event_id');
+//            $form->hidden('number_set', 'number_set');
+//            $form->hidden('category_id', 'category_id');
+//            $form->hidden('active', 'active');
+//            $form->hidden('is_paid', 'is_paid');
+            $form->tools(function (Form\Tools $tools) {
+                $tools->disableList();
+                $tools->disableDelete();
+                $tools->disableView();
+            });
+            $form->footer(function ($footer) {
+                $footer->disableReset();
+                $footer->disableViewCheck();
+                $footer->disableEditingCheck();
+                $footer->disableCreatingCheck();
+            });
+            $form->table('result_for_edit', 'Таблица результата', function ($table){
+                $table->text('route_id', 'Номер маршрут')->readonly();
+                $table->text('grade', 'Категория')->readonly();
+                $table->select('attempt', 'Результат')->attribute('inputmode', 'none')->options([1 => 'FLASH', 2 => 'REDPOINT', 0 => 'Не пролез'])->width('50px');
+            });
+        }
+        $form->saving(function (Form $form) use ($type){
+            if($type == 'update'){
+              $user_id = $form->model()->first()->user_id;
+              $event_id = $form->model()->first()->event_id;
+              $routes = $form->result_for_edit;
+              foreach ($routes as $route){
+                  $result = ResultParticipant::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
+                  $result->attempt = $route['attempt'];
+                  $result->save();
+              }
+              Event::refresh_final_points_all_participant($form->model()->first()->event_id);
+            }
+        });
         return $form;
     }
     public function exportQualificationExcel(Request $request)

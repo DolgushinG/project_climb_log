@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
 //        $schedule->command('queue:work')->everyMinute()->withoutOverlapping();
         $schedule->command('events:update-status')->hourly();
+        $schedule->command('participant:update-reg-status')->hourly();
     }
 
     /**

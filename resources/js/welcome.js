@@ -76,7 +76,6 @@ $(document).on('click','#btn-participant', function(e) {
     let event_id = document.getElementById('btn-participant').getAttribute('data-id')
     let link = document.getElementById('btn-participant').getAttribute('data-link')
     let is_qualification_counting_like_final = document.getElementById('btn-participant').getAttribute('data-format')
-
     let user_id = document.getElementById('btn-participant').getAttribute('data-user-id')
     e.preventDefault()
     $.ajax({
@@ -99,20 +98,10 @@ $(document).on('click','#btn-participant', function(e) {
                 button.text(xhr.message)
             }, 3000);
             setTimeout(function () {
-                if(!Number(is_qualification_counting_like_final)){
-                    button.text('Внести результат')
-                    button.removeClass('btn btn-dark rounded-pill')
-                    button.addClass('btn btn-success rounded-pill')
-                    button.attr("id", "listRoutesEvent");
-                    document.getElementById("listRoutesEvent").onclick = function () {
-                        location.href = link+"/routes";
-                    };
-                } else {
-                    button.text('Вы принимаете участие')
-                    button.removeClass('btn btn-dark rounded-pill')
-                    button.addClass('btn btn-secondary rounded-pill')
-                    button.attr('disabled', 'disabled')
-                }
+                button.text('Необходимо оплатить участие в разделе стартовый взнос')
+                button.removeClass('btn btn-dark rounded-pill')
+                button.addClass('btn btn-warning rounded-pill')
+                button.attr('disabled', 'disabled')
             }, 6000);
         },
         error: function(xhr, status, error) {
@@ -188,44 +177,93 @@ $(document).on('click','#btn-participant-change-set', function(e) {
 
     });
 });
-// let sets = document.getElementById("floatingSelect");
-// let category = document.getElementById("floatingSelectCategory");
-// let sport_category = document.getElementById("floatingSelectSportCategory");
-// if(sets){
-//     document.getElementById("floatingSelect").addEventListener("change", (ev) => {
-//         var value = document.getElementById("floatingSelect").value;
-//         var c_value = document.getElementById("floatingSelectCategory").value;
-//         if (value !== "" && c_value !== ""){
-//             var button_paticipant = document.querySelector('#btn-participant');
-//             button_paticipant.style.display = 'block';
-//         }
-//     });
-// }
-// if(category){
-//     document.getElementById("floatingSelectCategory").addEventListener("change", (ev) => {
-//         var select = document.getElementById("floatingSelect");
-//         let is_input_set = document.getElementById('btn-participant').getAttribute('data-sets')
-//         if(is_input_set === 1){
-//             select.value = 'show_button'
-//         }
-//         var c_value = document.getElementById("floatingSelectCategory").value;
-//         if (select !== "" && c_value !== ""){
-//             var button_paticipant = document.querySelector('#btn-participant');
-//             button_paticipant.style.display = 'block';
-//         }
-//     });
-// }
-// if(sport_category){
-//     document.getElementById("floatingSelectSportCategory").addEventListener("change", (ev) => {
-//         var value = document.getElementById("floatingSelect").value;
-//         var c_value = document.getElementById("floatingSelectCategory").value;
-//         var c_value_sport = document.getElementById("floatingSelectSportCategory").value;
-//         if (value !== "" && c_value !== "" && c_value_sport !== ""){
-//             var button_paticipant = document.querySelector('#btn-participant');
-//             button_paticipant.style.display = 'block';
-//         }
-//     });
-// }
+
+var $modal = $('#modal');
+var image = document.getElementById('image');
+var cropper;
+$("body").on("change", ".image", function (e) {
+    var files = e.target.files;
+    var done = function (url) {
+        image.src = url;
+        $modal.modal('show');
+    };
+    var reader;
+    var file;
+    var url;
+    if (files && files.length > 0) {
+        file = files[0];
+
+        if (URL) {
+            done(URL.createObjectURL(file));
+        } else if (FileReader) {
+            reader = new FileReader();
+            reader.onload = function (e) {
+                done(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+});
+$modal.on('shown.bs.modal', function () {
+    cropper = new Cropper(image, {
+        autoCrop: true,
+        autoCropArea: 1,
+        minContainerHeight  : 400,
+        minContainerWidth   : 400,
+        minCanvasWidth      : 400,
+        minCanvasHeight     : 400,
+        aspectRatio: 500 / 660,
+        minCropBoxWidth: 500,
+        minCropBoxHeight: 660,
+        viewMode: 2,
+        preview: '.preview'
+    });
+}).on('hidden.bs.modal', function () {
+    cropper.destroy();
+    cropper = null;
+});
+$("#crop").click(function () {
+    canvas = cropper.getCroppedCanvas({
+        width: 500,
+        height: 600,
+    });
+    canvas.toBlob(function (blob) {
+        url = URL.createObjectURL(blob);
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = function () {
+            var base64data = reader.result;
+            let block_attach_bill = document.getElementById('attachBill')
+            let event_id = document.getElementById('attachBill').getAttribute('data-event-id')
+            let block_checking_bill = document.getElementById('checkingBill')
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                type: "POST",
+                dataType: "json",
+                url: "/cropimageupload",
+                data: {'image': base64data , 'event_id': event_id},
+                success: function (data) {
+                    $modal.modal('hide');
+                    block_attach_bill.style.display = 'none';
+                    setTimeout(function () {
+                        block_checking_bill.style.display = 'block';
+                    }, 1000);
+
+                },
+                error: function (xhr, status, error) {
+                    $modal.modal('hide');
+                }
+            });
+        }
+    });
+})
+$(document).ready(function () {
+    $(document).on('click', '#modalclose', function (e) {
+        $modal.modal('hide');
+    })
+});
 
 
 

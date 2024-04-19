@@ -125,6 +125,9 @@ class Generators
                     $attempt = Grades::getAttemptFromGrades($route->grade, $group);
                     $result_participant[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route->route_id,'attempt' => $attempt,'grade' => $route->grade);
                 }
+                $participant = Participant::where('event_id', $event_id)->where('user_id', $active_participant->user_id)->first();
+                $participant->result_for_edit = $result_participant;
+                $participant->save();
                 DB::table('result_participant')->insert($result_participant);
             }
         }

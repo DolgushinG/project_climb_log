@@ -25,6 +25,8 @@ class CreateParticipantsTable extends Migration
             $table->integer('user_place')->nullable();
             $table->boolean('active');
             $table->boolean('is_paid')->nullable();
+            $table->string('bill')->nullable();
+            $table->json('result_for_edit')->nullable();
             $table->timestamps();
         });
     }

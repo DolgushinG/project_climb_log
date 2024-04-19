@@ -13,6 +13,10 @@ body {
   font-family: "Open Sans", sans-serif;
   color: #444444;
 }
+.showbuttonsave{
+    display: block!important;
+    margin-left: 1rem;
+}
 .form-group.required .control-label:after {
     content:"*";
     color:red;
@@ -141,7 +145,15 @@ h6 {
   color: #fff;
   padding: 0;
 }
+.img-container {
+    /* Never limit the container height here */
+    max-width: 100%;
+}
 
+.img-container img {
+    /* This is important */
+    width: 100%;
+}
 #topbar .contact-info i {
   font-style: normal;
   color: #fff;
