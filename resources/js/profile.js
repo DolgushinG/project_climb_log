@@ -62,6 +62,7 @@ $(document).ready(function () {
                     btn_saveChanges.text(data.message)
                 }, 3000);
                 setTimeout(function () {
+                    getProfile('Card', '#profileCard');
                     getProfile(tab);
                 }, 4000);
             },

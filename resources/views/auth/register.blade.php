@@ -56,38 +56,6 @@
                                                     </option>
                                                 </select>
                                             </div>
-                                            <div class="col-12">
-                                                <label for="birthday" class="form-label">Дата рождения</label>
-                                                <div class="input-group has-validation">
-                                                    <input
-                                                        placeholder="yyyy-mm-dd"
-                                                        class="form-control"
-                                                        type="date"
-                                                        value="{{old('birthday')}}"
-                                                        name="birthday"
-                                                        id="birthday"
-                                                        autofocus
-                                                    />
-                                                    <div class="invalid-feedback">Введите дату рождения</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <label for="city" class="form-label">Город</label>
-                                                <div class="input-group has-validation">
-                                                    <input type="text" name="city" placeholder="Город" class="form-control" id="city"
-                                                           value="{{old('city')}}" autofocus>
-                                                    <div class="invalid-feedback">Введите город</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <label for="team" class="form-label">Команда</label>
-                                                <div class="input-group has-validation">
-                                                    <input type="text" name="team" placeholder="Команда" class="form-control" id="team"
-                                                           value="{{old('team')}}" autofocus>
-                                                    <div class="invalid-feedback">Введите команда</div>
-                                                </div>
-                                            </div>
-                                            <!-- Email Address -->
                                             <div class="col-12 form-group required">
                                                 <label for="email" class="control-label">Email</label>
                                                 <input type="text" name="email" placeholder="Почта" class="form-control" id="email"

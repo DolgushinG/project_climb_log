@@ -21,7 +21,7 @@
                                             <h5 class="card-title text-center pb-0 fs-4">Войти в аккаунт</h5>
                                             <p class="text-center small">Каждый сервис это уникальный аккаунт </p>
                                         </div>
-                                        <p class="text-center small">Ввдите ваш email и пароль чтобы войти</p>
+                                        <p class="text-center small">Введите ваш email и пароль чтобы войти</p>
                                         <form class="row g-3 needs-validation" method="POST"
                                               action="{{ route('login') }}">
                                             @csrf
