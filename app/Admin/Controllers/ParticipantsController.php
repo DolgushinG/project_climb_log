@@ -84,10 +84,15 @@ class ParticipantsController extends Controller
     public function update($id, Request $request)
     {
         $type = 'edit';
+        $value = null;
+        if($request->is_paid){
+            $type = 'is_paid';
+            $value = $request->is_paid;
+        }
         if($request->result_for_edit){
             $type = 'update';
         }
-        return $this->form($type)->update($id);
+        return $this->form($type, $value)->update($id);
     }
 
     /**
@@ -204,16 +209,21 @@ class ParticipantsController extends Controller
         if($event->is_need_pay_for_reg){
             $grid->column('is_paid', 'Оплата')->switch($states);
             \Encore\Admin\Admin::style('
-                         img {
-                            position: relative;
-                            transition: transform 0.25s ease;
-                        }
-
-                        img:hover {
-                            -webkit-transform: scale(5.5);
-                            transform: scale(5.5);
-                            position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
-                            z-index: 9999;
+                        @media only screen and (min-width: 1025px) {
+                                         img {
+                                        position: relative;
+                                        transition: transform 0.25s ease;
+        //                             transform-origin: center center;
+                                }
+                                img:hover {
+                                    -webkit-transform: scale(5.5);
+                                    transform: scale(5.5);
+                                    margin-top: -50px; /* половина высоты изображения */
+                                    margin-left: -50px; /* половина ширины изображения */
+                                    z-index: 9999;
+                                    position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
+                                    z-index: 9999;
+                                }
                         }
 
             ');
@@ -307,7 +317,7 @@ class ParticipantsController extends Controller
      *
      * @return Form
      */
-    protected function form($type)
+    protected function form($type, $value)
     {
 
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
@@ -353,12 +363,6 @@ class ParticipantsController extends Controller
                 }
             ");
 
-//            $form->hidden('owner_id')->value(Admin::user()->id);
-//            $form->hidden('event_id');
-//            $form->hidden('number_set', 'number_set');
-//            $form->hidden('category_id', 'category_id');
-//            $form->hidden('active', 'active');
-//            $form->hidden('is_paid', 'is_paid');
             $form->tools(function (Form\Tools $tools) {
                 $tools->disableList();
                 $tools->disableDelete();
@@ -376,7 +380,7 @@ class ParticipantsController extends Controller
                 $table->select('attempt', 'Результат')->attribute('inputmode', 'none')->options([1 => 'FLASH', 2 => 'REDPOINT', 0 => 'Не пролез'])->width('50px');
             });
         }
-        $form->saving(function (Form $form) use ($type){
+        $form->saving(function (Form $form) use ($type, $value){
             if($type == 'update'){
               $user_id = $form->model()->first()->user_id;
               $event_id = $form->model()->first()->event_id;
@@ -387,6 +391,12 @@ class ParticipantsController extends Controller
                   $result->save();
               }
               Event::refresh_final_points_all_participant($form->model()->first()->event_id);
+            }
+
+            if($type == 'is_paid'){
+                $participant = Participant::where('event_id', $form->model()->first()->event_id)->where('user_id', $form->model()->first()->user_id)->first();
+                $participant->is_paid = $value;
+                $participant->save();
             }
         });
         return $form;
