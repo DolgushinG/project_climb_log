@@ -83,193 +83,105 @@ $(document).ready(function () {
         });
     });
 });
-// var $modal = $('#modal');
-// var image = document.getElementById('image');
-// var cropper;
-// $("body").on("change", ".image", function (e) {
-//     var files = e.target.files;
-//     var done = function (url) {
-//         image.src = url;
-//         $modal.modal('show');
-//     };
-//     var reader;
-//     var file;
-//     var url;
-//     if (files && files.length > 0) {
-//         file = files[0];
-//
-//         if (URL) {
-//             done(URL.createObjectURL(file));
-//         } else if (FileReader) {
-//             reader = new FileReader();
-//             reader.onload = function (e) {
-//                 done(reader.result);
-//             };
-//             reader.readAsDataURL(file);
-//         }
-//     }
-// });
-// $modal.on('shown.bs.modal', function () {
-//     cropper = new Cropper(image, {
-//     autoCrop: true,
-//     autoCropArea: 1,
-//     aspectRatio: 500 / 660,
-//     minCropBoxWidth: 500,
-//     minCropBoxHeight: 660,
-//     viewMode: 2,
-//     preview: '.preview'
-//     });
-// }).on('hidden.bs.modal', function () {
-//     cropper.destroy();
-//     cropper = null;
-// });
-// $("#crop").click(function () {
-//     canvas = cropper.getCroppedCanvas({
-//         width: 500,
-//         height: 600,
-//     });
-//     canvas.toBlob(function (blob) {
-//         url = URL.createObjectURL(blob);
-//         var reader = new FileReader();
-//         reader.readAsDataURL(blob);
-//         reader.onloadend = function () {
-//             var base64data = reader.result;
-//             var tab = 'Sidebar';
-//             let btn_saveChanges = $('#saveChanges')
-//             $.ajax({
-//                 type: "POST",
-//                 dataType: "json",
-//                 url: "cropimageupload",
-//                 data: { '_token': $('meta[name="_token"]').attr('content'), 'image': base64data },
-//                 success: function (data) {
-//                     $modal.modal('hide');
-//                     btn_saveChanges.removeClass('btn-save-change')
-//                     btn_saveChanges.addClass('btn-edit-change')
-//                     btn_saveChanges.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-//                         '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
-//                     setTimeout(function () {
-//                         btn_saveChanges.text(data.message)
-//                     }, 3000);
-//                     setTimeout(function () {
-//                         getProfile(tab, '#sidebar');
-//                         getProfile('Edit');
-//                     }, 4000);
-//                 },
-//                 error: function (xhr, status, error) {
-//                     $modal.modal('hide');
-//                     btn_saveChanges.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-//                         '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
-//                     setTimeout(function () {
-//                         btn_saveChanges.removeClass('btn-save-change')
-//                         btn_saveChanges.addClass('btn-failed-change')
-//                         btn_saveChanges.text(xhr.responseJSON.message[0])
-//                     }, 3000);
-//                     setTimeout(function () {
-//                         btn_saveChanges.removeClass('btn-failed-change')
-//                         btn_saveChanges.addClass('btn-save-change')
-//                         btn_saveChanges.text('Cохранить')
-//                     }, 6000);
-//                 }
-//             });
-//         }
-//     });
-// })
-// $(document).ready(function () {
-//     $(document).on('click', '#modalclose', function (e) {
-//     $modal.modal('hide');
-// })
-// });
-//
-// function checkbox_value($id) {
-//     let checked = 0;
-//     if (document.querySelector($id+':checked')) {
-//         checked = 1;
-//     }
-//     document.querySelector($id).value = checked;
-// }
-// $(document).ready(function () {
-//     $(document).on('click', '#category1', function (e) {
-//         checkbox_value('#category1')
-//     })
-//     $(document).on('click', '#category2', function (e) {
-//         checkbox_value('#category2')
-//     })
-//     $(document).on('click', '#category3', function (e) {
-//         checkbox_value('#category3')
-//     })
-//     $(document).on('click', '#category4', function (e) {
-//         checkbox_value('#category4')
-//     })
-//     $(document).on('click', '#category5', function (e) {
-//         checkbox_value('#category5')
-//     })
-//     $(document).on('click', '#category6', function (e) {
-//         checkbox_value('#category6')
-//     })
-// });
-// $(document).ready(function () {
-//     $(document).on('click', '#opt1', function (e) {
-//         let checked = 0;
-//         if (document.querySelector('#opt1:checked')) {
-//             checked = 1;
-//         }
-//         document.getElementById('opt1').value = checked;
-//     })
-// });
-// $(document).ready(function () {
-//     $(document).on('click', '#opt2', function (e) {
-//         let checked = 0;
-//         if (document.querySelector('#opt2:checked')) {
-//             checked = 1;
-//         }
-//         document.getElementById('opt2').value = checked;
-//     })
-// });
-// $(document).ready(function () {
-//     $(document).on('click', '#opt3', function (e) {
-//         let checked = 0;
-//         if (document.querySelector('#opt3:checked')) {
-//             checked = 1;
-//         }
-//         document.getElementById('opt3').value = checked;
-//     })
-// });
-// // if(Cookies.get("_hidemode") === "Enabled"){
-// //     let id = $('.comment').val();
-// //     $('#commentField_'+id).slideUp();
-// //     $('#commentField_'+id).addClass('hide_comments');
-// //     document.querySelector("#showHideContent").innerHTML = 'Посмотреть комментарии';
-// //     document.querySelector("#showHideContent").dataset.secondname = 'Скрыть комментарии';
-// // } else if (Cookies.get("_showmode") === "Enabled") {
-// //     let id = $('.comment').val();
-// //     $('#commentField_'+id).addClass('show_comments');
-// //     getComments(id);
-//
-// //     $('#commentField_'+id).slideDown();
-// //     document.querySelector("#showHideContent").innerHTML = 'Скрыть комментарии';
-// //     document.querySelector("#showHideContent").dataset.secondname = 'Посмотреть комментарии';
-// // } else {
-// //     let id = $('.comment').val();
-// //     Cookies.set('_hidemode', 'Enabled');
-// //     document.querySelector("#showHideContent").innerHTML = 'Посмотреть комментарии';
-// //     document.querySelector("#showHideContent").dataset.secondname = 'Скрыть комментарии';
-// //     $('#commentField_'+id).addClass('hide_comments');
-// // }
-//
-// // //comment
-// // const checkLengthcomment = function(evt) {
-// //     if (fieldcomment.value.length > 1) {
-// //         buttoncomment.removeAttribute('disabled')
-// //     } else {
-// //         buttoncomment.setAttribute('disabled','disabled');
-// //     }
-// //   }
-// //   const fieldcomment = document.querySelector('#commenttext')
-// //   const buttoncomment = document.querySelector('.submitComment')
-// //   fieldcomment.addEventListener('keyup', checkLengthcomment)
-// $(function () {
-//     $('[data-toggle="tooltip"]').tooltip({
-//         animation: false,
-//         delay: {"show": 100, "hide": 100}
-//     })
-// })
+$(document).on('click', '#changePassword', function(e){
+    let btn_change_password = $('#changePassword')
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    var new_password = $('#new-password').val();
+    var old_password = $('#current-password').val();
+    var password_confirmation = $('#password_confirmation').val();
+
+    e.preventDefault();
+    var currentPassword = document.getElementById('current-password').value;
+    var newPassword = document.getElementById('new-password').value;
+    var passwordConfirmation = document.getElementById('password_confirmation').value;
+
+    // Validation checks
+    if (!currentPassword || !newPassword || !passwordConfirmation) {
+        displayError("Пожалуйста заполните все поля");
+        return;
+    }
+
+    if (newPassword !== passwordConfirmation) {
+        displayError("Пароли не совпадают");
+        return;
+    }
+    clearError();
+
+    $.ajax({
+        type: 'post',
+        url: "/change-password",
+        data:{
+            old_password:old_password,
+            new_password:new_password,
+            password_confirmation:password_confirmation
+        },
+        cache: false,
+        success: function (data){
+            btn_change_password.removeClass('btn-save-change')
+            btn_change_password.addClass('btn-edit-change')
+            btn_change_password.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+                '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+            setTimeout(function () {
+                btn_change_password.text(data.message)
+            }, 3000);
+            setTimeout(function () {
+                btn_change_password.removeClass('btn-edit-change')
+                btn_change_password.text('Cохранить')
+                getProfile('Setting');
+            }, 6000);
+
+        }, error: function (xhr, status, error){
+            btn_change_password.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+                '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+            setTimeout(function () {
+                btn_change_password.removeClass('btn-save-change')
+                btn_change_password.addClass('btn-failed-change')
+                btn_change_password.text(xhr.responseJSON.message)
+            }, 3000);
+            setTimeout(function () {
+                btn_change_password.removeClass('btn-failed-change')
+                btn_change_password.addClass('btn-save-change')
+                btn_change_password.text('Cохранить')
+            }, 6000);
+        }
+    });
+})
+document.getElementById("password_confirmation").addEventListener("input", (ev) => {
+    var value_n = document.getElementById("new-password").value;
+    var value_c = document.getElementById("password_confirmation").value;
+    if(value_n !== value_c){
+        displayError("Пароли не совпадают")
+    } else {
+        clearError()
+    }
+});
+document.getElementById("new-password").addEventListener("input", (ev) => {
+    var value_n = document.getElementById("new-password").value;
+    var value_c = document.getElementById("password_confirmation").value;
+    if(value_n !== value_c){
+        displayError("Пароли не совпадают")
+    } else {
+        clearError()
+    }
+});
+
+// Function to display error message
+function displayError(message) {
+    var errorMessageContainer = document.getElementById('ajax-alert');
+    errorMessageContainer.textContent = message;
+}
+
+// Function to clear error message
+function clearError() {
+    var errorMessageContainer = document.getElementById('ajax-alert');
+    errorMessageContainer.textContent = '';
+}
+
+// Listen for changes in input fields to clear error message if input is present
+document.getElementById('current-password').addEventListener('input', clearError);
+// document.getElementById('new-password').addEventListener('input', clearError);
