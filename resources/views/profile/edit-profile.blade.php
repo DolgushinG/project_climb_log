@@ -51,7 +51,7 @@
             <label for="gender" class="col-md-4 col-lg-3 col-form-label">Пол</label>
             <div class="col-md-8 col-lg-9">
                 <select class="form-select" name="gender" id="gender" required>
-                    <option disabled value="">Укажите пол...</option>
+                    <option disabled selected value="">Укажите пол...</option>
                     @if($user->gender)
                         @foreach($genders as $gender)
                             @if($user->gender == $gender)
@@ -63,6 +63,12 @@
                                     @lang('somewords.'.$gender)
                                 </option>
                             @endif
+                        @endforeach
+                    @else
+                        @foreach($genders as $gender)
+                                <option value="{{$gender}}">
+                                    @lang('somewords.'.$gender)
+                                </option>
                         @endforeach
                     @endif
             </select>

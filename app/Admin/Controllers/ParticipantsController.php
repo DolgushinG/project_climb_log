@@ -23,6 +23,7 @@ use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\Set;
 use App\Models\User;
+use Encore\Admin\Actions\Response;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -462,6 +463,9 @@ class ParticipantsController extends Controller
         }
         $participant->bill = null;
         $participant->save();
+        return response()->json(["status" => true,"message" => "Успешно отозван","display" =>[]]);
     }
+
+
 
 }

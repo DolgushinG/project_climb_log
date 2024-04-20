@@ -25,7 +25,10 @@
                                                     <div class="invalid-feedback">Пожалуйста введите email</div>
                                                 </div>
                                             </div>
-                                            @if($errors->any())
+                                        @if (session('status'))
+                                            <p class="alert alert-success">{{ session('status') }}</p>
+                                        @endif
+                                        @if($errors->any())
                                                 @foreach($errors->all() as $error)
                                                     <span class="text-uppercase text-danger d-block mb-3" data-aos="fade-left" data-aos-delay="300">{{ $error }}</span>
                                                 @endforeach

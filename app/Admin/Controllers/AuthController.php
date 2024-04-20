@@ -53,7 +53,12 @@ class AuthController extends BaseAuthController
         $class = config('admin.database.users_model');
 
         $form = new Form(new $class());
-
+        $form->footer(function ($footer) {
+            $footer->disableReset();
+            $footer->disableViewCheck();
+            $footer->disableEditingCheck();
+            $footer->disableCreatingCheck();
+        });
         $form->display('username', trans('admin.username'));
         $form->text('name', trans('admin.name'))->rules('required');
         $form->image('avatar', trans('admin.avatar'))->move('images/profile_images')->uniqueName();;

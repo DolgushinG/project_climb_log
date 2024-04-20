@@ -174,12 +174,6 @@ class ProfileController extends Controller
 
     public function changePassword(Request $request)
     {
-        if(!Auth::user()->password){
-            $user = User::find(Auth::id());
-            $user->password = Hash::make($request->get('new_password'));
-            $user->save();
-            return response()->json(['success' => true, 'message' => 'Ваш пароль успешно изменен'], 200);
-        }
         $messages = array(
             'old_password.required' => 'Поле пароль обязательно для заполнения',
             'new_password.required' => 'Поле новый пароль обязательно для заполнения',
@@ -193,6 +187,12 @@ class ProfileController extends Controller
         if ($validator->fails())
         {
             return response()->json(['error' => true,'message'=>$validator->errors()->all()],422);
+        }
+        if(!Auth::user()->password){
+            $user = User::find(Auth::id());
+            $user->password = Hash::make($request->get('new_password'));
+            $user->save();
+            return response()->json(['success' => true, 'message' => 'Ваш пароль успешно изменен'], 200);
         }
         $currentPass = Auth::user()->password;
         if (Hash::check($request->get('old_password'), $currentPass)) {

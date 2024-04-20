@@ -1,74 +1,78 @@
 <div class="tab-pane fade active show pt-3" id="tab-settings">
-    @foreach($user->types_auth as $auth)
-        @if($user->is_alert_for_needs_set_password)
-            <div class="row mb-3">
-                <div class="col-md-8 col-lg-9">
-                    <div class="alert alert-warning alert-dismissible fade show" role="alert"
+    @if($user->is_alert_for_needs_set_password)
+        <div class="row mb-3">
+            <div class="col-md-8 col-lg-9">
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     <label for="" class="form-label">Вход был выполнен через сервисы рекомендуется заполнить пароль</label>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <div class="row mb-3">
+        <div class="col-md-8 col-lg-9">
+            <ol class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Способы входа в аккаунт</div>
+                            @foreach($user->types_auth as $auth)
+                                Доступен вход по {!! $auth['icon_auth'] !!}
+                                <span class="badge bg-primary">{{strtoupper($auth['title_auth'])}}</span><br>
+                             @endforeach
+                            </div>
+                        </li>
+                    </ol>
                     </div>
                 </div>
             </div>
 
-        @endif
-            <div class="row mb-3">
-                <div class="col-md-8 col-lg-9">
-                        <label for="" class="form-check">
-                            Доступен вход по {!! $auth['icon_auth'] !!} <span class="badge bg-primary">{{strtoupper($auth['title_auth'])}}</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-    @endforeach
-    <form>
+    <form id="passwordChangeForm">
         @if($user->is_show_old_password)
         <div class="row mb-3">
             <div class="col-md-8 col-lg-9">
-                <div class="form-check">
-                    <label for="current-password" class="form-label">Старый пароль</label>
-                    <input type="password" autocomplete="current-password" name="current-password" class="form-control"
+                <div class="form-floating mb-3">
+                    <input type="password" placeholder="Укажите старый пароль" autocomplete="current-password" name="current-password" class="form-control"
                            id="current-password" required>
+                    <label for="current-password" class="form-label">Старый пароль</label>
                 </div>
             </div>
         </div>
             @else
             <div class="row mb-3" style="display: none">
                 <div class="col-md-8 col-lg-9">
-                    <div class="form-check">
-                        <label for="current-password" class="form-label">Старый пароль</label>
-                        <input type="password" autocomplete="current-password" name="current-password" class="form-control"
+                    <div class="form-floating mb-3">
+                        <input type="password" placeholder="Укажите старый пароль" autocomplete="current-password" name="current-password" class="form-control"
                                id="current-password" value="1">
+                        <label for="current-password" class="form-label">Старый пароль</label>
                     </div>
                 </div>
             </div>
         @endif
         <div class="row mb-3">
             <div class="col-md-8 col-lg-9">
-                <div class="form-check">
-                    <label for="new-password" class="form-label">Новый пароль</label>
-                    <input type="password" autocomplete="new-password" name="new-password" class="form-control"
-                           id="new-password" required>
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" placeholder="Новый пароль" name="new-password" id="new-password" required>
+                    <label for="new-password">Новый пароль</label>
                 </div>
             </div>
         </div>
         <div class="row mb-3">
             <div class="col-md-8 col-lg-9">
-                <div class="form-check">
-                    <label for="password_confirmation" class="form-label">Подтверждение
-                        пароля</label>
-                    <input type="password" autocomplete="new-password" name="password_confirmation" class="form-control"
+                <div class="form-floating mb-3">
+                    <input type="password" placeholder="Подтверждение пароля" autocomplete="new-password" name="password_confirmation" class="form-control"
                            id="password_confirmation" required>
+                    <label for="password_confirmation">Подтверждение пароля</label>
                 </div>
             </div>
         </div>
         <div class="text-center">
             <button type="submit" id="changePassword" class="btn btn-primary btn-save-change">Сохранить</button>
-            <div id="ajax-alert" class="pt-2 alert-danger" style="display:none; color: red"></div>
+            <div id="ajax-alert" class="pt-2 alert-danger" style="color: red"></div>
         </div>
     </form>
 </div>
 <script>
-    document.querySelector('#changePassword').setAttribute('disabled', 'disabled');
     $(document).on('click', '#changePassword', function(e){
         let btn_change_password = $('#changePassword')
 
@@ -82,6 +86,22 @@
         var password_confirmation = $('#password_confirmation').val();
 
         e.preventDefault();
+        var currentPassword = document.getElementById('current-password').value;
+        var newPassword = document.getElementById('new-password').value;
+        var passwordConfirmation = document.getElementById('password_confirmation').value;
+
+        // Validation checks
+        if (!currentPassword || !newPassword || !passwordConfirmation) {
+            displayError("Пожалуйста заполните все поля");
+            return;
+        }
+
+        if (newPassword !== passwordConfirmation) {
+            displayError("Пароли не совпадают");
+            return;
+        }
+        clearError();
+
         $.ajax({
             type: 'post',
             url: "/change-password",
@@ -119,49 +139,39 @@
                 }, 6000);
             }
         });
-    });
-    document.getElementById("current-password").addEventListener("input", (ev) => {
-        var value_o = document.getElementById("current-password").value;
+    })
+    document.getElementById("password_confirmation").addEventListener("input", (ev) => {
         var value_n = document.getElementById("new-password").value;
         var value_c = document.getElementById("password_confirmation").value;
-        if (value_o !== "" && value_n !== "" && value_c !== ""){
-            var changePassword = document.querySelector('#changePassword');
-            changePassword.removeAttribute('disabled','disabled');
+        if(value_n !== value_c){
+            displayError("Пароли не совпадают")
+        } else {
+            clearError()
+        }
+    });
+    document.getElementById("new-password").addEventListener("input", (ev) => {
+        var value_n = document.getElementById("new-password").value;
+        var value_c = document.getElementById("password_confirmation").value;
+        if(value_n !== value_c){
+            displayError("Пароли не совпадают")
+        } else {
+            clearError()
         }
     });
 
-    document.getElementById("new-password").addEventListener("input", (ev) => {
-        var value_o = document.getElementById("current-password").value;
-        var value_n = document.getElementById("new-password").value;
-        var value_c = document.getElementById("password_confirmation").value;
-        if (value_o !== "" && value_n !== "" && value_c !== ""){
-            if(value_n === value_c){
-                var changePassword = document.querySelector('#changePassword');
-                changePassword.removeAttribute('disabled','disabled');
-                document.querySelector('#ajax-alert').style.display = 'None';
-            } else {
-                var alert = document.querySelector('#ajax-alert');
-                alert.style.display = 'block'
-                alert.textContent = "Пароли не совпадают"
-                alert.color = 'red'
-            }
-        }
-    });
-    document.getElementById("password_confirmation").addEventListener("input", (ev) => {
-        var value_o = document.getElementById("current-password").value;
-        var value_n = document.getElementById("new-password").value;
-        var value_c = document.getElementById("password_confirmation").value;
-        if (value_o !== "" && value_n !== "" && value_c !== ""){
-            if(value_n === value_c){
-                var changePassword = document.querySelector('#changePassword');
-                changePassword.removeAttribute('disabled','disabled');
-                document.querySelector('#ajax-alert').style.display = 'None';
-            } else {
-                var alert = document.querySelector('#ajax-alert');
-                alert.style.display = 'block'
-                alert.textContent = "Пароли не совпадают"
-                alert.color = 'red'
-            }
-        }
-    });
+    // Function to display error message
+    function displayError(message) {
+        var errorMessageContainer = document.getElementById('ajax-alert');
+        errorMessageContainer.textContent = message;
+    }
+
+    // Function to clear error message
+    function clearError() {
+        var errorMessageContainer = document.getElementById('ajax-alert');
+        errorMessageContainer.textContent = '';
+    }
+
+    // Listen for changes in input fields to clear error message if input is present
+    document.getElementById('current-password').addEventListener('input', clearError);
+    // document.getElementById('new-password').addEventListener('input', clearError);
 </script>
