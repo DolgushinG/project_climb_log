@@ -295,6 +295,12 @@ class AdminTablesSeeder extends Seeder
                     "slug" => "owner.result.route.final.stage",
                     "http_method" => "",
                     "http_path" => "/final-stage*"
+                ],
+                [
+                    "name" => "bill",
+                    "slug" => "bill",
+                    "http_method" => "",
+                    "http_path" => "/reject/bill/*"
                 ]
             ]
         );
@@ -438,6 +444,10 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 2,
                     "permission_id" => 16
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 17
                 ]
             ]
         );
