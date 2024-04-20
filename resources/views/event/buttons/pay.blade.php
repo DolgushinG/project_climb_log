@@ -3,7 +3,7 @@
         Чек отправлен (На проверке..)
     </button>
 @else
-    <button href="#" data-bs-toggle="modal" data-bs-target="#scrollingModal" class="btn btn-warning rounded-pill">
+    <button id="btn-payment" data-bs-toggle="modal" data-bs-target="#scrollingModal" class="btn btn-warning rounded-pill">
          Оплатить
     </button>
 @endif

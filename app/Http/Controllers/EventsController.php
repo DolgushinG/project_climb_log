@@ -66,6 +66,18 @@ class EventsController extends Controller
             return view('404');
         }
     }
+
+    public function event_info_payment(Request $request, $start_date, $climbing_gym, $event_id)
+    {
+        $event = Event::find($event_id);
+        return view('event.tab.payment_without_bill', compact('event'));
+    }
+    public function event_info_payment_bill(Request $request, $start_date, $climbing_gym, $event_id)
+    {
+        $event = Event::find($event_id);
+        return view('event.tab.payment', compact('event'));
+    }
+
     public function get_participants(Request $request, $start_date, $climbing_gym, $title){
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if($event) {
@@ -359,5 +371,7 @@ class EventsController extends Controller
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
         return view('result-page', compact('routes', 'event'));
     }
+
+
 
 }

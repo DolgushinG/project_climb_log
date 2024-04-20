@@ -17,7 +17,7 @@
 {{--    <link rel="stylesheet" href="{{ mix('css/app.css') }}" />--}}
     <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" />
     <!-- Vendor CSS Files -->
-    <link href="{{asset('plugins/cropper/cropper.css')}}" rel="stylesheet">
+{{--    <link href="{{asset('plugins/cropper/cropper.css')}}" rel="stylesheet">--}}
     <link href="{{asset('vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
     <link href="{{asset('vendor/bootstrap-icons/bootstrap-icons.css')}}" rel="stylesheet">
     <link href="{{asset('vendor/boxicons/css/boxicons.min.css')}}" rel="stylesheet">
@@ -40,7 +40,7 @@
 <div id="preloader"></div>
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
         class="bi bi-arrow-up-short"></i></a>
-<script src="{{asset('plugins/cropper/cropper.js')}}"></script>
+{{--<script src="{{asset('plugins/cropper/cropper.js')}}"></script>--}}
 <script src="{{asset('vendor/apexcharts/apexcharts.min.js')}}"></script>
 <script src="{{asset('vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
 <script src="{{asset('vendor/chart.js/chart.umd.js')}}"></script>

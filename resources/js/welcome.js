@@ -98,12 +98,16 @@ $(document).on('click','#btn-participant', function(e) {
                 button.text(xhr.message)
             }, 3000);
             setTimeout(function () {
-                button.text('Оплатить')
-                button.removeClass('btn btn-dark rounded-pill')
-                button.attr('id', '#btn')
-                button.addClass('btn btn-warning rounded-pill')
-                button.attr('data-bs-toggle', 'modal')
-                button.attr('data-bs-target', '#payModal')
+                window.location.reload();
+                // getInfoPayment(event_id, '#payment')
+                // getInfoPaymentBll(event_id, '#paymentTab')
+                // button.text('Оплатить')
+                // button.removeClass('btn btn-dark rounded-pill')
+                // button.attr('id', '#btn')
+                // button.addClass('btn btn-warning rounded-pill')
+                // button.attr('data-bs-toggle', 'modal')
+                // button.attr('data-bs-target', '#scrollingModal')
+
             }, 6000);
         },
         error: function(xhr, status, error) {
@@ -125,7 +129,34 @@ $(document).on('click','#btn-participant', function(e) {
 
     });
 });
-
+function getInfoPayment(event_id, id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.ajax({
+        type: 'GET',
+        url: 'getInfoPayment/' + event_id,
+        success: function (data) {
+            $(id).html(data);
+        },
+    });
+}
+function getInfoPaymentBll(event_id, id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.ajax({
+        type: 'GET',
+        url: 'getInfoPaymentBill/' + event_id,
+        success: function (data) {
+            $(id).html(data);
+        },
+    });
+}
 
 $(document).on('click','#btn-participant-change-set', function(e) {
     $.ajaxSetup({
@@ -238,6 +269,7 @@ $("#crop").click(function () {
             var block_attach_bill = document.getElementById('attachBill')
             var event_id = document.getElementById('attachBill').getAttribute('data-event-id')
             var block_checking_bill = document.getElementById('checkingBill')
+            let button_pay = $('#btn-payment')
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -248,6 +280,9 @@ $("#crop").click(function () {
                 data: {'image': base64data , 'event_id': event_id},
                 success: function (data) {
                     $modal.modal('hide');
+                    getInfoPaymentBll(event_id, '#paymentTab')
+                    button_pay.text('Чек отправлен (На проверке..)')
+                    button_pay.attr('disabled', 'disabled')
                     block_attach_bill.style.display = 'none';
                     setTimeout(function () {
                         block_checking_bill.style.display = 'block';

@@ -11,7 +11,7 @@
                 <div class="col">
                     <div class="container">
                         <div class="row">
-                            @if(!\App\Models\Participant::is_active_participant($event->id, Auth()->user()->id))
+                            @if(\App\Models\Participant::is_active_participant($event->id, Auth()->user()->id))
                                 <h1> Ваш результат уже был добавлен </h1>
                             @else
                                 <h1> Внести результаты </h1>

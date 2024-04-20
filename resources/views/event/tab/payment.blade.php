@@ -1,3 +1,5 @@
+<link href="{{asset('plugins/cropper/cropper.css')}}" rel="stylesheet">
+<script src="{{asset('plugins/cropper/cropper.js')}}"></script>
 @if($event->is_need_pay_for_reg)
     <div class="container text-center pt-2 pb-2">
         <label> Сумма к оплате: </label>
@@ -28,7 +30,7 @@
                                 <div class="img-container">
                                     <div class="row">
                                         <div class="col-md-8">
-                                            <img id="image" src="https://avatars0.githubusercontent.com/u/3456749">
+                                            <img id="image" src="">
                                         </div>
                                         <div class="col-md-4">
                                             <div class="preview"></div>

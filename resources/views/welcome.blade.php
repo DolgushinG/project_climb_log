@@ -61,8 +61,8 @@
                                             <div class="modal-header">
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
-                                            <div class="modal-body">
-                                                @include('event.tab.payment')
+                                            <div class="modal-body" id="payment">
+                                                @include('event.tab.payment_without_bill')
                                             </div>
                                         </div>
                                     </div>
@@ -136,7 +136,7 @@
                                 <div class="tab-pane fade" id="bordered-justified-contact" role="tabpanel"
                                      aria-labelledby="contact-tab">
                                     <div class="container">
-                                        <div class="row">
+                                        <div class="row" id="paymentTab">
                                             @include('event.tab.payment')
                                         </div>
                                     </div>
