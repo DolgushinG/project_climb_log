@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Notifications\CustomResetPasswordNotification;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -200,7 +202,38 @@ class User extends Authenticatable
 
     }
 
+    /**
+     *
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new CustomResetPasswordNotification($token));
+    }
 
+    public static function send_new_device($user, $ip, $device)
+    {
+        if (!str_contains($user->email, 'telegram')) {
+            $details = array();
+            $details['middlename'] = $user->middlename;
+            $details['device'] = $device;
+            $details['ip'] = $ip;
+            $details['time'] = $user->updated_at;
+            Mail::to($user->email)->send(new \App\Mail\AuthNewDevice($details));
+        }
+    }
+    public static function send_auth_socialize($user, $socialize)
+    {
+        if (!str_contains($user->email, 'telegram')) {
+            $details = array();
+            $details['middlename'] = $user->middlename;
+            $details['socialize'] = $socialize;
+            $details['time'] = $user->updated_at;
+            Mail::to($user->email)->send(new \App\Mail\AuthSocialize($details));
+        }
 
-
+    }
 }

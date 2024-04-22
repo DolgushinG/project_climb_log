@@ -9,7 +9,7 @@ use Laravel\Socialite\Facades\Socialite;
 
 class SocialiteController extends Controller
 {
-    public function callback_vkontakte(){
+    public function callback_vkontakte(Request $request){
         try {
             $socialite_user =  Socialite::driver('vkontakte')->stateless()->user();
         } catch (\Exception $e) {
@@ -20,13 +20,13 @@ class SocialiteController extends Controller
         if($existingUser){
             \Illuminate\Support\Facades\Auth::login($existingUser);
         } else {
-            $user = $this->saving_callback($socialite_user, 'vkontakte');
+            $user = $this->saving_callback($socialite_user, 'vkontakte', $request);
             \Illuminate\Support\Facades\Auth::login($user);
         }
         return redirect('/profile');
     }
 
-    public function callback_telegram(){
+    public function callback_telegram(Request $request){
         try {
             $socialite_user =  Socialite::driver('telegram')->stateless()->user();
         } catch (\Exception $e) {
@@ -37,13 +37,13 @@ class SocialiteController extends Controller
         if($existingUser){
             \Illuminate\Support\Facades\Auth::login($existingUser);
         } else {
-            $user = $this->saving_callback($socialite_user, 'telegram');
+            $user = $this->saving_callback($socialite_user, 'telegram', $request);
             \Illuminate\Support\Facades\Auth::login($user);
         }
         return redirect('/profile');
     }
 
-    public function callback_yandex(){
+    public function callback_yandex(Request $request){
         try {
             $socialite_user =  Socialite::driver('yandex')->stateless()->user();
         } catch (\Exception $e) {
@@ -54,12 +54,12 @@ class SocialiteController extends Controller
         if($existingUser){
             \Illuminate\Support\Facades\Auth::login($existingUser);
         } else {
-            $user = $this->saving_callback($socialite_user, 'yandex');
+            $user = $this->saving_callback($socialite_user, 'yandex', $request);
             \Illuminate\Support\Facades\Auth::login($user);
         }
         return redirect('/profile');
     }
-    public function saving_callback($socialite_user, $socialite){
+    public function saving_callback($socialite_user, $socialite, $request=null){
 
         $email = $socialite_user->getEmail() ?? null;
         if(!$email){
@@ -88,6 +88,9 @@ class SocialiteController extends Controller
                 $user->year = $socialite_user->user['birthday'] ?? null;
                 $user->save();
             }
+        }
+        if($user){
+            User::send_auth_socialize($user, $socialite);
         }
 
 

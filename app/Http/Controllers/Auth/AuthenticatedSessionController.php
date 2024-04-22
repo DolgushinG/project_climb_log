@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +34,10 @@ class AuthenticatedSessionController extends Controller
 
         $url = $request->session()->get('link');
         $request->authenticate();
+        $user = User::where('email' , $request->email)->first();
+        if($user){
+            User::send_new_device($user, $request->ip(), $request->header('User-Agent'));
+        }
         $request->session()->regenerate();
         return redirect($url);
     }

@@ -170,7 +170,7 @@ class ParticipantsController extends Controller
         });
         $grid->actions(function ($actions) use ($event) {
 //            $actions->disableEdit();
-            $actions->append(new ActionRejectBill($actions->getKey(), $event->id));
+//            $actions->append(new ActionRejectBill($actions->getKey(), $event->id));
             $actions->disableView();
             $actions->disableDelete();
         });
@@ -463,7 +463,6 @@ class ParticipantsController extends Controller
         }
         $participant->bill = null;
         $participant->save();
-        return response()->json(["status" => true,"message" => "Успешно отозван","display" =>[]]);
     }
 
 

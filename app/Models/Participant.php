@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Mail;
 use function Symfony\Component\String\s;
 
 class Participant extends Model
@@ -344,5 +345,17 @@ class Participant extends Model
                 'from' => $el['От какой категории сложности определять эту категорию']);
         }
         return $res;
+    }
+
+    public static function send_main_about_take_part($event, $user)
+    {
+        if (!str_contains($user->email, 'telegram')) {
+            $details = array();
+            $details['title'] = $event->title;
+            $details['event_start_date'] = $event->start_date;
+            $details['event_url'] = $event->link;
+            Mail::to($user->email)->send(new \App\Mail\TakePart($details));
+        }
+
     }
 }

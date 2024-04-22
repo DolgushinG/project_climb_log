@@ -214,9 +214,8 @@ class EventsController extends Controller
         $participant->owner_id = $event->owner_id;
         $participant->active = 0;
         $participant->save();
-
-        if($request->user_id){
-            $user = User::find($request->user_id);
+        $user = User::find($request->user_id);
+        if($user){
             $user->gender = $request->gender;
             $user->sport_category = $request->sport_category;
             $user->birthday = $request->birthday;
@@ -224,6 +223,9 @@ class EventsController extends Controller
         }
 
         if ($participant->save()) {
+            if($user && $event){
+                Participant::send_main_about_take_part($event, $user);
+            }
             return response()->json(['success' => true, 'message' => 'Успешная регистрация'], 201);
         } else {
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
