@@ -29,6 +29,6 @@ class AuthSocialize extends Mailable
      */
     public function build()
     {
-        return $this->subject( 'Вход по аккаунт использую учетную запись'.$this->details['socialize'])->markdown('emails.auth-socialize');
+        return $this->subject( 'Вход по аккаунт использую учетную запись '.$this->details['socialize'])->markdown('emails.auth-socialize');
     }
 }
