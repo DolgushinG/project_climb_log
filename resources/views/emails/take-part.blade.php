@@ -2,7 +2,7 @@
 @section('content')
     <h3>Вы приняли участие в соревновании <h3/><br>
     <h2><strong>{{ $details['title'] }}</strong><h2/><br>
-    <img width="100%" src="{{asset('storage/'.$details['image'])}}" alt="">   <br>
+{{--        <img width="100%" src="{{asset('storage/'.$details['image'])}}" alt="">   <br>--}}
     <h3>Дата старта  : <strong>{{ $details['event_start_date'] }}</strong><h3/><br>
     <h3><strong>Для завершения регистрации пожалуйста оплатите участие</strong><br>
     @isset($details['info_payment'])

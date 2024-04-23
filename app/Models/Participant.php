@@ -370,7 +370,7 @@ class Participant extends Model
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
             $details['event_url'] = $event->link;
-            $details['image'] = $event->image;
+//            $details['image'] = $event->image;
             Mail::to($user->email)->queue(new \App\Mail\ConfirmBill($details));
         }
 
