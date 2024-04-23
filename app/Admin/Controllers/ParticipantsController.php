@@ -30,6 +30,7 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
+use Encore\Admin\Show;
 use Encore\Admin\Widgets\Table;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -59,6 +60,60 @@ class ParticipantsController extends Controller
                     }
                 }
             });
+    }
+
+    /**
+     * Show interface.
+     *
+     * @param mixed $id
+     * @param Content $content
+     * @return Content
+     */
+    public function show($id, Content $content)
+    {
+        return $content
+            ->header(trans('admin.detail'))
+            ->description(trans('admin.description'))
+            ->body($this->detail($id));
+    }
+
+    /**
+     * Make a show builder.
+     *
+     * @param mixed $id
+     * @return Show
+     */
+    protected function detail($id)
+    {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        if($event) {
+            if($event->is_qualification_counting_like_final){
+                $show = new Show(ResultQualificationLikeFinal::findOrFail($id));
+                $show->panel()
+                    ->tools(function ($tools) {
+                        $tools->disableEdit();
+                        $tools->disableList();
+                        $tools->disableDelete();
+                    });;
+            } else {
+                $show = new Show(Participant::findOrFail($id));
+                $show->panel()
+                    ->tools(function ($tools) {
+//                        $tools->disableEdit();
+                        $tools->disableList();
+                        $tools->disableDelete();
+                    });;
+            }
+        }
+        $show->field('user.middlename', __('Имя и Фамилия'));
+        $show->field('user.birthday', __('Дата Рождения'));
+        $show->field('user.email', __('Почта'));
+        $show->field('user.city', __('Город'));
+        $show->field('user.team', __('Команда'));
+        $show->field('user.sports_category', __('Разряд'));
+        $show->field('bill', 'Чек')->image('',600, 800);
+
+        return $show;
     }
 
     /**
@@ -171,7 +226,7 @@ class ParticipantsController extends Controller
         $grid->actions(function ($actions) use ($event) {
 //            $actions->disableEdit();
 //            $actions->append(new ActionRejectBill($actions->getKey(), $event->id));
-            $actions->disableView();
+//            $actions->disableView();
             $actions->disableDelete();
         });
         $grid->column('user.middlename', __('Участник'));
@@ -262,7 +317,7 @@ class ParticipantsController extends Controller
         $grid->actions(function ($actions) {
             $actions->disableEdit();
 //            $actions->disableDelete();
-            $actions->disableView();
+//            $actions->disableView();
         });
 
         $grid->disableExport();

@@ -80,8 +80,7 @@ class BatchResultFinalCustom extends Action
             $user = User::where('middlename', $res)->first()->id;
             if($event->is_qualification_counting_like_final) {
                 $category_id = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
-            }
-            if($event->is_additional_final){
+            } else {
                 $category_id = Participant::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
             }
             $category = ParticipantCategory::find($category_id)->category;

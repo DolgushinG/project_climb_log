@@ -87,8 +87,7 @@ class BatchResultFinalCustomFillOneRoute extends Action
             $user = User::where('middlename', $res)->first()->id;
             if($event->is_qualification_counting_like_final) {
                 $category_id = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
-            }
-            if($event->is_additional_final){
+            } else {
                 $category_id = Participant::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
             }
             $category = ParticipantCategory::find($category_id)->category;
@@ -107,8 +106,8 @@ class BatchResultFinalCustomFillOneRoute extends Action
         $this->integer('amount_try_top', 'Попытки на топ');
         $this->integer('amount_try_zone', 'Попытки на зону');
         Admin::script("// Получаем все элементы с атрибутом modal
-        const elementsWithModalAttribute3 = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
-        const elementsWithIdAttribute3 = document.querySelectorAll('[id=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
+        const elementsWithModalAttribute3 = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute\"]');
+        const elementsWithIdAttribute3 = document.querySelectorAll('[id=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute\"]');
 
         // Создаем объект для отслеживания счетчика для каждого modal
         const modalCounters3 = {};
