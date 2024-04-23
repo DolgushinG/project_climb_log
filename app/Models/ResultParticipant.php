@@ -93,7 +93,7 @@ class ResultParticipant extends Model
                 ->first();
         }
         if($participant){
-            return boolval($participant->is_paid);
+            return $participant->is_paid == 1;
         } else {
             Log::error('Не нашелся участник - user_id'.$user_id.'event_id'.$event_id.', причем эта кнопка должна появится только после того как он зарегистрировался');
         }
@@ -111,7 +111,6 @@ class ResultParticipant extends Model
                 ->where('user_id', '=', $user_id)
                 ->first();
         }
-
         if($participant){
             if($participant->bill){
                 return true;

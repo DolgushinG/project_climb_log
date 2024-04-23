@@ -69,7 +69,7 @@
                     </div>
                 @endif
                 @if($event->img_payment)
-                    <img class="img-fluid img-responsive" src="{{asset('storage/'.$event->img_payment)}}" alt="qr">
+                    <img class="img-thumbnail img-responsive" src="{{asset('storage/'.$event->img_payment)}}" alt="qr">
                 @endif
             @endif
         @endif

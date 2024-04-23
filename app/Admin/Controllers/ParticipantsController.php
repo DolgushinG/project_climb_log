@@ -93,7 +93,7 @@ class ParticipantsController extends Controller
         if($request->result_for_edit){
             $type = 'update';
         }
-        return $this->form($type, $value)->update($id);
+        return $this->form($type, $id)->update($id);
     }
 
     /**
@@ -108,7 +108,7 @@ class ParticipantsController extends Controller
         return $content
             ->header(trans('admin.edit'))
             ->description(trans('admin.description'))
-            ->body($this->form('edit')->edit($id));
+            ->body($this->form('edit', $id)->edit($id));
     }
 
     /**
@@ -318,7 +318,7 @@ class ParticipantsController extends Controller
      *
      * @return Form
      */
-    protected function form($type, $value=null)
+    protected function form($type, $id=null)
     {
 
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
@@ -381,23 +381,27 @@ class ParticipantsController extends Controller
                 $table->select('attempt', 'Результат')->attribute('inputmode', 'none')->options([1 => 'FLASH', 2 => 'REDPOINT', 0 => 'Не пролез'])->width('50px');
             });
         }
-        $form->saving(function (Form $form) use ($type, $value){
+        $form->saving(function (Form $form) use ($type, $id){
             if($type == 'update'){
-              $user_id = $form->model()->first()->user_id;
-              $event_id = $form->model()->first()->event_id;
+              $user_id = $form->model()->find($id)->user_id;
+              $event_id = $form->model()->find($id)->event_id;
               $routes = $form->result_for_edit;
               foreach ($routes as $route){
                   $result = ResultParticipant::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
                   $result->attempt = $route['attempt'];
                   $result->save();
               }
-              Event::refresh_final_points_all_participant($form->model()->first()->event_id);
+              Event::refresh_final_points_all_participant($form->model()->find($id)->event_id);
             }
-
-            if($type == 'is_paid'){
-                $participant = Participant::where('event_id', $form->model()->first()->event_id)->where('user_id', $form->model()->first()->user_id)->first();
-                $participant->is_paid = $value;
+            if($form->input('is_paid') == "0" || $form->input('is_paid') == "1"){
+                $participant = $form->model()->find($id);
+                $participant->is_paid = $form->input('is_paid');
                 $participant->save();
+                if($form->input('is_paid') === "1"){
+                    $event = Event::find($participant->event_id);
+                    $user = User::find($participant->user_id);
+                    Participant::send_confirm_bill($event, $user);
+                }
             }
         });
         return $form;

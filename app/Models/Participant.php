@@ -354,7 +354,24 @@ class Participant extends Model
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
             $details['event_url'] = $event->link;
-            Mail::to($user->email)->send(new \App\Mail\TakePart($details));
+            $details['link_payment'] = $event->link_payment;
+            $details['img_payment'] = $event->img_payment;
+            $details['info_payment'] = $event->info_payment;
+            $details['image'] = $event->image;
+            Mail::to($user->email)->queue(new \App\Mail\TakePart($details));
+        }
+
+    }
+
+    public static function send_confirm_bill($event, $user)
+    {
+        if (!str_contains($user->email, 'telegram')) {
+            $details = array();
+            $details['title'] = $event->title;
+            $details['event_start_date'] = $event->start_date;
+            $details['event_url'] = $event->link;
+            $details['image'] = $event->image;
+            Mail::to($user->email)->queue(new \App\Mail\ConfirmBill($details));
         }
 
     }

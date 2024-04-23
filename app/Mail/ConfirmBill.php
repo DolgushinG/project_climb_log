@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class AuthNewDevice extends Mailable implements ShouldQueue
+class ConfirmBill extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -29,6 +29,6 @@ class AuthNewDevice extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject( 'Вы авторизовались')->markdown('emails.auth-device');
+        return $this->subject( 'Ваш оплата подтверждена, вы завершили регистрацию')->markdown('emails.confirm-bill');
     }
 }
