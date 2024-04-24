@@ -217,7 +217,8 @@ class EventsController extends Controller
 //            $form->time('end_time', 'Время окончания')->attribute('inputmode', 'none')->placeholder('Время окончания')->required();
             $form->image('image', 'Афиша')->placeholder('Афиша')->attribute('inputmode', 'none')->required();
             $form->summernote('description', 'Описание')->placeholder('Описание')->required();
-            $form->text('contact', 'Контактная информация')->required();
+            $form->text('contact', 'Телефон')->required();
+            $form->text('contact_link', 'Ссылка на соц.сеть');
             $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
             $form->hidden('admin_link', 'Ссылка на сореванование')->placeholder('Ссылка');
 //            $form->disableSubmit();

@@ -15,6 +15,12 @@
                                 @endguest
                                 @auth
                                     @if(\App\Models\User::user_participant($event->id))
+{{--                                            Открыто/Закрыто изменение участия в сетах--}}
+                                        @if(!$event->is_input_set && $event->is_registration_state)
+                                            @include('event.selects.sets_participant')
+                                        @else
+                                            @include('event.buttons.reg-close')
+                                        @endif
                                         @if(\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
                                                 @if($event->is_qualification_counting_like_final)
                                                     @include('event.buttons.participant_already')
@@ -23,14 +29,16 @@
                                                     @include('event.buttons.results_have_been_sent_already')
                                                 @endif
                                         @else
-                                            @include('event.selects.sets_participant')
                                             {{--Нужна оплата?--}}
                                             @if($event->is_need_pay_for_reg)
                                                 @if(\App\Models\ResultParticipant::is_pay_participant(Auth()->user()->id, $event->id))
                                                         @if($event->is_qualification_counting_like_final)
                                                             @include('event.buttons.participant_already')
                                                         @else
-                                                            @include('event.buttons.send_result')
+{{--                                                          Регистрация открыта/закрыта--}}
+                                                            @if($event->is_send_result_state)
+                                                                @include('event.buttons.send_result')
+                                                            @endif
                                                         @endif
                                                 @else
                                                         @include('event.buttons.pay')
@@ -40,18 +48,27 @@
                                                 @if($event->is_qualification_counting_like_final)
                                                         @include('event.buttons.participant_already')
                                                 @else
+{{--                                                 Регистрация открыта/закрыта--}}
+                                                    @if($event->is_send_result_state)
                                                     {{-- Фестивальная система вносят результаты сами участники--}}
                                                         @include('event.buttons.send_result')
+                                                    @endif
                                                 @endif
                                             @endif
 
                                         @endif
                                     @else
-                                        @include('event.selects.birthday')
-                                        @include('event.selects.genders')
-                                        @include('event.selects.categories')
-                                        @include('event.selects.sets_take_part')
-                                        @include('event.buttons.take_part')
+                                        @if($event->is_registration_state)
+                                            @include('event.selects.birthday')
+                                            @include('event.selects.genders')
+                                            @include('event.selects.categories')
+                                            @if(!$event->is_input_set)
+                                                 @include('event.selects.sets_take_part')
+                                            @endif
+                                            @include('event.buttons.take_part')
+                                        @else
+                                            @include('event.buttons.reg-close')
+                                        @endif
                                         <div id="error-message" class="text-danger"></div>
                                     @endif
                                 @endauth
@@ -125,6 +142,7 @@
                                             <div class="section-title">
                                                 <h2>Контакты</h2>
                                                 <p>{{$event->contact}}</p>
+                                                <a href="{{$event->contact_link}}">Ссылка на сеть</a>
                                             </div>
                                         </div>
                                     </section>

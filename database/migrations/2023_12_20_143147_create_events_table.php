@@ -22,6 +22,7 @@ class CreateEventsTable extends Migration
             $table->string('document')->nullable();
             $table->longText('description')->nullable();
             $table->text('contact')->nullable();
+            $table->text('contact_link')->nullable();
             $table->string('image')->nullable();
             $table->string('climbing_gym_name');
             $table->string('climbing_gym_name_eng');
