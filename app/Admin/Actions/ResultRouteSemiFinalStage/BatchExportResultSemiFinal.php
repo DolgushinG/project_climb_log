@@ -21,14 +21,13 @@ class BatchExportResultSemiFinal extends Action
 
     public function handle(Request $request)
     {
-        return $this->response()->download('exports/events/'.$request->format_export.'/semifinal/'.$request->title);
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+        return $this->response()->download('exports/events/'.$request->format_export.'/semifinal/'.$event->id);
     }
 
     public function form()
     {
         $this->modalSmall();
-        $events = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->get()->pluck('title','id');
-        $this->select('title', 'Сореванование')->options($events);
         $this->radio('format_export', 'Какой формат')->options(
             [
                 "excel" => "excel"

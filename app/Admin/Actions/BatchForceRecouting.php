@@ -21,17 +21,14 @@ class BatchForceRecouting extends Action
 
     public function handle(Request $request)
     {
-        $event_id = $request->title;
-        $event = Event::find($event_id);
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         Event::refresh_final_points_all_participant($event);
         return $this->response()->success('Пересчитано')->refresh();
     }
 
-    public function form()
+    public function dialog()
     {
-        $this->modalSmall();
-        $events = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->get()->pluck('title','id');
-        $this->select('title', 'Сореванование')->options($events);
+        $this->confirm('Подтвердить перерасчет');
     }
 
     public function html()

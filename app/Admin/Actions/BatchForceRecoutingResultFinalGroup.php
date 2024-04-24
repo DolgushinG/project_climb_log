@@ -22,20 +22,17 @@ class BatchForceRecoutingResultFinalGroup extends Action
 
     public function handle(Request $request)
     {
-        $event_id = $request->title;
-        $event = Event::find(intval($event_id));
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         $event->is_additional_final = 1;
         $event->save();
-        ResultFinalStage::where('event_id', intval($event_id))->delete();
-        Event::refresh_final_points_all_participant_in_final(intval($event_id));
+        ResultFinalStage::where('event_id', $event->id)->delete();
+        Event::refresh_final_points_all_participant_in_final($event->id);
         return $this->response()->success('Пересчитано')->refresh();
     }
 
-    public function form()
+    public function dialog()
     {
-        $this->modalSmall();
-        $events = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->get()->pluck('title','id');
-        $this->select('title', 'Сореванование')->options($events);
+        $this->confirm('Подтвердить пересчет результата по полу и группе');
     }
 
     public function html()

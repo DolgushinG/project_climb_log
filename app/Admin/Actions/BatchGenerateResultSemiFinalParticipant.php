@@ -25,8 +25,7 @@ class BatchGenerateResultSemiFinalParticipant extends Action
     public function handle(Request $request)
     {
         $owner_id = \Encore\Admin\Facades\Admin::user()->id;
-        $event_id = $request->title;
-        $event = Event::find($event_id);
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         if($event->is_qualification_counting_like_final){
             Generators::prepare_result_participant($owner_id, $event->id,'result_route_qualification_like_final');
         } else {
@@ -36,11 +35,9 @@ class BatchGenerateResultSemiFinalParticipant extends Action
         return $this->response()->success('Готово')->refresh();
     }
 
-    public function form()
+    public function dialog()
     {
-        $this->modalSmall();
-        $events = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->get()->pluck('title', 'id')->toArray();
-        $this->select('title', 'Сореванование')->options($events);
+        $this->confirm('Подтвердить генерацию результатов финала по результатам полуфинала');
     }
 
     public function html()

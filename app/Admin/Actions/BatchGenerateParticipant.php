@@ -27,9 +27,8 @@ class BatchGenerateParticipant extends Action
     public function handle(Request $request)
     {
         $owner_id = \Encore\Admin\Facades\Admin::user()->id;
-        $event_id = $request->title;
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         $count = intval($request->count);
-        $event = Event::find($event_id);
         if($event->is_qualification_counting_like_final){
             $table_result = 'result_qualification_like_final';
             $table_result_routes = 'result_route_qualification_like_final';
@@ -70,9 +69,7 @@ class BatchGenerateParticipant extends Action
     public function form()
     {
         $this->modalSmall();
-        $events = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->get()->pluck('title', 'id')->toArray();
         $this->integer('count', 'Сколько участников');
-        $this->select('title', 'Сореванование')->options($events);
     }
 
     public function html()
