@@ -378,4 +378,17 @@ class Participant extends Model
         }
 
     }
+
+    public static function send_message_from_climbing_gym($subject, $message, $user, $climbing_gym_name)
+    {
+        if (!str_contains($user['email'], 'telegram')) {
+            $details = array();
+            $details['subject'] = $subject;
+            $details['message'] = $message;
+            $details['middlename'] = $user['middlename'];
+            $details['climbing_gym_name'] = $climbing_gym_name;
+            Mail::to($user['email'])->queue(new \App\Mail\MessageParticipants($details));
+        }
+
+    }
 }

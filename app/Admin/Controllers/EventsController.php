@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchNotificationOfParticipant;
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionExportCardParticipant;
 use App\Admin\Extensions\CustomButton;
@@ -145,7 +146,12 @@ class EventsController extends Controller
             $actions->append(new ActionExport($actions->getKey(), 'all', 'excel'));
             $actions->append(new ActionExportCardParticipant($actions->getKey(), 'Карточка участника'));
         });
-
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+        if($event){
+            $grid->tools(function (Grid\Tools $tools) {
+                $tools->append(new BatchNotificationOfParticipant);
+            });
+        }
         $grid->disableFilter();
         $grid->disableExport();
         $grid->column('title', 'Название');
