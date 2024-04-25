@@ -41,7 +41,9 @@
                                                             @endif
                                                         @endif
                                                 @else
-                                                        @include('event.buttons.pay')
+                                                        @if($event->is_registration_state)
+                                                            @include('event.buttons.pay')
+                                                        @endif
                                                 @endif
                                             @else
                                                 {{-- Француская система в ней результаты вносят судьи--}}
@@ -120,12 +122,14 @@
                                             aria-controls="profile" aria-selected="false">Положение
                                     </button>
                                 </li>
-                                <li class="nav-item flex-fill" role="presentation" style="margin-right: 8px!important;">
-                                    <button class="nav-link w-100" id="contact-tab" data-bs-toggle="tab"
-                                            data-bs-target="#bordered-justified-contact" type="button" role="tab"
-                                            aria-controls="contact" aria-selected="false">Стартовый взнос
-                                    </button>
-                                </li>
+                                @if($event->is_registration_state)
+                                    <li class="nav-item flex-fill" role="presentation" style="margin-right: 8px!important;">
+                                        <button class="nav-link w-100" id="contact-tab" data-bs-toggle="tab"
+                                                data-bs-target="#bordered-justified-contact" type="button" role="tab"
+                                                aria-controls="contact" aria-selected="false">Стартовый взнос
+                                        </button>
+                                    </li>
+                                @endif
                             </ul>
                             <div class="tab-content pt-2" id="borderedTabJustifiedContent">
                                 <div class="tab-pane fade show active" id="bordered-justified-info" role="tabpanel"

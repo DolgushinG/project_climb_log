@@ -355,6 +355,9 @@ class Participant extends Model
             $details['event_start_date'] = $event->start_date;
             $details['event_url'] = $event->link;
             $details['link_payment'] = $event->link_payment;
+            if($event->registration_time_expired){
+                $details['pay_time_expired'] = $event->registration_time_expired;
+            }
             $details['img_payment'] = $event->img_payment;
             $details['info_payment'] = $event->info_payment;
             $details['image'] = $event->image;

@@ -228,8 +228,6 @@ class EventsController extends Controller
             $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
         })->tab('Параметры соревнования', function ($form) use ($id) {
-            $form->html('<p>*Классика - квалификация и полуфинал/финал для лучших в квалификации, </p>');
-            $form->html('<p>*Как финальный раунд - то есть квалификация будет считаться как по кол-ву топов и зон </p>');
             $form->radio('is_qualification_counting_like_final','Настройка подсчета квалификации')
                 ->options([
                     0 =>'Фестивальная система(Баллы и коэффициенты)',

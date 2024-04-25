@@ -4,7 +4,10 @@
     <h2><strong>{{ $details['title'] }}</strong><h2/><br>
 {{--        <img width="100%" src="{{asset('storage/'.$details['image'])}}" alt="">   <br>--}}
     <h3>Дата старта  : <strong>{{ $details['event_start_date'] }}</strong><h3/><br>
-    <h3><strong>Для завершения регистрации пожалуйста оплатите участие</strong><br>
+    <h3><strong>Для завершения регистрации пожалуйста оплатите участие или</strong><br>
+        @isset($details['pay_time_expired'])
+            <h3 style="color:red"><strong>регистрация сгорит через {{$details['pay_time_expired']}} - {{\App\Helpers\Helpers::echo_days($details['pay_time_expired'])}}</strong><br>
+        @endisset
     @isset($details['info_payment'])
         <h2>Информация об оплате:</h2><br>
     @endisset

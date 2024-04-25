@@ -92,4 +92,14 @@ class Helpers
         }
         return $result;
     }
+
+    public static function echo_days($days) {
+        if($days % 10 == 1 && ($days % 100 > 19 || $days < 11 )) {
+            return "день";
+        } else if ($days % 10 > 1 && $days % 10 < 5 && ($days % 100 >19 || $days < 11 )) {
+            return "дня";
+        } else {
+            return "дней";
+        }
+    }
 }

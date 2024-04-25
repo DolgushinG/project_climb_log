@@ -12,6 +12,11 @@
                     <span class="badge bg-success" style="font-size: 22px"> ОПЛАЧЕНО </span><br>
                 </div>
             @else
+                @if($event->registration_time_expired)
+                    <div class="container text-center pt-2 pb-2">
+                        <span style="font-size: 22px">Без оплаты регистрация сгорит через {{$event->registration_time_expired}} - {{\App\Helpers\Helpers::echo_days($event->registration_time_expired)}}</span><br>
+                    </div>
+                @endif
                 <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
                      aria-hidden="true">
                     <div class="modal-dialog modal-lg" role="document">
