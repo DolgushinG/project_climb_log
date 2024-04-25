@@ -23,7 +23,11 @@
                     <i class="fa fa-envelope"></i>
                 </div>
                 <div class="list-details" style="overflow: hidden; overflow-wrap: break-word;max-width:250px;">
-                    <span >{{$user->email ?? ''}}</span>
+                    @if(str_contains($user->email, 'telegram'))
+                        <span></span>
+                    @else
+                        <span >{{$user->email ?? ''}}</span>
+                    @endif
                     <small>Email</small>
                 </div>
             </li>

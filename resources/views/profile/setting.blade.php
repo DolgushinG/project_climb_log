@@ -3,7 +3,7 @@
         <div class="row mb-3">
             <div class="col-md-8 col-lg-9">
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <label for="" class="form-label">Вход был выполнен через сервисы рекомендуется заполнить пароль</label>
+                    <label for="" class="form-label">Вход был выполнен через сервисы рекомендуется заполнить пароль чтобы можно были входить по логину и паролю</label>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </div>

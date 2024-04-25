@@ -2,11 +2,22 @@
 @section('content')
     <section id="contact" class="d-flex align-items-center">
         <div class="container" data-aos="zoom-out" data-aos-delay="100">
+
         </div>
     </section><!-- End Hero -->
     <link href="{{asset('vendor/helpers/css_suggestions.css')}}" rel="stylesheet" />
     <script src="{{asset('vendor/helpers/jquery.suggestions.js')}}"></script>
     <main id="main" class="main">
+        @if(str_contains($user->email, 'telegram'))
+        <div class="container d-flex align-items-center" data-aos="zoom-out" data-aos-delay="100">
+            <div class="alert alert-warning  alert-dismissible fade show w-100" role="alert">
+                <h4 class="alert-heading">Добро пожаловать {{$user->middlename}}! </h4>
+                <p>У вас был вход через Telegram, вам необходимо заполнить ваш email для участия в соревнованиях</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <h4></h4>
+        </div>
+        @endif
         <section class="section profile">
             <div class="container">
                 <div class="row">

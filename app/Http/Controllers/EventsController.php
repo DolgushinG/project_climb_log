@@ -179,7 +179,8 @@ class EventsController extends Controller
 
     public function store(StoreRequest $request) {
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
-        if(!$event || !$event->is_registration_state ){
+        $user = User::find($request->user_id);
+        if(!$event || !$event->is_registration_state || str_contains($user->email, 'telegram')){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
         $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
