@@ -11,6 +11,7 @@ use App\Models\ParticipantCategory;
 use App\Models\ResultParticipant;
 use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultSemiFinalStage;
+use App\Models\Route;
 use Encore\Admin\Actions\Action;
 use Encore\Admin\Actions\BatchAction;
 use Encore\Admin\Facades\Admin;
@@ -74,7 +75,10 @@ class BatchGenerateParticipant extends Action
 
     public function html()
     {
-        return "<a class='generate-participant btn btn-sm btn-warning '><i class='fa fa-trophy'></i> Сгенерировать участников [beta](Ожидание до ~ 2 мин)</a>
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+        $exist_routes = Route::where('event_id', $event->id)->first();
+        if($exist_routes){
+            return "<a class='generate-participant btn btn-sm btn-warning '><i class='fa fa-trophy'></i> Сгенерировать участников [beta](Ожидание до ~ 2 мин)</a>
             <style>
                  .generate-participant {margin-top:8px;}
                 @media screen and (max-width: 767px) {
@@ -82,6 +86,17 @@ class BatchGenerateParticipant extends Action
                     }
             </style>
         ";
+        } else {
+            return "<button class='generate-participant btn btn-sm btn-warning' disabled><i class='fa fa-trophy'></i> Сгенерировать участников (Неообходимо настроить трассы)</button>
+            <style>
+                 .generate-participant {margin-top:8px;}
+                @media screen and (max-width: 767px) {
+                    .generate-participant {margin-top:8px;}
+                    }
+            </style>
+        ";
+        }
+
     }
 
 }

@@ -42,6 +42,7 @@ class BatchGenerateResultSemiFinalParticipant extends Action
 
     public function html()
     {
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         return "<a class='generate-result-semifinal-participant btn btn-sm btn-warning'><i class='fa fa-trophy'></i> Сгенерировать результаты[beta]</a>
             <style>
                  .generate-result-semifinal-participant {margin-top:8px;}

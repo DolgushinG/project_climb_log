@@ -17,6 +17,7 @@ use App\Models\ParticipantCategory;
 use App\Models\ResultParticipant;
 use App\Models\ResultQualificationLikeFinal;
 use App\Models\ResultRouteQualificationLikeFinal;
+use App\Models\Route;
 use App\Models\Set;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -303,15 +304,15 @@ class EventsController extends Controller
             $form->datetime('datetime_registration_state', 'Дата закрытия регистрации [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
             $form->switch('is_send_result_state', 'Отправка результатов')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->datetime('datetime_send_result_state', 'Дата закрытия отправки результатов [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
-            $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-            if(!$events){
+            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+            if(!$event){
                 $help = 'Самая важная функция, чтобы текущие сореванование отображались во вкладках "Квалификация,полуфинал,финал"
                 нужно активировать';
                 $form->switch('active', 'Активировать соревнование для просмотра и управления')
                     ->help($help)
                     ->states(self::STATES_BTN);
             } else {
-                if($events->id != intval($id)){
+                if($event->id != intval($id)){
                     $help = 'Только одно соревнование может быть активировано для управление, если нельзя нажать значит какое-то соревнование уже активировано';
                     $form->switch('active', 'Активировать соревнование для просмотра и управления')
                         ->help($help)
@@ -325,9 +326,18 @@ class EventsController extends Controller
                         ->states(self::STATES_BTN);
                 }
             }
-            $form->switch('is_public', 'Опубликовать для всех')
-                ->help('После включения, все смогут зайти на страницу с соревнованиями')
-                ->states(self::STATES_BTN);
+            $exist_routes = Route::where('event_id', $event->id)->first();
+            if($exist_routes){
+                $form->switch('is_public', 'Опубликовать для всех')
+                    ->help('После включения, все смогут зайти на страницу с соревнованиями')
+                    ->states(self::STATES_BTN);
+            } else {
+                $help = 'Необходимо добавить трассы в разделе настройка трасс, после этого можно опубликовать для всех';
+                $form->switch('is_public', 'Опубликовать для всех')
+                    ->help($help)
+                    ->states(self::STATES_BTN)->readOnly();
+            }
+
 
         });
 
