@@ -34,11 +34,8 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            if ($e instanceof \Exception) {
-                $message = $e->getMessage();
-                $this->sendTelegramMessage($message);
-            }
-
+            $message = 'Message - '.$e->getMessage().PHP_EOL.'File - '.$e->getFile().PHP_EOL.'Line -'.$e->getLine();
+            $this->sendTelegramMessage($message);
         });
     }
 
