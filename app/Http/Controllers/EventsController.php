@@ -137,7 +137,7 @@ class EventsController extends Controller
         return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
     }
 
-    public function get_final_results(Request $request, $start_date, $climbing_gym, $title)
+    public function get_qualification_classic_results(Request $request, $start_date, $climbing_gym, $title)
     {
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
 //        $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
@@ -171,10 +171,31 @@ class EventsController extends Controller
         } else {
             return view('404');
         }
-        return view('event.final_result', compact(['event', 'result',  'categories', 'stats']));
+        return view('event.qualification_classic_results', compact(['event', 'result',  'categories', 'stats']));
     }
 
 
+    public function get_qualification_france_system_results(Request $request, $start_date, $climbing_gym, $title)
+    {
+        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
+        $routes = Route::where('event_id', $event->id)->pluck('route_id');
+        if($event){
+            if($event->is_qualification_counting_like_final){
+                $result_each_routes = array();
+                foreach ($event->categories as $category) {
+                    $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
+                    $users_female2 = Event::get_france_system_result('result_qualification_like_final', $event->id, 'female', $category)->toArray();
+                    $users_male2 = Event::get_france_system_result('result_qualification_like_final', $event->id, 'male', $category)->toArray();
+                    $result_each_routes['male'][$category->id] = $users_female2;
+                    $result_each_routes['female'][$category->id] = $users_male2;
+                }
+            }
+        } else {
+            return view('404');
+        }
+        return view('event.qualification_france_system_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
+    }
 
 
     public function store(StoreRequest $request) {

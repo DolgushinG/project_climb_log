@@ -16,9 +16,9 @@
                                     class="badge bg-success text-light">{{$stats->male}}</span></h5>
                             <!-- Bordered Tabs Justified -->
                             <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
-                                @foreach($categories as $category)
+                                @foreach($categories as $index => $category)
                                     <li class="nav-item mr-2 flex-fill" role="presentation" style="margin-right: 8px!important;">
-                                        <button class="nav-link w-100" id="{{$category['id']}}-tab"
+                                        <button class="nav-link w-100 {{ $index == 0 ? 'active' : '' }}" id="{{$category['id']}}-tab"
                                                 data-bs-toggle="tab"
                                                 data-bs-target="#bordered-justified-{{$category['id']}}" type="button"
                                                 role="tab" aria-controls="{{$category['id']}}"
@@ -29,8 +29,8 @@
                                 @endforeach
                             </ul>
                             <div class="tab-content pt-2" id="borderedTabJustifiedContent">
-                                @foreach($categories as $category)
-                                        <div class="tab-pane fade show" id="bordered-justified-{{$category['id']}}"
+                                @foreach($categories as $index => $category)
+                                        <div class="tab-pane fade show {{ $index == 0 ? 'active' : '' }}" id="bordered-justified-{{$category['id']}}"
                                              role="tabpanel" aria-labelledby="{{$category['id']}}-tab">
                                             <table class="table table-auto font-size table-striped">
                                                 <thead>
@@ -77,9 +77,9 @@
                             <!-- Bordered Tabs Justified -->
                             <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified"
                                 role="tablist">
-                                @foreach($categories as $category)
+                                @foreach($categories as $index => $category)
                                     <li class="nav-item flex-fill" role="presentation" style="margin-right: 8px!important;">
-                                        <button class="nav-link mr-2 w-100" id="tab-women-{{$category['id']}}"
+                                        <button class="nav-link mr-2 w-100 {{ $index == 0 ? 'active' : '' }}" id="tab-women-{{$category['id']}}"
                                                 data-bs-toggle="tab"
                                                 data-bs-target="#bordered-justified-women-{{$category['id']}}"
                                                 type="button" role="tab" aria-controls="women-{{$category['id']}}"
@@ -90,8 +90,8 @@
                                 @endforeach
                             </ul>
                             <div class="tab-content pt-2" id="borderedTabJustifiedContent">
-                                @foreach($categories as $category)
-                                    <div class="tab-pane fade show" id="bordered-justified-women-{{$category['id']}}" role="tabpanel" aria-labelledby="tab-women-{{$category['id']}}">
+                                @foreach($categories as $index => $category)
+                                    <div class="tab-pane fade show {{ $index == 0 ? 'active' : '' }}" id="bordered-justified-women-{{$category['id']}}" role="tabpanel" aria-labelledby="tab-women-{{$category['id']}}">
                                         <table class="table table-sm table-striped">
                                         <thead>
                                             <tr>

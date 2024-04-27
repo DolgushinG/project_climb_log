@@ -36,4 +36,21 @@ class ResultQualificationLikeFinal extends Model
         $after_slice_participant_final_sort_id = array_slice($participant_final_sort_id->toArray(), 0, $amount_better);
         return User::whereIn('id', $after_slice_participant_final_sort_id)->get();
     }
+
+    public static function get_users_qualification_result($table, $event_id, $gender)
+    {
+        return User::query()
+            ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+            ->where($table.'.event_id', '=', $event_id)
+            ->select(
+                $table.'.place',
+                'users.id',
+                'users.middlename',
+                $table.'.category_id',
+                $table.'.amount_top',
+                $table.'.amount_try_top',
+                $table.'.amount_zone',
+                $table.'.amount_try_zone',
+            )->where($table.'.gender', '=', $gender)->get();
+    }
 }

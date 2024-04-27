@@ -35,7 +35,9 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             $message = 'Message - '.$e->getMessage().PHP_EOL.'File - '.$e->getFile().PHP_EOL.'Line -'.$e->getLine();
-            $this->sendTelegramMessage($message);
+            if(env('TELEGRAM_CHAT_ID')){
+                $this->sendTelegramMessage($message);
+            }
         });
     }
 

@@ -4,6 +4,7 @@ namespace App\Admin\Actions\ResultRouteQualificationLikeFinalStage;
 
 use App\Admin\Controllers\ResultRouteSemiFinalStageController;
 use App\Models\Event;
+use App\Models\Grades;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultQualificationLikeFinal;
@@ -66,6 +67,7 @@ class BatchResultQualificationLikeFinal extends Action
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
+        $count_routes = Grades::where('event_id', $event->id)->first()->count_routes;
         $participant_users_id = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
         $result = User::whereIn('id', $participant_users_id)->pluck( 'middlename','id');
         $result_qualification_like_final = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
@@ -80,7 +82,7 @@ class BatchResultQualificationLikeFinal extends Action
         }
         $this->select('user_id', 'Участник')->options($result)->required(true);
         $this->hidden('event_id', '')->value($event->id);
-        for($i = 1; $i <= $event->amount_routes_in_qualification_like_final; $i++){
+        for($i = 1; $i <= $count_routes; $i++){
             $this->integer('route_id_'.$i, 'Трасса')->value($i)->readOnly();
             $this->integer('amount_try_top_'.$i, 'Попытки на топ');
             $this->integer('amount_try_zone_'.$i, 'Попытки на зону');

@@ -280,10 +280,12 @@ class EventsController extends Controller
                 $form->customlist('categories', 'Категории участников');
             } else {
                 $form->list('categories', 'Категории участников')->rules('required|min:2');
+
                 $form->radio('is_auto_categories','Настройка категорий')
                     ->options([0 => 'Сами участники выбирают категорию при регистрации', 1 => 'Автоопределение категории по параметрам'])
                     ->when(0, function (Form $form) {
                     })->when(1, function (Form $form) {
+                        $form->html('<h4 style="color: red" >Автоопределение категории по параметрам работает только при фестивальной системе</h4>');
                         $form->table('options_categories', '', function ($table) use ($form){
                             $table->select('Категория участника')->options($form->model()->categories)->readonly();
                             $table->select('От какой категории сложности определять эту категорию')->options(Grades::getGrades())->width('30px');
@@ -337,8 +339,6 @@ class EventsController extends Controller
                     ->help($help)
                     ->states(self::STATES_BTN)->readOnly();
             }
-
-
         });
 
         $form->tools(function (Form\Tools $tools) {

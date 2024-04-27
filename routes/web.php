@@ -37,7 +37,8 @@ Route::get('event/{start_date}/{climbing_gym}/getInfoPayment/{event_id}', [App\H
 Route::get('event/{start_date}/{climbing_gym}/getInfoPaymentBill/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_payment_bill']);
 Route::get('/admin/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::get('/event/{start_date}/{climbing_gym}/{title}/participants', [App\Http\Controllers\EventsController::class, 'get_participants'])->name('participants');
-Route::get('/event/{start_date}/{climbing_gym}/{title}/final/results', [App\Http\Controllers\EventsController::class, 'get_final_results'])->name('final_results');
+Route::get('/event/{start_date}/{climbing_gym}/{title}/qualificationClassic/results', [App\Http\Controllers\EventsController::class, 'get_qualification_classic_results'])->name('get_qualification_classic_results');
+Route::get('/event/{start_date}/{climbing_gym}/{title}/qualificationFranceSystem/results', [App\Http\Controllers\EventsController::class, 'get_qualification_france_system_results'])->name('get_qualification_france_system_results');
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile');
     Route::get('/getProfileOverview', [App\Http\Controllers\ProfileController::class, 'getTabContentOverview'])->name('getProfileOverview');

@@ -10,6 +10,7 @@ use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultParticipant;
 use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
 use Encore\Admin\Actions\Action;
@@ -34,7 +35,8 @@ class BatchGenerateParticipant extends Action
             $table_result = 'result_qualification_like_final';
             $table_result_routes = 'result_route_qualification_like_final';
             $text = 'готово';
-            $exist_participants = ResultQualificationLikeFinal::where('event_id',  $event->id)->first();
+            ResultRouteQualificationLikeFinal::where('event_id',  $event->id)->delete();
+            ResultQualificationLikeFinal::where('event_id',  $event->id)->delete();
         } else {
             $table_result = 'participants';
             $table_result_routes = 'result_participant';

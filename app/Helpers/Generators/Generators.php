@@ -136,6 +136,7 @@ class Generators
         if($table === 'result_route_qualification_like_final') {
             ResultRouteQualificationLikeFinal::where('event_id', $event_id)->delete();
             $event = Event::find($event_id);
+            $count_routes = Grades::where('event_id', $event_id)->first()->count_routes;
             $event_categories = $event->categories;
             $participants = ResultQualificationLikeFinal::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
             $result = array();
@@ -147,7 +148,7 @@ class Generators
                 } else {
                     Log::error('Category has not found '.$category.' category_random'.$event_categories[array_rand($event_categories)].' event_id'.$event_id);
                 }
-                for ($route = 1; $route <= $event->amount_routes_in_qualification_like_final; $route++) {
+                for ($route = 1; $route <= $count_routes; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {
                         $amount_try_zone = rand(1, 10);
@@ -182,7 +183,7 @@ class Generators
                 if($event->is_qualification_counting_like_final){
                     $participant = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 }
-                for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
+                for ($route = 1; $route <= $count_routes; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {
                         $amount_try_zone = rand(1, 10);

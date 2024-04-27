@@ -94,7 +94,10 @@
                                 <a href="{{route('participants', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Список участников</a>
                                 @if(!$event->is_qualification_counting_like_final)
-                                    <a href="{{route('final_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                    <a href="{{route('get_qualification_classic_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                       class="btn btn-primary rounded-pill">Предворительные результаты</a>
+                                @else
+                                    <a href="{{route('get_qualification_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                        class="btn btn-primary rounded-pill">Предворительные результаты</a>
                                 @endif
                             </div>

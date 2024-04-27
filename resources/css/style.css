@@ -54,7 +54,22 @@ h5,
 h6 {
   font-family: "Roboto", sans-serif;
 }
+.result-try {
+    --bs-badge-padding-x: 0.65em;
+    --bs-badge-padding-y: 0.35em;
+    --bs-badge-font-size: 0.80em;
+    --bs-badge-color: #fff;
+    display: inline-block;
+    padding: var(--bs-badge-padding-y) var(--bs-badge-padding-x);
+    font-size: var(--bs-badge-font-size);
+    font-weight: var(--bs-badge-font-weight);
+    color: var(--bs-badge-color);
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    width: 28px;
 
+}
 /*--------------------------------------------------------------
 # Preloader
 --------------------------------------------------------------*/
@@ -774,7 +789,11 @@ section {
   .breadcrumbs ol {
     display: block;
   }
-
+    .table{
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
   .breadcrumbs ol li {
     display: inline-block;
   }
