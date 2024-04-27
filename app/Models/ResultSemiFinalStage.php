@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ResultSemiFinalStage extends Model
 {
     protected $table = 'result_semifinal_stage';
+    public $timestamps = true;
 
     public function event()
     {

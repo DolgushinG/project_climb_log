@@ -10,6 +10,7 @@ use function Symfony\Component\String\s;
 class Participant extends Model
 {
     use HasFactory;
+    public $timestamps = true;
 
     protected $table = 'participants';
 

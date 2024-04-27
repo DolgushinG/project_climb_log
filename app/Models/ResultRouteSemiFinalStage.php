@@ -9,6 +9,7 @@ use stdClass;
 class ResultRouteSemiFinalStage extends Model
 {
     protected $table = 'result_route_semifinal_stage';
+    public $timestamps = true;
 
     public function event()
     {

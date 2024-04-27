@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ResultRouteFinalStage extends Model
 {
     protected $table = 'result_route_final_stage';
+    public $timestamps = true;
 
     public function event()
     {

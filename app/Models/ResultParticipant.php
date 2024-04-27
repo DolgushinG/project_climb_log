@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 
 class ResultParticipant extends Model
 {
+    public $timestamps = true;
+
     const FLASH = 1;
 
     const STATUS_PASSED_FLASH = "1";

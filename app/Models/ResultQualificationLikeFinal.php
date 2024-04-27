@@ -8,6 +8,9 @@ class ResultQualificationLikeFinal extends Model
 {
     protected $table = 'result_qualification_like_final';
 
+    public $timestamps = true;
+
+
     public function event()
     {
         return $this->belongsTo(Event::class)->where('active', '=', 1);

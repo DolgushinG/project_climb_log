@@ -16,6 +16,7 @@ use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
+use Carbon\Carbon;
 use Database\Seeders\ParticipantSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -92,13 +93,13 @@ class Generators
                 $user->category = $category_id;
                 $user->save();
                 $sets = Set::where('owner_id', $owner_id)->pluck('id','number_set')->toArray();
-                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'category_id' => $category_id,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1);
+                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'category_id' => $category_id,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         } else {
             for ($i = 1; $i <= $users; $i++) {
                 $user = User::find($i);
                 $sets = Set::where('owner_id', $owner_id)->pluck('id','number_set')->toArray();
-                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1);
+                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         }
 
@@ -123,7 +124,7 @@ class Generators
                         (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route->route_id, $owner_id, $active_participant->gender);
                     }
                     $attempt = Grades::getAttemptFromGrades($route->grade, $group);
-                    $result_participant[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route->route_id,'attempt' => $attempt,'grade' => $route->grade);
+                    $result_participant[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route->route_id,'attempt' => $attempt,'grade' => $route->grade, 'created_at' => Carbon::now());
                 }
                 $participant = Participant::where('event_id', $event_id)->where('user_id', $active_participant->user_id)->first();
                 $participant->result_for_edit = $result_participant;
@@ -164,7 +165,7 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $participant->gender,'user_id' => $participant->user_id,'category_id' => $category_id, 'route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $participant->gender,'user_id' => $participant->user_id,'category_id' => $category_id, 'route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
                 }
             }
             DB::table('result_route_qualification_like_final')->insert($result);
@@ -199,7 +200,7 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'],'category_id' => $participant->category_id,'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'],'category_id' => $participant->category_id,'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
                 }
             }
             DB::table('result_route_semifinal_stage')->insert($result);
@@ -235,7 +236,7 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'], 'user_id' => $user['id'],'category_id' => $participant->category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone);
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'], 'user_id' => $user['id'],'category_id' => $participant->category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
                 }
             }
             DB::table('result_route_final_stage')->insert($result);

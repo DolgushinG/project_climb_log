@@ -11,6 +11,7 @@ use function Symfony\Component\String\s;
 class Grades extends Model
 {
     protected $table = 'grades';
+    public $timestamps = true;
 
     protected $casts = [
         'grade_and_amount' =>'json',
