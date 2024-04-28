@@ -100,6 +100,14 @@
                                     <a href="{{route('get_qualification_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                        class="btn btn-primary rounded-pill">Предворительные результаты</a>
                                 @endif
+                                @if($event->is_semifinal && $is_show_button_semifinal)
+                                    <a href="{{route('get_semifinal_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                       class="btn btn-success rounded-pill">Результаты полуфинала</a>
+                                @endif
+                                    @if($is_show_button_final)
+                                    <a href="{{route('get_final_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                       class="btn btn-success rounded-pill">Результаты финала</a>
+                                    @endif
                             </div>
                         </div>
                     </div>

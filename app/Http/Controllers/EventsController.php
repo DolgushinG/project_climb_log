@@ -10,8 +10,10 @@ use App\Models\EventAndCoefficientRoute;
 use App\Models\Grades;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
+use App\Models\ResultFinalStage;
 use App\Models\ResultParticipant;
 use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
@@ -60,8 +62,10 @@ class EventsController extends Controller
                 $set->procent = intval($percent);
                 $set->date = Helpers::getDatesByDayOfWeek($event_exist->start_date, $event_exist->end_date);
             }
+            $is_show_button_final = boolval(ResultFinalStage::where('event_id', $event->id)->first());
+            $is_show_button_semifinal = boolval(ResultSemiFinalStage::where('event_id', $event->id)->first());
             $sport_categories = User::sport_categories;
-            return view('welcome', compact(['event', 'sport_categories', 'sets']));
+            return view('welcome', compact(['event', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('404');
         }
@@ -194,7 +198,54 @@ class EventsController extends Controller
         } else {
             return view('404');
         }
-        return view('event.qualification_france_system_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
+        return view('event.france_system_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
+    }
+
+    public function get_semifinal_france_system_results(Request $request, $start_date, $climbing_gym, $title)
+    {
+        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
+        $routes = array();
+        for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
+            $routes[] = $route;
+        }
+        if($event){
+            $result_each_routes = array();
+            foreach ($event->categories as $category) {
+                $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
+                $users_female2 = Event::get_france_system_result('result_semifinal_stage', $event->id, 'female', $category)->toArray();
+                $users_male2 = Event::get_france_system_result('result_semifinal_stage', $event->id, 'male', $category)->toArray();
+                $result_each_routes['male'][$category->id] = $users_female2;
+                $result_each_routes['female'][$category->id] = $users_male2;
+            }
+        } else {
+            return view('404');
+        }
+        return view('event.france_system_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
+    }
+
+    public function get_final_france_system_results(Request $request, $start_date, $climbing_gym, $title)
+    {
+        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
+        $routes = array();
+        for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
+            $routes[] = $route;
+        }
+        if($event){
+            $result_each_routes = array();
+            foreach ($event->categories as $category) {
+                $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
+                $users_female2 = Event::get_france_system_result('result_final_stage', $event->id, 'female', $category)->toArray();
+                $users_male2 = Event::get_france_system_result('result_final_stage', $event->id, 'male', $category)->toArray();
+                $result_each_routes['male'][$category->id] = $users_female2;
+                $result_each_routes['female'][$category->id] = $users_male2;
+            }
+
+        } else {
+            return view('404');
+        }
+        return view('event.france_system_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
 
 

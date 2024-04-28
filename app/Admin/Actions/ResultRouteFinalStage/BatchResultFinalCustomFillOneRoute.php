@@ -53,13 +53,13 @@ class BatchResultFinalCustomFillOneRoute extends Action
         $data[] = array('owner_id' => \Encore\Admin\Facades\Admin::user()->id,
             'user_id' => intval($results['user_id']),
             'event_id' => intval($results['event_id']),
-            'final_route_id' => intval($results['final_route_id_'.$i]),
+            'final_route_id' => intval($results['final_route_id']),
             'category_id' => $category_id,
             'amount_top' => $amount_top,
             'gender' => $gender,
-            'amount_try_top' => intval($results['amount_try_top_'.$i]),
+            'amount_try_top' => intval($results['amount_try_top']),
             'amount_zone' => $amount_zone,
-            'amount_try_zone' => intval($results['amount_try_zone_'.$i]),
+            'amount_try_zone' => intval($results['amount_try_zone']),
         );
         $final_route_id = intval($results['final_route_id']);
         $user = User::find(intval($results['user_id']))->middlename;
@@ -70,7 +70,7 @@ class BatchResultFinalCustomFillOneRoute extends Action
             return $this->response()->error('Результат уже есть по '.$user.' и трассе '.$final_route_id);
         } else {
             DB::table('result_route_final_stage')->insert($data);
-            Event::refresh_final_points_all_participant_in_semifinal($event->id);
+            Event::refresh_final_points_all_participant_in_final($event->id);
             return $this->response()->success('Результат успешно внесен')->refresh();
         }
     }
@@ -97,12 +97,12 @@ class BatchResultFinalCustomFillOneRoute extends Action
             }
         }
         $routes = [];
-        for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
+        for($i = 1; $i <= $event->amount_routes_in_final; $i++){
             $routes[$i] = $i;
         }
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
-        $this->select('final_route_id', 'Трасса')->value($routes);
+        $this->select('final_route_id', 'Трасса')->options($routes);
         $this->integer('amount_try_top', 'Попытки на топ');
         $this->integer('amount_try_zone', 'Попытки на зону');
         Admin::script("// Получаем все элементы с атрибутом modal

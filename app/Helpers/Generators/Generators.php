@@ -183,7 +183,7 @@ class Generators
                 if($event->is_qualification_counting_like_final){
                     $participant = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 }
-                for ($route = 1; $route <= $count_routes; $route++) {
+                for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {
                         $amount_try_zone = rand(1, 10);
