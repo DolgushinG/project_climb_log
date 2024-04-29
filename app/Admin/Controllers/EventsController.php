@@ -328,8 +328,7 @@ class EventsController extends Controller
                         ->states(self::STATES_BTN);
                 }
             }
-            if($event){
-                $exist_routes = Route::where('event_id', $event->id)->first();
+            $exist_routes = Route::where('event_id', $id)->first();
             if($exist_routes){
                 $form->switch('is_public', 'Опубликовать для всех')
                     ->help('После включения, все смогут зайти на страницу с соревнованиями')
@@ -340,8 +339,6 @@ class EventsController extends Controller
                     ->help($help)
                     ->states(self::STATES_BTN)->readOnly();
             }
-            }
-            
         });
 
         $form->tools(function (Form\Tools $tools) {
