@@ -36,8 +36,7 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
 
             $message = 'Message - '.$e->getMessage().PHP_EOL.'File - '.$e->getFile().PHP_EOL.'Line - '.$e->getLine();
-//            dd($message);
-            if(env('TELEGRAM_CHAT_ID')){
+            if(env('APP_ENV') == "prod"){
                 $this->sendTelegramMessage($message);
             }
         });
@@ -45,7 +44,6 @@ class Handler extends ExceptionHandler
 
     private function sendTelegramMessage($message)
     {
-        dd($message);
         Telegram::bot('mybot')->sendMessage([
             'chat_id' => env('TELEGRAM_CHAT_ID'),
             'text' => $message,
