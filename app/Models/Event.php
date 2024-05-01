@@ -367,7 +367,7 @@ class Event extends Model
         $final_participant_result->save();
     }
 
-    public static function get_france_system_result($table, $event_id, $gender, $category)
+    public static function get_france_system_result($table, $event_id, $gender, $category=null)
     {
         $users = User::query()
             ->leftJoin($table, 'users.id', '=', $table.'.user_id')

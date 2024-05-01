@@ -340,7 +340,8 @@ class EventsController extends Controller
                     ->help($help)
                     ->states(self::STATES_BTN)->readOnly();
             }
-            $form->html('<button class="btn btn-primary" id="create-event" type="submit">Cоздать сореванование</button>');
+            $form->html('<button class="btn btn-primary" id="create-event" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Заполните обязательные поля">Отправить</button>');
+            $form->html('<h5 id="create-warning" style="color: red" >Если кнопка некликабельна заполните обязательные поля</h5>');
         });
 
         $form->tools(function (Form\Tools $tools) {
@@ -512,6 +513,10 @@ class EventsController extends Controller
 
         if (isValid) {
           submitButton.disabled = false;
+          let input_warning = document.querySelector('#create-warning');
+          if (input_warning) {
+            input_warning.remove();
+                }
         } else {
           submitButton.disabled = true;
         }
@@ -531,8 +536,12 @@ class EventsController extends Controller
             if(window.location.href.indexOf(\"edit\") > -1)
             {
                 const warning = document.querySelector('#warning-category');
+                const input_warning = document.querySelector('#create-warning');
                 if (warning) {
                     warning.remove();
+                }
+                if (input_warning) {
+                    input_warning.remove();
                 }
                  return
             }
