@@ -45,6 +45,7 @@ class Handler extends ExceptionHandler
 
     private function sendTelegramMessage($message)
     {
+        dd($message);
         Telegram::bot('mybot')->sendMessage([
             'chat_id' => env('TELEGRAM_CHAT_ID'),
             'text' => $message,
