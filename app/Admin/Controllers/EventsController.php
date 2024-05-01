@@ -203,6 +203,7 @@ class EventsController extends Controller
             $this->install_admin_script();
             $form->footer(function ($footer) {
 //                $footer->disableReset();
+                $footer->disableSubmit();
                 $footer->disableViewCheck();
                 $footer->disableEditingCheck();
                 $footer->disableCreatingCheck();
@@ -222,7 +223,7 @@ class EventsController extends Controller
             $form->date('end_date', 'Дата окончания')->attribute('inputmode', 'none')->placeholder('гггг:мм:дд')->required();
 //            $form->time('start_time', 'Время старта')->attribute('inputmode', 'none')->placeholder('Время старта')->required();
 //            $form->time('end_time', 'Время окончания')->attribute('inputmode', 'none')->placeholder('Время окончания')->required();
-            $form->image('image', 'Афиша')->placeholder('Афиша')->attribute('inputmode', 'none')->required();
+            $form->image('image', 'Афиша')->placeholder('Афиша')->attribute('inputmode', 'none');
             $form->summernote('description', 'Описание')->placeholder('Описание')->required();
             $form->text('contact', 'Телефон')->required();
             $form->text('contact_link', 'Ссылка на соц.сеть');
@@ -328,7 +329,7 @@ class EventsController extends Controller
                         ->states(self::STATES_BTN);
                 }
             }
-            $exist_routes = Route::where('event_id', $id)->first();
+            $exist_routes = Route::where('event_id', $event->id)->first();
             if($exist_routes){
                 $form->switch('is_public', 'Опубликовать для всех')
                     ->help('После включения, все смогут зайти на страницу с соревнованиями')
@@ -339,6 +340,7 @@ class EventsController extends Controller
                     ->help($help)
                     ->states(self::STATES_BTN)->readOnly();
             }
+            $form->html('<button class="btn btn-primary" id="create-event" type="submit">Cоздать сореванование</button>');
         });
 
         $form->tools(function (Form\Tools $tools) {
@@ -486,7 +488,7 @@ class EventsController extends Controller
             }
 
 
-      const submitButton = document.querySelector('.pull-right [type=\"submit\"]');
+      const submitButton = document.querySelector('#create-event');
       const requiredInputs = document.querySelectorAll('input[required]');
       const requiredRadio = document.querySelectorAll('radio[required]');
       if(!submitButton || !requiredInputs || !requiredRadio){
