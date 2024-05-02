@@ -354,7 +354,7 @@ class Participant extends Model
             $details = array();
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
-            $details['event_url'] = $event->link;
+            $details['event_url'] = env('APP_URL').$event->link;
             $details['link_payment'] = $event->link_payment;
             if($event->registration_time_expired){
                 $details['pay_time_expired'] = $event->registration_time_expired;
@@ -373,7 +373,7 @@ class Participant extends Model
             $details = array();
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
-            $details['event_url'] = $event->link;
+            $details['event_url'] = env('APP_URL').$event->link;
 //            $details['image'] = $event->image;
             Mail::to($user->email)->queue(new \App\Mail\ConfirmBill($details));
         }
