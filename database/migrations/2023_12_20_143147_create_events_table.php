@@ -52,12 +52,11 @@ class CreateEventsTable extends Migration
             $table->integer('is_need_sport_category')->nullable();
             $table->integer('choice_transfer')->nullable();
             $table->integer('amount_routes_in_final');
-            $table->integer('amount_routes_in_qualification_like_final')->nullable();
             $table->integer('amount_routes_in_semifinal')->nullable();
             $table->json('transfer_to_next_category')->nullable();
             $table->integer('mode')->nullable();
             $table->integer('mode_amount_routes')->nullable();
-            $table->boolean('active');
+            $table->boolean('active')->default(0);
             $table->boolean('is_input_set')->nullable();
             $table->boolean('is_registration_state')->nullable();
             $table->boolean('is_need_pay_for_reg')->nullable();
@@ -65,7 +64,7 @@ class CreateEventsTable extends Migration
             $table->datetime('datetime_registration_state')->nullable();
             $table->boolean('is_send_result_state')->nullable();
             $table->datetime('datetime_send_result_state')->nullable();
-            $table->boolean('is_public')->nullable();
+            $table->boolean('is_public')->default(0);
             $table->timestamps();
         });
     }

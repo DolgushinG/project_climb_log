@@ -6,6 +6,7 @@ use App\Admin\CustomAction\ActionExport;
 use App\Exports\QualificationResultExport;
 use App\Helpers\Generators\Generators;
 use App\Models\Event;
+use App\Models\Grades;
 use App\Models\Participant;
 use App\Models\ParticipantCategory;
 use App\Models\ResultParticipant;
@@ -78,8 +79,12 @@ class BatchGenerateParticipant extends Action
     public function html()
     {
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        $exist_routes = Route::where('event_id', $event->id)->first();
-        if($exist_routes){
+        if($event->is_qualification_counting_like_final){
+            $is_enabled = Grades::where('event_id', $event->id)->first();
+        } else {
+            $is_enabled = Route::where('event_id', $event->id)->first();
+        }
+        if($is_enabled){
             return "<a class='generate-participant btn btn-sm btn-warning '><i class='fa fa-trophy'></i> Сгенерировать участников [beta](Ожидание до ~ 2 мин)</a>
             <style>
                  .generate-participant {margin-top:8px;}

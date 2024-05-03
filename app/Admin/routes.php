@@ -22,8 +22,8 @@ Route::group([
         $router->resource('formats', FormatsController::class);
         $router->resource('semifinal-stage', ResultRouteSemiFinalStageController::class);
         $router->resource('final-stage', ResultRouteFinalStageController::class);
-        $router->resource('participants-categories', ParticipantCategoriesController::class);
         $router->resource('sets', SetsController::class);
+        $router->resource('owner-payments', OwnerPaymentsController::class);
         $router->resource('event-and-coefficient-route',  EventAndCoefficientsRoutesController::class);
         $router->get('exports/events/excel/qualification/{id}', 'ParticipantsController@exportQualificationExcel')->name('exportQualificationExcel');
         $router->get('exports/events/card/participant/{id}', 'ParticipantsController@cardParticipantExcel')->name('cardParticipantExcel');

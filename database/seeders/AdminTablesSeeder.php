@@ -141,14 +141,6 @@ class AdminTablesSeeder extends Seeder
                 [
                     "parent_id" => 0,
                     "order" => 5,
-                    "title" => "Категории участников",
-                    "icon" => "fa-angellist",
-                    "uri" => "participants-categories",
-                    "permission" => "owner.participants.categories"
-                ],
-                [
-                    "parent_id" => 0,
-                    "order" => 6,
                     "title" => "Настройка трасс",
                     "icon" => "fa-codepen",
                     "uri" => "grades",
@@ -156,7 +148,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 7,
+                    "order" => 6,
                     "title" => "Форматы",
                     "icon" => "fa-align-center",
                     "uri" => "formats",
@@ -164,7 +156,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 8,
+                    "order" => 7,
                     "title" => "Сеты",
                     "icon" => "fa-adjust",
                     "uri" => "sets",
@@ -172,15 +164,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 9,
-                    "title" => "Коэффициент трасс",
-                    "icon" => "fa-anchor",
-                    "uri" => "event-and-coefficient-route",
-                    "permission" => "owner.event.and.coefficient.route"
-                ],
-                [
-                    "parent_id" => 0,
-                    "order" => 10,
+                    "order" => 8,
                     "title" => "Финал",
                     "icon" => "fa-cogs",
                     "uri" => "final-stage",
@@ -188,11 +172,19 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 0,
-                    "title" => "Logs",
+                    "order" => 10,
+                    "title" => "Логи",
                     "icon" => "fa-bars",
                     "uri" => "logs",
                     "permission" => "*"
+                ],
+                [
+                    "parent_id" => 0,
+                    "order" => 9,
+                    "title" => "Оплата за сервис",
+                    "icon" => "fa-money",
+                    "uri" => "owner-payments",
+                    "permission" => "owner.payments"
                 ]
             ]
         );
@@ -301,6 +293,12 @@ class AdminTablesSeeder extends Seeder
                     "slug" => "bill",
                     "http_method" => "",
                     "http_path" => "/reject/bill/*"
+                ],
+                [
+                    "name" => "payments",
+                    "slug" => "owner.payments",
+                    "http_method" => "",
+                    "http_path" => "/owner-payments*"
                 ]
             ]
         );
@@ -345,10 +343,6 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "role_id" => 1,
-                    "menu_id" => 16
-                ],
-                [
-                    "role_id" => 1,
                     "menu_id" => 17
                 ],
                 [
@@ -358,14 +352,6 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 1,
                     "menu_id" => 19
-                ],
-                [
-                    "role_id" => 1,
-                    "menu_id" => 20
-                ],
-                [
-                    "role_id" => 1,
-                    "menu_id" => 21
                 ],
                 [
                     "role_id" => 1,
@@ -448,6 +434,10 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 2,
                     "permission_id" => 17
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 18
                 ]
             ]
         );

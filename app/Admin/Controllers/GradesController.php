@@ -33,10 +33,17 @@ class GradesController extends Controller
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
                 if($event){
-                    $row->column(4, function (Column $column) {
-                        $column->row($this->event_routes());
-                        $column->row($this->ready_routes());
-                    });
+                    if($event->is_qualification_counting_like_final){
+                        $row->column(4, function (Column $column) {
+                            $column->row($this->france_system_routes());
+                        });
+                    } else {
+                        $row->column(4, function (Column $column) {
+                            $column->row($this->event_routes());
+                            $column->row($this->ready_routes());
+                        });
+                    }
+
                 }
             });
     }
@@ -96,7 +103,11 @@ class GradesController extends Controller
         }
         if($request->count_routes){
             $grade = Grades::where('event_id', $request->event_id)->first();
-            Route::generation_route($request->owner_id, $request->event_id, $request->count_routes, $request->grade_and_amount);
+            $route = Route::where('event_id', $request->event_id)->first();
+            if($route){
+                Route::generation_route($request->owner_id, $request->event_id, $request->count_routes, $request->grade_and_amount);
+            }
+
         }
         return $this->form('update')->update($grade->id);
     }
@@ -122,7 +133,10 @@ class GradesController extends Controller
     public function destroy($id)
     {
         $event_id = Grades::find($id)->event_id;
-        Route::where('event_id', $event_id)->delete();
+        $route = Route::where('event_id', $event_id)->first();
+        if($route){
+            Route::where('event_id', $event_id)->delete();
+        }
         return $this->form()->destroy($id);
     }
 
@@ -153,12 +167,48 @@ class GradesController extends Controller
         $grid->disableExport();
         $grid->disablePagination();
         $grid->disableCreateButton();
-
         $grid->column('event_id', 'Настройка трасс для соренования')->display(function ($event_id) {
             return Event::find($event_id)->title;
         });
+        $grid->column('count_routes', 'Кол-во трасс');
         return $grid;
     }
+
+    /**
+     * Make a grid builder.
+     *
+     * @return Grid
+     */
+    protected function france_system_routes()
+    {
+        $grid = new Grid(new Grades);
+        if (!Admin::user()->isAdministrator()){
+            $grid->model()->where('owner_id', '=', Admin::user()->id);
+        }
+        $grid->model()->where(function ($query) {
+            $query->has('event.grades');
+        });
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        $grades = Grades::where('event_id', $event->id)->first();
+        if(!$grades){
+            $grid->tools(function ($tools) {
+                $tools->append("<a href='/admin/grades/create' class='btn btn-success'> Настроить кол-во трасс</a>");
+            });
+        }
+        $grid->disableFilter();
+        $grid->disableBatchActions();
+        $grid->disableColumnSelector();
+        $grid->disableExport();
+        $grid->disablePagination();
+        $grid->disableCreateButton();
+        $grid->column('event_id', 'Настройка трасс для соренования')->display(function ($event_id) {
+            return Event::find($event_id)->title;
+        });
+        $grid->column('count_routes', 'Кол-во трасс');
+        return $grid;
+    }
+
+
 
     /**
      * Make a grid builder.
@@ -233,53 +283,58 @@ class GradesController extends Controller
             $tools->disableDelete();
             $tools->disableView();
         });
-        Admin::style(".select2-selection__arrow {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        $form->hidden('owner_id', '')->value(Admin::user()->id);
+        $form->hidden('event_id', '')->value($event->id);
+
+        if(!$event->is_qualification_counting_like_final){
+            $form->hidden('count_routes', 'Кол-во трасс');
+            Admin::style(".select2-selection__arrow {
                 display: None;
             }");
-        if($type == 'edit'){
-            $form->html('<h4 id="warning-category" style="color: red" >Внимение!! Если вы редактировали категории или номера трасс,
+            if($type == 'edit'){
+                $form->html('<h4 id="warning-category" style="color: red" >Внимение!! Если вы редактировали категории или номера трасс,
                                     то это сбросится так как генерация трасс происходит с нуля</h4>');
-        }
-
-        $form->hidden('owner_id', '')->value(Admin::user()->id);
-        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-        $form->hidden('event_id', '')->value($event->id);
-        $form->hidden('count_routes', '');
-        $form->tablecustom('grade_and_amount', '', function ($table) use ($event){
-            $grades = Grades::getGrades();
-            $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
-            $table->number('Кол-во')->width('50px');
-            if($event->mode == 1){
-                $table->text('Ценность')->width('50px');
             }
-            $table->disableButton();
-        })->value($routes);
-        $form->saving(function (Form $form) {
-            if($form->grade_and_amount){
-                $main_count = 0;
-                foreach ($form->grade_and_amount as $route){
-                    for ($count = 1; $count <= $route['Кол-во']; $count++){
-                        $main_count++;
-                    }
+            $form->tablecustom('grade_and_amount', '', function ($table) use ($event){
+                $grades = Grades::getGrades();
+                $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
+                $table->number('Кол-во')->width('50px');
+                if($event->mode == 1){
+                    $table->text('Ценность')->width('50px');
                 }
-                $form->count_routes = $main_count;
-            }
-        });
-        $form->saved(function (Form $form) use ($type) {
-            if($type !== 'update') {
-                $owner_id = Admin::user()->id;
-                $event = Event::where('owner_id', '=', $owner_id)->where('active', '=', 1)->first();
-                $exist_routes_list = Route::where('owner_id', '=', $owner_id)
-                    ->where('event_id', '=', $event->id)->first();
-                if (!$exist_routes_list) {
-                    if ($form->count_routes) {
+                $table->disableButton();
+            })->value($routes);
+            $form->saving(function (Form $form) {
+                if($form->grade_and_amount){
+                    $main_count = 0;
+                    foreach ($form->grade_and_amount as $route){
+                        for ($count = 1; $count <= $route['Кол-во']; $count++){
+                            $main_count++;
+                        }
+                    }
+                    $form->count_routes = $main_count;
+                }
+            });
+            $form->saved(function (Form $form) use ($type) {
+                if($type !== 'update') {
+                    $owner_id = Admin::user()->id;
+                    $event = Event::where('owner_id', '=', $owner_id)->where('active', '=', 1)->first();
+                    $exist_routes_list = Route::where('owner_id', '=', $owner_id)
+                        ->where('event_id', '=', $event->id)->first();
+                    if (!$exist_routes_list) {
+                        if ($form->count_routes) {
+                            Route::generation_route($owner_id, $event->id, $form->count_routes, $form->grade_and_amount);
+                        }
+                    } else {
                         Route::generation_route($owner_id, $event->id, $form->count_routes, $form->grade_and_amount);
                     }
-                } else {
-                    Route::generation_route($owner_id, $event->id, $form->count_routes, $form->grade_and_amount);
                 }
-            }
-        });
+            });
+        } else {
+            $form->number('count_routes', 'Кол-во трасс');
+        }
+
         return $form;
     }
 

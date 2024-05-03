@@ -55,36 +55,40 @@ class EventsController extends Controller
      */
     public function index(Content $content)
     {
-        return $content->row(function ($row) {
-                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-                if($event){
-                    if($event->is_qualification_counting_like_final){
-                        $participant = ResultQualificationLikeFinal::where('event_id', $event->id);
-                    } else {
-                        $participant = Participant::where('event_id', $event->id);
-                    }
-                    $sum_participant = $participant->count();
-                    $participant_is_paid = $participant->where('is_paid', 1)->count();
-                    $participant_is_not_paid = $participant->where('is_paid', 0)->count();
-                    $participant_is_not_active = $participant->where('active', 0)->count();
-                    $participant_is_active = $participant->where('active', 1)->count();
-                    $sum = $participant_is_not_paid + $participant_is_not_active;
-                }
-                $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/participants', $sum_participant ?? 0));
-                $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/participants', $participant_is_paid ?? 0));
-                if($event){
-                    if(!$event->is_qualification_counting_like_final){
-                        $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
-                        $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
-                    }
-                } else {
-                    $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
-                    $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
-                }
 
-
-            })->body($this->grid());
-
+            if (!Admin::user()->is_access_to_create_event) {
+                return $content
+                    ->header('Доступ к созданию соревнований остановлен, обратитесь к администратору сервиса');
+            } else {
+                return $content
+                    ->row(function ($row) {
+                        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+                        if ($event) {
+                            if ($event->is_qualification_counting_like_final) {
+                                $participant = ResultQualificationLikeFinal::where('event_id', $event->id);
+                            } else {
+                                $participant = Participant::where('event_id', $event->id);
+                            }
+                            $sum_participant = $participant->count();
+                            $participant_is_paid = $participant->where('is_paid', 1)->count();
+                            $participant_is_not_paid = $participant->where('is_paid', 0)->count();
+                            $participant_is_not_active = $participant->where('active', 0)->count();
+                            $participant_is_active = $participant->where('active', 1)->count();
+                            $sum = $participant_is_not_paid + $participant_is_not_active;
+                        }
+                        $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/participants', $sum_participant ?? 0));
+                        $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/participants', $participant_is_paid ?? 0));
+                        if ($event) {
+                            if (!$event->is_qualification_counting_like_final) {
+                                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
+                                $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
+                            }
+                        } else {
+                            $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
+                            $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
+                        }
+                    })->body($this->grid());
+            }
     }
 
     /**
@@ -266,7 +270,6 @@ class EventsController extends Controller
 
                         })->value(1)->required();
                 })->when(1, function (Form $form) {
-                    $form->number('amount_routes_in_qualification_like_final','Кол-во трасс в квалификации')->attribute('inputmode', 'none')->value(10);
                 })->value(1)->required();
             $form->radio('is_additional_final','Финалы для разных групп')
                 ->options([

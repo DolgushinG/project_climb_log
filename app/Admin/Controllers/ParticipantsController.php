@@ -14,6 +14,7 @@ use App\Exports\QualificationLikeFinalResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
 use App\Models\Grades;
+use App\Models\OwnerPayments;
 use App\Models\Participant;
 use App\Http\Controllers\Controller;
 use App\Models\ParticipantCategory;
@@ -94,7 +95,7 @@ class ParticipantsController extends Controller
                         $tools->disableEdit();
                         $tools->disableList();
                         $tools->disableDelete();
-                    });;
+                    });
             } else {
                 $show = new Show(Participant::findOrFail($id));
                 $show->panel()
@@ -102,7 +103,7 @@ class ParticipantsController extends Controller
 //                        $tools->disableEdit();
                         $tools->disableList();
                         $tools->disableDelete();
-                    });;
+                    });
             }
         }
         $show->field('user.middlename', __('Имя и Фамилия'));
@@ -251,7 +252,7 @@ class ParticipantsController extends Controller
             ->help('При некорректном раставлением мест, необходимо пересчитать результаты')
             ->sortable();
         $grid->column('points', 'Баллы')->sortable();
-        $grid->column('active', 'Статус')->using([0 => 'Не внес', 1 => 'Внес'])->display(function ($title, $column) {
+        $grid->column('active', 'Результаты')->using([0 => 'Не внес', 1 => 'Внес'])->display(function ($title, $column) {
             If ($this->active == 0) {
                 return $column->label('default');
             } else {
@@ -309,7 +310,7 @@ class ParticipantsController extends Controller
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
             $selector->select('is_paid', 'Есть оплата', [ 1 => 'Да',  0 => 'Нет']);
         });
-        $grid->tools(function (Grid\Tools $tools) {
+        $grid->tools(function (Grid\Tools $tools) use ($event){
             $tools->append(new BatchExportResultQualificationLikeFinal);
             $tools->append(new BatchResultQualificationLikeFinal);
             $tools->append(new BatchGenerateParticipant);
@@ -450,13 +451,35 @@ class ParticipantsController extends Controller
             }
             if($form->input('is_paid') == "0" || $form->input('is_paid') == "1"){
                 $participant = $form->model()->find($id);
+                $amount_participant = $form->model()->where('event_id', $participant->event_id)->get()->count();
                 $participant->is_paid = $form->input('is_paid');
                 $participant->save();
+                $admin = Admin::user();
+                $event = Event::find($participant->event_id);
                 if($form->input('is_paid') === "1"){
-                    $event = Event::find($participant->event_id);
+                    $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
+                    if(!$payments){
+                        $payments = new OwnerPayments;
+                    }
+                    $payments->owner_id = $admin->id;
+                    $payments->event_id = $participant->event_id;
+                    $payments->event_title = $event->title;
+                    $payments->amount_for_pay = $payments->amount_for_pay + Event::counting_amount_for_pay_participant($event->id);
+                    $payments->amount_participant = $amount_participant;
+                    $payments->amount_start_price = $event->amount_start_price;
+                    $payments->amount_cost_for_service = Event::COST_FOR_EACH_PARTICIPANT;
+                    $payments->save();
                     $user = User::find($participant->user_id);
                     Participant::send_confirm_bill($event, $user);
                 }
+                if($form->input('is_paid') === "0"){
+                    if($admin){
+                        $amount = $admin->amount_for_pay - Event::counting_amount_for_pay_participant($event->id);
+                        $admin->amount_for_pay = $amount;
+                        $admin->save();
+                    }
+                }
+
             }
         });
         return $form;

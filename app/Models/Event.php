@@ -18,6 +18,8 @@ class Event extends Model
     const DEFAULT_SEMIFINAL_PARTICIPANT = 20;
     const DEFAULT_FINAL_PARTICIPANT = 6;
 
+    const COST_FOR_EACH_PARTICIPANT = 1;
+
     protected $casts = [
         'grade_and_amount' =>'json',
         'options_categories' => 'json',
@@ -50,6 +52,12 @@ class Event extends Model
         return $this->hasOne(Participant::class);
     }
 
+    public function ownerPayments()
+    {
+        return $this->hasOne(OwnerPayments::class);
+    }
+
+
     public function grades()
     {
         return $this->hasOne(Grades::class);
@@ -76,6 +84,23 @@ class Event extends Model
     public function user()
     {
         return $this->belongsToMany(User::class);
+    }
+
+    public static function counting_amount_for_pay_event($event_id)
+    {
+        $event = Event::find($event_id);
+        if($event->is_qualification_counting_like_final){
+            $amount_participant = ResultQualificationLikeFinal::where('event_id', $event_id)->where('is_paid', 1)->count();
+        } else {
+            $amount_participant = Participant::where('event_id', $event_id)->where('is_paid', 1)->count();
+        }
+        return ($amount_participant * $event->amount_start_price) * (self::COST_FOR_EACH_PARTICIPANT / 100);
+    }
+
+    public static function counting_amount_for_pay_participant($event_id)
+    {
+        $event = Event::find($event_id);
+        return $event->amount_start_price * (self::COST_FOR_EACH_PARTICIPANT / 100);
     }
 
     public function number_to_month($month): string

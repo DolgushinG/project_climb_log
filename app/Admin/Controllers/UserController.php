@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -37,6 +38,12 @@ class UserController extends AdminController
         $grid->column('phone', trans('admin.phone'));
         $grid->column('city', trans('admin.city'));
         $grid->column('roles', trans('admin.roles'))->pluck('name')->label();
+        $states = [
+            'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
+            'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+        ];
+
+        $grid->column('is_access_to_create_event', 'Доступ к проведению')->switch($states);
         $grid->column('created_at', trans('admin.created_at'));
         $grid->column('updated_at', trans('admin.updated_at'));
 
@@ -76,6 +83,12 @@ class UserController extends AdminController
         $show->field('address', trans('admin.address'));
         $show->field('phone', trans('admin.phone'));
         $show->field('city', trans('admin.city'));
+        $show->field('is_access_to_create_event', 'Доступ к проведению');
+        $show->field('amount_for_pay', 'Сумма к оплате')->display(function ($amount){
+            return $amount.' руб.';
+        });;
+        $show->field('is_paid', 'Оплачено');
+//        $show->field('bill', 'Чек по оплате');
         $show->field('roles', trans('admin.roles'))->as(function ($roles) {
             return $roles->pluck('name');
         })->label();
@@ -107,7 +120,6 @@ class UserController extends AdminController
         $form->text('username', trans('admin.username'))
             ->creationRules(['required', "unique:{$connection}.{$userTable}"])
             ->updateRules(['required', "unique:{$connection}.{$userTable},username,{{id}}"]);
-
         $form->text('name', trans('admin.name'))->rules('required');
         $form->text('phone', trans('admin.phone'))->rules('required');
         $form->text('climbing_gym_name', trans('admin.climbing_gym_name'));
@@ -115,6 +127,10 @@ class UserController extends AdminController
         $form->text('address', trans('admin.address'));
         $form->text('city', trans('admin.city'));
         $form->image('avatar', trans('admin.avatar'));
+        $form->switch('is_access_to_create_event', 'Доступ к проведению');
+        $form->text('amount_for_pay', 'Сумма к оплате');
+        $form->switch('is_paid', 'Оплачено');
+//        $form->file('bill', 'Чек по оплате')->move('/bill/events/'.Admin::user()->id, $name);
         $form->password('password', trans('admin.password'))->rules('required|confirmed');
         $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
             ->default(function ($form) {

@@ -18,7 +18,7 @@ class CreateGradesTable extends Migration
             $table->integer('owner_id');
             $table->integer('event_id');
             $table->integer('count_routes');
-            $table->json('grade_and_amount');
+            $table->json('grade_and_amount')->nullable();
             $table->timestamps();
         });
     }

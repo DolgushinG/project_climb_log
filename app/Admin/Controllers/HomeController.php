@@ -5,7 +5,9 @@ namespace App\Admin\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Participant;
+use App\Models\ParticipantCategory;
 use App\Models\ResultParticipant;
+use App\Models\ResultQualificationLikeFinal;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Controllers\Dashboard;
@@ -41,9 +43,9 @@ class HomeController extends Controller
                         $row->column(4, function (Column $column) {
                             $column->append($this->sets());
                         });
-
                         $row->column(4, function (Column $column) {
-                            $column->append($this->gender());
+                            $column->row($this->male());
+                            $column->row($this->female());
                         });
                 }
 
@@ -59,7 +61,11 @@ class HomeController extends Controller
         foreach ($events_active as $event_active){
             $event = new \stdClass();
             $event->title = $event_active->title;
-            $event->count_participant = Participant::where('event_id', '=', $event_active->id)->count();
+            if($event_active->is_qualification_counting_like_final){
+                $event->count_participant = ResultQualificationLikeFinal::where('event_id', '=', $event_active->id)->count();
+            } else {
+                $event->count_participant = Participant::where('event_id', '=', $event_active->id)->count();
+            }
             $events[] = $event;
         }
         return Admin::component('admin::dashboard.events_participants', compact('events'));
@@ -73,7 +79,12 @@ class HomeController extends Controller
         if($event){
             $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
             foreach ($sets as $set){
-                $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
+                if($event->is_qualification_counting_like_final){
+                    $participants_event = ResultQualificationLikeFinal::where('event_id','=',$event->id)->where('number_set_id', '=', $set->id)->count();
+                } else {
+                    $participants_event = Participant::where('event_id','=',$event->id)->where('number_set_id', '=', $set->id)->count();
+                }
+
                 $set->free = $set->max_participants - $participants_event;
                 $a = $set->max_participants;
                 $b = $set->free;
@@ -100,14 +111,40 @@ class HomeController extends Controller
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public static function gender()
+    public static function male()
     {
-        $event_id = Event::where('owner_id', '=', Admin::user()->id)->get()->pluck('id');
-        $users_id = Participant::whereIn('event_id',$event_id)->get()->pluck('user_id');
-        $users_female = User::whereIn('id', $users_id)->where('gender', '=', 'female')->get()->count();
-        $users_male = User::whereIn('id', $users_id)->where('gender', '=', 'male')->get()->count();
-        $gender = array('female' => $users_female, 'male' => $users_male);
-        return view('admin.charts.gender', compact('gender'));
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->latest()->first();
+
+        $categories = ParticipantCategory::where('event_id', $event->id)->get();
+        $all_group = array();
+        foreach ($categories as $category) {
+            if($event->is_qualification_counting_like_final){
+                $all_group['male'][] = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', '=', $category->id)->get()->count();
+            } else {
+                $all_group['male'][] = Participant::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', '=', $category->id)->get()->count();
+            }
+        }
+        $categories_array = $categories->pluck('category')->toArray();
+        return view('admin.charts.male', compact('all_group', 'categories_array'));
+    }
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public static function female()
+    {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->latest()->first();
+
+        $categories = ParticipantCategory::where('event_id', $event->id)->get();
+        $all_group = array();
+        foreach ($categories as $category) {
+            if($event->is_qualification_counting_like_final){
+                $all_group['female'][] = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', '=', $category->id)->get()->count();
+            } else {
+                $all_group['female'][] = Participant::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', '=', $category->id)->get()->count();
+            }
+        }
+        $categories_array = $categories->pluck('category')->toArray();
+        return view('admin.charts.female', compact('all_group', 'categories_array'));
     }
 
     /**

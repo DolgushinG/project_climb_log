@@ -49,7 +49,6 @@ class Generators
                     ->withSemiFinal(0)
                     ->is_additional_final(1)
                     ->is_qualification_counting_like_final(1)
-                    ->amount_routes_in_qualification_like_final(15)
                     ->mode(2)
                     ->is_input_birthday(1)
                     ->is_need_sport_category(1)
@@ -75,7 +74,6 @@ class Generators
                     ->withSemiFinal(1)
                     ->is_additional_final(0)
                     ->is_qualification_counting_like_final(1)
-                    ->amount_routes_in_qualification_like_final(20)
                     ->mode(2)
                     ->is_input_birthday(1)
                     ->is_need_sport_category(1)
@@ -93,13 +91,13 @@ class Generators
                 $user->category = $category_id;
                 $user->save();
                 $sets = Set::where('owner_id', $owner_id)->pluck('id','number_set')->toArray();
-                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'category_id' => $category_id,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
+                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'category_id' => $category_id,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         } else {
             for ($i = 1; $i <= $users; $i++) {
                 $user = User::find($i);
                 $sets = Set::where('owner_id', $owner_id)->pluck('id','number_set')->toArray();
-                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => rand(0, 1),'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
+                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         }
 

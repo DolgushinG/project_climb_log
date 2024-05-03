@@ -144,12 +144,6 @@ class EventFactory extends Factory
             'count_routes' => $value,
         ]);
     }
-    public function amount_routes_in_qualification_like_final($value)
-    {
-        return $this->state([
-            'amount_routes_in_qualification_like_final' => $value,
-        ]);
-    }
     public function is_input_birthday($value)
     {
         return $this->state([

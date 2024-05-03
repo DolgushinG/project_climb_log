@@ -29,9 +29,10 @@ class BatchResultQualificationLikeFinal extends Action
     {
         $results = $request->toArray();
         $event = Event::find($results['event_id']);
+        $grades = Grades::where('event_id', $event->id)->first();
         $result_qualification_like = ResultQualificationLikeFinal::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
         $data = array();
-        for($i = 1; $i <= $event->amount_routes_in_qualification_like_final; $i++){
+        for($i = 1; $i <= $grades->count_routes; $i++){
             if($results['amount_try_top_'.$i] > 0 || $results['amount_try_top_'.$i] != null){
                 $amount_top  = 1;
             } else {
@@ -67,9 +68,9 @@ class BatchResultQualificationLikeFinal extends Action
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $count_routes = Grades::where('event_id', $event->id)->first()->count_routes;
+        $grades = Grades::where('event_id', $event->id)->first();
         $participant_users_id = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
-        $result = User::whereIn('id', $participant_users_id)->pluck( 'middlename','id');
+        $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
         $result_qualification_like_final = ResultRouteQualificationLikeFinal::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
             $user = User::where('middlename', $res)->first()->id;
@@ -82,17 +83,24 @@ class BatchResultQualificationLikeFinal extends Action
         }
         $this->select('user_id', 'Участник')->options($result)->required(true);
         $this->hidden('event_id', '')->value($event->id);
-        for($i = 1; $i <= $count_routes; $i++){
-            $this->integer('route_id_'.$i, 'Трасса')->value($i)->readOnly();
-            $this->integer('amount_try_top_'.$i, 'Попытки на топ');
-            $this->integer('amount_try_zone_'.$i, 'Попытки на зону');
+        if($grades){
+            for($i = 1; $i <= $grades->count_routes; $i++){
+                $this->integer('route_id_'.$i, 'Трасса')->value($i)->readOnly();
+                $this->integer('amount_try_top_'.$i, 'Попытки на топ');
+                $this->integer('amount_try_zone_'.$i, 'Попытки на зону');
+            }
         }
+
 
     }
 
     public function html()
     {
-        return "<a class='send-add btn btn-sm btn-success'><i class='fa fa-arrow-down'></i> Внести результат</a>
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
+            ->where('active', '=', 1)->first();
+        $grades = Grades::where('event_id', $event->id)->first();
+        if($grades){
+            return "<a class='send-add btn btn-sm btn-success'><i class='fa fa-arrow-down'></i> Внести результат</a>
                 <style>
                     .send-add {margin-top:8px;}
                  @media screen and (max-width: 767px) {
@@ -101,6 +109,19 @@ class BatchResultQualificationLikeFinal extends Action
                 </style>
 
             ";
+        } else {
+            return "<a class='send-add btn btn-sm btn-success disabled'><i class='fa fa-arrow-down'></i>Внести результат (Необходимо настроить трассы) </a>
+                <style>
+                    .send-add {margin-top:8px;}
+                 @media screen and (max-width: 767px) {
+                        .send-add {margin-top:8px;}
+                    }
+                </style>
+
+            ";
+        }
+
+
     }
 
 }
