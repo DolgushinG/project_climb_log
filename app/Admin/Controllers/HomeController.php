@@ -114,17 +114,22 @@ class HomeController extends Controller
     public static function male()
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->latest()->first();
-
-        $categories = ParticipantCategory::where('event_id', $event->id)->get();
-        $all_group = array();
-        foreach ($categories as $category) {
-            if($event->is_qualification_counting_like_final){
-                $all_group['male'][] = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', '=', $category->id)->get()->count();
-            } else {
-                $all_group['male'][] = Participant::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', '=', $category->id)->get()->count();
+        if($event){
+            $categories = ParticipantCategory::where('event_id', $event->id)->get();
+            $all_group = array();
+            foreach ($categories as $category) {
+                if($event->is_qualification_counting_like_final){
+                    $all_group['male'][] = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', '=', $category->id)->get()->count();
+                } else {
+                    $all_group['male'][] = Participant::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', '=', $category->id)->get()->count();
+                }
             }
+            $categories_array = $categories->pluck('category')->toArray();
+        } else {
+            $all_group = array('male' => null);
+            $categories_array = null;
         }
-        $categories_array = $categories->pluck('category')->toArray();
+
         return view('admin.charts.male', compact('all_group', 'categories_array'));
     }
     /**
@@ -133,17 +138,22 @@ class HomeController extends Controller
     public static function female()
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->latest()->first();
-
-        $categories = ParticipantCategory::where('event_id', $event->id)->get();
-        $all_group = array();
-        foreach ($categories as $category) {
-            if($event->is_qualification_counting_like_final){
-                $all_group['female'][] = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', '=', $category->id)->get()->count();
-            } else {
-                $all_group['female'][] = Participant::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', '=', $category->id)->get()->count();
+        if($event){
+            $categories = ParticipantCategory::where('event_id', $event->id)->get();
+            $all_group = array();
+            foreach ($categories as $category) {
+                if($event->is_qualification_counting_like_final){
+                    $all_group['female'][] = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', '=', $category->id)->get()->count();
+                } else {
+                    $all_group['female'][] = Participant::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', '=', $category->id)->get()->count();
+                }
             }
+            $categories_array = $categories->pluck('category')->toArray();
+        } else {
+            $all_group = array('female' => null);
+            $categories_array = null;
         }
-        $categories_array = $categories->pluck('category')->toArray();
+
         return view('admin.charts.female', compact('all_group', 'categories_array'));
     }
 

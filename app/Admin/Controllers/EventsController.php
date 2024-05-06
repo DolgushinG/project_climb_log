@@ -3,7 +3,9 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\BatchNotificationOfParticipant;
+use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportProtocolRouteParticipantQualification;
 use App\Admin\CustomAction\ActionExport;
+use App\Admin\CustomAction\ActionExportCardForJudgeParticipant;
 use App\Admin\CustomAction\ActionExportCardParticipant;
 use App\Admin\Extensions\CustomButton;
 use App\Exports\AllResultExport;
@@ -148,12 +150,13 @@ class EventsController extends Controller
         }
         $grid->actions(function ($actions) {
             $actions->disableView();
-            $actions->append(new ActionExport($actions->getKey(), 'all', 'excel'));
+            $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты'));
             $actions->append(new ActionExportCardParticipant($actions->getKey(), 'Карточка участника'));
+            $actions->append(new ActionExportCardForJudgeParticipant($actions->getKey(), 'Карточка'));
         });
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         if($event){
-            $grid->tools(function (Grid\Tools $tools) {
+            $grid->tools(function (Grid\Tools $tools) use ($event) {
                 $tools->append(new BatchNotificationOfParticipant);
             });
         }
@@ -208,6 +211,7 @@ class EventsController extends Controller
             $form->footer(function ($footer) {
 //                $footer->disableReset();
                 $footer->disableSubmit();
+                $footer->disableReset();
                 $footer->disableViewCheck();
                 $footer->disableEditingCheck();
                 $footer->disableCreatingCheck();
@@ -343,7 +347,7 @@ class EventsController extends Controller
                     ->help($help)
                     ->states(self::STATES_BTN)->readOnly();
             }
-            $form->html('<button class="btn btn-primary" id="create-event" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Заполните обязательные поля">Отправить</button>');
+            $form->html('<button class="btn btn-primary" id="create-event" type="submit" data-bs-toggle="tooltip" data-bs-placement="top" title="Заполните обязательные поля">Сохранить</button>');
             $form->html('<h5 id="create-warning" style="color: red" >Если кнопка некликабельна заполните обязательные поля</h5>');
         });
 

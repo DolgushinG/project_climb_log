@@ -52,7 +52,7 @@ class ResultParticipant extends Model
         if ($count_route_passed == 0) {
             $count_route_passed = 1;
         }
-        return sqrt($count_route_passed / $active_participant );
+        return sqrt($active_participant / $count_route_passed);
     }
     public function get_value_route($attempt, $value_category, $format, $custom_value=null) {
         switch ($format) {

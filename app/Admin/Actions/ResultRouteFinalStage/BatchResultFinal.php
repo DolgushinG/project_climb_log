@@ -61,7 +61,7 @@ class BatchResultFinal extends Action
             );
         }
         DB::table('result_route_final_stage')->insert($data);
-        Event::refresh_final_points_all_participant_in_final($event->id, $event->owner_id);
+        Event::refresh_final_points_all_participant_in_final($event->id);
         return $this->response()->success('Результат успешно внесен')->refresh();
     }
 

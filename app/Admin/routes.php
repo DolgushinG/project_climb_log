@@ -26,7 +26,10 @@ Route::group([
         $router->resource('owner-payments', OwnerPaymentsController::class);
         $router->resource('event-and-coefficient-route',  EventAndCoefficientsRoutesController::class);
         $router->get('exports/events/excel/qualification/{id}', 'ParticipantsController@exportQualificationExcel')->name('exportQualificationExcel');
-        $router->get('exports/events/card/participant/{id}', 'ParticipantsController@cardParticipantExcel')->name('cardParticipantExcel');
+        $router->get('exports/events/card-judge/participant/{id}', 'ParticipantsController@cardJudgeExcel')->name('cardJudgeExcel');
+        $router->get('exports/events/{event_id}/{stage}/{set_id}/{gender}/{category_id}', 'ParticipantsController@protocolRouteExcel')->name('protocolRouteExcel');
+        $router->get('exports/events/{event_id}/final/{gender}/{category_id}', 'ParticipantsController@protocolRouteExcel')->name('protocolRouteExcel');
+        $router->get('exports/events/{event_id}/semifinal/{gender}/{category_id}', 'ParticipantsController@protocolRouteExcel')->name('protocolRouteExcel');
         $router->get('exports/events/csv/qualification/{id}', 'ParticipantsController@exportQualificationCsv')->name('exportQualificationCsv');
         $router->get('exports/events/ods/qualification/{id}', 'ParticipantsController@exportQualificationOds')->name('exportQualificationOds');
         $router->get('exports/events/excel/semifinal/{id}', 'ResultRouteSemiFinalStageController@exportSemiFinalExcel')->name('exportSemiFinalExcel');

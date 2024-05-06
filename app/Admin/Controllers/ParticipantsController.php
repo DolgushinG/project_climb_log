@@ -5,11 +5,14 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\BatchGenerateParticipant;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
+use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportProtocolRouteParticipantQualification;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportResultQualificationLikeFinal;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchResultQualificationLikeFinal;
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionRejectBill;
+use App\Exports\ExportCardForJudgeParticipant;
 use App\Exports\ExportCardParticipant;
+use App\Exports\ExportProtocolRouteParticipant;
 use App\Exports\QualificationLikeFinalResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
@@ -314,6 +317,7 @@ class ParticipantsController extends Controller
             $tools->append(new BatchExportResultQualificationLikeFinal);
             $tools->append(new BatchResultQualificationLikeFinal);
             $tools->append(new BatchGenerateParticipant);
+            $tools->append(new BatchExportProtocolRouteParticipantQualification);
         });
         $grid->actions(function ($actions) {
             $actions->disableEdit();
@@ -504,6 +508,22 @@ class ParticipantsController extends Controller
     {
         $file_name = 'Карточка участника с трассами.xlsx';
         $result = Excel::download(new ExportCardParticipant($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
+    }
+    public function cardJudgeExcel(Request $request)
+    {
+        $file_name = 'Карточка.xlsx';
+        $result = Excel::download(new ExportCardForJudgeParticipant($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
+    }
+    public function protocolRouteExcel(Request $request)
+    {
+        $file_name = 'Протокол.xlsx';
+        $result = Excel::download(new ExportProtocolRouteParticipant($request->event_id, $request->stage, $request->set_id, $request->gender, $request->category_id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);

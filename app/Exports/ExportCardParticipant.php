@@ -90,6 +90,7 @@ class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAut
                 $ready_title_flash_rp = ExportHelpers::merge_arrays($title_array_flash_rp);
                 $routes = 1;
                 $cell_height = 2;
+//                dd($title_array, $title_array_flash_rp, $ready_title, $ready_title_flash_rp);
                 foreach($ready_title as $title){
                     $set_cell_value = explode(':', $title)[0];
                     $sheet->mergeCells($title);
@@ -112,7 +113,6 @@ class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAut
                     $sheet->setCellValue($set_cell_value_2, 'RP');
                     $sheet->getStyle($set_cell_value_2)->applyFromArray($style);
                 }
-
             },
 
         ];
