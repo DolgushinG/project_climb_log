@@ -164,15 +164,26 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
         switch ($this->stage){
             case 'qualification':
                 $table = 'result_qualification_like_final';
-                return User::query()
-                    ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-                    ->where($table.'.event_id', '=', $this->event->id)
-                    ->where($table.'.category_id', '=', $this->category_id)
-                    ->where($table.'.number_set_id', '=', $this->number_set_id)
-                    ->where($table.'.gender', '=', $this->gender)
-                    ->select(
-                        'users.middlename',
-                    )->pluck('middlename')->toArray();
+                if($this->category_id == "not_category"){
+                    return User::query()
+                        ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+                        ->where($table.'.event_id', '=', $this->event->id)
+                        ->where($table.'.number_set_id', '=', $this->number_set_id)
+                        ->where($table.'.gender', '=', $this->gender)
+                        ->select(
+                            'users.middlename',
+                        )->pluck('middlename')->toArray();
+                } else {
+                    return User::query()
+                        ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+                        ->where($table.'.event_id', '=', $this->event->id)
+                        ->where($table.'.category_id', '=', $this->category_id)
+                        ->where($table.'.number_set_id', '=', $this->number_set_id)
+                        ->where($table.'.gender', '=', $this->gender)
+                        ->select(
+                            'users.middlename',
+                        )->pluck('middlename')->toArray();
+                }
             case 'semifinal':
                 if($this->category_id == 'not_category'){
                     $category = null;

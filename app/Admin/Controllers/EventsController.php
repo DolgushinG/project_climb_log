@@ -7,6 +7,7 @@ use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportProtocol
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionExportCardForJudgeParticipant;
 use App\Admin\CustomAction\ActionExportCardParticipant;
+use App\Admin\CustomAction\ActionExportList;
 use App\Admin\Extensions\CustomButton;
 use App\Exports\AllResultExport;
 use App\Helpers\Helpers;
@@ -151,6 +152,7 @@ class EventsController extends Controller
         $grid->actions(function ($actions) {
             $actions->disableView();
             $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты'));
+            $actions->append(new ActionExportList($actions->getKey(), 'Список участников'));
             $actions->append(new ActionExportCardParticipant($actions->getKey(), 'Карточка участника'));
             $actions->append(new ActionExportCardForJudgeParticipant($actions->getKey(), 'Карточка'));
         });

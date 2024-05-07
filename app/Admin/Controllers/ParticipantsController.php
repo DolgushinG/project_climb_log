@@ -12,6 +12,7 @@ use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionRejectBill;
 use App\Exports\ExportCardForJudgeParticipant;
 use App\Exports\ExportCardParticipant;
+use App\Exports\ExportListParticipant;
 use App\Exports\ExportProtocolRouteParticipant;
 use App\Exports\QualificationLikeFinalResultExport;
 use App\Exports\QualificationResultExport;
@@ -508,6 +509,14 @@ class ParticipantsController extends Controller
     {
         $file_name = 'Карточка участника с трассами.xlsx';
         $result = Excel::download(new ExportCardParticipant($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
+    }
+    public function listParticipantExcel(Request $request)
+    {
+        $file_name = 'Полный список участников.xlsx';
+        $result = Excel::download(new ExportListParticipant($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);
