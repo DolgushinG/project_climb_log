@@ -62,7 +62,6 @@
                                     <button type="button" id="btn-send-result" data-owner-id="{{$event->owner_id}}"
                                             data-id="{{$event->id}}" data-user-id="{{Auth()->user()->id}}"
                                             class="btn btn-success button-desktop-fixed rounded-pill">
-                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                         Внести
                                     </button>
                                 </div>

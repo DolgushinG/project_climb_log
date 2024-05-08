@@ -216,6 +216,7 @@ $(document).on('click','#send-all-result', function(e) {
     });
 
     let button = $('#send-all-result')
+    let button_close = $('#send-all-result-close')
     let email = document.getElementById('allResultFloatingEmail').value
     let event_id = document.getElementById('allResultFloatingEmail').getAttribute('data-event-id')
     e.preventDefault()
@@ -236,10 +237,7 @@ $(document).on('click','#send-all-result', function(e) {
             setTimeout(function () {
                 button.text('Отправлено')
                 button.attr("disabled", true);
-            }, 6000);
-            setTimeout(function () {
-                button.text('Отравить')
-                button.removeAttr("disabled");
+                button_close.click()
             }, 6000);
 
         },

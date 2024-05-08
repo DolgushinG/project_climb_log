@@ -17,7 +17,7 @@
                                     @if(!str_contains(\Illuminate\Support\Facades\Auth::user()->email, 'telegram'))
                                         @if(\App\Models\User::user_participant($event->id))
     {{--                                            Открыто/Закрыто изменение участия в сетах--}}
-                                            @if(!$event->is_input_set && $event->is_registration_state)
+                                            @if(!$event->is_input_set && $event->is_registration_state && !\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
                                                 @include('event.selects.sets_participant')
                                             @else
                                                 @include('event.buttons.reg-close')

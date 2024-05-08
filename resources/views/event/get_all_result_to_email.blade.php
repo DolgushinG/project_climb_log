@@ -20,7 +20,7 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button id="send-all-result-close" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                 <button id="send-all-result" type="button" class="btn btn-primary">Отправить</button>
             </div>
         </div>
