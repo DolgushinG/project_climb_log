@@ -10,8 +10,8 @@ use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportResultQu
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchResultQualificationLikeFinal;
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionRejectBill;
-use App\Exports\ExportCardForJudgeParticipant;
-use App\Exports\ExportCardParticipant;
+use App\Exports\ExportCardParticipantFranceSystem;
+use App\Exports\ExportCardParticipantFestival;
 use App\Exports\ExportListParticipant;
 use App\Exports\ExportProtocolRouteParticipant;
 use App\Exports\QualificationLikeFinalResultExport;
@@ -505,10 +505,10 @@ class ParticipantsController extends Controller
             'Content-Type' => 'application/xlsx',
         ]);
     }
-    public function cardParticipantExcel(Request $request)
+    public function cardParticipantFestivalExcel(Request $request)
     {
         $file_name = 'Карточка участника с трассами.xlsx';
-        $result = Excel::download(new ExportCardParticipant($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        $result = Excel::download(new ExportCardParticipantFestival($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);
@@ -521,10 +521,10 @@ class ParticipantsController extends Controller
             'Content-Type' => 'application/xlsx',
         ]);
     }
-    public function cardJudgeExcel(Request $request)
+    public function cardParticipantFranceSystemExcel(Request $request)
     {
         $file_name = 'Карточка.xlsx';
-        $result = Excel::download(new ExportCardForJudgeParticipant($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        $result = Excel::download(new ExportCardParticipantFranceSystem($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);

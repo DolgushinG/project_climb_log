@@ -1,6 +1,6 @@
 @if($event->is_need_pay_for_reg)
     <div class="container text-center pt-2 pb-2">
-        <label> Сумма к оплате: </label>
+        <label> Стартовый взнос : </label>
         <span class="badge bg-success" style="font-size: 22px"> {{$event->amount_start_price}} руб </span><br>
     </div>
     <div class="container text-center pt-2 pb-2">

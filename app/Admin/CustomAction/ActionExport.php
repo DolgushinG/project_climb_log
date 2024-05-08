@@ -7,19 +7,21 @@ use Encore\Admin\Facades\Admin;
 class ActionExport extends RowAction
 {
     protected $id;
-    public $name;
+    public $name_btn;
     public $format;
+    public $stage;
 
-    public function __construct($id, $name, $format)
+    public function __construct($id, $stage, $name_btn, $format)
     {
         $this->id = $id;
-        $this->name = $name;
+        $this->stage = $stage;
+        $this->name_btn = $name_btn;
         $this->format = $format;
     }
 
-    protected function script($name, $format)
+    protected function script($stage, $format)
     {
-        switch ($name){
+        switch ($stage){
             case 'final':
                 switch ($format) {
                     case 'excel':
@@ -124,14 +126,13 @@ class ActionExport extends RowAction
 
     public function render()
     {
-        Admin::script($this->script($this->name, $this->format));
-        $btn = strtoupper($this->format);
-        return "<a class='btn report-participant btn-xs btn-success grid-check-row {$this->name}-{$this->format}' data-id='{$this->id}'>$btn</a>";
+        Admin::script($this->script($this->stage, $this->format));
+        return "<a class='btn {$this->stage}-{$this->format} btn-xs btn-success grid-check-row' data-id='{$this->id}'>$this->name_btn</a>";
     }
 
     public function href()
     {
-        return 'exports/events/'.$this->format.'/'.$this->name.'/'.$this->id;
+        return 'exports/events/'.$this->format.'/'.$this->stage.'/'.$this->id;
     }
     public function __toString()
     {

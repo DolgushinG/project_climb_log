@@ -84,50 +84,25 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
                 $sheet->setCellValue('O5', 'БОНУС');
                 $sheet->setCellValue('A2', $this->event_title());
                 $sheet->setCellValue('A3', 'Сет № ');
-                $set = Set::find($this->number_set_id);
-                $sheet->setCellValue('B3', $set->number_set);
                 $sheet->setCellValue('I1', $this->event_date());
                 $sheet->setCellValue('I2', $this->event_city());
 
                 $sheet->getStyle('A1:O10')->applyFromArray($style);
-//                $sheet->getStyle('A1')->applyFromArray($style);
-//                $sheet->getStyle('I1')->applyFromArray($style);
-//                if($event->is_qualification_counting_like_final){
-//
-//                }
 
                 $set_cell = 6;
                 $participants = $this->get_participants();
-////                dd($title_array, $title_array_flash_rp, $ready_title, $ready_title_flash_rp);
                 foreach($participants as $participant){
                     $sheet->mergeCells('A'.$set_cell.':C'.$set_cell);
                     $sheet->setCellValue('A'.$set_cell, $participant);
                     $sheet->getStyle($set_cell)->applyFromArray($style);
-//                    $sheet->getDelegate()->getRowDimension($cell_height)->setRowHeight(15);
                     $set_cell++;
-//                    $cell_height++;
                 }
                 $try = 10;
                 $tries_cell = ['D','E','F','G','H','I','J','K','L','M'];
                 for($i = 1; $i <= $try; $i++){
                     $sheet->setCellValue($tries_cell[$i-1].'5', ''.$i);
                     $sheet->getStyle($tries_cell[$i-1].'5')->applyFromArray($style);
-//                    $sheet->getDelegate()->getRowDimension($cell_height)->setRowHeight(15);
-//                    $cell_height++;
                 }
-////                foreach($empty_cell as $title){
-////                    $set_cell_value = explode(':', $title)[0];
-////                    $sheet->setCellValue($set_cell_value, '');
-////                    $sheet->getStyle($set_cell_value)->applyFromArray($style);
-////                }
-//                foreach($ready_title_flash_rp as $title){
-//                    $set_cell_value_1 = explode(':', $title)[0];
-//                    $set_cell_value_2 = explode(':', $title)[1];
-//                    $sheet->setCellValue($set_cell_value_1, 'F');
-//                    $sheet->getStyle($set_cell_value_1)->applyFromArray($style);
-//                    $sheet->setCellValue($set_cell_value_2, 'RP');
-//                    $sheet->getStyle($set_cell_value_2)->applyFromArray($style);
-//                }
             },
 
         ];

@@ -23,7 +23,7 @@ class BatchExportProtocolRouteParticipantQualification extends Action
         } else {
             $category_id = 'not_category';
         }
-        return $this->response()->download('exports/events/'.$event->id.'/qualification/'.$request->set_id.'/'.$request->gender.'/'.$category_id);
+        return $this->response()->download('exports/events/'.$event->id.'/qualification/'.$request->set_id.'/'.$request->gender.'/'.$category_id)->success('Успешно');
     }
 
     public function form()
@@ -42,7 +42,7 @@ class BatchExportProtocolRouteParticipantQualification extends Action
     }
     public function html()
     {
-        return "<a class='protocol-route btn btn-sm btn-warning'><i class='fa fa-file-archive'></i> $this->name</a>
+        return "<a class='protocol-route btn btn-sm btn-info'><i class='fa fa-file-archive'></i> $this->name</a>
                     <style>
                 .protocol-route {margin-top:8px;}
                  @media screen and (max-width: 767px) {

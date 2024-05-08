@@ -124,7 +124,7 @@ class ResultParticipant extends Model
         }
     }
 
-    public static function get_participant_qualification_group($event, $amount)
+    public static function get_participant_qualification_group($event, $amount, $gender=null)
     {
         $all_group_participants = array();
         foreach ($event->categories as $category){
@@ -163,7 +163,6 @@ class ResultParticipant extends Model
                 $merged_users[] = $a;
             }
         }
-
         return $merged_users;
     }
     public static function get_participant_qualification_gender($event, $amount)

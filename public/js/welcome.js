@@ -9,15 +9,70 @@ $(document).on('click', '#btn-participant', function (e) {
       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
   });
-  var value = document.getElementById("floatingSelect").value;
-  var category_value = document.getElementById("floatingSelectCategory").value;
-  var gender_value = document.getElementById("floatingSelectGender").value;
-  if (document.getElementById("floatingSelectSportCategory")) {
-    var sport_category_value = document.getElementById("floatingSelectSportCategory").value;
+  var sets = document.getElementById("floatingSelect");
+  var category = document.getElementById("floatingSelectCategory");
+  var sport_category = document.getElementById("floatingSelectSportCategory");
+  var birthday = document.getElementById("birthday");
+  var gender = document.getElementById("floatingSelectGender");
+
+  // Проверяем, что каждый селект присутствует на странице
+  if (sets) {
+    // Получаем значение выбранного элемента
+    var setsValue = sets.value.trim();
+
+    // Проверяем, что значение не пустое
+    if (setsValue === "") {
+      // Выводим сообщение об ошибке
+      document.getElementById("error-message").innerText = "Пожалуйста выберите сет для участия";
+      return; // Прерываем выполнение функции
+    }
   }
-  if (document.getElementById("birthday")) {
-    var birthday_value = document.getElementById("birthday").value;
+  if (birthday) {
+    // Получаем значение выбранного элемента
+    var birthdayValue = sets.value.trim();
+
+    // Проверяем, что значение не пустое
+    if (birthdayValue === "") {
+      // Выводим сообщение об ошибке
+      document.getElementById("error-message").innerText = "Пожалуйста установить дата рождения для участия";
+      return; // Прерываем выполнение функции
+    }
   }
+  if (category) {
+    // Получаем значение выбранного элемента
+    var categoryValue = category.value.trim();
+
+    // Проверяем, что значение не пустое
+    if (categoryValue === "") {
+      // Выводим сообщение об ошибке
+      document.getElementById("error-message").innerText = "Пожалуйста выберите категорию для участия";
+      return; // Прерываем выполнение функции
+    }
+  }
+  if (sport_category) {
+    // Получаем значение выбранного элемента
+    var sportCategoryValue = sport_category.value.trim();
+
+    // Проверяем, что значение не пустое
+    if (sportCategoryValue === "") {
+      // Выводим сообщение об ошибке
+      document.getElementById("error-message").innerText = "Пожалуйста выберите разряд для участия";
+      return; // Прерываем выполнение функции
+    }
+  }
+  if (gender) {
+    // Получаем значение выбранного элемента
+    var genderValue = gender.value.trim();
+
+    // Проверяем, что значение не пустое
+    if (genderValue === "") {
+      // Выводим сообщение об ошибке
+      document.getElementById("error-message").innerText = "Пожалуйста выберите разряд для участия";
+      return; // Прерываем выполнение функции
+    }
+  }
+  // Если все селекты заполнены, очищаем сообщение об ошибке
+  document.getElementById("error-message").innerText = "";
   var button = $('#btn-participant');
   var event_id = document.getElementById('btn-participant').getAttribute('data-id');
   var link = document.getElementById('btn-participant').getAttribute('data-link');
@@ -37,7 +92,7 @@ $(document).on('click', '#btn-participant', function (e) {
       'birthday': birthdayValue
     },
     success: function success(xhr, status, error) {
-      button.text('').append('<i id="spinner" style="margin-left: -12px;\n' + '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...');
+      button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...');
       setTimeout(function () {
         button.text(xhr.message);
       }, 3000);
@@ -54,7 +109,7 @@ $(document).on('click', '#btn-participant', function (e) {
       }, 6000);
     },
     error: function error(xhr, status, _error) {
-      button.text('').append('<i id="spinner" style="margin-left: -12px;\n' + '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...');
+      button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...');
       setTimeout(function () {
         button.removeClass('btn-save-change');
         button.addClass('btn-failed-change');
@@ -142,6 +197,52 @@ $(document).on('click', '#btn-participant-change-set', function (e) {
     }
   });
 });
+$(document).on('click', '#send-all-result', function (e) {
+  $.ajaxSetup({
+    headers: {
+      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    }
+  });
+  var button = $('#send-all-result');
+  var email = document.getElementById('allResultFloatingEmail').value;
+  var event_id = document.getElementById('allResultFloatingEmail').getAttribute('data-event-id');
+  e.preventDefault();
+  $.ajax({
+    type: 'POST',
+    url: 'sendAllResult',
+    data: {
+      'event_id': event_id,
+      'email': email
+    },
+    success: function success(xhr, status, error) {
+      button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...');
+      button.attr("disabled", true);
+      setTimeout(function () {
+        button.text(xhr.message);
+        button.attr("disabled", true);
+      }, 3000);
+      setTimeout(function () {
+        button.text('Отправлено');
+        button.attr("disabled", true);
+      }, 6000);
+      setTimeout(function () {
+        button.text('Отравить');
+        button.removeAttr("disabled");
+      }, 6000);
+    },
+    error: function error(xhr, status, _error3) {
+      button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...');
+      button.attr("disabled", true);
+      setTimeout(function () {
+        button.text(xhr.message);
+      }, 3000);
+      setTimeout(function () {
+        button.text('Отправить');
+        button.removeAttr("disabled");
+      }, 6000);
+    }
+  });
+});
 var $modal = $('#modal');
 var image = document.getElementById('image');
 var cropper;
@@ -221,7 +322,7 @@ $("#crop").click(function () {
             block_checking_bill.style.display = 'block';
           }, 1000);
         },
-        error: function error(xhr, status, _error3) {
+        error: function error(xhr, status, _error4) {
           $modal.modal('hide');
         }
       });

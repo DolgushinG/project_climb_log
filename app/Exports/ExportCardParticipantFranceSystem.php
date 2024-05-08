@@ -17,7 +17,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Sheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ExportCardForJudgeParticipant implements WithCustomStartCell, ShouldAutoSize, WithEvents, WithStyles
+class ExportCardParticipantFranceSystem implements WithCustomStartCell, ShouldAutoSize, WithEvents, WithStyles
 {
 
     public $event_id;

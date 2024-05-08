@@ -5,8 +5,8 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchNotificationOfParticipant;
 use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportProtocolRouteParticipantQualification;
 use App\Admin\CustomAction\ActionExport;
-use App\Admin\CustomAction\ActionExportCardForJudgeParticipant;
-use App\Admin\CustomAction\ActionExportCardParticipant;
+use App\Admin\CustomAction\ActionExportCardParticipantFranceSystem;
+use App\Admin\CustomAction\ActionExportCardParticipantFestival;
 use App\Admin\CustomAction\ActionExportList;
 use App\Admin\Extensions\CustomButton;
 use App\Exports\AllResultExport;
@@ -151,10 +151,10 @@ class EventsController extends Controller
         }
         $grid->actions(function ($actions) {
             $actions->disableView();
-            $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты'));
+            $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
             $actions->append(new ActionExportList($actions->getKey(), 'Список участников'));
-            $actions->append(new ActionExportCardParticipant($actions->getKey(), 'Карточка участника'));
-            $actions->append(new ActionExportCardForJudgeParticipant($actions->getKey(), 'Карточка'));
+            $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника'));
+            $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника'));
         });
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         if($event){
@@ -338,7 +338,7 @@ class EventsController extends Controller
                         ->states(self::STATES_BTN);
                 }
             }
-            $exist_routes = Route::where('event_id', $id)->first();
+            $exist_routes = Grades::where('event_id', $id)->first();
             if($exist_routes){
                 $form->switch('is_public', 'Опубликовать для всех')
                     ->help('После включения, все смогут зайти на страницу с соревнованиями')

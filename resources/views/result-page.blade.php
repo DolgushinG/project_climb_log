@@ -61,7 +61,9 @@
                                 <div id="mobile-fixed" class="btn-container-desktop-fixed">
                                     <button type="button" id="btn-send-result" data-owner-id="{{$event->owner_id}}"
                                             data-id="{{$event->id}}" data-user-id="{{Auth()->user()->id}}"
-                                            class="btn btn-success button-desktop-fixed rounded-pill">Внести
+                                            class="btn btn-success button-desktop-fixed rounded-pill">
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        Внести
                                     </button>
                                 </div>
                             <!-- End Table with stripped rows -->
@@ -149,8 +151,7 @@
             var results = [...document.querySelectorAll('.btn-check')].map(input => [input.id, input.checked, input.getAttribute('data-grade')])
             let button = $('#btn-send-result')
             button.attr("disabled", "true")
-            button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-                        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+            button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...')
             let event_id = document.getElementById('btn-send-result').getAttribute('data-id')
             let user_id = document.getElementById('btn-send-result').getAttribute('data-user-id')
             let owner_id = document.getElementById('btn-send-result').getAttribute('data-owner-id')
@@ -162,8 +163,7 @@
                 success: function (xhr, status, error) {
                     // button.removeClass('btn-save-change')
                     // button.addClass('btn-edit-change')
-                    button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-                        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Почти почти...')
+                    button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Почти почти...')
 
                     setTimeout(function () {
                         button.text(xhr.message)
@@ -181,8 +181,7 @@
                     }, 3000);
                 },
                 error: function (xhr, status, error) {
-                    button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-                        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+                    button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...')
                     setTimeout(function () {
                         button.removeClass('btn-save-change')
                         button.addClass('btn-failed-change')

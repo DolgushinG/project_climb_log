@@ -91,8 +91,7 @@ $(document).on('click','#btn-participant', function(e) {
             'birthday': birthdayValue,
         },
         success: function(xhr, status, error) {
-            button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-                '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+            button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...')
 
             setTimeout(function () {
                 button.text(xhr.message)
@@ -112,8 +111,7 @@ $(document).on('click','#btn-participant', function(e) {
         },
         error: function(xhr, status, error) {
 
-            button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-                '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+            button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...')
             setTimeout(function () {
                 button.removeClass('btn-save-change')
                 button.addClass('btn-failed-change')
@@ -204,6 +202,56 @@ $(document).on('click','#btn-participant-change-set', function(e) {
                 button.removeClass('btn-failed-change')
                 button.addClass('btn-save-change')
                 button.text('Изменить сет')
+            }, 6000);
+
+        },
+
+    });
+});
+$(document).on('click','#send-all-result', function(e) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    let button = $('#send-all-result')
+    let email = document.getElementById('allResultFloatingEmail').value
+    let event_id = document.getElementById('allResultFloatingEmail').getAttribute('data-event-id')
+    e.preventDefault()
+    $.ajax({
+        type: 'POST',
+        url: 'sendAllResult',
+        data: {
+            'event_id': event_id,
+            'email': email,
+        },
+        success: function(xhr, status, error) {
+            button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...')
+            button.attr("disabled", true);
+            setTimeout(function () {
+                button.text(xhr.message)
+                button.attr("disabled", true);
+            }, 3000);
+            setTimeout(function () {
+                button.text('Отправлено')
+                button.attr("disabled", true);
+            }, 6000);
+            setTimeout(function () {
+                button.text('Отравить')
+                button.removeAttr("disabled");
+            }, 6000);
+
+        },
+        error: function(xhr, status, error) {
+            button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...')
+            button.attr("disabled", true);
+            setTimeout(function () {
+                button.text(xhr.message)
+            }, 3000);
+            setTimeout(function () {
+                button.text('Отправить')
+                button.removeAttr("disabled");
             }, 6000);
 
         },

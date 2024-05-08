@@ -7,10 +7,16 @@ use App\Admin\Actions\BatchForceRecoutingResultFinalGroup;
 use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGender;
 use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGroup;
 use App\Admin\Actions\BatchGenerateResultSemiFinalParticipant;
+use App\Admin\Actions\ResultRouteFinalStage\BatchExportProtocolRouteParticipantFinal;
+use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportProtocolRouteParticipantSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustom;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustomFillOneRoute;
+use App\Exports\FinalProtocolCardsExport;
+use App\Exports\ExportFinalParticipant;
+use App\Exports\ExportSemiFinalParticipant;
+use App\Exports\SemiFinalProtocolCardsExport;
 use App\Exports\SemiFinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
@@ -147,6 +153,7 @@ class ResultRouteSemiFinalStageController extends Controller
             $tools->append(new BatchForceRecoutingSemiFinalResultGroup);
             $tools->append(new BatchForceRecoutingSemiFinalResultGender);
             $tools->append(new BatchGenerateResultSemiFinalParticipant);
+            $tools->append(new BatchExportProtocolRouteParticipantSemiFinal);
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
@@ -375,6 +382,14 @@ class ResultRouteSemiFinalStageController extends Controller
         $result = Excel::download(new SemiFinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::ODS);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/ods',
+        ]);
+    }
+    public function semifinalParticipantExcel(Request $request)
+    {
+        $file_name = 'Карточки полуфинала.xlsx';
+        $result = Excel::download(new SemiFinalProtocolCardsExport($request->event_id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
         ]);
     }
 

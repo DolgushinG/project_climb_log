@@ -17,7 +17,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Sheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ExportCardParticipant implements WithTitle, WithCustomStartCell, ShouldAutoSize, WithEvents, WithStyles, WithDrawings
+class ExportCardParticipantFestival implements WithTitle, WithCustomStartCell, ShouldAutoSize, WithEvents, WithStyles, WithDrawings
 {
 
     public $event_id;

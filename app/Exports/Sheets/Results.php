@@ -379,6 +379,6 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             }
             $users[$index] = collect($users[$index])->except('id', 'category_id');
         }
-        return Event::get_france_system_result($table, $this->event_id, $this->gender, $this->category);
+        return collect($users);
     }
 }

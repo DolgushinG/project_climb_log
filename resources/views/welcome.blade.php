@@ -108,6 +108,7 @@
                                     <a href="{{route('get_final_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                        class="btn btn-success rounded-pill">Результаты финала</a>
                                     @endif
+                                @include('event.get_all_result_to_email')
                             </div>
                         </div>
                     </div>
@@ -125,12 +126,6 @@
                                             aria-controls="info" aria-selected="true">Общая информация
                                     </button>
                                 </li>
-{{--                                <li class="nav-item flex-fill" role="presentation">--}}
-{{--                                    <button class="nav-link w-100" id="home-tab" data-bs-toggle="tab"--}}
-{{--                                            data-bs-target="#bordered-justified-home" type="button" role="tab"--}}
-{{--                                            aria-controls="home" aria-selected="true">Сеты--}}
-{{--                                    </button>--}}
-{{--                                </li>--}}
                                 <li class="nav-item flex-fill" role="presentation" style="margin-right: 8px!important;">
                                     <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab"
                                             data-bs-target="#bordered-justified-profile" type="button" role="tab"
@@ -179,7 +174,6 @@
                                     </div>
                                 </div>
                             </div><!-- End Bordered Tabs Justified -->
-
                         </div>
                     </div>
                 </div>

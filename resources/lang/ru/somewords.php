@@ -21,8 +21,10 @@ $some = [
     'Муж' => 'male',
     'grade' => 'Категория трассы',
     'SemiFinal' => 'Полуфинал',
+    'semifinal' => 'Полуфинал',
     'Qualification' => 'Квалификация',
     'QualificationLikeFinal' => 'Квалификация',
     'Final' => 'Финал',
+    'final' => 'Финал',
 ];
 return $some;

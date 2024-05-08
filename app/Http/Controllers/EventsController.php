@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ExportCardParticipantFranceSystem;
 use App\Helpers\Helpers;
 use App\Http\Requests\StoreRequest;
 use App\Jobs\UpdateResultParticipants;
@@ -18,10 +19,13 @@ use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Admin;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 use stdClass;
 use function Symfony\Component\String\s;
 
@@ -460,6 +464,20 @@ class EventsController extends Controller
         return view('result-page', compact('routes', 'event'));
     }
 
-
-
+    public function sendAllResult(Request $request)
+    {
+        $event = Event::find($request->event_id);
+        try {
+            $details = array();
+            $details['title'] = $event->title;
+            $details['event_start_date'] = $event->start_date;
+            $details['event_url'] = env('APP_URL').$event->link;
+            $details['event_id'] = $event->id;
+            Mail::to($request->email)->queue(new \App\Mail\AllResultExcelFIle($details));
+            return response()->json(['success' => true, 'message' => 'Успешная отправка'], 200);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Произошла ошибка'], 422);
+        }
+    }
 }

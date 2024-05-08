@@ -5,7 +5,7 @@ use App\Models\Event;
 use Encore\Admin\Actions\RowAction;
 use Encore\Admin\Facades\Admin;
 
-class ActionExportCardForJudgeParticipant extends RowAction
+class ActionExportCardParticipantFranceSystem extends RowAction
 {
     protected $id;
 
@@ -20,7 +20,7 @@ class ActionExportCardForJudgeParticipant extends RowAction
         return <<<SCRIPT
                         $('.card-judge').on('click', function () {
                             let id = this.getAttribute('data-id');
-                            document.location = 'exports/events/card-judge/participant/' + id
+                            document.location = 'exports/events/card-france-system/participant/' + id
                         });
                         SCRIPT;
     }
@@ -38,7 +38,7 @@ class ActionExportCardForJudgeParticipant extends RowAction
     }
     public function href()
     {
-        return 'exports/events/card-judge/participant/'.$this->id;
+        return 'exports/events/card-france-system/participant/'.$this->id;
     }
     public function __toString()
     {

@@ -8,12 +8,16 @@ use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGender;
 use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGroup;
 use App\Admin\Actions\BatchGenerateResultFinalParticipant;
 use App\Admin\Actions\BatchGenerateResultSemiFinalParticipant;
+use App\Admin\Actions\ResultRouteFinalStage\BatchExportProtocolRouteParticipantFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustom;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustomFillOneRoute;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustom;
+use App\Exports\FinalProtocolCardsExport;
+use App\Exports\ExportFinalParticipant;
+use App\Exports\ExportListParticipant;
 use App\Exports\FinalResultExport;
 use App\Models\Event;
 use App\Models\Participant;
@@ -127,6 +131,7 @@ class ResultRouteFinalStageController extends Controller
             $tools->append(new BatchForceRecoutingResultFinalGender);
             $tools->append(new BatchForceRecoutingResultFinalGroup);
             $tools->append(new BatchGenerateResultFinalParticipant);
+            $tools->append(new BatchExportProtocolRouteParticipantFinal);
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
@@ -263,6 +268,14 @@ class ResultRouteFinalStageController extends Controller
         $result = Excel::download(new FinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::ODS);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/ods',
+        ]);
+    }
+    public function finalParticipantExcel(Request $request)
+    {
+        $file_name = 'Карточка финала.xlsx';
+        $result = Excel::download(new FinalProtocolCardsExport($request->event_id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
         ]);
     }
 

@@ -33,6 +33,7 @@ Route::get('/competition', function () {
 
 //Route::get('/event/{id}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::get('/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
+Route::post('event/{start_date}/{climbing_gym}/sendAllResult', [App\Http\Controllers\EventsController::class, 'sendAllResult']);
 Route::get('event/{start_date}/{climbing_gym}/getInfoPayment/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_payment']);
 Route::get('event/{start_date}/{climbing_gym}/getInfoPaymentBill/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_payment_bill']);
 Route::get('/admin/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
