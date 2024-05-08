@@ -10,6 +10,7 @@ use App\Models\ResultParticipant;
 use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteQualificationLikeFinal;
 use App\Models\ResultRouteSemiFinalStage;
+use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -271,16 +272,14 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             )
             ->where('participants.gender', '=', $this->gender)->get()->sortBy('user_place')->toArray();
         $event = Event::find($this->event_id);
-        if($event->mode == 2){
-            $users['empty_row'] = array(
-                "id" => "",
-                "user_place" => "",
-                "middlename" => "",
-                "points" => "",
-                "owner_id" => "",
-                "number_set_id" => "",
-            );
-        }
+        $users['empty_row'] = array(
+            "id" => "",
+            "user_place" => "",
+            "middlename" => "",
+            "points" => "",
+            "owner_id" => "",
+            "number_set_id" => "",
+        );
         foreach ($users as $index => $user){
             if($index == 'empty_row'){
                 $count = Grades::where('event_id', $this->event_id)->first()->count_routes;
@@ -289,9 +288,16 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $users[$index]['amount_passed_routes'] = '';
                 $users[$index]['amount_passed_flash'] = '';
                 $users[$index]['amount_passed_redpoint'] = '';
-                $coefficient = EventAndCoefficientRoute::where('event_id', $this->event_id)->select('route_id', 'coefficient_'.$this->gender)->pluck('coefficient_'.$this->gender, 'route_id');
-                for ($i = 1; $i <= $count; $i++){
-                    $users[$index]['route_result_'.$i] = $coefficient[$i];
+                if($event->mode == 2){
+                    $coefficient = EventAndCoefficientRoute::where('event_id', $this->event_id)->select('route_id', 'coefficient_'.$this->gender)->pluck('coefficient_'.$this->gender, 'route_id');
+                    for ($i = 1; $i <= $count; $i++){
+                        $users[$index]['route_result_'.$i] = $coefficient[$i];
+                    }
+                } else {
+                    $values = Route::where('event_id', $this->event_id)->pluck('value');
+                    foreach ($values as $index2 => $value){
+                        $users[$index]['route_result_'.$index2] = $value;
+                    }
                 }
             } else {
                 $qualification_result = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
