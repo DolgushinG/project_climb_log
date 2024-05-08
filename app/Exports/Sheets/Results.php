@@ -290,13 +290,14 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $users[$index]['number_set_id'] = '';
                 $users[$index]['amount_passed_routes'] = '';
                 $users[$index]['amount_passed_flash'] = '';
-                $users[$index]['amount_passed_redpoint'] = 'Баллы за трассу [за флеш]';
                 if ($event->mode == 2) {
+                    $users[$index]['amount_passed_redpoint'] = 'Коэффициент трасс';
                     $coefficient = EventAndCoefficientRoute::where('event_id', $this->event_id)->select('route_id', 'coefficient_' . $this->gender)->pluck('coefficient_' . $this->gender, 'route_id');
                     for ($i = 1; $i <= $count; $i++) {
                         $users[$index]['route_result_' . $i] = $coefficient[$i];
                     }
                 } else {
+                    $users[$index]['amount_passed_redpoint'] = 'Баллы за трассу [за флеш]';
                     $routes_event = Route::where('event_id', $this->event_id)->get();
                     foreach ($routes_event as $index2 => $route) {
                         $users[$index]['route_result_' . $index2] = $route->value.' ['.$route->flash_value.']';
