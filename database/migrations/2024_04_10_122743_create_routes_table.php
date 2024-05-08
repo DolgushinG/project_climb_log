@@ -20,6 +20,7 @@ class CreateRoutesTable extends Migration
             $table->integer('route_id');
             $table->string('grade');
             $table->string('value')->nullable();
+            $table->string('flash_value')->nullable();
             $table->timestamps();
         });
     }

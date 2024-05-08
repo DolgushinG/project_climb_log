@@ -271,6 +271,9 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 'participants.number_set_id',
             )
             ->where('participants.gender', '=', $this->gender)->get()->sortBy('user_place')->toArray();
+        if(!$users){
+            return collect([]);
+        }
         $event = Event::find($this->event_id);
         $users['empty_row'] = array(
             "id" => "",
@@ -280,23 +283,23 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             "owner_id" => "",
             "number_set_id" => "",
         );
-        foreach ($users as $index => $user){
-            if($index == 'empty_row'){
+        foreach ($users as $index => $user) {
+            if ($index == 'empty_row') {
                 $count = Grades::where('event_id', $this->event_id)->first()->count_routes;
                 $users[$index]['user_place'] = '';
                 $users[$index]['number_set_id'] = '';
                 $users[$index]['amount_passed_routes'] = '';
                 $users[$index]['amount_passed_flash'] = '';
-                $users[$index]['amount_passed_redpoint'] = '';
-                if($event->mode == 2){
-                    $coefficient = EventAndCoefficientRoute::where('event_id', $this->event_id)->select('route_id', 'coefficient_'.$this->gender)->pluck('coefficient_'.$this->gender, 'route_id');
-                    for ($i = 1; $i <= $count; $i++){
-                        $users[$index]['route_result_'.$i] = $coefficient[$i];
+                $users[$index]['amount_passed_redpoint'] = 'Баллы за трассу [за флеш]';
+                if ($event->mode == 2) {
+                    $coefficient = EventAndCoefficientRoute::where('event_id', $this->event_id)->select('route_id', 'coefficient_' . $this->gender)->pluck('coefficient_' . $this->gender, 'route_id');
+                    for ($i = 1; $i <= $count; $i++) {
+                        $users[$index]['route_result_' . $i] = $coefficient[$i];
                     }
                 } else {
-                    $values = Route::where('event_id', $this->event_id)->pluck('value');
-                    foreach ($values as $index2 => $value){
-                        $users[$index]['route_result_'.$index2] = $value;
+                    $routes_event = Route::where('event_id', $this->event_id)->get();
+                    foreach ($routes_event as $index2 => $route) {
+                        $users[$index]['route_result_' . $index2] = $route->value.' ['.$route->flash_value.']';
                     }
                 }
             } else {
@@ -318,7 +321,6 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                             break;
                         case 2:
                             $attempt = 'R';
-
                             break;
                         case 0:
                             $attempt = '-';

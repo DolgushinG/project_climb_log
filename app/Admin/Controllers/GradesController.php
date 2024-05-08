@@ -301,7 +301,7 @@ class GradesController extends Controller
                 $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
                 $table->number('Кол-во')->width('50px');
                 if($event->mode == 1){
-                    $table->text('Ценность')->width('50px');
+                    $table->text('Ценность')->width('60px');
                 }
                 $table->disableButton();
             })->value($routes);

@@ -22,6 +22,7 @@ class CreateResultParticipantTable extends Migration
             $table->integer('route_id');
             $table->integer('attempt');
             $table->string('grade');
+            $table->integer('value')->nullable();
             $table->timestamps();
         });
     }

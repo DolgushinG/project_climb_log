@@ -36,7 +36,7 @@
                                                             @if($event->is_qualification_counting_like_final)
                                                                 @include('event.buttons.participant_already')
                                                             @else
-    {{--                                                          Регистрация открыта/закрыта--}}
+    {{--                                                          Отправка результатов открыта/закрыта--}}
                                                                 @if($event->is_send_result_state)
                                                                     @include('event.buttons.send_result')
                                                                 @endif
@@ -55,6 +55,8 @@
                                                         @if($event->is_send_result_state)
                                                         {{-- Фестивальная система вносят результаты сами участники--}}
                                                             @include('event.buttons.send_result')
+                                                        @else
+                                                                @include('event.buttons.send_result_is_close')
                                                         @endif
                                                     @endif
                                                 @endif
@@ -104,11 +106,13 @@
                                     <a href="{{route('get_semifinal_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                        class="btn btn-success rounded-pill">Результаты полуфинала</a>
                                 @endif
-                                    @if($is_show_button_final)
-                                    <a href="{{route('get_final_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
-                                       class="btn btn-success rounded-pill">Результаты финала</a>
-                                    @endif
-                                @include('event.get_all_result_to_email')
+                                @if($is_show_button_final)
+                                <a href="{{route('get_final_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                   class="btn btn-success rounded-pill">Результаты финала</a>
+                                @endif
+                                @if(!$event->is_send_result_state && $event->is_open_send_result_state)
+                                    @include('event.get_all_result_to_email')
+                                @endif
                             </div>
                         </div>
                     </div>

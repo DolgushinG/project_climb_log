@@ -134,8 +134,8 @@ class Event extends Model
         }
     }
     public static function get_result_format_all_route($event, $participant){
-        $custom_red_point = $event->amount_point_redpoint ?? ResultParticipant::REDPOINT;
-        $custom_flash = $event->amount_point_flash ?? ResultParticipant::FLASH;
+        $custom_red_point = $event->amount_point_redpoint;
+        $custom_flash = $event->amount_point_flash;
         $routes_id_passed_with_red_point = ResultParticipant::where('event_id', $event->id)->where('user_id', $participant->id)->where('attempt', ResultParticipant::STATUS_PASSED_REDPOINT)->pluck('route_id');
         $counting_routes_with_red_point_passed = count($routes_id_passed_with_red_point);
         $routes_id_passed_with_flash = ResultParticipant::where('event_id', $event->id)->where('user_id', $participant->id)->where('attempt', ResultParticipant::STATUS_PASSED_FLASH)->pluck('route_id');
@@ -162,13 +162,13 @@ class Event extends Model
             ->whereNotIn('attempt', [0])
             ->get();
         foreach ($routes as $route){
-            $value = Route::where('grade','=', $route->grade)->where('event_id','=', $event->id)->first()->value;
-            if(!$value){
+            $event_route = Route::where('grade','=', $route->grade)->where('event_id','=', $event->id)->first();
+            if(!$event_route){
                 Log::error('При создание соревнований было указано один формат все трасс или француская система, а были с
                 сгенерировано трассы, потом изменен формат и пытаемся сгенерироват результат
                 ');
             }
-            $route->value = (new \App\Models\ResultParticipant)->get_value_route($route->attempt, $value, $event->mode);
+            $route->value = (new \App\Models\ResultParticipant)->get_value_route($route->attempt, $event_route, $event->mode, $event->id);
         }
         $routes_id_passed_with_red_point = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultParticipant::STATUS_PASSED_REDPOINT)->pluck('route_id');
         if($routes_id_passed_with_red_point->isNotEmpty()){

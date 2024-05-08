@@ -63,6 +63,7 @@ class CreateEventsTable extends Migration
             $table->boolean('registration_time_expired')->nullable();
             $table->datetime('datetime_registration_state')->nullable();
             $table->boolean('is_send_result_state')->nullable();
+            $table->boolean('is_open_send_result_state')->default(1);
             $table->datetime('datetime_send_result_state')->nullable();
             $table->boolean('is_public')->default(0);
             $table->timestamps();

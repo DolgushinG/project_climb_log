@@ -379,8 +379,8 @@ class EventsController extends Controller
         $final_data_only_passed_route = array();
         foreach ($data as $route){
             # Варианты форматов подсчета баллов
-            $value_category = Route::where('grade','=',$route['grade'])->where('owner_id','=', $request->owner_id)->first()->value;
-            $value_route = (new \App\Models\ResultParticipant)->get_value_route($route['attempt'], $value_category, $format);
+            $owner_route = Route::where('grade','=',$route['grade'])->where('owner_id','=', $request->owner_id)->first();
+            $value_route = (new \App\Models\ResultParticipant)->get_value_route($route['attempt'], $owner_route, $format, $request->event_id);
             # Формат все трассы считаем сразу
             if($format == 2) {
                 (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);

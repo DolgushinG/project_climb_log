@@ -188,6 +188,13 @@ class EventsController extends Controller
                 return $column->label('success');
             }
         });
+        $grid->column('is_open_send_result_state', 'Полные результаты')->using([0 => 'Закрыты', 1 => 'Открыты'])->display(function ($title, $column) {
+            If ($this->is_open_send_result_state == 0) {
+                return $column->label('default');
+            } else {
+                return $column->label('success');
+            }
+        });
         $grid->column('is_public', 'Опубликовать для всех')->using([0 => 'Нет', 1 => 'Да'])->display(function ($title, $column) {
             If ($this->is_public == 0) {
                 return $column->label('default');
@@ -315,6 +322,7 @@ class EventsController extends Controller
             $form->number('registration_time_expired', 'Через сколько дней сгорит регистрации без оплаты')->help('Если 0 то сгорать не будет')->default(0);
             $form->datetime('datetime_registration_state', 'Дата закрытия регистрации [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
             $form->switch('is_send_result_state', 'Отправка результатов')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            $form->switch('is_open_send_result_state', 'Открыть полные результаты')->help('Даже если включить кнопка появиться только после закрыти внесения результатов')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->datetime('datetime_send_result_state', 'Дата закрытия отправки результатов [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
             if(!$event){

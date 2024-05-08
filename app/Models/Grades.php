@@ -30,18 +30,18 @@ class Grades extends Model
             ['Категория' => '5', 'Кол-во' => 3, 'Ценность' => 100],
             ['Категория' => '5+', 'Кол-во' => 2, 'Ценность' => 150],
             ['Категория' => '6A', 'Кол-во' => 2, 'Ценность' => 200],
-            ['Категория' => '6A+', 'Кол-во' => 2, 'Ценность' => 250],
-            ['Категория' => '6B', 'Кол-во' => 3, 'Ценность' => 300],
-            ['Категория' => '6B+', 'Кол-во' => 2, 'Ценность' => 350],
-            ['Категория' => '6C', 'Кол-во' => 2, 'Ценность' => 400],
-            ['Категория' => '6C+', 'Кол-во' => 2, 'Ценность' => 450],
-            ['Категория' => '7A', 'Кол-во' => 2, 'Ценность' => 500],
-            ['Категория' => '7A+', 'Кол-во' => 2, 'Ценность' => 550],
-            ['Категория' => '7B', 'Кол-во' => 2, 'Ценность' => 600],
-            ['Категория' => '7B+', 'Кол-во' => 1, 'Ценность' => 650],
-            ['Категория' => '7C', 'Кол-во' => 1, 'Ценность' => 700],
-            ['Категория' => '7C+', 'Кол-во' => 1, 'Ценность' => 750],
-            ['Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 800],
+            ['Категория' => '6A+', 'Кол-во' => 2, 'Ценность' => 300],
+            ['Категория' => '6B', 'Кол-во' => 3, 'Ценность' => 400],
+            ['Категория' => '6B+', 'Кол-во' => 2, 'Ценность' => 600],
+            ['Категория' => '6C', 'Кол-во' => 2, 'Ценность' => 800],
+            ['Категория' => '6C+', 'Кол-во' => 2, 'Ценность' => 1200],
+            ['Категория' => '7A', 'Кол-во' => 2, 'Ценность' => 1600],
+            ['Категория' => '7A+', 'Кол-во' => 2, 'Ценность' => 2400],
+            ['Категория' => '7B', 'Кол-во' => 2, 'Ценность' => 3200],
+            ['Категория' => '7B+', 'Кол-во' => 1, 'Ценность' => 4800],
+            ['Категория' => '7C', 'Кол-во' => 1, 'Ценность' => 6400],
+            ['Категория' => '7C+', 'Кол-во' => 1, 'Ценность' => 9600],
+            ['Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 12800],
         ];
     }
     public static function settings_routes($amount_routes, $routes)
@@ -73,7 +73,11 @@ class Grades extends Model
                         if ($amount_routes <= 20) {
                             if ($route['grade'] != '8A') {
                                 if (isset($route['value'])) {
-                                    $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade'], 'value' => $route['value']);
+                                    $grades_with_value_flash = Grades::grades_with_value_flash(20);
+                                    $grades = Grades::grades();
+                                    $index = array_search($route['grade'], $grades);
+                                    $flash_value = $grades_with_value_flash[$index];
+                                    $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade'], 'value' => $route['value'], 'flash_value' => $flash_value);
                                 } else {
                                     $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade']);
                                 }
@@ -81,7 +85,11 @@ class Grades extends Model
                             }
                         } else {
                             if (isset($route['value'])) {
-                                $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade'], 'value' => $route['value']);
+                                $grades_with_value_flash = Grades::grades_with_value_flash(20);
+                                $grades = Grades::grades();
+                                $index = array_search($route['grade'], $grades);
+                                $flash_value = $grades_with_value_flash[$index];
+                                $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade'], 'value' => $route['value'], 'flash_value' => $flash_value);
                             } else {
                                 $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade']);
                             }
@@ -124,9 +132,34 @@ class Grades extends Model
      */
     public static function grades(): array
     {
-        $grades = ['4', '5', '5+', '6A','6A+', '6B', '6B+', '6C', '6C+', '7A', '7A+', '7B', '7B+', '7C', '7C+', '8A'];
-        return $grades;
+        return ['4', '5', '5+', '6A','6A+', '6B', '6B+', '6C', '6C+', '7A', '7A+', '7B', '7B+', '7C', '7C+', '8A'];
     }
+
+    /**
+     * @return array[]
+     */
+    public static function grades_with_value_flash($start_low_grade): array
+    {
+
+        $step = 10;
+        $main_digit = $start_low_grade;
+        $res = [];
+        $count = 1;
+        $len = count(self::grades());
+        for ($i = 0; $i < $len; $i++) {
+            $res[] = $main_digit;
+            $main_digit += $step;
+            $count++;
+
+            if ($count == 3) {
+                $step *= 2;
+                $count = 1;
+            }
+        }
+
+        return $res;
+    }
+
 
     public static function getAttemptFromGrades($grade, $type_participant)
     {

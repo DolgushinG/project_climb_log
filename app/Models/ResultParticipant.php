@@ -10,24 +10,48 @@ class ResultParticipant extends Model
 {
     public $timestamps = true;
 
-    const FLASH = 1;
+//    const FLASH = 1;
 
     const STATUS_PASSED_FLASH = "1";
     const STATUS_PASSED_REDPOINT = "2";
     const STATUS_NOT_PASSED = "0";
 
-    const REDPOINT = 0.9;
-    const FAIL = 0;
-    const FLASH_VALUE = 10;
-    const REDPOINT_VALUE = 0;
+//    const REDPOINT = 0.9;
+//    const FAIL = 0;
+//    const FLASH_VALUE = 10;
+//    const REDPOINT_VALUE = 0;
 
-    const POINT_VALUES = array(self::STATUS_NOT_PASSED => self::FAIL, self::STATUS_PASSED_FLASH => self::FLASH_VALUE, self::STATUS_PASSED_REDPOINT => self::REDPOINT_VALUE);
+//    const POINT_VALUES = array(self::STATUS_NOT_PASSED => self::FAIL, self::STATUS_PASSED_FLASH => self::FLASH_VALUE, self::STATUS_PASSED_REDPOINT => self::REDPOINT_VALUE);
 
-    var $values = array(self::STATUS_NOT_PASSED => self::FAIL, self::STATUS_PASSED_FLASH => self::FLASH, self::STATUS_PASSED_REDPOINT => self::REDPOINT);
+//    var $values = array(self::STATUS_NOT_PASSED => self::FAIL, self::STATUS_PASSED_FLASH => self::FLASH, self::STATUS_PASSED_REDPOINT => self::REDPOINT);
 
 
     protected $table = 'result_participant';
 
+    public static function get_flash_value_for_mode_ten_better_route($attempt, $event_id, $route)
+    {
+        $event_route =  Route::where('event_id', $event_id)->where('grade', $route->grade)->first();
+        switch ($attempt){
+            case self::STATUS_NOT_PASSED:
+                return 0;
+            case self::STATUS_PASSED_FLASH:
+                return $route->value + $event_route->flash_value;
+            case self::STATUS_PASSED_REDPOINT:
+                return $route->value;
+        }
+    }
+    public static function get_flash_value_for_mode_all_route($attempt, $event_id)
+    {
+        $event = Event::find($event_id);
+        switch ($attempt){
+            case self::STATUS_NOT_PASSED:
+                return 0;
+            case self::STATUS_PASSED_FLASH:
+                return $event->amount_point_flash;
+            case self::STATUS_PASSED_REDPOINT:
+                return $event->amount_point_redpoint;
+        }
+    }
     private static function counting_result($event_id, $route_id, $gender)
     {
         $users = User::query()
@@ -54,14 +78,16 @@ class ResultParticipant extends Model
         }
         return sqrt($active_participant / $count_route_passed);
     }
-    public function get_value_route($attempt, $value_category, $format, $custom_value=null) {
+    public function get_value_route($attempt, $route, $format, $event_id) {
         switch ($format) {
             # 10 лучших
             case 1:
-                return $value_category + self::POINT_VALUES[$attempt];
+                return self::get_flash_value_for_mode_ten_better_route($attempt, $event_id, $route);
+//                return $route->value + self::POINT_VALUES[$attempt];
             # Все трассы
             case 2:
-                return $this->values[$attempt];
+                self::get_flash_value_for_mode_all_route($attempt, $event_id);
+//                return $this->values[$attempt];
         }
     }
 
