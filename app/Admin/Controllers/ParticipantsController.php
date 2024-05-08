@@ -478,10 +478,14 @@ class ParticipantsController extends Controller
                     Participant::send_confirm_bill($event, $user);
                 }
                 if($form->input('is_paid') === "0"){
+                    $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
+                    if(!$payments){
+                        $payments = new OwnerPayments;
+                    }
                     if($admin){
-                        $amount = $admin->amount_for_pay - Event::counting_amount_for_pay_participant($event->id);
-                        $admin->amount_for_pay = $amount;
-                        $admin->save();
+                        $amount = $payments->amount_for_pay - Event::counting_amount_for_pay_participant($event->id);
+                        $payments->amount_for_pay = $amount;
+                        $payments->save();
                     }
                 }
 
