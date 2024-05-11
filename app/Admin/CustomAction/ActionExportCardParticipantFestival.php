@@ -18,7 +18,7 @@ class ActionExportCardParticipantFestival extends RowAction
     protected function script()
     {
         return <<<SCRIPT
-                        $('.card-participant').on('click', function () {
+                        $('.card-festival').on('click', function () {
                             let id = this.getAttribute('data-id');
                             document.location = 'exports/events/card-festival/participant/' + id
                         });
@@ -34,7 +34,7 @@ class ActionExportCardParticipantFestival extends RowAction
             $display = 'display:None';
         }
         $btn = strtoupper($this->name);
-        return "<a class='btn card-participant btn-xs btn-success grid-check-row' style='{$display}' data-id='{$this->id}'>$btn</a>";
+        return "<a class='btn card-festival btn-xs btn-success grid-check-row' style='{$display}' data-id='{$this->id}'>$btn</a>";
     }
 
     public function href()
