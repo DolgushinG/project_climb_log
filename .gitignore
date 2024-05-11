@@ -21,3 +21,4 @@ yarn-error.log
 /public/js/profile.js
 /public/js/welcome.js.js
 /public/css/*
+composer.lock
