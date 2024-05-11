@@ -27,7 +27,7 @@ Route::group([
         $router->resource('event-and-coefficient-route',  EventAndCoefficientsRoutesController::class);
         $router->get('exports/events/excel/qualification/{id}', 'ParticipantsController@exportQualificationExcel')->name('exportQualificationExcel');
         $router->get('exports/events/card-france-system/participant/{id}', 'ParticipantsController@cardParticipantFranceSystemExcel')->name('cardParticipantFranceSystemExcel');
-        $router->get('exports/events/card-festival/participant/{id}', 'ParticipantsController@cardParticipantExcel')->name('cardParticipantExcel');
+        $router->get('exports/events/card-festival/participant/{id}', 'ParticipantsController@cardParticipantFestivalExcel')->name('cardParticipantFestivalExcel');
         $router->get('exports/events/list/participant/{id}', 'ParticipantsController@listParticipantExcel')->name('listParticipantExcel');
         $router->get('exports/events/{event_id}/final/participants', 'ResultRouteFinalStageController@finalParticipantExcel')->name('finalParticipantExcel');
         $router->get('exports/events/{event_id}/semifinal/participants', 'ResultRouteSemiFinalStageController@semifinalParticipantExcel')->name('semifinalParticipantExcel');
