@@ -19,8 +19,6 @@
     {{--                                            Открыто/Закрыто изменение участия в сетах--}}
                                             @if(!$event->is_input_set && $event->is_registration_state && !\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
                                                 @include('event.selects.sets_participant')
-                                            @else
-                                                @include('event.buttons.reg-close')
                                             @endif
                                             @if(\App\Models\ResultParticipant::participant_with_result(Auth()->user()->id, $event->id))
                                                     @if($event->is_qualification_counting_like_final)
