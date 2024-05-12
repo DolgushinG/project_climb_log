@@ -130,8 +130,6 @@ $(document).on('click', '#changePassword', function(e){
                 btn_change_password.text(data.message)
             }, 3000);
             setTimeout(function () {
-                btn_change_password.removeClass('btn-edit-change')
-                btn_change_password.text('Cохранить')
                 getProfile('Setting');
             }, 6000);
 
