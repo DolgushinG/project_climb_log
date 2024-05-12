@@ -103,20 +103,32 @@ return [
     | If you don't need to send an email notification, set null.
     |
     */
+//    'notifications' => [
+//
+//        'notifications' => [
+//            \MohsenAbrishami\Stethoscope\Notifications\LogReportNotification::class => ['mail'],
+//        ],
+//
+//        'notifiable' => \MohsenAbrishami\Stethoscope\Notifications\Notifiable::class,
+//
+//        'mail' => [
+//            'to' => env('MAIL_NOTIFY_TO_ADDRESS'),
+//        ],
+//
+//    ],
     'notifications' => [
 
         'notifications' => [
-            \MohsenAbrishami\Stethoscope\Notifications\LogReportNotification::class => ['mail'],
+            App\Notifications\StethoscopeNotification::class => ['telegram'],
         ],
 
-        'notifiable' => \MohsenAbrishami\Stethoscope\Notifications\Notifiable::class,
+        'notifiable' => App\Notifications\StethoscopeNotifiable::class,
 
-        'mail' => [
-            'to' => env('MAIL_NOTIFY_TO_ADDRESS'),
-        ],
+        'telegram' => [
+            'channel_id' => env('TELEGRAM_CHAT_ID')
+        ]
 
     ],
-
     /*
     |--------------------------------------------------------------------------
     | Dashboard Configuration
