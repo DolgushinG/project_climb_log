@@ -85,7 +85,7 @@ class SocialiteController extends Controller
             if($socialite == 'yandex'){
                 $user->gender = $socialite_user->user['sex'] ?? null;
                 $user->email = $socialite_user->user['default_email'] ?? null;
-                $user->year = $socialite_user->user['birthday'] ?? null;
+                $user->birthday = $socialite_user->user['birthday'] ?? null;
                 $user->save();
             }
         }

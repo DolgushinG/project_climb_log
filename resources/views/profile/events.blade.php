@@ -32,7 +32,7 @@
                         </li>
 
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="event/{{$event->climbing_gym_name_eng}}/{{$event->title_eng}}" class="btn btn-success">Перейти на страницу с соревнованием</a>
+                            <a href="{{$event->link}}" class="btn btn-success">Перейти на страницу с соревнованием</a>
                         </li>
                     </ul><!-- End List With badges -->
                 </div>

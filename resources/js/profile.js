@@ -151,24 +151,30 @@ $(document).on('click', '#changePassword', function(e){
         }
     });
 })
-document.getElementById("password_confirmation").addEventListener("input", (ev) => {
-    var value_n = document.getElementById("new-password").value;
-    var value_c = document.getElementById("password_confirmation").value;
-    if(value_n !== value_c){
-        displayError("Пароли не совпадают")
-    } else {
-        clearError()
-    }
-});
-document.getElementById("new-password").addEventListener("input", (ev) => {
-    var value_n = document.getElementById("new-password").value;
-    var value_c = document.getElementById("password_confirmation").value;
-    if(value_n !== value_c){
-        displayError("Пароли не совпадают")
-    } else {
-        clearError()
-    }
-});
+let pass_confirm = document.getElementById("password_confirmation")
+if(pass_confirm){
+    pass_confirm.addEventListener("input", (ev) => {
+        var value_n = document.getElementById("new-password").value;
+        var value_c = document.getElementById("password_confirmation").value;
+        if(value_n !== value_c){
+            displayError("Пароли не совпадают")
+        } else {
+            clearError()
+        }
+    });
+}
+let pass_new = document.getElementById("new-password")
+if(pass_new){
+    pass_new.addEventListener("input", (ev) => {
+        var value_n = document.getElementById("new-password").value;
+        var value_c = document.getElementById("password_confirmation").value;
+        if(value_n !== value_c){
+            displayError("Пароли не совпадают")
+        } else {
+            clearError()
+        }
+    });
+}
 
 // Function to display error message
 function displayError(message) {
@@ -181,7 +187,10 @@ function clearError() {
     var errorMessageContainer = document.getElementById('ajax-alert');
     errorMessageContainer.textContent = '';
 }
-
+let current_pass = document.getElementById('current-password')
 // Listen for changes in input fields to clear error message if input is present
-document.getElementById('current-password').addEventListener('input', clearError);
+if(current_pass){
+    current_pass.addEventListener('input', clearError);
+}
+
 // document.getElementById('new-password').addEventListener('input', clearError);

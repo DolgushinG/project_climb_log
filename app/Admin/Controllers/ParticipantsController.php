@@ -215,7 +215,7 @@ class ParticipantsController extends Controller
                 $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
             }
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
-            $selector->select('active', 'Кто добавил', [ 1 => 'Добавил',  0 => 'Не добавил']);
+            $selector->select('active', 'Результаты ', [ 1 => 'Добавил',  0 => 'Не добавил']);
             $selector->select('is_paid', 'Есть оплата', [ 1 => 'Да',  0 => 'Нет']);
         });
         $grid->disableBatchActions();

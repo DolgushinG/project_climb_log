@@ -6,7 +6,7 @@
 * License: https://bootstrapmade.com/license/
 */
 
-/*--------------------------------------------------------------
+/*----------------btn-edit-change----------------------------------------------
 # General
 --------------------------------------------------------------*/
 body {
@@ -1984,6 +1984,14 @@ section {
     background-color: #0054a8;
 
 }
+.btn-save-change{
+    background-color: #008cff;
+    color: white!important;
+    margin-top: 32px;
+    width: 100%;
+    font-family: inherit;
+}
+
 .user-box img {
     width: 100%;
     border-radius: 10%;
