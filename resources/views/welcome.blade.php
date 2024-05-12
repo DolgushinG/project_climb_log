@@ -11,7 +11,11 @@
                             <img class="img-fluid rounded py-4" src="{{asset('storage/'.$event->image)}}">
                             <div class="d-grid gap-2 mt-3">
                                 @guest
-                                    <a href="{{route('login')}}" class="btn btn-dark rounded-pill">Войти для участия</a>
+                                    @if($event->is_registration_state)
+                                        <a href="{{route('login')}}" class="btn btn-dark rounded-pill">Войти для участия</a>
+                                    @else
+                                        @include('event.buttons.reg-close')
+                                    @endif
                                 @endguest
                                 @auth
                                     @if(!str_contains(\Illuminate\Support\Facades\Auth::user()->email, 'telegram'))
