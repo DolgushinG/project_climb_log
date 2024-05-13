@@ -21,8 +21,11 @@
                                                             data-bs-toggle="tab"
                                                             data-bs-target="#bordered-justified-{{$set->id}}" type="button"
                                                             role="tab" aria-controls="{{$set->id}}"
-                                                            aria-selected="true">{{$set->time}} @lang('somewords.'.ucfirst($set->day_of_week))<span
-                                                            style="margin-left: 5px;" class="badge bg-dark text-light">{{$set->count_participant}}</span></button>
+                                                            aria-selected="true">{{$set->time}} @lang('somewords.'.ucfirst($set->day_of_week))
+                                                            @isset($set->date[$set->day_of_week])
+                                                                {{$set->date[$set->day_of_week]}}
+                                                            @endisset
+                                                        <span style="margin-left: 5px;" class="badge bg-dark text-light">{{$set->count_participant}}</span></button>
                                                 </li>
                                             @endif
                                         @endforeach

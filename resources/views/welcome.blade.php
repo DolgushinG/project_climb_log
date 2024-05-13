@@ -99,10 +99,10 @@
                                    class="btn btn-primary rounded-pill">Список участников</a>
                                 @if(!$event->is_qualification_counting_like_final)
                                     <a href="{{route('get_qualification_classic_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
-                                       class="btn btn-primary rounded-pill">Предворительные результаты</a>
+                                       class="btn btn-primary rounded-pill">Предварительные результаты</a>
                                 @else
                                     <a href="{{route('get_qualification_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
-                                       class="btn btn-primary rounded-pill">Предворительные результаты</a>
+                                       class="btn btn-primary rounded-pill">Предварительные результаты</a>
                                 @endif
                                 @if($event->is_semifinal && $is_show_button_semifinal)
                                     <a href="{{route('get_semifinal_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
@@ -162,7 +162,10 @@
                                             <div class="section-title">
                                                 <h2>Контакты</h2>
                                                 <p>{{$event->contact}}</p>
-                                                <a href="{{$event->contact_link}}">Ссылка на сеть</a>
+                                            </div>
+                                            <div class="section-title">
+                                                <h2>Соц-сеть</h2>
+                                                <p><a href="{{$event->contact_link}}">Ссылка на соц-сеть</a><p/>
                                             </div>
                                         </div>
                                     </section>

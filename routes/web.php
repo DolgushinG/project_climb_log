@@ -30,7 +30,8 @@ Route::get('/auth/yandex/redirect', function (){
 Route::get('/competition', function () {
     return view('welcome');
 });
-
+Route::get('/privacyconf', [App\Http\Controllers\Controller::class, 'indexPrivacy'])->name('privacyconf');
+Route::get('/privatedata', [App\Http\Controllers\Controller::class, 'indexPrivacyData'])->name('privatedata');
 //Route::get('/event/{id}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::get('/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::post('event/{start_date}/{climbing_gym}/sendAllResult', [App\Http\Controllers\EventsController::class, 'sendAllResult'])->middleware('throttle:5,1');

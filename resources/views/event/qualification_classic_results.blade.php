@@ -7,7 +7,7 @@
         </div>
     </section><!-- End Hero -->
     <main id="main">
-        <section class="section contact">
+        <section class="section-bg contact">
             <div class="row m-2 gy-4">
                 <div class="col-xl-12">
                     <div class="card">

@@ -25,4 +25,12 @@ class Controller extends BaseController
         $events = Event::where('is_public', '=', 1)->get();
         return view('main', compact(['events', 'cities']));
     }
+    public function indexPrivacy()
+    {
+        return view('privacy.policiesconf');
+    }
+    public function indexPrivacyData()
+    {
+        return view('privacy.privatedata');
+    }
 }

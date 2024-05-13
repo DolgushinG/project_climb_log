@@ -53,7 +53,7 @@
                                                             <br>
                                                             @foreach($routes as $route)
                                                                 @isset($res['amount_try_top_'.$route])
-                                                                    @if($res['amount_try_zone_'.$route])
+                                                                    @if($res['amount_try_zone_'.$route] > 0)
                                                                         <span class="bg-success result-try" style="border-radius: 0 0 5px 5px;">{{$res['amount_try_zone_'.$route]}}</span>
                                                                     @else
                                                                         <span class="bg-danger result-try" style="color:white; border-radius: 0 0 5px 5px;">-</span>
@@ -102,7 +102,7 @@
                                                         <br>
                                                         @foreach($routes as $route)
                                                             @isset($res['amount_try_top_'.$route])
-                                                                @if($res['amount_try_zone_'.$route])
+                                                                @if($res['amount_try_zone_'.$route] > 0)
                                                                     <span class="bg-success result-try" style="border-radius: 0 0 5px 5px;">{{$res['amount_try_zone_'.$route]}}</span>
                                                                 @else
                                                                     <span class="bg-danger result-try" style="color:white; border-radius: 0 0 5px 5px;">-</span>

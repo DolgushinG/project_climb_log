@@ -431,7 +431,7 @@
                 <div class="row" data-aos="fade-up" data-aos-delay="100">
                     <div class="col-lg-12 d-flex justify-content-center">
                         <ul id="portfolio-flters">
-                            <li data-filter="*" class="filter-active">All</li>
+                            <li data-filter="*" class="filter-active">Все города</li>
                             @foreach($cities as $city)
                                 <li data-filter=".filter-{{$city['name']}}">{{$city['name']}}<span style="margin-left: 7px; font-size: 10px;" class="badge rounded-pill bg-primary ml-5">{{$city['count_event']}}</span></li>
                             @endforeach

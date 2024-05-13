@@ -2,28 +2,40 @@ $('#tab-overview').addClass('show active');
 getProfile('Overview');
 $(document).on('click', '#overview', function () {
     deactivateAllTabs();
-    $('#overview').addClass('show active');
-    getProfile('Overview');
+    let overview = $('#overview')
+    overview.addClass('active');
+    overview.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
+    getProfile('Overview', '#tabContent','#overview', 'Профиль');
 });
 $(document).on('click', '#edit', function () {
     deactivateAllTabs();
-    $('#edit').addClass('show active');
-    getProfile('Edit');
+    let edit = $('#edit')
+    edit.addClass('active');
+    edit.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
+    getProfile('Edit','#tabContent','#edit','Изменить');
 });
 $(document).on('click', '#events', function () {
     deactivateAllTabs();
-    $('#events').addClass('show active');
-    getProfile('Events');
+    let events = $('#events')
+    events.addClass('active');
+    events.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
+    getProfile('Events','#tabContent','#events','Соревнования');
 });
 $(document).on('click', '#setting', function () {
     deactivateAllTabs();
-    $('#setting').addClass('active');
-    getProfile('Setting');
+    let setting = $('#setting')
+    setting.addClass('active');
+    setting.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
+    getProfile('Setting', '#tabContent','#setting','Пароль');
 });
 function deactivateAllTabs() {
     $('#overview, #edit, #setting, #events').removeClass('show active');
 }
-function getProfile(tab, id='#tabContent') {
+function getProfile(tab, id='#tabContent', itab='',text='') {
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -33,7 +45,12 @@ function getProfile(tab, id='#tabContent') {
         type: 'GET',
         url: 'getProfile' + tab,
         success: function (data) {
+            let spinner = $('#spinner')
+            spinner.remove()
+            let id_tab = $(itab)
+            id_tab.text(text)
             $(id).html(data);
+
         },
     });
 }

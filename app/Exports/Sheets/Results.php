@@ -315,13 +315,23 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $users[$index]['amount_passed_routes'] = $amount_passed_routes;
                 $users[$index]['amount_passed_flash'] = $amount_passed_flash;
                 $users[$index]['amount_passed_redpoint'] = $amount_passed_redpoint;
+                $routes_event_value = Route::where('event_id', $this->event_id)->pluck('value', 'route_id')->toArray();
+                $routes_event_flash_value = Route::where('event_id', $this->event_id)->pluck('flash_value', 'route_id')->toArray();
                 foreach ($qualification_result as $result){
                     switch ($result->attempt){
                         case 1:
-                            $attempt = 'F';
+                            if($event->mode == 1){
+                                $attempt = $routes_event_value[$result->route_id] + $routes_event_flash_value[$result->route_id];
+                            } else {
+                                $attempt = 'F';
+                            }
                             break;
                         case 2:
-                            $attempt = 'R';
+                            if($event->mode == 1){
+                                $attempt = $routes_event_value[$result->route_id];
+                            } else {
+                                $attempt = 'R';
+                            }
                             break;
                         case 0:
                             $attempt = '-';

@@ -31,9 +31,9 @@
                     <h4>Полезные ссылки</h4>
                     <ul>
                         <li><i class="bx bx-chevron-right"></i> <a href="{{route('main')}}">Домой</a></li>
-                        <li><i class="bx bx-chevron-right"></i> <a href="#">О нас</a></li>
-                        <li><i class="bx bx-chevron-right"></i> <a href="#">Согласие на обработку персональных данных</a></li>
-                        <li><i class="bx bx-chevron-right"></i> <a href="#">Политика в отношении обработки персональных данных</a></li>
+{{--                        <li><i class="bx bx-chevron-right"></i> <a href="#">О нас</a></li>--}}
+                        <li><i class="bx bx-chevron-right"></i> <a href="{{route('privatedata')}}">Согласие на обработку персональных данных</a></li>
+                        <li><i class="bx bx-chevron-right"></i> <a href="{{route('privacyconf')}}">Политика в отношении обработки персональных данных</a></li>
                     </ul>
                 </div>
 

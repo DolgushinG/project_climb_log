@@ -108,6 +108,7 @@ class EventsController extends Controller
                     } else {
                         $sets[$index]->count_participant = Participant::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
                     }
+                    $sets[$index]->date = Helpers::getDatesByDayOfWeek($event->start_date, $event->end_date);
                 }
             } else {
                 $days = null;
