@@ -686,7 +686,28 @@ section {
   text-align: center;
   padding-bottom: 30px;
 }
+#cookie_agree{
+    cursor: pointer;
+}
+.cookie-policy__text {
+    font-size: 12px;
+    line-height: 18px;
+    color: hsla(0,0%,100%,.9)
+}
+.cookie-policy__card {
+    width: 360px;
+    position: fixed;
+    right: 19px;
+    bottom: 20px;
+    padding: 12px 30px;
+    background-color: rgba(65, 84, 241, 0.51);
+    border-radius: 30px;
+    z-index: 99
+}
 
+.cookie-policy__card_hidden {
+    display: none
+}
 .section-title h2 {
   font-size: 13px;
   letter-spacing: 1px;
@@ -784,7 +805,10 @@ section {
     .btn-redpoint {
         font-size: 13px;
     }
-
+    .cookie-policy__card {
+        bottom:60px;
+        max-width: calc(100% - 100px)
+    }
   .breadcrumbs ol {
     display: block;
   }

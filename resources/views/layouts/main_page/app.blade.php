@@ -37,6 +37,7 @@
 
 <body>
 @include('layouts.main_page.header')
+@include('cookie.cookies')
 @yield("content")
 @include('layouts.main_page.footer')
 <div id="preloader"></div>
@@ -60,5 +61,6 @@
 
 <!-- Template Main JS File -->
 <script src="{{asset('js/main.js')}}"></script>
+
 </body>
 </html>
