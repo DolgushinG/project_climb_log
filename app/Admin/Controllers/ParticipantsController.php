@@ -38,6 +38,7 @@ use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Table;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Maatwebsite\Excel\Facades\Excel;
 use Nette\Utils\Image;
 use function Symfony\Component\String\s;
@@ -55,10 +56,10 @@ class ParticipantsController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->row(function(Row $row) {
+            ->row(function (Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-                if($event) {
-                    if($event->is_qualification_counting_like_final){
+                if ($event) {
+                    if ($event->is_qualification_counting_like_final) {
                         $row->column(20, $this->qualification_counting_like_final());
                     } else {
                         $row->column(20, $this->qualification_classic());
@@ -91,8 +92,8 @@ class ParticipantsController extends Controller
     protected function detail($id)
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-        if($event) {
-            if($event->is_qualification_counting_like_final){
+        if ($event) {
+            if ($event->is_qualification_counting_like_final) {
                 $show = new Show(ResultQualificationLikeFinal::findOrFail($id));
                 $show->panel()
                     ->tools(function ($tools) {
@@ -116,7 +117,7 @@ class ParticipantsController extends Controller
         $show->field('user.city', __('Город'));
         $show->field('user.team', __('Команда'));
         $show->field('user.sports_category', __('Разряд'));
-        $show->field('bill', 'Чек')->image('',600, 800);
+        $show->field('bill', 'Чек')->image('', 600, 800);
 
         return $show;
     }
@@ -146,11 +147,11 @@ class ParticipantsController extends Controller
     {
         $type = 'edit';
         $value = null;
-        if($request->is_paid){
+        if ($request->is_paid) {
             $type = 'is_paid';
             $value = $request->is_paid;
         }
-        if($request->result_for_edit){
+        if ($request->result_for_edit) {
             $type = 'update';
         }
         return $this->form($type, $id)->update($id);
@@ -201,7 +202,7 @@ class ParticipantsController extends Controller
     protected function qualification_classic()
     {
         $grid = new Grid(new Participant);
-        if (!Admin::user()->isAdministrator()){
+        if (!Admin::user()->isAdministrator()) {
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
         $grid->model()->where(function ($query) {
@@ -211,12 +212,12 @@ class ParticipantsController extends Controller
         $grid->selector(function (Grid\Tools\Selector $selector) use ($event) {
             $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
             $p_categories = Participant::where('event_id', $event->id)->whereIn('category_id', $category)->get();
-            if($p_categories->isNotEmpty()){
+            if ($p_categories->isNotEmpty()) {
                 $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
             }
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
-            $selector->select('active', 'Результаты ', [ 1 => 'Добавил',  0 => 'Не добавил']);
-            $selector->select('is_paid', 'Есть оплата', [ 1 => 'Да',  0 => 'Нет']);
+            $selector->select('active', 'Результаты ', [1 => 'Добавил', 0 => 'Не добавил']);
+            $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
         $grid->disableBatchActions();
         $grid->disableFilter();
@@ -237,18 +238,18 @@ class ParticipantsController extends Controller
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.birthday', __('Дата Рождения'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
-            return trans_choice('somewords.'.$gender, 10);
+            return trans_choice('somewords.' . $gender, 10);
         });
         $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
         $p_categories = Participant::where('event_id', $event->id)->whereIn('category_id', $category)->get();
 
-        if($p_categories->isNotEmpty()){
+        if ($p_categories->isNotEmpty()) {
             $grid->column('category_id', 'Категория')
                 ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
                 ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         }
 
-        if(!$event->is_input_set){
+        if (!$event->is_input_set) {
             $grid->column('number_set_id', 'Номер сета')
                 ->select(Set::getParticipantSets(Admin::user()->id));
         }
@@ -257,17 +258,18 @@ class ParticipantsController extends Controller
             ->sortable();
         $grid->column('points', 'Баллы')->sortable();
         $grid->column('active', 'Результаты')->using([0 => 'Не внес', 1 => 'Внес'])->display(function ($title, $column) {
-            If ($this->active == 0) {
+            if ($this->active == 0) {
                 return $column->label('default');
             } else {
                 return $column->label('success');
             }
         });
-        $states = [
-            'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
-            'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
-        ];
-        if($event->is_need_pay_for_reg){
+
+        if ($event->is_need_pay_for_reg) {
+            $states = [
+                'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
+                'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+            ];
             $grid->column('is_paid', 'Оплата')->switch($states);
             \Encore\Admin\Admin::style('
                         @media only screen and (min-width: 1025px) {
@@ -288,7 +290,7 @@ class ParticipantsController extends Controller
                         }
 
             ');
-            $grid->column('bill', 'Чек участника')->image('',100, 100);
+            $grid->column('bill', 'Чек участника')->image('', 100, 100);
         }
         return $grid;
     }
@@ -302,7 +304,7 @@ class ParticipantsController extends Controller
     protected function qualification_counting_like_final()
     {
         $grid = new Grid(new ResultQualificationLikeFinal);
-        if (!Admin::user()->isAdministrator()){
+        if (!Admin::user()->isAdministrator()) {
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
         $grid->model()->where(function ($query) {
@@ -312,9 +314,9 @@ class ParticipantsController extends Controller
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
-            $selector->select('is_paid', 'Есть оплата', [ 1 => 'Да',  0 => 'Нет']);
+            $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
-        $grid->tools(function (Grid\Tools $tools) use ($event){
+        $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchExportResultQualificationLikeFinal);
             $tools->append(new BatchResultQualificationLikeFinal);
             $tools->append(new BatchGenerateParticipant);
@@ -332,7 +334,7 @@ class ParticipantsController extends Controller
         $grid->disableColumnSelector();
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
-            return trans_choice('somewords.'.$gender, 10);
+            return trans_choice('somewords.' . $gender, 10);
         });
         $grid->column('number_set_id', 'Номер сета')
             ->select(Participant::number_sets(Admin::user()->id));
@@ -348,7 +350,7 @@ class ParticipantsController extends Controller
             'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
             'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
         ];
-        if($event->is_need_pay_for_reg){
+        if ($event->is_need_pay_for_reg) {
             $grid->column('is_paid', 'Оплата')->switch($states);
 
             \Encore\Admin\Admin::style('
@@ -370,20 +372,21 @@ class ParticipantsController extends Controller
                         }
 
             ');
-            $grid->column('bill', 'Чек участника')->image('',100, 100);
+            $grid->column('bill', 'Чек участника')->image('', 100, 100);
         }
         return $grid;
     }
+
     /**
      * Make a form builder.
      *
      * @return Form
      */
-    protected function form($type, $id=null)
+    protected function form($type, $id = null)
     {
 
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-        if($event->is_qualification_counting_like_final){
+        if ($event->is_qualification_counting_like_final) {
             $form = new Form(new ResultQualificationLikeFinal);
             $form->display('ID');
             $form->hidden('owner_id')->value(Admin::user()->id);
@@ -401,15 +404,15 @@ class ParticipantsController extends Controller
             $form->switch('active', 'active');
             $form->switch('is_paid', 'is_paid');
             $form->saving(function (Form $form) {
-                if($form->amount_try_top > 0){
-                    $form->amount_top  = 1;
+                if ($form->amount_try_top > 0) {
+                    $form->amount_top = 1;
                 } else {
-                    $form->amount_top  = 0;
+                    $form->amount_top = 0;
                 }
-                if($form->amount_try_zone > 0){
-                    $form->amount_zone  = 1;
+                if ($form->amount_try_zone > 0) {
+                    $form->amount_zone = 1;
                 } else {
-                    $form->amount_zone  = 0;
+                    $form->amount_zone = 0;
                 }
             });
         } else {
@@ -436,34 +439,39 @@ class ParticipantsController extends Controller
                 $footer->disableEditingCheck();
                 $footer->disableCreatingCheck();
             });
-            $form->table('result_for_edit', 'Таблица результата', function ($table){
+            $form->table('result_for_edit', 'Таблица результата', function ($table) {
                 $table->text('route_id', 'Номер маршрут')->readonly();
                 $table->text('grade', 'Категория')->readonly();
                 $table->select('attempt', 'Результат')->attribute('inputmode', 'none')->options([1 => 'FLASH', 2 => 'REDPOINT', 0 => 'Не пролез'])->width('50px');
             });
         }
-        $form->saving(function (Form $form) use ($type, $id){
-            if($type == 'update'){
-              $user_id = $form->model()->find($id)->user_id;
-              $event_id = $form->model()->find($id)->event_id;
-              $routes = $form->result_for_edit;
-              foreach ($routes as $route){
-                  $result = ResultParticipant::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
-                  $result->attempt = $route['attempt'];
-                  $result->save();
-              }
-              Event::refresh_final_points_all_participant($form->model()->find($id)->event_id);
+        $form->saving(function (Form $form) use ($type, $id) {
+            if ($type == 'update') {
+                $user_id = $form->model()->find($id)->user_id;
+                $event_id = $form->model()->find($id)->event_id;
+                $routes = $form->result_for_edit;
+                foreach ($routes as $route) {
+                    $result = ResultParticipant::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
+                    $result->attempt = $route['attempt'];
+                    $result->save();
+                }
+                $categories = ParticipantCategory::where('event_id', $event_id)->get();
+                foreach ($categories as $category) {
+                    Cache::forget('result_male_cache_' . $category->category);
+                    Cache::forget('result_female_cache_' . $category->category);
+                }
+                Event::refresh_final_points_all_participant($form->model()->find($id)->event_id);
             }
-            if($form->input('is_paid') == "0" || $form->input('is_paid') == "1"){
+            if ($form->input('is_paid') == "0" || $form->input('is_paid') == "1") {
                 $participant = $form->model()->find($id);
                 $amount_participant = $form->model()->where('event_id', $participant->event_id)->get()->count();
                 $participant->is_paid = $form->input('is_paid');
                 $participant->save();
                 $admin = Admin::user();
                 $event = Event::find($participant->event_id);
-                if($form->input('is_paid') === "1"){
+                if ($form->input('is_paid') === "1") {
                     $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
-                    if(!$payments){
+                    if (!$payments) {
                         $payments = new OwnerPayments;
                     }
                     $payments->owner_id = $admin->id;
@@ -477,12 +485,12 @@ class ParticipantsController extends Controller
                     $user = User::find($participant->user_id);
                     Participant::send_confirm_bill($event, $user);
                 }
-                if($form->input('is_paid') === "0"){
+                if ($form->input('is_paid') === "0") {
                     $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
-                    if(!$payments){
+                    if (!$payments) {
                         $payments = new OwnerPayments;
                     }
-                    if($admin){
+                    if ($admin) {
                         $amount = $payments->amount_for_pay - Event::counting_amount_for_pay_participant($event->id);
                         $payments->amount_for_pay = $amount;
                         $payments->save();
@@ -493,6 +501,7 @@ class ParticipantsController extends Controller
         });
         return $form;
     }
+
     public function exportQualificationExcel(Request $request)
     {
         $file_name = 'Результаты квалификации.xlsx';
@@ -501,6 +510,7 @@ class ParticipantsController extends Controller
             'Content-Type' => 'application/xlsx',
         ]);
     }
+
     public function exportQualificationLikeFinalExcel(Request $request)
     {
         $file_name = 'Результаты квалификации.xlsx';
@@ -509,6 +519,7 @@ class ParticipantsController extends Controller
             'Content-Type' => 'application/xlsx',
         ]);
     }
+
     public function cardParticipantFestivalExcel(Request $request)
     {
         $file_name = 'Карточка участника с трассами.xlsx';
@@ -517,6 +528,7 @@ class ParticipantsController extends Controller
             'Content-Type' => 'application/xlsx',
         ]);
     }
+
     public function listParticipantExcel(Request $request)
     {
         $file_name = 'Полный список участников.xlsx';
@@ -525,6 +537,7 @@ class ParticipantsController extends Controller
             'Content-Type' => 'application/xlsx',
         ]);
     }
+
     public function cardParticipantFranceSystemExcel(Request $request)
     {
         $file_name = 'Карточка.xlsx';
@@ -533,6 +546,7 @@ class ParticipantsController extends Controller
             'Content-Type' => 'application/xlsx',
         ]);
     }
+
     public function protocolRouteExcel(Request $request)
     {
         $file_name = 'Протокол.xlsx';
@@ -541,6 +555,7 @@ class ParticipantsController extends Controller
             'Content-Type' => 'application/xlsx',
         ]);
     }
+
     public function exportQualificationCsv(Request $request)
     {
         $file_name = 'Результаты квалификации.csv';
@@ -549,6 +564,7 @@ class ParticipantsController extends Controller
             'Content-Type' => 'application/csv',
         ]);
     }
+
     public function exportQualificationOds(Request $request)
     {
         $file_name = 'Результаты квалификации.ods';
@@ -571,7 +587,7 @@ class ParticipantsController extends Controller
     public function rejectBill(Request $request)
     {
         $event = Event::find($request->event_id);
-        if($event->is_qualification_counting_like_final){
+        if ($event->is_qualification_counting_like_final) {
             $participant = ResultQualificationLikeFinal::find($request->id);
         } else {
             $participant = Participant::find($request->id);
@@ -579,7 +595,6 @@ class ParticipantsController extends Controller
         $participant->bill = null;
         $participant->save();
     }
-
 
 
 }

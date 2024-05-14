@@ -51,6 +51,15 @@ class EventsController extends Controller
             ];
 
     /**
+     * Store a newly created resource in storage.
+     *
+     * @return mixed
+     */
+    public function store()
+    {
+        return $this->form('store')->store();
+    }
+    /**
      * Index interface.
      *
      * @param Content $content
@@ -110,6 +119,22 @@ class EventsController extends Controller
     }
 
     /**
+     * Update the specified resource in storage.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function update($id, Request $request)
+    {
+        $type = 'edit';
+        if($request->active){
+            $type = 'active';
+        }
+        return $this->form($type, $id)->update($id);
+    }
+
+    /**
      * Edit interface.
      *
      * @param mixed $id
@@ -121,7 +146,7 @@ class EventsController extends Controller
         return $content
             ->header(trans('admin.edit'))
             ->description(trans('admin.description'))
-            ->body($this->form($id)->edit($id));
+            ->body($this->form('edit', $id)->edit($id));
     }
 
     /**
@@ -133,7 +158,7 @@ class EventsController extends Controller
     public function create(Content $content)
     {
         return $content
-            ->body($this->form());
+            ->body($this->form('create'));
     }
 
     /**
@@ -167,13 +192,6 @@ class EventsController extends Controller
         $grid->column('title', 'Название');
         $grid->column('link', 'Ссылка для всех')->link();
         $grid->column('admin_link', 'Ссылка на предпросмотр')->link();
-        $grid->column('active', 'Активировать соревнование для просмотра и управления')->using([0 => 'Нет', 1 => 'Да'])->display(function ($title, $column) {
-            If ($this->active == 0) {
-                return $column->label('default');
-            } else {
-                return $column->label('success');
-            }
-        });
         $grid->column('is_registration_state', 'Регистрация')->using([0 => 'Закрыта', 1 => 'Открыта'])->display(function ($title, $column) {
             If ($this->is_registration_state == 0) {
                 return $column->label('default');
@@ -202,6 +220,7 @@ class EventsController extends Controller
                 return $column->label('success');
             }
         });
+        $grid->column('active', 'Активировать соревнование для просмотра и управления')->switch(self::STATES_BTN);
         return $grid;
     }
 
@@ -210,7 +229,7 @@ class EventsController extends Controller
      *
      * @return Form
      */
-    protected function form($id = null)
+    protected function form($type, $id=null)
     {
 
         $form = new Form(new Event);
@@ -385,54 +404,70 @@ class EventsController extends Controller
                 $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$title_eng;
             }
         });
-        $form->saved(function (Form $form) {
-            if($form->categories){
-                $categories = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
-                    ->where('event_id', '=', $form->model()->id)->get();
-                #  Заменяем если категории которые уже были не изменяя ID
-                if($categories->isNotEmpty()){
-                    foreach ($form->categories['values'] as $index => $category){
-                        if(isset($categories[$index])){
-                            $categories[$index]->category = $category;
-                        } else {
-                            $participant_category = new ParticipantCategory;
-                            $participant_category->category = $category;
-                            $categories->push($participant_category);
+        $form->saved(function (Form $form)  use ($type, $id){
+            if($type == 'update') {
+                if ($form->categories) {
+                    $categories = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
+                        ->where('event_id', '=', $form->model()->id)->get();
+                    #  Заменяем если категории которые уже были не изменяя ID
+                    if ($categories->isNotEmpty()) {
+                        foreach ($form->categories['values'] as $index => $category) {
+                            if (isset($categories[$index])) {
+                                $categories[$index]->category = $category;
+                            } else {
+                                $participant_category = new ParticipantCategory;
+                                $participant_category->category = $category;
+                                $categories->push($participant_category);
+                            }
                         }
-                    }
-                    foreach ($categories as $category){
-                        $participant_category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
-                            ->where('event_id', '=', $form->model()->id)->where('id', '=', $category->id)->first();
-                        # Если в входящей форме пришли значение которых нет в БД до значит их удалили
-                        if(array_search($category->category, $form->categories['values']) === false){
-                            ParticipantCategory::where('owner_id', '=', Admin::user()->id)
-                                ->where('event_id', '=', $form->model()->id)->where('category', '=', $category->category)->delete();
+                        foreach ($categories as $category) {
+                            $participant_category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
+                                ->where('event_id', '=', $form->model()->id)->where('id', '=', $category->id)->first();
+                            # Если в входящей форме пришли значение которых нет в БД до значит их удалили
+                            if (array_search($category->category, $form->categories['values']) === false) {
+                                ParticipantCategory::where('owner_id', '=', Admin::user()->id)
+                                    ->where('event_id', '=', $form->model()->id)->where('category', '=', $category->category)->delete();
+                            }
+                            if (!$participant_category) {
+                                $participant_category = new ParticipantCategory;
+                                $participant_category->owner_id = Admin::user()->id;
+                                $participant_category->event_id = $form->model()->id;
+                            }
+                            $participant_category->category = $category->category;
+                            $participant_category->save();
                         }
-                        if(!$participant_category){
-                            $participant_category = new ParticipantCategory;
-                            $participant_category->owner_id = Admin::user()->id;
-                            $participant_category->event_id = $form->model()->id;
+                    } else {
+                        foreach ($form->categories as $category) {
+                            foreach ($category as $c) {
+                                $participant_categories = new ParticipantCategory;
+                                $participant_categories->owner_id = Admin::user()->id;
+                                $participant_categories->event_id = $form->model()->id;
+                                $participant_categories->category = $c;
+                                $participant_categories->save();
+                            }
                         }
-                        $participant_category->category = $category->category;
-                        $participant_category->save();
-                    }
-                } else {
-                    foreach ($form->categories as $category){
-                        foreach ($category as $c){
-                            $participant_categories = new ParticipantCategory;
-                            $participant_categories->owner_id = Admin::user()->id;
-                            $participant_categories->event_id = $form->model()->id;
-                            $participant_categories->category = $c;
-                            $participant_categories->save();
-                         }
-                    }
 
+                    }
+                    $exist_sets = Set::where('owner_id', '=', Admin::user()->id)->first();
+                    if (!$exist_sets) {
+                        $this->install_set(Admin::user()->id);
+                    }
+                    return back()->isRedirect('events');
                 }
-                $exist_sets = Set::where('owner_id', '=', Admin::user()->id)->first();
-                if(!$exist_sets) {
-                    $this->install_set(Admin::user()->id);
+            }
+            if($form->input('active') === "1"){
+                $event_owner = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+                if($event_owner->id != $form->model()->id){
+                    throw new \Exception('Только одно соревнование может быть опубликовано');
                 }
-                return back()->isRedirect('events');
+                $event = $form->model()->find($id);
+                $event->active = 1;
+                $event->save();
+            }
+            if($form->input('active') === "0"){
+                $event = $form->model()->find($id);
+                $event->active = 0;
+                $event->save();
             }
             return $form;
         });
