@@ -20,8 +20,8 @@ jobs:
       - name: Deploy to server
         uses: appleboy/ssh-action@master
         with:
-          host: HOST
-          username: USERNAME
-          port: PORT
-          key: SSHKEY
+          host: $HOST
+          username: $USERNAME
+          port: $PORT
+          key: $SSHKEY
           script: "cd /var/www/project_comp_log && ./.scripts/deploy.sh"
