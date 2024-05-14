@@ -21,6 +21,10 @@ mix.js('resources/js/main.js', 'public/js').postCss('resources/css/style.css', '
     require('tailwindcss'),
     require('autoprefixer'),
 ]);
+mix.js('resources/bootstrap/js/bootstrap.bundle.js', 'public/vendor/bootstrap/js/bootstrap.bundle.min.js').postCss('resources/bootstrap/css/bootstrap.css', 'public/vendor/bootstrap/css', [
+    require('tailwindcss'),
+    require('autoprefixer'),
+]);
 mix.js('resources/js/welcome.js', 'public/js')
 mix.js('resources/js/profile.js', 'public/js')
 mix.js('resources/js/ddata.js', 'public/js')

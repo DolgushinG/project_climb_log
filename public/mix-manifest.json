@@ -1,10 +1,12 @@
 {
     "/js/app.js": "/js/app.js",
     "/js/main.js": "/js/main.js",
+    "/vendor/bootstrap/js/bootstrap.bundle.min.js": "/vendor/bootstrap/js/bootstrap.bundle.min.js",
     "/js/welcome.js": "/js/welcome.js",
     "/js/profile.js": "/js/profile.js",
     "/js/ddata.js": "/js/ddata.js",
     "/js/datepicker.js": "/js/datepicker.js",
+    "/vendor/bootstrap/css/bootstrap.css": "/vendor/bootstrap/css/bootstrap.css",
     "/css/style.css": "/css/style.css",
     "/css/app.css": "/css/app.css",
     "/css/font-awesome.min.css": "/css/font-awesome.min.css",

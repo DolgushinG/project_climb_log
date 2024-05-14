@@ -20,7 +20,7 @@
     <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" />
     <!-- Vendor CSS Files -->
 {{--    <link href="{{asset('plugins/cropper/cropper.css')}}" rel="stylesheet">--}}
-    <link href="{{asset('vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{asset('vendor/bootstrap/css/bootstrap.css')}}" rel="stylesheet">
     <link href="{{asset('vendor/bootstrap-icons/bootstrap-icons.css')}}" rel="stylesheet">
     <link href="{{asset('vendor/boxicons/css/boxicons.min.css')}}" rel="stylesheet">
 {{--    <link href="{{asset('vendor/quill/quill.snow.css')}}" rel="stylesheet">--}}
