@@ -7,6 +7,7 @@ echo "Deployment started ..."
 # если уже в режиме обслуживания
 (/usr/bin/php artisan down) || true
 
+git stash
 # Загрузить последнюю версию приложения
 git pull origin production
 
