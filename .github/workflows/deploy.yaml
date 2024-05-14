@@ -8,7 +8,7 @@ on:
       - production
   pull_request:
     branches:
-      - productioncdc
+      - production
 
 # Authenticate to the the server via ssh
 # and run our deployment script
