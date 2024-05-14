@@ -24,4 +24,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
-          script: "cd /var/www/project_climb_log && chmod +x ./.scripts/deploy.sh && ./.scripts/deploy.sh"
+      - name: connect and pull
+        run: "cd /var/www/project_climb_log && git checkout production && git pull && exit"
