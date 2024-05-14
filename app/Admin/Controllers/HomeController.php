@@ -129,7 +129,9 @@ class HomeController extends Controller
             $all_group = array('male' => null);
             $categories_array = null;
         }
-
+        if(!$all_group){
+            $all_group = array('male' => null);
+        }
         return view('admin.charts.male', compact('all_group', 'categories_array'));
     }
     /**
@@ -153,7 +155,9 @@ class HomeController extends Controller
             $all_group = array('female' => null);
             $categories_array = null;
         }
-
+        if(!$all_group){
+            $all_group = array('female' => null);
+        }
         return view('admin.charts.female', compact('all_group', 'categories_array'));
     }
 
