@@ -27,9 +27,9 @@ jobs:
           script: |
             cd /var/www/project_climb_log
             git pull
-            composer install --no-interaction --prefer-dist --optimize-autoloader
-            php artisan migrate
-            php artisan optimize
-            php artisan config:clear
-            npm run prod
+            /usr/local/bin/composer install --no-interaction --prefer-dist --optimize-autoloader
+            /usr/bin/php artisan migrate
+            /usr/bin/php artisan optimize
+            /usr/bin/php artisan config:clear
+            /root/.nvm/versions/node/v20.13.1/bin/npm run prod
 
