@@ -31,5 +31,5 @@ jobs:
             /usr/bin/php artisan migrate
             /usr/bin/php artisan optimize
             /usr/bin/php artisan config:clear
-            /root/.nvm/versions/node/v20.13.1/bin/npm run prod
+            npm run prod
 
