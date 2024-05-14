@@ -627,7 +627,7 @@ h6 {
 
 @media (min-device-width: 481px) and (max-device-width: 768px){
   #hero {
-    height: 100vh;
+    height: 90vh;
     background: url("../img/welcome-banner-ipad.png") left;
   }
 
@@ -657,9 +657,19 @@ h6 {
 
 @media  (min-device-width: 200px) and (max-device-width: 480px) {
   #hero {
-      height: 75vh;
+      height: 80vh;
       background: url("../img/welcome-banner-mobile.png") left;
   }
+    #hero h1 {
+        font-size: 28px;
+        line-height: 36px;
+    }
+
+    #hero h2 {
+        font-size: 18px;
+        line-height: 24px;
+        margin-bottom: 30px;
+    }
     .btn-failed {
         font-size: 13px;
     }
