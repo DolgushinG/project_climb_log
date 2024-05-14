@@ -7,9 +7,10 @@ echo "Deployment started ..."
 # если уже в режиме обслуживания
 (/usr/bin/php artisan down) || true
 
-git stash
 # Загрузить последнюю версию приложения
-git pull origin production
+git checkout production
+
+git pull
 
 # Установить зависимости Composer
 /usr/local/bin/composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
