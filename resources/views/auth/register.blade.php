@@ -79,9 +79,9 @@
                                             <div class="col-12">
                                                 <div class="form-check form-group required">
                                                     <input class="form-check-input" name="terms" type="checkbox" value="" id="acceptTerms" required>
-                                                    <label class="form-check-label control-label" for="acceptTerms">Я даю согласие на обработку моих
-                                                        персональных данных </label>
-                                                    <div class="invalid-feedback">You must agree before submitting.</div>
+                                                    <label class="form-check-label control-label" for="acceptTerms">Я даю согласие на обработку моих <br> персональных данных
+                                                        в порядке и на условиях, указанных в <a href="{{route('privacyconf')}}">согласии.</a></label>
+                                                    <div class="invalid-feedback">Для регистрации требуется согласиться на обработку персональных данных.</div>
                                                 </div>
                                             </div>
                                             <div class="col-12">

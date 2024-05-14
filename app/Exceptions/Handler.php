@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Session\TokenMismatchException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
@@ -47,5 +49,13 @@ class Handler extends ExceptionHandler
             'chat_id' => env('TELEGRAM_CHAT_ID'),
             'text' => $message,
         ]);
+    }
+
+    protected function prepareException(Throwable $e)
+    {
+        if ($e instanceof TokenMismatchException) {
+            $e = new HttpException(419, 'Ваш сессия на вход устарела. Пожалуйста обновите страницу для продолжения работы системы.', $e);
+        }
+        return parent::prepareException($e);
     }
 }

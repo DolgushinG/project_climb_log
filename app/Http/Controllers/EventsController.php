@@ -22,6 +22,7 @@ use Encore\Admin\Admin;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -163,8 +164,16 @@ class EventsController extends Controller
                 $result_female = array();
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
                 foreach ($categories as $category) {
-                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                    $result_male_cache = Cache::remember('result_male_cache_'.$category->category, 30 * 30, function () use ($event, $category) {
+                        return Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                    });
+                    $result_female_cache = Cache::remember('result_female_cache_'.$category->category, 30 * 30, function () use ($event, $category) {
+                        return Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                    });
+                    $result_male[] = $result_male_cache;
+                    $result_female[] = $result_female_cache;
+//                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+//                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
                     $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
                     $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
@@ -436,6 +445,11 @@ class EventsController extends Controller
             Event::update_participant_place($event, $participant->id, $participant->gender);
         }
         Event::refresh_final_points_all_participant($event);
+        $categories = ParticipantCategory::where('event_id', $request->event_id)->get();
+        foreach ($categories as $category) {
+            Cache::forget('result_male_cache_'.$category->category);
+            Cache::forget('result_female_cache_'.$category->category);
+        }
         if ($result) {
             $event = Event::find($request->event_id);
             return response()->json(['success' => true, 'message' => 'Успешная внесение результатов', 'link' => $event->link], 201);

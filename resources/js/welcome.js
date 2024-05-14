@@ -95,7 +95,7 @@ $(document).on('click','#btn-participant', function(e) {
 
             setTimeout(function () {
                 button.text(xhr.message)
-            }, 3000);
+            }, 1500);
             setTimeout(function () {
                 window.location.reload();
                 // getInfoPayment(event_id, '#payment')
@@ -107,7 +107,7 @@ $(document).on('click','#btn-participant', function(e) {
                 // button.attr('data-bs-toggle', 'modal')
                 // button.attr('data-bs-target', '#scrollingModal')
 
-            }, 6000);
+            }, 3000);
         },
         error: function(xhr, status, error) {
 
@@ -116,12 +116,12 @@ $(document).on('click','#btn-participant', function(e) {
                 button.removeClass('btn-save-change')
                 button.addClass('btn-failed-change')
                 button.text(xhr.message)
-            }, 3000);
+            }, 1500);
             setTimeout(function () {
                 button.removeClass('btn-failed-change')
                 button.addClass('btn-save-change')
                 button.text('Участвовать')
-            }, 6000);
+            }, 3000);
 
         },
 
