@@ -131,6 +131,9 @@ class EventsController extends Controller
         if($request->active){
             $type = 'active';
         }
+        if($request->title){
+            $type = 'edit';
+        }
         return $this->form($type, $id)->update($id);
     }
 
@@ -405,7 +408,7 @@ class EventsController extends Controller
             }
         });
         $form->saved(function (Form $form)  use ($type, $id){
-            if($type == 'update') {
+            if($type == 'update' || $type == 'create' || $type == 'edit' || $type == 'store') {
                 if ($form->categories) {
                     $categories = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
                         ->where('event_id', '=', $form->model()->id)->get();
