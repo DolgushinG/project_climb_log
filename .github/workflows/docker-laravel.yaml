@@ -15,8 +15,11 @@ jobs:
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
     - name: Install Dependencies
       run: composer update
-    - name: Generate key
-      run: php artisan key:generate
-    - name: Storage link
-      run: php artisan storage:link
+      script: |
+        mkdir bootstrap/cache
+        chmod 777 bootstrap/cache
+        chmod 777 storage
+        php artisan key:generate
+        php artisan storage:link
+        git reset --hard
       # Your Laravel application is ready...
