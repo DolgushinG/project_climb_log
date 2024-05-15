@@ -11,12 +11,11 @@ jobs:
       image: lorisleiva/laravel-docker:8.1
     steps:
     - uses: actions/checkout@v2
-    - name: Copy .env
-      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-    - name: Install Dependencies
-      run: composer update
+    - uses: actions/github-script@v7
       with:
         script: |
+            php -r "file_exists('.env') || copy('.env.example', '.env');"
+            composer update
             mkdir bootstrap/cache
             chmod 777 bootstrap/cache
             chmod 777 storage
