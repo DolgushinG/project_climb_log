@@ -299,7 +299,7 @@ class GradesController extends Controller
             $form->tablecustom('grade_and_amount', '', function ($table) use ($event){
                 $grades = Grades::getGrades();
                 $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
-                $table->number('Кол-во')->width('50px');
+                $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
                 if($event->mode == 1){
                     $table->text('Ценность')->width('60px');
                 }
