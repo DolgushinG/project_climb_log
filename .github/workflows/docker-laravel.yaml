@@ -11,15 +11,17 @@ jobs:
       image: lorisleiva/laravel-docker:8.1
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/github-script@v7
-      with:
-        script: |
-            php -r "file_exists('.env') || copy('.env.example', '.env');"
-            composer update
-            mkdir bootstrap/cache
-            chmod 777 bootstrap/cache
-            chmod 777 storage
-            php artisan key:generate
-            php artisan storage:link
-            git reset --hard
-          # Your Laravel application is ready...
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+    - name: Install Dependencies
+      run: composer update
+    - name: Bootstrap
+      run: mkdir bootstrap/cache && chmod 777 bootstrap/cache && chmod 777 storage
+    - name: Key generate
+      run: php artisan key:generate
+    - name: Storage link
+      run: php artisan storage:link
+    - name: Cache clear
+      run: php artisan optimize && php artisan config:clear
+    script: |
+      # Your Laravel application is ready...
