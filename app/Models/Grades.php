@@ -47,24 +47,6 @@ class Grades extends Model
     public static function settings_routes($amount_routes, $routes)
     {
         $res = [];
-//        $routes = [
-//            ['grade' => '4', 'value' => 50],
-//            ['grade' => '5', 'value' => 100],
-//            ['grade' => '5+', 'value' => 150],
-//            ['grade' => '6A', 'value' => 200],
-//            ['grade' => '6A+', 'value' => 250],
-//            ['grade' => '6B', 'value' => 300],
-//            ['grade' => '6B+', 'value' => 350],
-//            ['grade' => '6C', 'value' => 400],
-//            ['grade' => '6C+', 'value' => 450],
-//            ['grade' => '7A', 'value' => 500],
-//            ['grade' => '7A+', 'value' => 550],
-//            ['grade' => '7B', 'value' => 600],
-//            ['grade' => '7B+', 'value' => 650],
-//            ['grade' => '7C', 'value' => 700],
-//            ['grade' => '7C+', 'value' => 750],
-//            ['grade' => '8A', 'value' => 800],
-//        ];
         $route_id = 1;
         foreach ($routes as $route) {
             if($route['amount'] != 0) {
@@ -138,11 +120,11 @@ class Grades extends Model
     /**
      * @return array[]
      */
-    public static function grades_with_value_flash($start_low_grade): array
+    public static function grades_with_value_flash($start_point): array
     {
 
         $step = 10;
-        $main_digit = $start_low_grade;
+        $main_digit = $start_point;
         $res = [];
         $count = 1;
         $len = count(self::grades());

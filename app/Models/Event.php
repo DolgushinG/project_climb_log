@@ -6,10 +6,7 @@ use App\Admin\Controllers\ResultRouteSemiFinalStageController;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use stdClass;
 
 class Event extends Model
 {
@@ -44,49 +41,46 @@ class Event extends Model
         'active'
     ];
 
-    public static function exist_events($owner_id){
-        return boolval(Event::where('owner_id', '=', $owner_id)->where('active', '=', 1)->first());
-    }
-    public function participant()
+    public function participant(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Participant::class);
     }
 
-    public function ownerPayments()
+    public function ownerPayments(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(OwnerPayments::class);
     }
 
 
-    public function grades()
+    public function grades(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Grades::class);
     }
-    public function routes()
+    public function routes(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Grades::class);
     }
 
-    public function result_semifinal_stage()
+    public function result_semifinal_stage(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(ResultRouteSemiFinalStage::class);
     }
-    public function result_qualification_like_final()
+    public function result_qualification_like_final(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(ResultQualificationLikeFinal::class);
     }
 
-    public function result_final_stage()
+    public function result_final_stage(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(ResultFinalStage::class);
     }
 
-    public function user()
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
 
-    public static function counting_amount_for_pay_event($event_id)
+    public static function counting_amount_for_pay_event($event_id): float|int
     {
         $event = Event::find($event_id);
         if($event->is_qualification_counting_like_final){
@@ -97,7 +91,7 @@ class Event extends Model
         return ($amount_participant * $event->amount_start_price) * (self::COST_FOR_EACH_PARTICIPANT / 100);
     }
 
-    public static function counting_amount_for_pay_participant($event_id)
+    public static function counting_amount_for_pay_participant($event_id): float|int
     {
         $event = Event::find($event_id);
         return $event->amount_start_price * (self::COST_FOR_EACH_PARTICIPANT / 100);
@@ -122,7 +116,8 @@ class Event extends Model
         return $m;
     }
 
-    public function translate_to_eng($text, $mode='eng'){
+    public function translate_to_eng($text, $mode='eng'): array|string
+    {
         $cyr = ['а','б','в','г','д','е','ё','ж','з','и','й','к','л','м','н','о','п', 'р','с','т','у','ф','х','ц','ч','ш','щ','ъ','ы','ь','э','ю','я', 'А','Б','В','Г','Д','Е','Ё','Ж','З','И','Й','К','Л','М','Н','О','П', 'Р','С','Т','У','Ф','Х','Ц','Ч','Ш','Щ','Ъ','Ы','Ь','Э','Ю','Я'
         ];
         $lat = ['a','b','v','g','d','e','io','zh','z','i','y','k','l','m','n','o','p', 'r','s','t','u','f','h','ts','ch','sh','sht','a','i','y','e','yu','ya', 'A','B','V','G','D','E','Io','Zh','Z','I','Y','K','L','M','N','O','P', 'R','S','T','U','F','H','Ts','Ch','Sh','Sht','A','I','Y','e','Yu','Ya'
@@ -133,7 +128,8 @@ class Event extends Model
             return str_replace($lat, $cyr, $text);
         }
     }
-    public static function get_result_format_all_route($event, $participant){
+    public static function get_result_format_all_route($event, $participant): float|int
+    {
         $custom_red_point = $event->amount_point_redpoint;
         $custom_flash = $event->amount_point_flash;
         $routes_id_passed_with_red_point = ResultParticipant::where('event_id', $event->id)->where('user_id', $participant->id)->where('attempt', ResultParticipant::STATUS_PASSED_REDPOINT)->pluck('route_id');
@@ -185,7 +181,8 @@ class Event extends Model
         return $finish_flash_result + $finish_red_point_result;
     }
 
-    public static function refresh_final_points_all_participant($event) {
+    public static function refresh_final_points_all_participant($event): void
+    {
         $format = $event->mode ?? null;
         if(!$format){
             Log::info('Обновление без формата 1 или 2, пока что недоступно потому что используется формат подсчета как финал)');
@@ -228,7 +225,8 @@ class Event extends Model
             $participant_result->save();
         }
     }
-    public static function refresh_final_points_all_participant_in_semifinal($event_id) {
+    public static function refresh_final_points_all_participant_in_semifinal($event_id): void
+    {
         $event = Event::find($event_id);
         $amount_the_best_participant = $event->amount_the_best_participant ?? self::DEFAULT_SEMIFINAL_PARTICIPANT;
         $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
@@ -275,7 +273,8 @@ class Event extends Model
 
     }
 
-    public static function refresh_qualification_counting_like_final($event) {
+    public static function refresh_qualification_counting_like_final($event): void
+    {
         $fields = ['firstname','id','category','active','team','city', 'email','year','lastname','skill','sport_category','email_verified_at', 'created_at', 'updated_at'];
         if($event->is_additional_final) {
             $all_group_participants = array();
@@ -299,7 +298,8 @@ class Event extends Model
         }
     }
 
-    public static function refresh_final_points_all_participant_in_final($event_id){
+    public static function refresh_final_points_all_participant_in_final($event_id): void
+    {
         $event = Event::find($event_id);
         $amount_the_best_participant_to_go_final = $event->amount_the_best_participant_to_go_final ?? self::DEFAULT_FINAL_PARTICIPANT;
         $amount_the_best_participant = $event->amount_the_best_participant ?? self::DEFAULT_SEMIFINAL_PARTICIPANT;
@@ -369,7 +369,8 @@ class Event extends Model
         }
     }
 
-    public function insert_final_participant_result($event_id, $points, $user_id, $gender){
+    public function insert_final_participant_result($event_id, $points, $user_id, $gender): void
+    {
         $final_participant_result = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first();
         $final_participant_result->points = $final_participant_result->points + $points;
         $final_participant_result->active = 1;
@@ -377,7 +378,8 @@ class Event extends Model
         $final_participant_result->save();
     }
 
-    public static function update_participant_place($event, $user_id, $gender){
+    public static function update_participant_place($event, $user_id, $gender): void
+    {
         $final_participant_result = Participant::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
         if(!$event->is_auto_categories && $final_participant_result->category_id == null){
             $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), Participant::get_list_passed_route($event->id, $user_id), 3);
@@ -392,7 +394,7 @@ class Event extends Model
         $final_participant_result->save();
     }
 
-    public static function get_france_system_result($table, $event_id, $gender, $category=null)
+    public static function get_france_system_result($table, $event_id, $gender, $category=null): \Illuminate\Support\Collection
     {
         $users = User::query()
             ->leftJoin($table, 'users.id', '=', $table.'.user_id')
