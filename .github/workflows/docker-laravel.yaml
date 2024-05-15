@@ -23,5 +23,6 @@ jobs:
       run: php artisan storage:link
     - name: Cache clear
       run: php artisan optimize && php artisan config:clear
-    script: |
+    - name: Git clone
+      run: git --version || true && npm --version || true
       # Your Laravel application is ready...
