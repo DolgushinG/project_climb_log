@@ -1,0 +1,64 @@
+#name: Deploy
+#
+## Trigger the workflow on push and
+## pull request events on the production branch
+#on:
+#  pull_request:
+#    branches:
+#      - develop
+
+# Authenticate to the the server via ssh
+# and run our deployment script
+
+name: Python application
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Git clone
+        run: |
+          git clone https://github.com/DolgushinG/project_comp_reg_autotests
+          cd project_comp_reg_autotests
+          python3 -m venv virtual-env
+          source virtual-env/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pytest --browser chrome
+  build:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSHKEY }}
+          script: |
+            cd /var/www/stage-dev.project_climb_log
+            git reset --hard
+            git pull
+            /usr/bin/php artisan down
+            /usr/bin/php artisan optimize
+            /usr/bin/php artisan config:clear
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            npm run prod
+            /usr/bin/php artisan up
+
+
+

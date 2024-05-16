@@ -54,7 +54,7 @@
                                                     Войти
                                                 </button>
                                             </div>
-
+                                            @if(env('APP_ENV') == 'prod')
                                             <div class="pt-4 pb-2">
                                                 <div class="col-12" style="text-align: center">
                                                     {{--                                                <a href="/auth/telegram/redirect" class="btn btn-primary w-100" type="button">--}}
@@ -99,6 +99,7 @@
                                                     font-size: 20px;
                                                 }
                                             </style>
+                                            @endif
                                             <div class="col-12">
                                                 @if (Route::has('password.request'))
                                                     <a href="{{ route('password.request') }}"
