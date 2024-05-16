@@ -19,7 +19,30 @@ on:
     branches: [ develop ]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSHKEY }}
+          script: |
+            cd /var/www/stage-dev.project_climb_log
+            echo ${{ github.head_ref || github.ref_name }}
+            git checkout ${{ github.head_ref || github.ref_name }}
+            /usr/bin/php artisan down
+            /usr/bin/php artisan optimize
+            /usr/bin/php artisan config:clear
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            npm run prod
+            /usr/bin/php artisan up
   test:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -36,29 +59,7 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           pytest --browser chrome
-  build:
-    needs: [test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }}
-          key: ${{ secrets.SSHKEY }}
-          script: |
-            cd /var/www/stage-dev.project_climb_log
-            git reset --hard
-            git pull
-            /usr/bin/php artisan down
-            /usr/bin/php artisan optimize
-            /usr/bin/php artisan config:clear
-            export NVM_DIR=~/.nvm
-            source ~/.nvm/nvm.sh
-            npm run prod
-            /usr/bin/php artisan up
+
 
 
 

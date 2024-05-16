@@ -24,7 +24,7 @@ jobs:
           script: |
             cd /var/www/project_climb_log
             git reset --hard
-            git merge --no-ff develop
+            git pull
             /usr/bin/php artisan down
             /usr/bin/php artisan optimize
             /usr/bin/php artisan config:clear
