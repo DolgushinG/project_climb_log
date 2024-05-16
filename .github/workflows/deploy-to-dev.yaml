@@ -1,58 +1,68 @@
-name: Deploy
-
-# Trigger the workflow on push and
-# pull request events on the production branch
-on:
-  pull_request:
-    branches:
-      - develop
+#name: Deploy
+#
+## Trigger the workflow on push and
+## pull request events on the production branch
+#on:
+#  pull_request:
+#    branches:
+#      - develop
 
 # Authenticate to the the server via ssh
 # and run our deployment script
+
+name: Python application
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
 jobs:
-  testing:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setting up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      - name: Installing package list
-        run: apt list --installed
-      - name: Removing previous chrome instances on runner
-        run: sudo apt purge google-chrome-stable
-
-      # Need to fetch reqs if needed
-      - name: Installing all necessary packages
-        run: pip install chromedriver-autoinstaller selenium pyvirtualdisplay
-      - name: Install xvfb
-        run: sudo apt-get install xvfb
-
-      - name: Running the Python script
-        run: python3 --version
   build:
-    needs: testing
+
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
+      - name: Starting Selenoid Server (aerokube/selenoid) within actions
+        uses: ajinx/selenoid@2.0
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }}
-          key: ${{ secrets.SSHKEY }}
-          script: |
-            cd /var/www/stage-dev.project_climb_log
-            git reset --hard
-            git pull
-            /usr/bin/php artisan down
-            /usr/bin/php artisan optimize
-            /usr/bin/php artisan config:clear
-            export NVM_DIR=~/.nvm
-            source ~/.nvm/nvm.sh
-            npm run prod
-            /usr/bin/php artisan up
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Install plugin
+        run: pip install pytest-github-actions-annotate-failures
+      - name: Test with pytest
+        run: |
+          pytest --alluredir=allure-results --browser remote
+#  build:
+#    needs: testing
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Deploy to server
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.HOST }}
+#          username: ${{ secrets.USERNAME }}
+#          port: ${{ secrets.PORT }}
+#          key: ${{ secrets.SSHKEY }}
+#          script: |
+#            cd /var/www/stage-dev.project_climb_log
+#            git reset --hard
+#            git pull
+#            /usr/bin/php artisan down
+#            /usr/bin/php artisan optimize
+#            /usr/bin/php artisan config:clear
+#            export NVM_DIR=~/.nvm
+#            source ~/.nvm/nvm.sh
+#            npm run prod
+#            /usr/bin/php artisan up
 
 
 
