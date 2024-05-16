@@ -33,9 +33,12 @@ jobs:
         run: |
           git clone https://github.com/DolgushinG/project_comp_reg_autotests
           cd project_comp_reg_autotests
+          ls
+          pwd
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python -m venv venv
+          source venv/bin/activate
           pip install -r requirements.txt
       - name: Install plugin
         run: pip install pytest-github-actions-annotate-failures
