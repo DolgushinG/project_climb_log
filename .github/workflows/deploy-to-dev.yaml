@@ -34,7 +34,7 @@ jobs1:
         run: python3 --version
 
 jobs2:
-  needs: job1
+  needs: jobs1
   deploy:
     runs-on: ubuntu-latest
     steps:
