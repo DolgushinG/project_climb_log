@@ -19,10 +19,8 @@ on:
     branches: [ develop ]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.9
@@ -38,29 +36,29 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           pytest --browser chrome
-#  build:
-#    needs: testing
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Deploy to server
-#        uses: appleboy/ssh-action@master
-#        with:
-#          host: ${{ secrets.HOST }}
-#          username: ${{ secrets.USERNAME }}
-#          port: ${{ secrets.PORT }}
-#          key: ${{ secrets.SSHKEY }}
-#          script: |
-#            cd /var/www/stage-dev.project_climb_log
-#            git reset --hard
-#            git pull
-#            /usr/bin/php artisan down
-#            /usr/bin/php artisan optimize
-#            /usr/bin/php artisan config:clear
-#            export NVM_DIR=~/.nvm
-#            source ~/.nvm/nvm.sh
-#            npm run prod
-#            /usr/bin/php artisan up
+  build:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSHKEY }}
+          script: |
+            cd /var/www/stage-dev.project_climb_log
+            git reset --hard
+            git pull
+            /usr/bin/php artisan down
+            /usr/bin/php artisan optimize
+            /usr/bin/php artisan config:clear
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            npm run prod
+            /usr/bin/php artisan up
 
 
 
