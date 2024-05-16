@@ -41,6 +41,7 @@ jobs:
             npm run prod
             /usr/bin/php artisan up
   test:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
