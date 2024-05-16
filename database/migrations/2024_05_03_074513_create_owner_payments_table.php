@@ -17,7 +17,7 @@ class CreateOwnerPaymentsTable extends Migration
             $table->increments('id');
             $table->integer('owner_id');
             $table->integer('event_id');
-            $table->integer('amount_for_pay');
+            $table->integer('amount_for_pay')->nullable();
             $table->string('bill')->nullable();
             $table->string('request_for_payment')->nullable();
             $table->boolean('is_paid')->default(0);
