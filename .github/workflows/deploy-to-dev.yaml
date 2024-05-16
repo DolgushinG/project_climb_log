@@ -32,7 +32,7 @@ jobs:
 
       - name: Running the Python script
         run: python3 --version
-  deploy:
+  build:
     needs: testing
     runs-on: ubuntu-latest
     steps:
