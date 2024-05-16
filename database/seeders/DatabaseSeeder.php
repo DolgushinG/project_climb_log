@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
         for($i = 1; $i <= 300; $i++){
             \App\Models\User::factory()->count(1)->withGender($genders[array_rand($genders)])->create();
         }
-        $tester = array('firstname' => 'Tester','middlename' => 'tester tester','lastname' => 'Tester','avatar' => NULL,'gender' => 'female','birthday' => NULL,'city' => 'Pamelafort','year' => NULL,'team' => 'laboriosam','is_notify_about_new_event' => NULL,'is_notify_about_where_was_participant_event' => NULL,'telegram_id' => NULL,'vkontakte_id' => NULL,'yandex_id' => NULL,'category' => '3','skill' => NULL,'sport_category' => NULL,'email' => 'tester@tester.ru','email_verified_at' => '2024-04-23 13:31:56','password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi','remember_token' => 'hAuohetZkE','created_at' => '2024-04-23 13:31:56','updated_at' => '2024-04-24 13:09:57');
+        $tester = array('firstname' => 'Tester','middlename' => 'tester tester','lastname' => 'Tester','avatar' => NULL,'gender' => 'female','birthday' => '1992-05-29','city' => 'Pamelafort','year' => NULL,'team' => 'laboriosam','is_notify_about_new_event' => NULL,'is_notify_about_where_was_participant_event' => NULL,'telegram_id' => NULL,'vkontakte_id' => NULL,'yandex_id' => NULL,'category' => '3','skill' => NULL,'sport_category' => NULL,'email' => 'tester@tester.ru','email_verified_at' => '2024-04-23 13:31:56','password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi','remember_token' => 'hAuohetZkE','created_at' => '2024-04-23 13:31:56','updated_at' => '2024-04-24 13:09:57');
         \Illuminate\Support\Facades\DB::table('users')->insert($tester);
         $this->call([
             AdminTablesSeeder::class,

@@ -84,9 +84,6 @@ class UserController extends AdminController
         $show->field('phone', trans('admin.phone'));
         $show->field('city', trans('admin.city'));
         $show->field('is_access_to_create_event', 'Доступ к проведению');
-        $show->field('amount_for_pay', 'Сумма к оплате')->display(function ($amount){
-            return $amount.' руб.';
-        });;
         $show->field('is_paid', 'Оплачено');
 //        $show->field('bill', 'Чек по оплате');
         $show->field('roles', trans('admin.roles'))->as(function ($roles) {
@@ -128,7 +125,6 @@ class UserController extends AdminController
         $form->text('city', trans('admin.city'));
         $form->image('avatar', trans('admin.avatar'));
         $form->switch('is_access_to_create_event', 'Доступ к проведению');
-        $form->text('amount_for_pay', 'Сумма к оплате');
         $form->switch('is_paid', 'Оплачено');
 //        $form->file('bill', 'Чек по оплате')->move('/bill/events/'.Admin::user()->id, $name);
         $form->password('password', trans('admin.password'))->rules('required|confirmed');
