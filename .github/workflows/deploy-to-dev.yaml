@@ -32,7 +32,8 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /var/www/stage-dev.project_climb_log
-            git checkout ${GITHUB_REF##*/}
+            echo ${{ github.head_ref || github.ref_name }}
+            git checkout ${{ github.head_ref || github.ref_name }}
             /usr/bin/php artisan down
             /usr/bin/php artisan optimize
             /usr/bin/php artisan config:clear
