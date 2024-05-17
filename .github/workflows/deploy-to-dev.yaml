@@ -59,6 +59,10 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           pytest --browser chrome
+        with:
+          name: my-artifact
+          path: project_comp_reg_autotests/tests/output/**
+          retention-days: 1
 
 
 
