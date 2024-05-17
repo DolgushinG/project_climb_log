@@ -60,23 +60,22 @@ class EventFactory extends Factory
      */
     public function definition()
     {
-
+        $date = $this->faker->date();
         return [
             'image' => $this->faker->randomElement(['images/20231115_cea82537af86871a32344dcd5c6a23ba.jpeg','images/vT94mFyT9xU.jpg']),
             'active' => true,
             'is_registration_state' => true,
             'is_send_result_state' => true,
-            'start_date' => $this->faker->date(),
+            'start_date' => $date,
             'end_date' => $this->faker->date(),
             'description' => $this->faker->paragraph(20),
             'contact' => '+7(932)-782-22-11',
             'address' => $this->faker->address(),
-//            'grade_and_amount' => $routes,
-            'title' => $this->faker->word(),
-            'title_eng' => $this->faker->word(),
+            'title' => 'competition',
+            'title_eng' => 'competition',
             'subtitle' => $this->faker->word(),
-            'link' => $this->faker->url(),
-            'admin_link' => $this->faker->url(),
+            'link' => '/event/'.$date.'/admin/competition',
+            'admin_link' => '/admin/event/'.$date.'/admin/competition',
             'link_payment' => "https://www.tinkoff.ru/cf/1ZyTiSRkXmZ",
             'img_payment' => "images/qr.png",
             'info_payment' => $this->faker->paragraph(20),
@@ -85,8 +84,9 @@ class EventFactory extends Factory
             'amount_start_price' => 1800,
             'amount_the_best_participant' => $this->faker->randomElement([6,8,10,20]),
             'categories' => $this->faker->randomElement([['Новичок', 'Общий зачет'], ['Новичок', 'Любители', 'Спортсмены']]),
-//            'transfer_to_next_category' => $transfer_to_text_category,
             'count_routes' => 30,
+            'is_public' => true,
+            'is_need_pay_for_reg' => false,
         ];
     }
     public function withOwnerId($value)
@@ -159,8 +159,12 @@ class EventFactory extends Factory
     public function withClimbingGym($value)
     {
         return $this->state([
-            'climbing_gym_name' => $this->climbingGyms[$value],
-            'climbing_gym_name_eng' => (new \App\Models\Event)->translate_to_eng($this->climbingGyms[$value]),
+            # рандомные названия
+//            'climbing_gym_name' => $this->climbingGyms[$value],
+//            'climbing_gym_name_eng' => (new \App\Models\Event)->translate_to_eng($this->climbingGyms[$value]),
+        # фикс админ
+            'climbing_gym_name' => 'admin',
+            'climbing_gym_name_eng' => 'admin',
         ]);
     }
 

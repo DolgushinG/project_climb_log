@@ -125,8 +125,6 @@ class UserController extends AdminController
         $form->text('city', trans('admin.city'));
         $form->image('avatar', trans('admin.avatar'));
         $form->switch('is_access_to_create_event', 'Доступ к проведению');
-        $form->switch('is_paid', 'Оплачено');
-//        $form->file('bill', 'Чек по оплате')->move('/bill/events/'.Admin::user()->id, $name);
         $form->password('password', trans('admin.password'))->rules('required|confirmed');
         $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
             ->default(function ($form) {
