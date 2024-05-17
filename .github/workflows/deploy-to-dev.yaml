@@ -65,6 +65,7 @@ jobs:
         with:
           name: artifact
           path: ${{ github.workspace }}/artifact/**
+        if: always()
 
 
 
