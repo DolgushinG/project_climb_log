@@ -52,10 +52,12 @@ jobs:
           python-version: 3.9
       - name: Git clone
         run: |
-          gh release list --repo DolgushinG/project_comp_reg_autotests
+          git clone https://github.com/DolgushinG/project_comp_reg_autotests
           pwd
           ls
           cd project_comp_reg_autotests
+          mkdir tests/output
+          cd tests/output/ && touch 1.txt
 #          python3 -m venv virtual-env
 #          source virtual-env/bin/activate
 #          pip install --upgrade pip
