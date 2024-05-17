@@ -54,13 +54,12 @@ jobs:
         run: |
           git clone https://github.com/DolgushinG/project_comp_reg_autotests
           cd project_comp_reg_autotests
-          mkdir tests/output
-          cp -r tests/output ${{ github.workspace }}/artifact
           python3 -m venv virtual-env
           source virtual-env/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
           pytest --browser chrome
+          cp -r tests/output ${{ github.workspace }}/artifact
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
