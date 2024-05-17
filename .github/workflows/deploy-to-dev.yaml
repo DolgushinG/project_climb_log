@@ -15,8 +15,6 @@ name: Python application
 on:
   push:
     branches: [ "cl*" ]
-  pull_request:
-    branches: [ develop ]
 
 jobs:
   build:
@@ -84,6 +82,31 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           tox -e chrome2
+          cp -r tests/output ${{ github.workspace }}/artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifact
+          path: ${{ github.workspace }}/artifact/**
+        if: always()
+  test_part_3:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Git clone
+        run: |
+          git clone https://github.com/DolgushinG/project_comp_reg_autotests
+          cd project_comp_reg_autotests
+          python3 -m venv virtual-env
+          source virtual-env/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          tox -e chrome3
           cp -r tests/output ${{ github.workspace }}/artifact
       - name: Upload artifact
         uses: actions/upload-artifact@v3
