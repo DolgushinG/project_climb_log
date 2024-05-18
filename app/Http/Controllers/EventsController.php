@@ -90,15 +90,23 @@ class EventsController extends Controller
     public function get_participants(Request $request, $start_date, $climbing_gym, $title){
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if($event) {
-            $participants = array();
             if($event->is_qualification_counting_like_final){
-                $participant_event = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->get();
+                $table = 'result_qualification_like_final';
             } else {
-                $participant_event = Participant::where('event_id', '=', $event->id)->get();
+                $table = 'participants';
             }
-            $users_id = $participant_event->pluck('user_id')->toArray();
-            $users = User::whereIn('id', $users_id)->get()->toArray();
-            $users_event = $participant_event->toArray();
+            $participants = User::query()
+                ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+                ->where($table.'.event_id', '=', $event->id)
+                ->select(
+                    'users.id',
+                    'users.middlename',
+                    'users.city',
+                    'users.team',
+                    $table.'.gender',
+                    $table.'.number_set_id',
+                    $table.'.category_id',
+                )->get()->toArray();
             if($event->is_input_set != 1){
                 $days = Set::where('owner_id', '=', $event->owner_id)->select('day_of_week')->distinct()->get();
                 $sets = Set::where('owner_id', '=', $event->owner_id)->get();
@@ -110,34 +118,26 @@ class EventsController extends Controller
                         $sets[$index]->count_participant = Participant::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
                     }
                     $sets[$index]->date = Helpers::getDatesByDayOfWeek($event->start_date, $event->end_date);
+                    if($sets[$index]->count_participant == 0){
+                        unset($sets[$index]);
+                    }
                 }
             } else {
                 $days = null;
                 $sets = null;
             }
             $index = 0;
-            foreach ($users_event as $set => $user) {
-                if ($index <= count($users)) {
+            $categories = ParticipantCategory::where('event_id', $event->id)->pluck('category', 'id')->toArray();
+            foreach ($participants as $index_user => $user) {
+                if ($index <= count($participants)) {
                     if($event->is_input_set == 1){
-                        $array_for_set = array(
-                            'middlename' => $users[$index]['middlename'],
-                            'city' => $users[$index]['city'],
-                            'team' => $users[$index]['team'],
-                            'gender' => $users[$index]['gender'],
-                        );
+                        $participants[$index_user]['category'] = $categories[$participants[$index]['category_id']];
                     } else {
                         $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
-                        $array_for_set = array(
-                            'middlename' => $users[$index]['middlename'],
-                            'city' => $users[$index]['city'],
-                            'team' => $users[$index]['team'],
-                            'number_set' => $set->number_set,
-                            'time' => $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10),
-                            'gender' => $users[$index]['gender'],
-                        );
+                        $participants[$index_user]['category'] = $categories[$participants[$index]['category_id']];
+                        $participants[$index_user]['number_set'] = $set->number_set;
+                        $participants[$index_user]['time'] = $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10);
                     }
-
-                    $participants[] = $array_for_set;
                 }
                 $index++;
             }
