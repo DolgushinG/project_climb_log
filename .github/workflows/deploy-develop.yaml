@@ -1,0 +1,36 @@
+name: Deploy
+
+# Trigger the workflow on push and
+# pull request events on the production branch
+on:
+  push:
+    branches:
+      - develop
+
+# Authenticate to the the server via ssh
+# and run our deployment script
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSHKEY }}
+          script: |
+            cd /var/www/stage-dev.project_climb_log
+            git checkout develop
+            git reset --hard
+            git pull
+            /usr/bin/php artisan down
+            /usr/bin/php artisan optimize
+            /usr/bin/php artisan config:clear
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+            npm run prod
+            /usr/bin/php artisan up
+
