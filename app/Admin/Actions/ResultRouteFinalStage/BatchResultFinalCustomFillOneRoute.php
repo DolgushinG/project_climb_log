@@ -93,7 +93,17 @@ class BatchResultFinalCustomFillOneRoute extends Action
             $category = ParticipantCategory::find($category_id)->category;
             $result[$index] = $res.' ['.$category.']';
             if(in_array($index, $result_final)){
-                $result[$index] = $res.' ['.$category.']'.' [Уже добавлен]';
+                $result_user = ResultRouteFinalStage::where('event_id', $event->id)->where('user_id', $user);
+                $routes = $result_user->pluck('final_route_id')->toArray();
+                $string_version = '';
+                foreach ($routes as $value) {
+                    $string_version .= $value . ', ';
+                }
+                if($result_user->get()->count() == $event->amount_routes_in_final){
+                    $result[$index] = $res.' ['.$category.']'.' [Добавлены все трассы]';
+                } else {
+                    $result[$index] = $res.' ['.$category.']'.' [Трассы: '.$string_version.']';
+                }
             }
         }
         $routes = [];

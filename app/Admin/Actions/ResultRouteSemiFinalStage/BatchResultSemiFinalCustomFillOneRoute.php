@@ -83,7 +83,7 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
         $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
         $merged_users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant, $this->category);
         $result = $merged_users->pluck( 'middlename','id');
-        $result_semifinal = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
+        $result_semifinal = ResultRouteSemiFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
             $user = User::where('middlename', $res)->first()->id;
             if($event->is_qualification_counting_like_final) {
@@ -94,7 +94,17 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
             $category = ParticipantCategory::find($category_id)->category;
             $result[$index] = $res.' ['.$category.']';
             if(in_array($index, $result_semifinal)){
-                $result[$index] = $res.' ['.$category.']'.' [Уже добавлен]';
+                $result_user = ResultRouteSemiFinalStage::where('event_id', $event->id)->where('user_id', $user);
+                $routes = $result_user->pluck('final_route_id')->toArray();
+                $string_version = '';
+                foreach ($routes as $value) {
+                    $string_version .= $value . ', ';
+                }
+                if($result_user->get()->count() == $event->amount_routes_in_final){
+                    $result[$index] = $res.' ['.$category.']'.' [Добавлены все трассы]';
+                } else {
+                    $result[$index] = $res.' ['.$category.']'.' [Трассы: '.$string_version.']';
+                }
             }
         }
         Admin::script("// Получаем все элементы с атрибутом modal
