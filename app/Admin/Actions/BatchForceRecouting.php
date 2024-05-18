@@ -5,11 +5,13 @@ namespace App\Admin\Actions;
 use App\Admin\CustomAction\ActionExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
+use App\Models\ParticipantCategory;
 use App\Models\ResultSemiFinalStage;
 use Encore\Admin\Actions\Action;
 use Encore\Admin\Actions\BatchAction;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -22,6 +24,11 @@ class BatchForceRecouting extends Action
     public function handle(Request $request)
     {
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+        $categories = ParticipantCategory::where('event_id', $event->id)->get();
+        foreach ($categories as $category) {
+            Cache::forget('result_male_cache_' . $category->category);
+            Cache::forget('result_female_cache_' . $category->category);
+        }
         Event::refresh_final_points_all_participant($event);
         return $this->response()->success('Пересчитано')->refresh();
     }
