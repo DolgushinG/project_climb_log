@@ -6,13 +6,14 @@
     </section><!-- End Hero -->
     <!-- Slider Start -->
     <main id="main" class="main">
-        <section class="section contact">
-            <div class="row gy-4">
-                <div class="col-xl-6">
+        <section class="section contact d-flex align-items-center">
+            <div class="row w-100">
+                <div class="col-md-1"></div>
+                <div class="col-md-4">
                     <div class="card p-4">
-                        <div class="container">
+                        <div class="container ">
                             <h4 class="text-center">{{$event->title}}</h4>
-                            <img class="img-fluid rounded py-4" src="{{asset('storage/'.$event->image)}}" alt="">
+                            <img class="img img-responsive" src="{{asset('storage/'.$event->image)}}" alt="">
                             <div class="d-grid gap-2 mt-3">
                                 @guest
                                     @if($event->is_registration_state)
@@ -123,7 +124,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-6">
+                <div class="col-md-6">
 
 
                     <div class="card">
