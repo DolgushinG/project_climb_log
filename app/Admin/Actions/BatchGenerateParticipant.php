@@ -18,6 +18,7 @@ use Encore\Admin\Actions\Action;
 use Encore\Admin\Actions\BatchAction;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -66,7 +67,11 @@ class BatchGenerateParticipant extends Action
             Event::refresh_final_points_all_participant($event);
 //            Event::refresh_final_points_all_participant($event);
         }
-
+        $categories = ParticipantCategory::where('event_id', $event->id)->get();
+        foreach ($categories as $category) {
+            Cache::forget('result_male_cache_' . $category->category);
+            Cache::forget('result_female_cache_' . $category->category);
+        }
         return $this->response()->success($text)->refresh();
     }
 
