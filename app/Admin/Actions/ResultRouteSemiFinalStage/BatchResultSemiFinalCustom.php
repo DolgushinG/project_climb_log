@@ -75,7 +75,7 @@ class BatchResultSemiFinalCustom extends Action
         $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
         $merged_users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant, $this->category);
         $result = $merged_users->pluck( 'middlename','id');
-        $result_semifinal = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
+        $result_semifinal = ResultRouteSemiFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
             $user = User::where('middlename', $res)->first()->id;
             if($event->is_qualification_counting_like_final) {
@@ -139,7 +139,8 @@ class BatchResultSemiFinalCustom extends Action
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
-            $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
+            $this->hidden('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
+            $this->integer('show_final_route_id_'.$i, 'Трасса '.$i);
             $this->integer('amount_try_top_'.$i, 'Попытки на топ');
             $this->integer('amount_try_zone_'.$i, 'Попытки на зону');
         }
