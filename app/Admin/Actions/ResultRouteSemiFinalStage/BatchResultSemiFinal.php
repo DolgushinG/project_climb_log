@@ -69,7 +69,7 @@ class BatchResultSemiFinal extends Action
         $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
         $merged_users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant);
         $result = $merged_users->pluck( 'middlename','id');
-        $result_semifinal = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
+        $result_semifinal = ResultRouteSemiFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
             if(in_array($index, $result_semifinal)){
                 $result[$index] = $res.' [Уже добавлен]';
