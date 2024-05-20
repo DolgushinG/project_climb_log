@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: artifact
-          path: ${{ github.workspace }}/artifact/**
+          path: ${{ github.workspace }}/artifact/*
         if: always()
   test_part_2:
     needs: [ build ]

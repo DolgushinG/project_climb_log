@@ -165,6 +165,18 @@ class EventsController extends Controller
     }
 
     /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        return $this->form('destroy')->destroy($id);
+    }
+
+    /**
      * Make a grid builder.
      *
      * @return Grid
@@ -408,7 +420,7 @@ class EventsController extends Controller
             }
         });
         $form->saved(function (Form $form)  use ($type, $id){
-            if($type == 'update' || $type == 'create' || $type == 'edit' || $type == 'store') {
+            if($type != 'active') {
                 if ($form->categories) {
                     $categories = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
                         ->where('event_id', '=', $form->model()->id)->get();
