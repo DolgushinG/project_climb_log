@@ -60,6 +60,7 @@ class BatchGenerateParticipant extends Action
                 $start = $start+$parts;
             }
         }
+
         Generators::prepare_result_participant($owner_id, $event->id, $table_result_routes, $count);
         if($event->is_qualification_counting_like_final){
             Event::refresh_qualification_counting_like_final($event);
@@ -67,6 +68,7 @@ class BatchGenerateParticipant extends Action
             Event::refresh_final_points_all_participant($event);
 //            Event::refresh_final_points_all_participant($event);
         }
+
         $categories = ParticipantCategory::where('event_id', $event->id)->get();
         foreach ($categories as $category) {
             Cache::forget('result_male_cache_' . $category->category);

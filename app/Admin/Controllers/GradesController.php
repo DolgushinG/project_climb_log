@@ -167,7 +167,7 @@ class GradesController extends Controller
         $grid->disableExport();
         $grid->disablePagination();
         $grid->disableCreateButton();
-        $grid->column('event_id', 'Настройка трасс для соренования')->display(function ($event_id) {
+        $grid->column('event_id', 'Настройка трасс для соревнования')->display(function ($event_id) {
             return Event::find($event_id)->title;
         });
         $grid->column('count_routes', 'Кол-во трасс');
@@ -201,7 +201,7 @@ class GradesController extends Controller
         $grid->disableExport();
         $grid->disablePagination();
         $grid->disableCreateButton();
-        $grid->column('event_id', 'Настройка трасс для соренования')->display(function ($event_id) {
+        $grid->column('event_id', 'Настройка трасс для соревнования')->display(function ($event_id) {
             return Event::find($event_id)->title;
         });
         $grid->column('count_routes', 'Кол-во трасс');
