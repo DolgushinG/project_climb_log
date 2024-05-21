@@ -211,6 +211,7 @@ class Generators
             $event = Event::find($event_id);
 
             $users = ResultFinalStage::get_final_participant($event, null, true);
+
             $result = array();
             foreach ($users as $user) {
                 $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
