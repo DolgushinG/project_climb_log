@@ -28,7 +28,7 @@ class SemiFinalResultExport implements WithMultipleSheets
         $sheets = [];
         $genders = ['male', 'female'];
         $event = Event::find($this->event_id);
-        if($event->is_additional_semifinal){
+        if($event->is_sort_group_semifinal){
             $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
             foreach ($genders as $gender) {
                 foreach ($categories as $category) {

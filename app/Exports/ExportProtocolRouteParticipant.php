@@ -7,7 +7,7 @@ use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultSemiFinalStage;
 use App\Models\Set;
 use App\Models\User;
@@ -138,7 +138,7 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
     {
         switch ($this->stage){
             case 'qualification':
-                $table = 'result_qualification_like_final';
+                $table = 'result_france_system_qualification';
                 if($this->category_id == "not_category"){
                     return User::query()
                         ->leftJoin($table, 'users.id', '=', $table.'.user_id')

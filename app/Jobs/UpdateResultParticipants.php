@@ -4,8 +4,8 @@ namespace App\Jobs;
 
 use App\Models\Event;
 use App\Models\Grades;
-use App\Models\Participant;
-use App\Models\ResultParticipant;
+use App\Models\ResultQualificationClassic;
+use App\Models\ResultRouteQualificationClassic;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;

@@ -11,7 +11,7 @@
                 <div class="col">
                     <div class="container">
                         <div class="row">
-                            @if(\App\Models\Participant::is_active_participant($event->id, Auth()->user()->id))
+                            @if(\App\Models\ResultQualificationClassic::is_active_participant($event->id, Auth()->user()->id))
                                 <h1> Ваш результат уже был добавлен </h1>
                             @else
                                 <h1> Внести результаты </h1>
@@ -19,8 +19,10 @@
 
                                 </div>
                                 <div class="text-right">
-                                    <button type="button" class="btn btn-dark" id="all-flash">Отметить все FLASH</button>
-                                    <button type="button" class="btn btn-dark" id="all-redpoint">Отметить все REDPOINT</button>
+                                    <button type="button" class="btn btn-dark" id="all-flash">Отметить все FLASH
+                                    </button>
+                                    <button type="button" class="btn btn-dark" id="all-redpoint">Отметить все REDPOINT
+                                    </button>
                                 </div>
                                 <table class="table">
                                     <thead>
@@ -39,20 +41,26 @@
                                             <th>{{$route->grade}}</th>
                                             <td>
                                                 <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
-                                                       name="{{$route->count}}" id="failed-{{$route->count}}" autocomplete="off"
+                                                       name="{{$route->count}}" id="failed-{{$route->count}}"
+                                                       autocomplete="off"
                                                        checked>
-                                                <label class="btn btn-outline-danger btn-failed" for="failed-{{$route->count}}">Не пролез</label>
+                                                <label class="btn btn-outline-danger btn-failed"
+                                                       for="failed-{{$route->count}}">Не пролез</label>
                                             </td>
                                             <td>
-                                                <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}" class="btn-check"
-                                                       name="{{$route->count}}" id="flash-{{$route->count}}" autocomplete="off">
-                                                <label class="btn btn-outline-success  btn-flash" for="flash-{{$route->count}}">FLASH</label>
+                                                <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
+                                                       class="btn-check"
+                                                       name="{{$route->count}}" id="flash-{{$route->count}}"
+                                                       autocomplete="off">
+                                                <label class="btn btn-outline-success  btn-flash"
+                                                       for="flash-{{$route->count}}">FLASH</label>
                                             </td>
                                             <td>
                                                 <input type="radio" data-id="all-redpoint" class="btn-check"
                                                        data-grade="{{$route->grade}}" name="{{$route->count}}"
                                                        id="redpoint-{{$route->count}}" autocomplete="off">
-                                                <label class="btn btn-outline-danger btn-redpoint" for="redpoint-{{$route->count}}">REDPOINT</label>
+                                                <label class="btn btn-outline-danger btn-redpoint"
+                                                       for="redpoint-{{$route->count}}">REDPOINT</label>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -65,7 +73,7 @@
                                         Внести
                                     </button>
                                 </div>
-                            <!-- End Table with stripped rows -->
+                                <!-- End Table with stripped rows -->
                             @endif
                         </div>
                     </div>

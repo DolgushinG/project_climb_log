@@ -27,7 +27,7 @@ class AllResultExport implements WithMultipleSheets
         $genders = ['male', 'female'];
         $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
         $event = Event::find($this->event_id);
-        if($event->is_qualification_counting_like_final){
+        if($event->is_france_system_qualification){
             $stage = 'QualificationLikeFinal';
         } else {
             $stage = 'Qualification';
@@ -37,7 +37,7 @@ class AllResultExport implements WithMultipleSheets
                 $sheets[] = new Results($this->event_id, $stage, $gender, $category);
             }
         }
-        if($event->is_additional_semifinal){
+        if($event->is_sort_group_semifinal){
             $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
             foreach ($genders as $gender) {
                 foreach ($categories as $category) {
@@ -49,7 +49,7 @@ class AllResultExport implements WithMultipleSheets
                 $sheets[] = new Results($this->event_id, 'SemiFinal', $gender);
             }
         }
-        if($event->is_additional_final){
+        if($event->is_sort_group_final){
             $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
             foreach ($genders as $gender) {
                 foreach ($categories as $category) {

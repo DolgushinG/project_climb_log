@@ -6,7 +6,7 @@ use App\Admin\CustomAction\ActionExport;
 use App\Exports\QualificationResultExport;
 use App\Helpers\Generators\Generators;
 use App\Models\Event;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultSemiFinalStage;
 use Encore\Admin\Actions\Action;
@@ -26,7 +26,7 @@ class BatchGenerateResultSemiFinalParticipant extends Action
     {
         $owner_id = \Encore\Admin\Facades\Admin::user()->id;
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        Generators::prepare_result_participant($owner_id, $event->id,'result_route_semifinal_stage');
+        Generators::prepare_result_route_qualification_classic($owner_id, $event->id,'result_route_semifinal_stage');
         return $this->response()->success('Готово')->refresh();
     }
 

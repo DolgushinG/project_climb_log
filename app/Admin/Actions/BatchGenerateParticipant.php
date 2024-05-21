@@ -7,11 +7,11 @@ use App\Exports\QualificationResultExport;
 use App\Helpers\Generators\Generators;
 use App\Models\Event;
 use App\Models\Grades;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
-use App\Models\ResultParticipant;
-use App\Models\ResultQualificationLikeFinal;
-use App\Models\ResultRouteQualificationLikeFinal;
+use App\Models\ResultRouteQualificationClassic;
+use App\Models\ResultFranceSystemQualification;
+use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
 use Encore\Admin\Actions\Action;
@@ -33,18 +33,18 @@ class BatchGenerateParticipant extends Action
         $owner_id = \Encore\Admin\Facades\Admin::user()->id;
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         $count = intval($request->count);
-        if($event->is_qualification_counting_like_final){
-            $table_result = 'result_qualification_like_final';
-            $table_result_routes = 'result_route_qualification_like_final';
+        if($event->is_france_system_qualification){
+            $table_result = 'result_france_system_qualification';
+            $table_result_routes = 'result_route_france_system_qualification';
             $text = 'готово';
-            ResultRouteQualificationLikeFinal::where('event_id',  $event->id)->delete();
-            ResultQualificationLikeFinal::where('event_id',  $event->id)->delete();
+            ResultRouteFranceSystemQualification::where('event_id',  $event->id)->delete();
+            ResultFranceSystemQualification::where('event_id',  $event->id)->delete();
         } else {
-            $table_result = 'participants';
-            $table_result_routes = 'result_participant';
+            $table_result = 'result_qualification_classic';
+            $table_result_routes = 'result_route_qualification_classic';
             $text = 'Обязательно пересчитайте результаты для правильного расставление мест';
-            Participant::where('event_id',  $event->id)->delete();
-            ResultParticipant::where('event_id',  $event->id)->delete();
+            ResultQualificationClassic::where('event_id',  $event->id)->delete();
+            ResultRouteQualificationClassic::where('event_id',  $event->id)->delete();
         }
         if($event->is_auto_categories){
             Generators::prepare_participant_with_owner($owner_id, $event->id, $count, $table_result);
@@ -61,8 +61,8 @@ class BatchGenerateParticipant extends Action
             }
         }
 
-        Generators::prepare_result_participant($owner_id, $event->id, $table_result_routes, $count);
-        if($event->is_qualification_counting_like_final){
+        Generators::prepare_result_route_qualification_classic($owner_id, $event->id, $table_result_routes, $count);
+        if($event->is_france_system_qualification){
             Event::refresh_qualification_counting_like_final($event);
         } else {
             Event::refresh_final_points_all_participant($event);
@@ -86,7 +86,7 @@ class BatchGenerateParticipant extends Action
     public function html()
     {
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        if($event->is_qualification_counting_like_final){
+        if($event->is_france_system_qualification){
             $is_enabled = Grades::where('event_id', $event->id)->first();
         } else {
             $is_enabled = Route::where('event_id', $event->id)->first();

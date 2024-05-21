@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
-use App\Models\Participant;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultQualificationClassic;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -13,10 +13,10 @@ class CropImageController extends Controller
     public function uploadCropImage(Request $request)
     {
         $event = Event::find($request->event_id);
-        if($event->is_qualification_counting_like_final){
-            $participant = ResultQualificationLikeFinal::where('user_id', Auth()->user()->id)->where('event_id', $request->event_id)->first();
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('user_id', Auth()->user()->id)->where('event_id', $request->event_id)->first();
         } else {
-            $participant = Participant::where('user_id', Auth()->user()->id)->where('event_id', $request->event_id)->first();
+            $participant = ResultQualificationClassic::where('user_id', Auth()->user()->id)->where('event_id', $request->event_id)->first();
         }
 
         if (!file_exists('storage/images/bill/users/'.$participant->user_id.'/')) {

@@ -3,38 +3,28 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\BatchNotificationOfParticipant;
-use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportProtocolRouteParticipantQualification;
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionExportCardParticipantFranceSystem;
 use App\Admin\CustomAction\ActionExportCardParticipantFestival;
 use App\Admin\CustomAction\ActionExportList;
-use App\Admin\Extensions\CustomButton;
 use App\Exports\AllResultExport;
-use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
 use App\Models\Format;
 use App\Models\Grades;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
-use App\Models\ResultParticipant;
-use App\Models\ResultQualificationLikeFinal;
-use App\Models\ResultRouteQualificationLikeFinal;
-use App\Models\Route;
+use App\Models\ResultFranceSystemQualification;
+use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\Set;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
-use Encore\Admin\Widgets\Box;
 use Encore\Admin\Widgets\InfoBox;
-use Encore\Admin\Widgets\Tab;
-use Encore\Admin\Widgets\Table;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\MessageBag;
 use Maatwebsite\Excel\Facades\Excel;
 
 class EventsController extends Controller
@@ -76,10 +66,10 @@ class EventsController extends Controller
                     ->row(function ($row) {
                         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
                         if ($event) {
-                            if ($event->is_qualification_counting_like_final) {
-                                $participant = ResultQualificationLikeFinal::where('event_id', $event->id);
+                            if ($event->is_france_system_qualification) {
+                                $participant = ResultFranceSystemQualification::where('event_id', $event->id);
                             } else {
-                                $participant = Participant::where('event_id', $event->id);
+                                $participant = ResultQualificationClassic::where('event_id', $event->id);
                             }
                             $sum_participant = $participant->count();
                             $participant_is_paid = $participant->where('is_paid', 1)->count();
@@ -91,7 +81,7 @@ class EventsController extends Controller
                         $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/participants', $sum_participant ?? 0));
                         $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/participants', $participant_is_paid ?? 0));
                         if ($event) {
-                            if (!$event->is_qualification_counting_like_final) {
+                            if (!$event->is_france_system_qualification) {
                                 $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
                                 $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
                             }
@@ -287,7 +277,7 @@ class EventsController extends Controller
             $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
         })->tab('Параметры соревнования', function ($form) use ($id) {
-            $form->radio('is_qualification_counting_like_final','Настройка подсчета квалификации')
+            $form->radio('is_france_system_qualification','Настройка подсчета квалификации')
                 ->options([
                     0 =>'Фестивальная система(Баллы и коэффициенты)',
                     1 =>'Француская система(Топ и Зона)',
@@ -308,7 +298,7 @@ class EventsController extends Controller
                             $form->number('amount_the_best_participant','Кол-во лучших участников идут в след раунд полуфинал')
                                 ->help('Если указано число например 6, то это 6 мужчин и 6 женщин')->value(6);
                             $form->number('amount_routes_in_semifinal','Кол-во трасс в полуфинале')->attribute('inputmode', 'none')->value(5);
-                            $form->radio('is_additional_semifinal','Полуфиналы для разных групп')
+                            $form->radio('is_sort_group_semifinal','Полуфиналы для разных групп')
                                 ->options([
                                     1 =>'Подсчет результатов полуфинала по полу и по категории участников',
                                     0 =>'Подсчет результатов полуфинала по полу',
@@ -318,7 +308,7 @@ class EventsController extends Controller
                         })->value(1)->required();
                 })->when(1, function (Form $form) {
                 })->value(1)->required();
-            $form->radio('is_additional_final','Финалы для разных групп')
+            $form->radio('is_sort_group_final','Финалы для разных групп')
                 ->options([
                     1 =>'Подсчет результатов финала по полу и по категории участников',
                     0 =>'Подсчет результатов финала по полу',
@@ -439,7 +429,7 @@ class EventsController extends Controller
                             $participant_category = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
                                 ->where('event_id', '=', $form->model()->id)->where('id', '=', $category->id)->first();
                             # Если в входящей форме пришли значение которых нет в БД до значит их удалили
-                            if (array_search($category->category, $form->categories['values']) === false) {
+                            if (!in_array($category->category, $form->categories['values'])) {
                                 ParticipantCategory::where('owner_id', '=', Admin::user()->id)
                                     ->where('event_id', '=', $form->model()->id)->where('category', '=', $category->category)->delete();
                             }
@@ -519,10 +509,10 @@ class EventsController extends Controller
     public function is_fill_results($event_id)
     {
         $result = false;
-        if(Participant::where('event_id',$event_id)->first()){
+        if(ResultQualificationClassic::where('event_id',$event_id)->first()){
             $result = true;
         }
-        if(ResultRouteQualificationLikeFinal::where('event_id',$event_id)->first()){
+        if(ResultRouteFranceSystemQualification::where('event_id',$event_id)->first()){
             $result = true;
         }
         return $result;
@@ -668,9 +658,9 @@ class EventsController extends Controller
     restoreSwitch('is_input_birthday');
     restoreSwitch('is_need_sport_category');
     restoreRadioButtons('is_semifinal');
-    restoreRadioButtons('is_qualification_counting_like_final');
-    restoreRadioButtons('is_additional_final');
-    restoreRadioButtons('is_additional_semifinal');
+    restoreRadioButtons('is_france_system_qualification');
+    restoreRadioButtons('is_sort_group_final');
+    restoreRadioButtons('is_sort_group_semifinal');
     restoreRadioButtons('mode');
     restoreInputValues();
 
