@@ -15,20 +15,23 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function main() {
+    public function main()
+    {
         $active_cities = Event::where('is_public', '=', 1)->distinct()->pluck('city')->toArray();
         $cities = [];
-        foreach ($active_cities as $city){
+        foreach ($active_cities as $city) {
             $count = Event::where('is_public', '=', 1)->where('city', '=', $city)->get()->count();
             $cities[] = array('name' => $city, 'count_event' => $count);
         }
         $events = Event::where('is_public', '=', 1)->get();
         return view('main', compact(['events', 'cities']));
     }
+
     public function indexPrivacy()
     {
         return view('privacy.policiesconf');
     }
+
     public function indexPrivacyData()
     {
         return view('privacy.privatedata');
