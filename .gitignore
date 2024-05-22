@@ -22,3 +22,9 @@ yarn-error.log
 /public/css/*
 /public/vendor/bootstrap
 
+/public/js/app.js.LICENSE.txt
+/public/js/datepicker.js
+/public/js/ddata.js
+/public/js/main.js
+/public/js/profile.js
+/public/js/welcome.js

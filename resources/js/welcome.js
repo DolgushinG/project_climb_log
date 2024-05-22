@@ -75,7 +75,7 @@ $(document).on('click','#btn-participant', function(e) {
     let button = $('#btn-participant')
     let event_id = document.getElementById('btn-participant').getAttribute('data-id')
     let link = document.getElementById('btn-participant').getAttribute('data-link')
-    let is_qualification_counting_like_final = document.getElementById('btn-participant').getAttribute('data-format')
+    let is_france_system_qualification = document.getElementById('btn-participant').getAttribute('data-format')
     let user_id = document.getElementById('btn-participant').getAttribute('data-user-id')
     e.preventDefault()
     $.ajax({

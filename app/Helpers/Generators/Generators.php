@@ -4,13 +4,13 @@ namespace App\Helpers\Generators;
 
 use App\Models\Event;
 use App\Models\Grades;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
-use App\Models\ResultParticipant;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultRouteQualificationClassic;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFinalStage;
-use App\Models\ResultRouteQualificationLikeFinal;
+use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
@@ -33,8 +33,8 @@ class Generators
                     ->withCity($i)
                     ->withClimbingGym($i)
                     ->withSemiFinal(1)
-                    ->is_additional_final(0)
-                    ->is_qualification_counting_like_final(0)
+                    ->is_sort_group_final(0)
+                    ->is_france_system_qualification(0)
                     ->amount_point_flash(1.2)
                     ->amount_point_redpoint(1)
                     ->mode(2)
@@ -47,8 +47,8 @@ class Generators
                     ->withCity($i)
                     ->withClimbingGym($i)
                     ->withSemiFinal(0)
-                    ->is_additional_final(1)
-                    ->is_qualification_counting_like_final(0)
+                    ->is_sort_group_final(1)
+                    ->is_france_system_qualification(0)
                     ->mode(2)
                     ->is_input_birthday(1)
                     ->is_need_sport_category(1)
@@ -60,8 +60,8 @@ class Generators
                     ->withCity($i)
                     ->withClimbingGym($i)
                     ->withSemiFinal(1)
-                    ->is_additional_final(1)
-                    ->is_qualification_counting_like_final(0)
+                    ->is_sort_group_final(1)
+                    ->is_france_system_qualification(0)
                     ->mode(1)
                     ->mode_amount_routes(15)
                     ->create();
@@ -72,8 +72,8 @@ class Generators
                     ->withCity($i)
                     ->withClimbingGym($i)
                     ->withSemiFinal(1)
-                    ->is_additional_final(0)
-                    ->is_qualification_counting_like_final(0)
+                    ->is_sort_group_final(0)
+                    ->is_france_system_qualification(0)
                     ->mode(2)
                     ->is_input_birthday(1)
                     ->is_need_sport_category(1)
@@ -104,17 +104,17 @@ class Generators
         DB::table($table)->insert($participants);
     }
 
-    public static function prepare_result_participant($owner_id, $event_id, $table, $count=30)
+    public static function prepare_result_route_qualification_classic($owner_id, $event_id, $table, $count=30)
     {
-        if($table === 'result_participant'){
-            ResultParticipant::where('event_id', $event_id)->delete();
-            $active_participants = Participant::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
+        if($table === 'result_route_qualification_classic'){
+            ResultRouteQualificationClassic::where('event_id', $event_id)->delete();
+            $active_participants = ResultQualificationClassic::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
             $event = Event::find($event_id);
 
             $type_group_routes = ['beginner', 'middle', 'pro'];
 
             foreach ($active_participants as $active_participant){
-                $result_participant = array();
+                $result_route_qualification_classic = array();
                 $info_routes = Route::where('event_id', $event_id)->get();
                 $group = $type_group_routes[rand(0,2)];
                 foreach ($info_routes as $route){
@@ -122,21 +122,21 @@ class Generators
                         (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route->route_id, $owner_id, $active_participant->gender);
                     }
                     $attempt = Grades::getAttemptFromGrades($route->grade, $group);
-                    $result_participant[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route->route_id,'attempt' => $attempt,'grade' => $route->grade, 'created_at' => Carbon::now());
+                    $result_route_qualification_classic[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route->route_id,'attempt' => $attempt,'grade' => $route->grade, 'created_at' => Carbon::now());
                 }
-                $participant = Participant::where('event_id', $event_id)->where('user_id', $active_participant->user_id)->first();
-                $participant->result_for_edit = $result_participant;
+                $participant = ResultQualificationClassic::where('event_id', $event_id)->where('user_id', $active_participant->user_id)->first();
+                $participant->result_for_edit = $result_route_qualification_classic;
                 $participant->save();
-                DB::table('result_participant')->insert($result_participant);
+                DB::table('result_route_qualification_classic')->insert($result_route_qualification_classic);
             }
         }
 
-        if($table === 'result_route_qualification_like_final') {
-            ResultRouteQualificationLikeFinal::where('event_id', $event_id)->delete();
+        if($table === 'result_route_france_system_qualification') {
+            ResultRouteFranceSystemQualification::where('event_id', $event_id)->delete();
             $event = Event::find($event_id);
             $count_routes = Grades::where('event_id', $event_id)->first()->count_routes;
             $event_categories = $event->categories;
-            $participants = ResultQualificationLikeFinal::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
+            $participants = ResultFranceSystemQualification::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
             $result = array();
 
             foreach($participants as $participant) {
@@ -167,7 +167,7 @@ class Generators
                     $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $participant->gender,'user_id' => $participant->user_id,'category_id' => $category_id, 'route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
                 }
             }
-            DB::table('result_route_qualification_like_final')->insert($result);
+            DB::table('result_route_france_system_qualification')->insert($result);
         }
 
         if($table === 'result_route_semifinal_stage') {
@@ -177,9 +177,9 @@ class Generators
             $users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant, null, true);
             $result = array();
             foreach ($users as $user) {
-                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
-                if($event->is_qualification_counting_like_final){
-                    $participant = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                if($event->is_france_system_qualification){
+                    $participant = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 }
                 for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
                     $amount_zone = rand(0, 1);
@@ -214,9 +214,9 @@ class Generators
 
             $result = array();
             foreach ($users as $user) {
-                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
-                if($event->is_qualification_counting_like_final){
-                    $participant = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                if($event->is_france_system_qualification){
+                    $participant = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 }
                 for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
                     $amount_zone = rand(0, 1);

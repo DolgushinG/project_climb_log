@@ -1916,6 +1916,11 @@ section {
     width: 100%;
     font-family: inherit;
 }
+.btn-failed-result-page-change{
+    background-color: rgba(169, 0, 0, 0.92) !important;
+    color: white!important;
+    font-family: inherit;
+}
 .btn-save-change:hover{
     background-color: #0054a8;
 

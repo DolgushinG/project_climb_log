@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ResultSemiFinalStage;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -26,14 +26,14 @@ class ResultRouteFinalSeeder extends Seeder
                 $result_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', 6)->toArray();
                 $result_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', 6)->toArray();
             } else {
-                $result_female = Participant::better_participants($event_id, 'female', 6)->toArray();
-                $result_male = Participant::better_participants($event_id, 'male', 6)->toArray();
+                $result_female = ResultQualificationClassic::better_participants($event_id, 'female', 6)->toArray();
+                $result_male = ResultQualificationClassic::better_participants($event_id, 'male', 6)->toArray();
             }
             $final_users = array_merge($result_female, $result_male);
 
             $result = array();
             foreach ($final_users as $user) {
-                $participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {

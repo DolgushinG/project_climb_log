@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Admin\Actions\ResultRouteQualificationLikeFinalStage;
+namespace App\Admin\Actions\ResultRouteFranceSystemQualificationStage;
 
 use App\Models\Event;
 use App\Models\ParticipantCategory;
@@ -9,7 +9,7 @@ use Encore\Admin\Actions\Action;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
 
-class BatchExportProtocolRouteParticipantQualification extends Action
+class BatchExportProtocolRouteParticipantsQualification extends Action
 {
     public $name = 'Протокол трассы';
 

@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Mail;
 use function Symfony\Component\String\s;
 
-class Participant extends Model
+class ResultQualificationClassic extends Model
 {
     use HasFactory;
     public $timestamps = true;
 
-    protected $table = 'participants';
+    protected $table = 'result_qualification_classic';
 
     protected $casts = [
         'result_for_edit' =>'json',
@@ -59,19 +59,19 @@ class Participant extends Model
             if($type == 'final'){
                 $is_semifinal = Event::find($event_id)->is_semifinal;
                 if($is_semifinal){
-                    $place = Participant::get_place_participant_in_semifinal($event_id, $d_array['user_id']);
+                    $place = ResultQualificationClassic::get_place_participant_in_semifinal($event_id, $d_array['user_id']);
                 } else {
                     $gender = User::find($d_array['user_id'])->gender;
-                    $category_id = Participant::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
-                    $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
+                    $category_id = ResultQualificationClassic::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
+                    $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
                 }
             } else {
                 $gender = User::find($d_array['user_id'])->gender;
-                if($type == "qualification_like_final"){
-                    $place = Participant::get_place_participant_in_qualification_like_final($event_id, $d_array['user_id']);
+                if($type == "france_system_qualification"){
+                    $place = ResultQualificationClassic::get_place_participant_in_france_system_qualification($event_id, $d_array['user_id']);
                 } else {
-                    $category_id = Participant::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
-                    $place = Participant::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
+                    $category_id = ResultQualificationClassic::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
+                    $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
                 }
 
             }
@@ -129,16 +129,16 @@ class Participant extends Model
     public static function get_place_participant_in_semifinal($event_id, $user_id){
         return ResultSemiFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
     }
-    public static function get_place_participant_in_qualification_like_final($event_id, $user_id){
-        return ResultQualificationLikeFinal::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
+    public static function get_place_participant_in_france_system_qualification($event_id, $user_id){
+        return ResultFranceSystemQualification::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
     }
 
     public static function get_places_participant_in_qualification($event_id, $user_id, $gender, $category_id=null, $get_place_user = false){
         $users_id = User::where('gender', '=', $gender)->pluck('id');
         if($category_id){
-            $all_participant_event = Participant::whereIn('user_id', $users_id)->where('category_id', '=', $category_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
+            $all_participant_event = ResultQualificationClassic::whereIn('user_id', $users_id)->where('category_id', '=', $category_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
         } else {
-            $all_participant_event = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
+            $all_participant_event = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
         }
         $user_places = array();
         foreach ($all_participant_event as $index => $user){
@@ -155,9 +155,9 @@ class Participant extends Model
     {
 
         if($category_id){
-            $active_participant = Participant::where('event_id', '=', $event_id)->where('category_id', '=', $category_id)->where('active', '=', 1)->pluck('user_id')->toArray();
+            $active_participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('category_id', '=', $category_id)->where('active', '=', 1)->pluck('user_id')->toArray();
         } else {
-            $active_participant = Participant::where('event_id', '=', $event_id)->where('active', '=', 1)->pluck('user_id')->toArray();
+            $active_participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('active', '=', 1)->pluck('user_id')->toArray();
         }
         if ($active_participant) {
             return count(User::whereIn('id', $active_participant)->where('gender', '=', $gender)->get()->toArray());
@@ -167,7 +167,7 @@ class Participant extends Model
     }
     public static function is_active_participant($event_id, $user_id)
     {
-        $active_participant = Participant::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->where('active', '=', 1)->first();
+        $active_participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->where('active', '=', 1)->first();
         if ($active_participant) {
             return true;
         } else {
@@ -177,12 +177,12 @@ class Participant extends Model
 
     public static function better_participants($event_id, $gender, $amount_better, $category_id = null){
         if($category_id){
-            $participant_users_id = Participant::where('event_id', '=', $event_id)->where('category_id', '=', $category_id)->pluck('user_id')->toArray();
+            $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('category_id', '=', $category_id)->pluck('user_id')->toArray();
         } else {
-            $participant_users_id = Participant::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
+            $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
         }
         $users_id = User::whereIn('id', $participant_users_id)->where('gender', '=', $gender)->pluck('id');
-        $participant_sort_id = Participant::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->sortByDesc('points')->pluck('user_id');
+        $participant_sort_id = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->sortByDesc('points')->pluck('user_id');
         $after_slice_participant_final_sort_id = array_slice($participant_sort_id->toArray(), 0, $amount_better);
         return User::whereIn('id', $after_slice_participant_final_sort_id)->get();
     }
@@ -195,10 +195,10 @@ class Participant extends Model
     public static function participant_number_set($user_id, $event_id){
         if($user_id && $event_id){
             $event = Event::find($event_id);
-            if($event->is_qualification_counting_like_final){
-                $number_set_id = ResultQualificationLikeFinal::where('user_id', $user_id)->where('event_id', $event_id)->first()->number_set_id ?? null;
+            if($event->is_france_system_qualification){
+                $number_set_id = ResultFranceSystemQualification::where('user_id', $user_id)->where('event_id', $event_id)->first()->number_set_id ?? null;
             } else {
-                $number_set_id = Participant::where('user_id', $user_id)->where('event_id', $event_id)->first()->number_set_id ?? null;
+                $number_set_id = ResultQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->first()->number_set_id ?? null;
             }
             return Set::find($number_set_id)->number_set;
         }
@@ -221,24 +221,24 @@ class Participant extends Model
     public static function get_sorted_group_participant($event_id, $gender, $category_id)
     {
         $users = User::query()
-            ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
-            ->where('participants.event_id', '=', $event_id)
-            ->where('participants.category_id', '=', $category_id)
+            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+            ->where('result_qualification_classic.event_id', '=', $event_id)
+            ->where('result_qualification_classic.category_id', '=', $category_id)
             ->select(
                 'users.id',
                 'users.city',
-                'participants.user_place',
+                'result_qualification_classic.user_place',
                 'users.middlename',
-                'participants.points',
-                'participants.owner_id',
-                'participants.gender',
-                'participants.category_id',
-                'participants.number_set_id',
+                'result_qualification_classic.points',
+                'result_qualification_classic.owner_id',
+                'result_qualification_classic.gender',
+                'result_qualification_classic.category_id',
+                'result_qualification_classic.number_set_id',
             )
-            ->where('participants.gender', '=', $gender)->get()->sortBy('user_place')->toArray();
+            ->where('result_qualification_classic.gender', '=', $gender)->get()->sortBy('user_place')->toArray();
         $event = Event::find($event_id);
         foreach ($users as $index => $user){
-            $place = Participant::get_places_participant_in_qualification($event_id, $user['id'], $gender, $category_id, true);
+            $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $user['id'], $gender, $category_id, true);
             $set = Set::find($user['number_set_id']);
             $users[$index]['user_place'] = $place;
             if($event->is_input_set != 1){
@@ -262,7 +262,7 @@ class Participant extends Model
 
     public static function get_list_passed_route($event_id, $user_id)
     {
-        return ResultParticipant::where('event_id', $event_id)->where('user_id', $user_id)->whereIn('attempt', [1,2])->pluck('grade');
+        return ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $user_id)->whereIn('attempt', [1,2])->pluck('grade');
     }
 
     public static function find_grade($list_grades, $grade)

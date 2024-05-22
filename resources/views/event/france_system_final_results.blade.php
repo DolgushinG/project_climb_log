@@ -13,7 +13,7 @@
                             <h5 class="card-title">Мужчины <span
                                     class="badge bg-success text-light"></span></h5>
                             <!-- Pills Tabs -->
-                            @if($event->is_additional_final)
+                            @if($event->is_sort_group_final)
                                 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                                     @foreach($categories as $index => $category)
                                         <li class="nav-item" role="presentation">
@@ -126,7 +126,7 @@
                             <h5 class="card-title">Женщины <span
                                     class="badge bg-success text-light"></span></h5>
                             <!-- Pills Tabs -->
-                            @if($event->is_additional_final)
+                            @if($event->is_sort_group_final)
                                 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                                     @foreach($categories as $index => $category)
                                         <li class="nav-item" role="presentation">

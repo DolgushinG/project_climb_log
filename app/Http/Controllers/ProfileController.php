@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 use App\Models\Event;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
-use App\Models\ResultParticipant;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultRouteQualificationClassic;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,9 +29,9 @@ class ProfileController extends Controller
     public function index() {
         $user = User::find(Auth()->user()->id);
         $state_user = array();
-        $result_flash = ResultParticipant::where('user_id', $user->id)->where('attempt', 1)->get()->count();
-        $result_redpoint = ResultParticipant::where('user_id', $user->id)->where('attempt', 2)->get()->count();
-        $result_all_route_passed = ResultParticipant::where('user_id', $user->id)->whereIn('attempt', [1,2])->get()->count();
+        $result_flash = ResultRouteQualificationClassic::where('user_id', $user->id)->where('attempt', 1)->get()->count();
+        $result_redpoint = ResultRouteQualificationClassic::where('user_id', $user->id)->where('attempt', 2)->get()->count();
+        $result_all_route_passed = ResultRouteQualificationClassic::where('user_id', $user->id)->whereIn('attempt', [1,2])->get()->count();
         if($result_all_route_passed > 0){
             $state_user['flash'] =  round(($result_flash / $result_all_route_passed) * 100, 2);
             $state_user['redpoint'] =  round(($result_redpoint / $result_all_route_passed) * 100, 2);
@@ -49,9 +49,9 @@ class ProfileController extends Controller
     {
         $user = User::find(Auth()->user()->id);
         $state_user = array();
-        $result_flash = ResultParticipant::where('user_id', $user->id)->where('attempt', 1)->get()->count();
-        $result_redpoint = ResultParticipant::where('user_id', $user->id)->where('attempt', 2)->get()->count();
-        $result_all_route_passed = ResultParticipant::where('user_id', $user->id)->whereIn('attempt', [1,2])->get()->count();
+        $result_flash = ResultRouteQualificationClassic::where('user_id', $user->id)->where('attempt', 1)->get()->count();
+        $result_redpoint = ResultRouteQualificationClassic::where('user_id', $user->id)->where('attempt', 2)->get()->count();
+        $result_all_route_passed = ResultRouteQualificationClassic::where('user_id', $user->id)->whereIn('attempt', [1,2])->get()->count();
         if($result_all_route_passed > 0){
             $state_user['flash'] =  round(($result_flash / $result_all_route_passed) * 100, 2);
             $state_user['redpoint'] =  round(($result_redpoint / $result_all_route_passed) * 100, 2);
@@ -75,9 +75,9 @@ class ProfileController extends Controller
         }
         $activities = Activity::where('causer_id', '=', $user->id)->orderBy('updated_at')->take(5)->get();
         $state_participant = array();
-        $all_like_final = ResultQualificationLikeFinal::where('user_id', $user->id)->where('active', 1)->get()->count();
-        $all_classic = Participant::where('user_id', $user->id)->where('active', 1)->get()->count();
-        $state_participant['amount_event'] = $all_classic + $all_like_final;
+        $all_results = ResultFranceSystemQualification::where('user_id', $user->id)->where('active', 1)->get()->count();
+        $all_classic = ResultQualificationClassic::where('user_id', $user->id)->where('active', 1)->get()->count();
+        $state_participant['amount_event'] = $all_classic + $all_results;
         return view('profile.overview', compact(['user', 'activities', 'state_participant']));
     }
     public function getTabContentSetting() {
@@ -113,15 +113,15 @@ class ProfileController extends Controller
 
     public function getTabContentEvents() {
         $user_id = Auth()->user()->id;
-        $participant = Participant::where('user_id', '=', $user_id)->pluck('event_id');
-        $res_qualification_like_final = ResultQualificationLikeFinal::where('user_id', '=', $user_id)->pluck('event_id');
-        $events_ids = $res_qualification_like_final->merge($participant);
+        $participant = ResultQualificationClassic::where('user_id', '=', $user_id)->pluck('event_id');
+        $res_france_system_qualification = ResultFranceSystemQualification::where('user_id', '=', $user_id)->pluck('event_id');
+        $events_ids = $res_france_system_qualification->merge($participant);
         $events = Event::whereIn('id', $events_ids->toArray())->get();
         foreach ($events as $event){
-            if($event->is_qualification_counting_like_final){
-                $event['amount_participant'] = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->get()->count();
+            if($event->is_france_system_qualification){
+                $event['amount_participant'] = ResultFranceSystemQualification::where('event_id', '=', $event->id)->get()->count();
             } else {
-                $event['amount_participant'] = Participant::where('event_id', '=', $event->id)->get()->count();
+                $event['amount_participant'] = ResultQualificationClassic::where('event_id', '=', $event->id)->get()->count();
             }
             $participant = ResultFinalStage::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
             $event['user_place'] = $participant->user_place ?? 'Нет результата';
@@ -166,7 +166,7 @@ class ProfileController extends Controller
         $user->team = $request->team;
         $user->birthday = $request->birthday;
         if ($user->save()) {
-            return response()->json(['success' => true, 'message' => 'Успешно сохранено'], 200);
+            return response()->json(['success' => true, 'message' => 'Успешно сохранено']);
         } else {
             return response()->json(['success' => false, 'message' => 'Ошибка сохранения'], 422);
         }
@@ -192,14 +192,14 @@ class ProfileController extends Controller
             $user = User::find(Auth::id());
             $user->password = Hash::make($request->get('new_password'));
             $user->save();
-            return response()->json(['success' => true, 'message' => 'Ваш пароль успешно изменен'], 200);
+            return response()->json(['success' => true, 'message' => 'Ваш пароль успешно изменен']);
         }
         $currentPass = Auth::user()->password;
         if (Hash::check($request->get('old_password'), $currentPass)) {
             $user = User::find(Auth::id());
             $user->password = Hash::make($request->get('new_password'));
             $user->save();
-            return response()->json(['success' => true, 'message' => 'Ваш пароль успешно изменен'], 200);
+            return response()->json(['success' => true, 'message' => 'Ваш пароль успешно изменен']);
         } else {
             return response()->json(['success' => false, 'message' => 'Введенный старый пароль неверный'], 422);
         }

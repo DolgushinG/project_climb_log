@@ -7,7 +7,7 @@ use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultSemiFinalStage;
 use App\Models\Set;
 use App\Models\User;
@@ -97,10 +97,10 @@ class ExportListParticipant implements WithCustomStartCell, ShouldAutoSize, With
 
     public function get_participants()
     {
-        if($this->event->is_qualification_counting_like_final){
-            $table = 'result_qualification_like_final';
+        if($this->event->is_france_system_qualification){
+            $table = 'result_france_system_qualification';
         } else {
-            $table = 'participants';
+            $table = 'result_qualification_classic';
         }
         return User::query()
             ->leftJoin($table, 'users.id', '=', $table.'.user_id')

@@ -10,7 +10,7 @@ class ParticipantCategory extends Model
     protected $table = 'participant_categories';
     public function participant()
     {
-        return $this->belongsTo(Participant::class);
+        return $this->belongsTo(ResultQualificationClassic::class);
     }
 
     public function getUserCategory($owner_id)

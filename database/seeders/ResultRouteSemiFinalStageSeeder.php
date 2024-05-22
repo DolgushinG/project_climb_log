@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
-use App\Models\Participant;
-use App\Models\ResultParticipant;
+use App\Models\ResultQualificationClassic;
+use App\Models\ResultRouteQualificationClassic;
 use App\Models\User;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Seeder;
@@ -24,8 +24,8 @@ class ResultRouteSemiFinalStageSeeder extends Seeder
             $event = Event::find($event_id);
             #!!! НЕ АКТУАЛЬНО НА ДАННЫЙ МОМЕНТ ПОДУМАТЬ НАД УДАЛЕНИМ
             if($event->is_semifinal){
-                $result_female = Participant::better_participants($event_id, 'female', 10)->toArray();
-                $result_male = Participant::better_participants($event_id, 'male', 10)->toArray();
+                $result_female = ResultQualificationClassic::better_participants($event_id, 'female', 10)->toArray();
+                $result_male = ResultQualificationClassic::better_participants($event_id, 'male', 10)->toArray();
                 $final_users = array_merge($result_female, $result_male);
                 $result = array();
                 foreach ($final_users as $user) {

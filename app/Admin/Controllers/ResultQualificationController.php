@@ -5,27 +5,27 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\BatchGenerateParticipant;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
-use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportProtocolRouteParticipantQualification;
-use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchExportResultQualificationLikeFinal;
-use App\Admin\Actions\ResultRouteQualificationLikeFinalStage\BatchResultQualificationLikeFinal;
+use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportProtocolRouteParticipantsQualification;
+use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportResultFranceSystemQualification;
+use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultFranceSystemQualification;
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionRejectBill;
 use App\Exports\ExportCardParticipantFranceSystem;
 use App\Exports\ExportCardParticipantFestival;
 use App\Exports\ExportListParticipant;
 use App\Exports\ExportProtocolRouteParticipant;
-use App\Exports\QualificationLikeFinalResultExport;
+use App\Exports\FranceSystemQualificationResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\OwnerPayments;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Http\Controllers\Controller;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
-use App\Models\ResultParticipant;
-use App\Models\ResultQualificationLikeFinal;
-use App\Models\ResultRouteQualificationLikeFinal;
+use App\Models\ResultRouteQualificationClassic;
+use App\Models\ResultFranceSystemQualification;
+use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Actions\Response;
@@ -43,7 +43,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Nette\Utils\Image;
 use function Symfony\Component\String\s;
 
-class ParticipantsController extends Controller
+class ResultQualificationController extends Controller
 {
     use HasResourceActions;
 
@@ -59,8 +59,8 @@ class ParticipantsController extends Controller
             ->row(function (Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if ($event) {
-                    if ($event->is_qualification_counting_like_final) {
-                        $row->column(20, $this->qualification_counting_like_final());
+                    if ($event->is_france_system_qualification) {
+                        $row->column(20, $this->france_system_qualification_counting());
                     } else {
                         $row->column(20, $this->qualification_classic());
                     }
@@ -93,8 +93,8 @@ class ParticipantsController extends Controller
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if ($event) {
-            if ($event->is_qualification_counting_like_final) {
-                $show = new Show(ResultQualificationLikeFinal::findOrFail($id));
+            if ($event->is_france_system_qualification) {
+                $show = new Show(ResultFranceSystemQualification::findOrFail($id));
                 $show->panel()
                     ->tools(function ($tools) {
                         $tools->disableEdit();
@@ -102,7 +102,7 @@ class ParticipantsController extends Controller
                         $tools->disableDelete();
                     });
             } else {
-                $show = new Show(Participant::findOrFail($id));
+                $show = new Show(ResultQualificationClassic::findOrFail($id));
                 $show->panel()
                     ->tools(function ($tools) {
 //                        $tools->disableEdit();
@@ -182,10 +182,10 @@ class ParticipantsController extends Controller
     public function destroy($id, Request $request)
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-        if ($event->is_qualification_counting_like_final) {
-            $result = ResultQualificationLikeFinal::find($id);
-            ResultRouteQualificationLikeFinal::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
-            $model = ResultQualificationLikeFinal::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+        if ($event->is_france_system_qualification) {
+            $result = ResultFranceSystemQualification::find($id);
+            ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+            $model = ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
             $model->amount_top = null;
             $model->amount_try_top = null;
             $model->amount_zone = null;
@@ -201,7 +201,7 @@ class ParticipantsController extends Controller
      */
     protected function qualification_classic()
     {
-        $grid = new Grid(new Participant);
+        $grid = new Grid(new ResultQualificationClassic);
         if (!Admin::user()->isAdministrator()) {
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
@@ -211,7 +211,7 @@ class ParticipantsController extends Controller
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $grid->selector(function (Grid\Tools\Selector $selector) use ($event) {
             $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
-            $p_categories = Participant::where('event_id', $event->id)->whereIn('category_id', $category)->get();
+            $p_categories = ResultQualificationClassic::where('event_id', $event->id)->whereIn('category_id', $category)->get();
             if ($p_categories->isNotEmpty()) {
                 $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
             }
@@ -241,7 +241,7 @@ class ParticipantsController extends Controller
             return trans_choice('somewords.' . $gender, 10);
         });
         $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
-        $p_categories = Participant::where('event_id', $event->id)->whereIn('category_id', $category)->get();
+        $p_categories = ResultQualificationClassic::where('event_id', $event->id)->whereIn('category_id', $category)->get();
 
         if ($p_categories->isNotEmpty()) {
             $grid->column('category_id', 'Категория')
@@ -301,14 +301,14 @@ class ParticipantsController extends Controller
      *
      * @return Grid
      */
-    protected function qualification_counting_like_final()
+    protected function france_system_qualification_counting()
     {
-        $grid = new Grid(new ResultQualificationLikeFinal);
+        $grid = new Grid(new ResultFranceSystemQualification);
         if (!Admin::user()->isAdministrator()) {
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
         $grid->model()->where(function ($query) {
-            $query->has('event.result_qualification_like_final');
+            $query->has('event.result_france_system_qualification');
         });
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $grid->selector(function (Grid\Tools\Selector $selector) {
@@ -317,10 +317,10 @@ class ParticipantsController extends Controller
             $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
-            $tools->append(new BatchExportResultQualificationLikeFinal);
-            $tools->append(new BatchResultQualificationLikeFinal);
+            $tools->append(new BatchExportResultFranceSystemQualification);
+            $tools->append(new BatchResultFranceSystemQualification);
             $tools->append(new BatchGenerateParticipant);
-            $tools->append(new BatchExportProtocolRouteParticipantQualification);
+            $tools->append(new BatchExportProtocolRouteParticipantsQualification);
         });
         $grid->actions(function ($actions) {
             $actions->disableEdit();
@@ -337,7 +337,7 @@ class ParticipantsController extends Controller
             return trans_choice('somewords.' . $gender, 10);
         });
         $grid->column('number_set_id', 'Номер сета')
-            ->select(Participant::number_sets(Admin::user()->id));
+            ->select(ResultQualificationClassic::number_sets(Admin::user()->id));
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
@@ -386,8 +386,8 @@ class ParticipantsController extends Controller
     {
 
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-        if ($event->is_qualification_counting_like_final) {
-            $form = new Form(new ResultQualificationLikeFinal);
+        if ($event->is_france_system_qualification) {
+            $form = new Form(new ResultFranceSystemQualification);
             $form->display('ID');
             $form->hidden('owner_id')->value(Admin::user()->id);
             $form->text('event_id', 'event_id');
@@ -416,7 +416,7 @@ class ParticipantsController extends Controller
                 }
             });
         } else {
-            $form = new Form(new Participant);
+            $form = new Form(new ResultQualificationClassic);
             Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
                 display: None;
                 }
@@ -451,7 +451,7 @@ class ParticipantsController extends Controller
                 $event_id = $form->model()->find($id)->event_id;
                 $routes = $form->result_for_edit;
                 foreach ($routes as $route) {
-                    $result = ResultParticipant::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
+                    $result = ResultRouteQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
                     $result->attempt = $route['attempt'];
                     $result->save();
                 }
@@ -483,7 +483,7 @@ class ParticipantsController extends Controller
                     $payments->amount_cost_for_service = Event::COST_FOR_EACH_PARTICIPANT;
                     $payments->save();
                     $user = User::find($participant->user_id);
-                    Participant::send_confirm_bill($event, $user);
+                    ResultQualificationClassic::send_confirm_bill($event, $user);
                 }
                 if ($form->input('is_paid') === "0") {
                     $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
@@ -511,10 +511,10 @@ class ParticipantsController extends Controller
         ]);
     }
 
-    public function exportQualificationLikeFinalExcel(Request $request)
+    public function exportFranceSystemQualificationExcel(Request $request)
     {
         $file_name = 'Результаты квалификации.xlsx';
-        $result = Excel::download(new QualificationLikeFinalResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        $result = Excel::download(new FranceSystemQualificationResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);
@@ -576,7 +576,7 @@ class ParticipantsController extends Controller
 
     protected function getUsers($event_id)
     {
-        $participant = Participant::where('owner_id', '=', Admin::user()->id)
+        $participant = ResultQualificationClassic::where('owner_id', '=', Admin::user()->id)
             ->where('event_id', '=', $event_id)
             ->where('active', '=', 1)
             ->pluck('user_id')->toArray();
@@ -587,10 +587,10 @@ class ParticipantsController extends Controller
     public function rejectBill(Request $request)
     {
         $event = Event::find($request->event_id);
-        if ($event->is_qualification_counting_like_final) {
-            $participant = ResultQualificationLikeFinal::find($request->id);
+        if ($event->is_france_system_qualification) {
+            $participant = ResultFranceSystemQualification::find($request->id);
         } else {
-            $participant = Participant::find($request->id);
+            $participant = ResultQualificationClassic::find($request->id);
         }
         $participant->bill = null;
         $participant->save();

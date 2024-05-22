@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Admin\Controllers\ParticipantsController;
+use App\Admin\Controllers\ResultQualificationController;
 use App\Helpers\Generators\Generators;
 use App\Models\Event;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\User;
 use Database\Factories\EventFactory;

@@ -4,10 +4,10 @@ namespace App\Admin\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
-use App\Models\ResultParticipant;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultRouteQualificationClassic;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Controllers\Dashboard;
@@ -61,10 +61,10 @@ class HomeController extends Controller
         foreach ($events_active as $event_active){
             $event = new \stdClass();
             $event->title = $event_active->title;
-            if($event_active->is_qualification_counting_like_final){
-                $event->count_participant = ResultQualificationLikeFinal::where('event_id', '=', $event_active->id)->count();
+            if($event_active->is_france_system_qualification){
+                $event->count_participant = ResultFranceSystemQualification::where('event_id', '=', $event_active->id)->count();
             } else {
-                $event->count_participant = Participant::where('event_id', '=', $event_active->id)->count();
+                $event->count_participant = ResultQualificationClassic::where('event_id', '=', $event_active->id)->count();
             }
             $events[] = $event;
         }
@@ -79,10 +79,10 @@ class HomeController extends Controller
         if($event){
             $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
             foreach ($sets as $set){
-                if($event->is_qualification_counting_like_final){
-                    $participants_event = ResultQualificationLikeFinal::where('event_id','=',$event->id)->where('number_set_id', '=', $set->id)->count();
+                if($event->is_france_system_qualification){
+                    $participants_event = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('number_set_id', '=', $set->id)->count();
                 } else {
-                    $participants_event = Participant::where('event_id','=',$event->id)->where('number_set_id', '=', $set->id)->count();
+                    $participants_event = ResultQualificationClassic::where('event_id','=',$event->id)->where('number_set_id', '=', $set->id)->count();
                 }
 
                 $set->free = $set->max_participants - $participants_event;
@@ -118,10 +118,10 @@ class HomeController extends Controller
             $categories = ParticipantCategory::where('event_id', $event->id)->get();
             $all_group = array();
             foreach ($categories as $category) {
-                if($event->is_qualification_counting_like_final){
-                    $all_group['male'][] = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', '=', $category->id)->get()->count();
+                if($event->is_france_system_qualification){
+                    $all_group['male'][] = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', '=', $category->id)->get()->count();
                 } else {
-                    $all_group['male'][] = Participant::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', '=', $category->id)->get()->count();
+                    $all_group['male'][] = ResultQualificationClassic::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', '=', $category->id)->get()->count();
                 }
             }
             $categories_array = $categories->pluck('category')->toArray();
@@ -144,10 +144,10 @@ class HomeController extends Controller
             $categories = ParticipantCategory::where('event_id', $event->id)->get();
             $all_group = array();
             foreach ($categories as $category) {
-                if($event->is_qualification_counting_like_final){
-                    $all_group['female'][] = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', '=', $category->id)->get()->count();
+                if($event->is_france_system_qualification){
+                    $all_group['female'][] = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', '=', $category->id)->get()->count();
                 } else {
-                    $all_group['female'][] = Participant::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', '=', $category->id)->get()->count();
+                    $all_group['female'][] = ResultQualificationClassic::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', '=', $category->id)->get()->count();
                 }
             }
             $categories_array = $categories->pluck('category')->toArray();

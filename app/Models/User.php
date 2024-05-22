@@ -82,10 +82,10 @@ class User extends Authenticatable
     public static function user_participant($event_id){
         $event = Event::find($event_id);
         $user_id = Auth()->user()->id;
-        if($event->is_qualification_counting_like_final){
-            $participant = ResultQualificationLikeFinal::where('user_id',  $user_id)->where('event_id', $event_id)->first();
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('user_id',  $user_id)->where('event_id', $event_id)->first();
         } else {
-            $participant = Participant::where('user_id', '=', $user_id)
+            $participant = ResultQualificationClassic::where('user_id', '=', $user_id)
                 ->where('event_id', '=', $event_id)->first();
         }
         if($participant){
@@ -101,7 +101,7 @@ class User extends Authenticatable
 
     public function participant()
     {
-        return $this->hasOne(Participant::class);
+        return $this->hasOne(ResultQualificationClassic::class);
     }
     public static function category($category_id)
     {   if($category_id){

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
 
-class ResultParticipant extends Model
+class ResultRouteQualificationClassic extends Model
 {
     public $timestamps = true;
 
@@ -26,7 +26,7 @@ class ResultParticipant extends Model
 //    var $values = array(self::STATUS_NOT_PASSED => self::FAIL, self::STATUS_PASSED_FLASH => self::FLASH, self::STATUS_PASSED_REDPOINT => self::REDPOINT);
 
 
-    protected $table = 'result_participant';
+    protected $table = 'result_route_qualification_classic';
 
     public static function get_flash_value_for_mode_ten_better_route($attempt, $event_id, $route)
     {
@@ -55,14 +55,14 @@ class ResultParticipant extends Model
     private static function counting_result($event_id, $route_id, $gender)
     {
         $users = User::query()
-            ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
-            ->where('participants.event_id', '=', $event_id)
-            ->where('participants.active', '=', 1)
+            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+            ->where('result_qualification_classic.event_id', '=', $event_id)
+            ->where('result_qualification_classic.active', '=', 1)
             ->select(
                 'users.id',
             )
             ->pluck('id');
-        return count(ResultParticipant::whereIn('user_id', $users)
+        return count(ResultRouteQualificationClassic::whereIn('user_id', $users)
             ->where('gender', '=', $gender)
             ->where('route_id', '=', $route_id)
             ->whereNotIn('attempt',[0])
@@ -71,7 +71,7 @@ class ResultParticipant extends Model
     }
 
     public static function get_coefficient($event_id, $route_id, $gender){
-        $active_participant = Participant::participant_with_result($event_id, $gender);
+        $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
         $count_route_passed = self::counting_result($event_id, $route_id, $gender);
         if ($count_route_passed == 0) {
             $count_route_passed = 1;
@@ -93,13 +93,13 @@ class ResultParticipant extends Model
 
     public static function participant_with_result($user_id, $event_id) {
         $event = Event::find($event_id);
-        if($event->is_qualification_counting_like_final){
-            $participant = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)
+        if($event->is_france_system_qualification){
+            $participant = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)
                 ->where('user_id', '=', $user_id)
                 ->first();
 
         } else {
-            $participant = ResultParticipant::where('event_id', '=', $event_id)
+            $participant = ResultRouteQualificationClassic::where('event_id', '=', $event_id)
                 ->where('user_id', '=', $user_id)
                 ->first();
         }
@@ -111,12 +111,12 @@ class ResultParticipant extends Model
     {
 
         $event = Event::find($event_id);
-        if($event->is_qualification_counting_like_final){
-            $participant = ResultQualificationLikeFinal::where('event_id', '=', $event_id)
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('event_id', '=', $event_id)
                 ->where('user_id', '=', $user_id)
                 ->first();
         } else {
-            $participant = Participant::where('event_id', '=', $event_id)
+            $participant = ResultQualificationClassic::where('event_id', '=', $event_id)
                 ->where('user_id', '=', $user_id)
                 ->first();
         }
@@ -130,12 +130,12 @@ class ResultParticipant extends Model
     public static function is_sended_bill($user_id, $event_id)
     {
         $event = Event::find($event_id);
-        if($event->is_qualification_counting_like_final){
-            $participant = ResultQualificationLikeFinal::where('event_id', '=', $event_id)
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('event_id', '=', $event_id)
                 ->where('user_id', '=', $user_id)
                 ->first();
         } else {
-            $participant = Participant::where('event_id', '=', $event_id)
+            $participant = ResultQualificationClassic::where('event_id', '=', $event_id)
                 ->where('user_id', '=', $user_id)
                 ->first();
         }
@@ -155,12 +155,12 @@ class ResultParticipant extends Model
         $all_group_participants = array();
         foreach ($event->categories as $category){
             $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-            if($event->is_qualification_counting_like_final) {
-                $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount, $category_id)->toArray();
-                $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount, $category_id)->toArray();
+            if($event->is_france_system_qualification) {
+                $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'female', $amount, $category_id)->toArray();
+                $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'male', $amount, $category_id)->toArray();
             } else {
-                $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount, $category_id);
-                $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount, $category_id);
+                $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'male', $amount, $category_id);
+                $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'female', $amount, $category_id);
             }
         }
         $merged_users = collect();
@@ -176,12 +176,12 @@ class ResultParticipant extends Model
     public static function get_participant_qualification_only_one_group($event, $amount, $group)
     {
         $all_group_participants = array();
-        if($event->is_qualification_counting_like_final) {
-            $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount, $group->id)->toArray();
-            $all_group_participants[] = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount, $group->id)->toArray();
+        if($event->is_france_system_qualification) {
+            $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'female', $amount, $group->id)->toArray();
+            $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'male', $amount, $group->id)->toArray();
         } else {
-            $all_group_participants[] = Participant::better_participants($event->id, 'male', $amount, $group->id);
-            $all_group_participants[] = Participant::better_participants($event->id, 'female', $amount, $group->id);
+            $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'male', $amount, $group->id);
+            $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'female', $amount, $group->id);
         }
         $merged_users = collect();
         foreach ($all_group_participants as $participant) {
@@ -193,12 +193,12 @@ class ResultParticipant extends Model
     }
     public static function get_participant_qualification_gender($event, $amount)
     {
-        if($event->is_qualification_counting_like_final) {
-            $users_female = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'female', $amount);
-            $users_male = ResultQualificationLikeFinal::better_of_participants_qualification_like_final_stage($event->id, 'male', $amount);
+        if($event->is_france_system_qualification) {
+            $users_female = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'female', $amount);
+            $users_male = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'male', $amount);
         } else {
-            $users_female = Participant::better_participants($event->id, 'female', $amount);
-            $users_male = Participant::better_participants($event->id, 'male', $amount);
+            $users_female = ResultQualificationClassic::better_participants($event->id, 'female', $amount);
+            $users_male = ResultQualificationClassic::better_participants($event->id, 'male', $amount);
         }
         return $users_male->merge($users_female);
     }

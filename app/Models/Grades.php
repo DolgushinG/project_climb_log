@@ -122,9 +122,8 @@ class Grades extends Model
      */
     public static function getGrades(): array
     {
-        $grades = ['4' => '4','5' => '5', '5+' => '5+','6A' => '6A','6A+' => '6A+', '6B' => '6B', '6B+' => '6B+','6C' => '6C',
+        return ['4' => '4','5' => '5', '5+' => '5+','6A' => '6A','6A+' => '6A+', '6B' => '6B', '6B+' => '6B+','6C' => '6C',
             '6C+' => '6C+','7A' => '7A','7A+' => '7A+','7B' => '7B','7B+' => '7B+','7C' => '7C','7C+' => '7C+','8A' => '8A'];
-        return $grades;
     }
 
     /**
@@ -191,13 +190,13 @@ class Grades extends Model
 
     public static function getGradesPartMiddle($grade): int
     {
-        if(in_array($grade, ['4', '5', '5+', '6A','6A+', '6B', '6B+']) != false){
+        if(in_array($grade, ['4', '5', '5+', '6A', '6A+', '6B', '6B+'])){
             $attempt = rand(1,2);
         }
-        if(in_array($grade, ['6C', '6C+', '7A', '7A+', '7B']) != false){
+        if(in_array($grade, ['6C', '6C+', '7A', '7A+', '7B'])){
             $attempt = rand(0,2);
         }
-        if(in_array($grade, ['7B+', '7C', '7C+', '8A']) != false){
+        if(in_array($grade, ['7B+', '7C', '7C+', '8A'])){
             $attempt = 0;
         }
 

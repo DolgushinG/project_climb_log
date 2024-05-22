@@ -12,10 +12,10 @@ class Set extends Model
     }
     public function participant()
     {
-        return $this->belongsTo(Participant::class);
+        return $this->belongsTo(ResultQualificationClassic::class);
     }
-    public function result_qualification_like_final()
+    public function result_france_system_qualification()
     {
-        return $this->belongsTo(ResultQualificationLikeFinal::class);
+        return $this->belongsTo(ResultFranceSystemQualification::class);
     }
 }

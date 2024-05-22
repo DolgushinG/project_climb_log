@@ -2,8 +2,8 @@
 
 namespace App\Admin\CustomAction;
 use App\Models\Event;
-use App\Models\Participant;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultQualificationClassic;
+use App\Models\ResultFranceSystemQualification;
 use Encore\Admin\Actions\Action;
 use Encore\Admin\Actions\BatchAction;
 use Encore\Admin\Actions\RowAction;
@@ -45,10 +45,10 @@ class ActionRejectBill extends RowAction
     {
         Admin::script($this->script());
         $event = Event::find($this->event_id);
-        if($event->is_qualification_counting_like_final){
-            $participant = ResultQualificationLikeFinal::find($this->id);
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::find($this->id);
         } else {
-            $participant = Participant::find($this->id);
+            $participant = ResultQualificationClassic::find($this->id);
         }
         if($participant->bill){
             $display = '';

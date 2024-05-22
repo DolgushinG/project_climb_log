@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Helpers\Generators\Generators;
 use App\Models\Event;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use Illuminate\Database\Seeder;
 use function Symfony\Component\Translation\t;
