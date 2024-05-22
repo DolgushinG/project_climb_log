@@ -28,7 +28,7 @@ class AllResultExport implements WithMultipleSheets
         $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
         $event = Event::find($this->event_id);
         if($event->is_france_system_qualification){
-            $stage = 'QualificationLikeFinal';
+            $stage = 'FranceSystemQualification';
         } else {
             $stage = 'Qualification';
         }

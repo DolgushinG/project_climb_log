@@ -95,7 +95,7 @@ class EventsController extends Controller
             } else {
                 $table = 'result_qualification_classic';
             }
-            $result_qualification_classic = User::query()
+            $participants = User::query()
                 ->leftJoin($table, 'users.id', '=', $table.'.user_id')
                 ->where($table.'.event_id', '=', $event->id)
                 ->select(
@@ -128,15 +128,15 @@ class EventsController extends Controller
             }
             $index = 0;
             $categories = ParticipantCategory::where('event_id', $event->id)->pluck('category', 'id')->toArray();
-            foreach ($result_qualification_classic as $index_user => $user) {
-                if ($index <= count($result_qualification_classic)) {
+            foreach ($participants as $index_user => $user) {
+                if ($index <= count($participants)) {
                     if($event->is_input_set == 1){
-                        $result_qualification_classic[$index_user]['category'] = $categories[$result_qualification_classic[$index]['category_id']];
+                        $participants[$index_user]['category'] = $categories[$participants[$index]['category_id']];
                     } else {
                         $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
-                        $result_qualification_classic[$index_user]['category'] = $categories[$result_qualification_classic[$index]['category_id']];
-                        $result_qualification_classic[$index_user]['number_set'] = $set->number_set;
-                        $result_qualification_classic[$index_user]['time'] = $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10);
+                        $participants[$index_user]['category'] = $categories[$participants[$index]['category_id']];
+                        $participants[$index_user]['number_set'] = $set->number_set;
+                        $participants[$index_user]['time'] = $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10);
                     }
                 }
                 $index++;
@@ -144,7 +144,7 @@ class EventsController extends Controller
         } else {
             return view('404');
         }
-        return view('event.participants', compact(['days', 'event', 'result_qualification_classic', 'sets']));
+        return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
     }
 
     public function get_qualification_classic_results(Request $request, $start_date, $climbing_gym, $title)
@@ -355,15 +355,18 @@ class EventsController extends Controller
     }
 
     public function sendResultParticipant(Request $request) {
+
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
         if(!$event || !$event->is_send_result_state){
-            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+            return response()->json(['success' => false, 'message' => 'Регистрация была закрыта'], 422);
         }
         $user_id = $request->user_id;
         $participant_active = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
         if (!$participant_active){
-            return response()->json(['success' => false, 'message' => 'ошибка внесение результатов'], 422);
+            return response()->json(['success' => false, 'message' => 'Результаты уже были добавлены или отсутствует регистрация'], 422);
         }
+        Event::validate_result($request->result);
+
         $gender = User::find($user_id)->gender;
         $format = Event::find($request->event_id)->mode;
         $data = array();

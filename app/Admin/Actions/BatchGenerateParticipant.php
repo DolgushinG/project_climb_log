@@ -63,7 +63,7 @@ class BatchGenerateParticipant extends Action
 
         Generators::prepare_result_route_qualification_classic($owner_id, $event->id, $table_result_routes, $count);
         if($event->is_france_system_qualification){
-            Event::refresh_qualification_counting_like_final($event);
+            Event::refresh_france_system_qualification_counting($event);
         } else {
             Event::refresh_final_points_all_participant($event);
 //            Event::refresh_final_points_all_participant($event);

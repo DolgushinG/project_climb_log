@@ -75,9 +75,9 @@ class ProfileController extends Controller
         }
         $activities = Activity::where('causer_id', '=', $user->id)->orderBy('updated_at')->take(5)->get();
         $state_participant = array();
-        $all_like_final = ResultFranceSystemQualification::where('user_id', $user->id)->where('active', 1)->get()->count();
+        $all_results = ResultFranceSystemQualification::where('user_id', $user->id)->where('active', 1)->get()->count();
         $all_classic = ResultQualificationClassic::where('user_id', $user->id)->where('active', 1)->get()->count();
-        $state_participant['amount_event'] = $all_classic + $all_like_final;
+        $state_participant['amount_event'] = $all_classic + $all_results;
         return view('profile.overview', compact(['user', 'activities', 'state_participant']));
     }
     public function getTabContentSetting() {

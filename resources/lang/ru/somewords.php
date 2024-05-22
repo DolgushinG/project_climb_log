@@ -23,7 +23,7 @@ $some = [
     'SemiFinal' => 'Полуфинал',
     'semifinal' => 'Полуфинал',
     'Qualification' => 'Квалификация',
-    'QualificationLikeFinal' => 'Квалификация',
+    'FranceSystemQualification' => 'Квалификация',
     'Final' => 'Финал',
     'final' => 'Финал',
 ];

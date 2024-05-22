@@ -132,7 +132,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                             case 'SemiFinal':
                                 $count = ResultRouteSemiFinalStage::count_route_in_semifinal_stage($this->event_id);
                                 break;
-                            case 'QualificationLikeFinal':
+                            case 'FranceSystemQualification':
                                 $count = ResultRouteFranceSystemQualification::count_route_in_qualification_final($this->event_id);
                         }
                         for($i = 1; $i <= $count; $i++){
@@ -183,8 +183,8 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $final[] = 'Попытки на ZONE';
                 }
                 return $final;
-            case 'QualificationLikeFinal':
-                $qualification_like_final = [
+            case 'FranceSystemQualification':
+                $france_system_qualification = [
                     'Место',
                     'Участник(Фамилия Имя)',
                     'Сумма TOP',
@@ -194,12 +194,12 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 ];
                 $count = ResultRouteFranceSystemQualification::count_route_in_qualification_final($this->event_id);
                 for($i = 1; $i <= $count; $i++){
-                    $qualification_like_final[] = 'TOP';
-                    $qualification_like_final[] = 'Попытки на TOP';
-                    $qualification_like_final[] = 'ZONE';
-                    $qualification_like_final[] = 'Попытки на ZONE';
+                    $france_system_qualification[] = 'TOP';
+                    $france_system_qualification[] = 'Попытки на TOP';
+                    $france_system_qualification[] = 'ZONE';
+                    $france_system_qualification[] = 'Попытки на ZONE';
                 }
-                return $qualification_like_final;
+                return $france_system_qualification;
             case 'Qualification':
                 $qualification = [
                     'Место',
@@ -233,7 +233,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         if($this->type == 'Final'){
             return self::get_final('result_final_stage');
         }
-        if($this->type == 'QualificationLikeFinal'){
+        if($this->type == 'FranceSystemQualification'){
             return self::get_final('result_france_system_qualification');
         }
         if($this->type == 'Qualification'){

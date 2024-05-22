@@ -32,7 +32,7 @@ class UpdateParticipantRegistrationStatusWithoutPayment extends Command
         foreach ($events as $event){
             // Определяем, нужно ли считать участников как финалистов или нет
             if($event->is_france_system_qualification){
-                // Если да, получаем участников события из таблицы ResultQualificationLikeFinal
+                // Если да, получаем участников события из таблицы ResultFranceSystemQualification
                 $participants = ResultFranceSystemQualification::where('event_id', $event->id)->get();
             } else {
                 // Если нет, получаем участников события из таблицы Participant
