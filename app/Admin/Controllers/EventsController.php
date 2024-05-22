@@ -391,9 +391,6 @@ class EventsController extends Controller
             $tools->disableView();
         });
         $form->saving(function (Form $form) {
-            if(!$form->is_semifinal){
-                $form->is_semifinal = 0;
-            }
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($events && $events->id != $form->model()->id){
