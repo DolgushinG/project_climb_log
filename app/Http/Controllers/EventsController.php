@@ -365,8 +365,13 @@ class EventsController extends Controller
         if (!$participant_active){
             return response()->json(['success' => false, 'message' => 'Результаты уже были добавлены или отсутствует регистрация'], 422);
         }
-        Event::validate_result($request->result);
-
+        $count_routes = Grades::where('event_id', $request->event_id)->first();
+        # Проверяем что есть результат был отмечен, умножение происходит на 2 потому что из 3 результатов failed passed и flash два из них false
+        # Не должно быть меньше этого, то есть если не отмечена хотя бы одна трасса она будет больше чем $count_routes * 2
+        $amount_false = Event::validate_result($request->result);
+        if($amount_false > $count_routes->count_routes * 2){
+            return response()->json(['success' => false, 'message' => 'Необходимо отметить все трассы'], 422);
+        }
         $gender = User::find($user_id)->gender;
         $format = Event::find($request->event_id)->mode;
         $data = array();
@@ -441,8 +446,8 @@ class EventsController extends Controller
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
             ->where('result_qualification_classic.event_id', '=', $request->event_id)
             ->select(
-                'result_qualification_classic.id',
-                'result_qualification_classic.gender',
+                'users.id',
+                'users.gender',
             )->get();
         foreach ($participants as $participant) {
             Event::update_participant_place($event, $participant->id, $participant->gender);

@@ -576,31 +576,21 @@ class Event extends Model
         return $users_sorted;
     }
 
-    public static function validate_result($result, $amount_routes)
+    public static function validate_result($result)
     {
-        $res = [];
+        $amount_false = 0;
         foreach ($result as $res) {
-
             if (str_contains($res[0], 'flash') && $res[1] == "false") {
-                $route_id = str_replace("flash-","", $result[0]);
-                $attempt = 1;
+                $amount_false++;
             }
             if (str_contains($res[0], 'redpoint') && $res[1] == "false") {
-                $route_id = str_replace("redpoint-","", $result[0]);
-                $attempt = 2;
+                $amount_false++;
             }
             if (str_contains($res[0], 'failed') && $res[1] == "false") {
-                $route_id = str_replace("failed-","", $result[0]);
-                $attempt = 0;
+                $amount_false++;
             }
-            if($result[1] == "false" && $result[1] == "false" && $result[1] == "false"){
-                return response()->json(['success' => false, 'message' => 'Необходимо выбрать хоть что-то, flash, redpoint, не пролез'], 422);
-            }
-
         }
-        if(isset($request->result[0][1])){
-
-        }
+        return $amount_false;
     }
 
 }
