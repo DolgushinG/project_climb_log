@@ -32,14 +32,14 @@ class ResultSemiFinalStage extends Model
     }
     public static function get_participant_semifinal($event, $amount, $one_group=null, $get_array=false)
     {
-        if($event->is_additional_semifinal){
+        if($event->is_sort_group_semifinal){
             if($one_group){
-                $merged_users = ResultParticipant::get_participant_qualification_only_one_group($event, $amount, $one_group);
+                $merged_users = ResultRouteQualificationClassic::get_participant_qualification_only_one_group($event, $amount, $one_group);
             } else {
-                $merged_users = ResultParticipant::get_participant_qualification_group($event, $amount);
+                $merged_users = ResultRouteQualificationClassic::get_participant_qualification_group($event, $amount);
             }
         } else {
-            $merged_users = ResultParticipant::get_participant_qualification_gender($event, $amount);
+            $merged_users = ResultRouteQualificationClassic::get_participant_qualification_gender($event, $amount);
         }
         if($get_array){
             return $merged_users->toArray();

@@ -87,8 +87,8 @@ class AdminTablesSeeder extends Seeder
                     "order" => 3,
                     "title" => "Квалификация",
                     "icon" => "fa-coffee",
-                    "uri" => "participants",
-                    "permission" => "owner.participants"
+                    "uri" => "result-qualification",
+                    "permission" => "owner.qualification"
                 ],
                 [
                     "parent_id" => 0,
@@ -235,10 +235,10 @@ class AdminTablesSeeder extends Seeder
                     "http_path" => "/events*"
                 ],
                 [
-                    "name" => "Participants",
-                    "slug" => "owner.participants",
-                    "http_method" => NULL,
-                    "http_path" => "/participants*"
+                    "name" => "Qualification",
+                    "slug" => "owner.qualification",
+                    "http_method" => "",
+                    "http_path" => "/result-qualification*"
                 ],
                 [
                     "name" => "Participants categories",

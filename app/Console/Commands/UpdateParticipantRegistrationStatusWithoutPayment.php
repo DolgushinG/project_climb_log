@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Participant;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultQualificationClassic;
+use App\Models\ResultFranceSystemQualification;
 use Illuminate\Console\Command;
 use App\Models\Event;
 use Carbon\Carbon;
@@ -31,12 +31,12 @@ class UpdateParticipantRegistrationStatusWithoutPayment extends Command
         // Перебираем каждое событие
         foreach ($events as $event){
             // Определяем, нужно ли считать участников как финалистов или нет
-            if($event->is_qualification_counting_like_final){
-                // Если да, получаем участников события из таблицы ResultQualificationLikeFinal
-                $participants = ResultQualificationLikeFinal::where('event_id', $event->id)->get();
+            if($event->is_france_system_qualification){
+                // Если да, получаем участников события из таблицы ResultFranceSystemQualification
+                $participants = ResultFranceSystemQualification::where('event_id', $event->id)->get();
             } else {
                 // Если нет, получаем участников события из таблицы Participant
-                $participants = Participant::where('event_id', $event->id)->get();
+                $participants = ResultQualificationClassic::where('event_id', $event->id)->get();
             }
 
             // Перебираем каждого участника события

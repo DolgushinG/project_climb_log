@@ -102,16 +102,16 @@ class EventFactory extends Factory
         ]);
     }
 
-    public function is_additional_final($value)
+    public function is_sort_group_final($value)
     {
         return $this->state([
-            'is_additional_final' => $value,
+            'is_sort_group_final' => $value,
         ]);
     }
-    public function is_qualification_counting_like_final($value)
+    public function is_france_system_qualification($value)
     {
         return $this->state([
-            'is_qualification_counting_like_final' => $value,
+            'is_france_system_qualification' => $value,
         ]);
     }
     public function amount_point_flash($value)

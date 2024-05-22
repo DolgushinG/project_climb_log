@@ -30,7 +30,7 @@ class ActionExportCardParticipantFranceSystem extends RowAction
         Admin::script($this->script());
         $event = Event::find($this->id);
         $display = '';
-        if(!$event->is_qualification_counting_like_final){
+        if(!$event->is_france_system_qualification){
             $display = 'display:None';
         }
         $btn = strtoupper($this->name);

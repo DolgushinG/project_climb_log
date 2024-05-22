@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ResultRouteQualificationLikeFinal extends Model
+class ResultRouteFranceSystemQualification extends Model
 {
-    protected $table = 'result_route_qualification_like_final';
+    protected $table = 'result_route_france_system_qualification';
     public $timestamps = true;
 
     public static function count_route_in_qualification_final($event_id, $toArrayString=null){
-        $count_routes = ResultRouteQualificationLikeFinal::where('event_id', '=', $event_id)->distinct()->get('route_id')->count();
+        $count_routes = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)->distinct()->get('route_id')->count();
         if($toArrayString){
             $routes = [];
             for($i = 1; $i <= $count_routes; $i++){

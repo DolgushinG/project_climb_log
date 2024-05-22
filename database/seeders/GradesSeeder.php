@@ -21,7 +21,7 @@ class GradesSeeder extends Seeder
         for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
             $event = Event::find($i);
             $event_id = $event->id;
-            if(!$event->is_qualification_counting_like_final){
+            if(!$event->is_france_system_qualification){
                 Route::generation_route($i, $event_id, $event->count_routes, Grades::getRoutes());
             } else {
                 $grades = Grades::where('event_id', $event_id)->first();

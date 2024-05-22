@@ -9,11 +9,11 @@ use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
 use App\Models\EventAndCoefficientRoute;
 use App\Models\Grades;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
-use App\Models\ResultParticipant;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultRouteQualificationClassic;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
 use App\Models\Set;
@@ -50,7 +50,7 @@ class EventsController extends Controller
         if($event_public_exist || $pre_show){
             $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('number_set')->get();
             foreach ($sets as $set){
-                $participants_event = Participant::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
+                $participants_event = ResultQualificationClassic::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
                 $set->free = $set->max_participants - $participants_event;
                 $a = $set->max_participants;
                 $b = $set->free;
@@ -90,10 +90,10 @@ class EventsController extends Controller
     public function get_participants(Request $request, $start_date, $climbing_gym, $title){
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if($event) {
-            if($event->is_qualification_counting_like_final){
-                $table = 'result_qualification_like_final';
+            if($event->is_france_system_qualification){
+                $table = 'result_france_system_qualification';
             } else {
-                $table = 'participants';
+                $table = 'result_qualification_classic';
             }
             $participants = User::query()
                 ->leftJoin($table, 'users.id', '=', $table.'.user_id')
@@ -112,10 +112,10 @@ class EventsController extends Controller
                 $sets = Set::where('owner_id', '=', $event->owner_id)->get();
                 $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('id');
                 foreach ($number_sets as $index => $set) {
-                    if($event->is_qualification_counting_like_final){
-                        $sets[$index]->count_participant = ResultQualificationLikeFinal::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
+                    if($event->is_france_system_qualification){
+                        $sets[$index]->count_participant = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
                     } else {
-                        $sets[$index]->count_participant = Participant::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
+                        $sets[$index]->count_participant = ResultQualificationClassic::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
                     }
                     $sets[$index]->date = Helpers::getDatesByDayOfWeek($event->start_date, $event->end_date);
                     if($sets[$index]->count_participant == 0){
@@ -152,9 +152,9 @@ class EventsController extends Controller
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
 //        $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
         if($event){
-            if(!$event->is_qualification_counting_like_final){
+            if(!$event->is_france_system_qualification){
 //                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
-                $user_ids = Participant::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+                $user_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
                 $stats = new stdClass();
                 $female_categories = array();
                 $male_categories = array();
@@ -165,10 +165,10 @@ class EventsController extends Controller
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
                 foreach ($categories as $category) {
                     $result_male_cache = Cache::remember('result_male_cache_'.$category->category, 60 * 60, function () use ($event, $category) {
-                        return Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                        return ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
                     });
                     $result_female_cache = Cache::remember('result_female_cache_'.$category->category, 60 * 60, function () use ($event, $category) {
-                        return Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        return ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     });
                     $result_male[] = $result_male_cache;
                     $result_female[] = $result_female_cache;
@@ -176,8 +176,8 @@ class EventsController extends Controller
 //                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
                     $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
-                    $female_categories[$category->id] = Participant::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
-                    $male_categories[$category->id] = Participant::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
                 }
                 $result_male_final = Helpers::arrayValuesRecursive($result_male);
                 $result_female_final = Helpers::arrayValuesRecursive($result_female);
@@ -199,12 +199,12 @@ class EventsController extends Controller
         $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
         $routes = Route::where('event_id', $event->id)->pluck('route_id');
         if($event){
-            if($event->is_qualification_counting_like_final){
+            if($event->is_france_system_qualification){
                 $result_each_routes = array();
                 foreach ($event->categories as $category) {
                     $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
-                    $users_female2 = Event::get_france_system_result('result_qualification_like_final', $event->id, 'female', $category)->toArray();
-                    $users_male2 = Event::get_france_system_result('result_qualification_like_final', $event->id, 'male', $category)->toArray();
+                    $users_female2 = Event::get_france_system_result('result_france_system_qualification', $event->id, 'female', $category)->toArray();
+                    $users_male2 = Event::get_france_system_result('result_france_system_qualification', $event->id, 'male', $category)->toArray();
                     $result_each_routes['male'][$category->id] = $users_female2;
                     $result_each_routes['female'][$category->id] = $users_male2;
                 }
@@ -225,7 +225,7 @@ class EventsController extends Controller
         }
         if($event){
             $result_each_routes = array();
-            if($event->is_additional_semifinal){
+            if($event->is_sort_group_semifinal){
                 foreach ($event->categories as $category) {
                     $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
                     $users_female2 = Event::get_france_system_result('result_semifinal_stage', $event->id, 'female', $category)->toArray();
@@ -255,7 +255,7 @@ class EventsController extends Controller
         }
         if($event){
             $result_each_routes = array();
-            if($event->is_additional_final) {
+            if($event->is_sort_group_final) {
                 foreach ($event->categories as $category) {
                     $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
                     $users_female2 = Event::get_france_system_result('result_final_stage', $event->id, 'female', $category)->toArray();
@@ -283,18 +283,18 @@ class EventsController extends Controller
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
         $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
-        if($event->is_qualification_counting_like_final){
-            $participant = ResultQualificationLikeFinal::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
             if($participant){
                 return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
             }
-            $participant = new ResultQualificationLikeFinal;
+            $participant = new ResultFranceSystemQualification;
         } else {
-            $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+            $participant = ResultQualificationClassic::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
             if($participant){
                 return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
             }
-            $participant = new Participant;
+            $participant = new ResultQualificationClassic;
         }
         $event = Event::find($request->event_id);
         if($event->is_input_set != 1){
@@ -324,7 +324,7 @@ class EventsController extends Controller
 
         if ($participant->save()) {
             if($user && $event){
-                Participant::send_main_about_take_part($event, $user);
+                ResultQualificationClassic::send_main_about_take_part($event, $user);
             }
             return response()->json(['success' => true, 'message' => 'Успешная регистрация'], 201);
         } else {
@@ -337,10 +337,10 @@ class EventsController extends Controller
         if(!$event || !$event->is_registration_state){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
-        if($event->is_qualification_counting_like_final){
-            $participant = ResultQualificationLikeFinal::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
         } else {
-            $participant = Participant::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+            $participant = ResultQualificationClassic::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
         }
         $event = Event::find($request->event_id);
         $number_set = $request->number_set;
@@ -355,14 +355,22 @@ class EventsController extends Controller
     }
 
     public function sendResultParticipant(Request $request) {
+
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
         if(!$event || !$event->is_send_result_state){
-            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+            return response()->json(['success' => false, 'message' => 'Регистрация была закрыта'], 422);
         }
         $user_id = $request->user_id;
-        $participant_active = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
+        $participant_active = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
         if (!$participant_active){
-            return response()->json(['success' => false, 'message' => 'ошибка внесение результатов'], 422);
+            return response()->json(['success' => false, 'message' => 'Результаты уже были добавлены или отсутствует регистрация'], 422);
+        }
+        $count_routes = Grades::where('event_id', $request->event_id)->first();
+        # Проверяем что есть результат был отмечен, умножение происходит на 2 потому что из 3 результатов failed passed и flash два из них false
+        # Не должно быть меньше этого, то есть если не отмечена хотя бы одна трасса она будет больше чем $count_routes * 2
+        $amount_false = Event::validate_result($request->result);
+        if($amount_false > $count_routes->count_routes * 2){
+            return response()->json(['success' => false, 'message' => 'Необходимо отметить все трассы'], 422);
         }
         $gender = User::find($user_id)->gender;
         $format = Event::find($request->event_id)->mode;
@@ -390,11 +398,11 @@ class EventsController extends Controller
         foreach ($data as $route){
             # Варианты форматов подсчета баллов
             $owner_route = Route::where('grade','=',$route['grade'])->where('owner_id','=', $request->owner_id)->first();
-            $value_route = (new \App\Models\ResultParticipant)->get_value_route($route['attempt'], $owner_route, $format, $request->event_id);
+            $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $request->event_id);
             # Формат все трассы считаем сразу
             if($format == 2) {
                 (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
-                $coefficient = ResultParticipant::get_coefficient($route['event_id'], $route['route_id'], $gender);
+                $coefficient = ResultRouteQualificationClassic::get_coefficient($route['event_id'], $route['route_id'], $gender);
                 $route['points'] = $coefficient * $value_route;
                 (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id'], $gender);
             } else if($format == 1) {
@@ -416,7 +424,7 @@ class EventsController extends Controller
             foreach ($lastElems as $lastElem) {
                 $points += $lastElem['points'];
             }
-            $participant = Participant::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
+            $participant = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
             $participant->points = $points;
             $participant->active = 1;
             $participant->save();
@@ -427,16 +435,16 @@ class EventsController extends Controller
         }
 
         # Добавление json результатов для редактирование в админке
-        $participant = Participant::where('event_id', $request->event_id)->where('user_id', $request->user_id)->first();
+        $participant = ResultQualificationClassic::where('event_id', $request->event_id)->where('user_id', $request->user_id)->first();
         $participant->result_for_edit = $final_data;
         $participant->save();
 
 
-        $result = ResultParticipant::insert($final_data);
+        $result = ResultRouteQualificationClassic::insert($final_data);
 
         $participants = User::query()
-            ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
-            ->where('participants.event_id', '=', $request->event_id)
+            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+            ->where('result_qualification_classic.event_id', '=', $request->event_id)
             ->select(
                 'users.id',
                 'users.gender',

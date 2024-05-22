@@ -20,7 +20,7 @@ use App\Exports\ExportFinalParticipant;
 use App\Exports\ExportListParticipant;
 use App\Exports\FinalResultExport;
 use App\Models\Event;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
 use App\Models\ResultRouteFinalStage;
@@ -119,7 +119,7 @@ class ResultRouteFinalStageController extends Controller
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultFinal);
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-            if($event->is_additional_final){
+            if($event->is_sort_group_final){
                 $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
                 foreach ($categories as $category){
                     $tools->append(new BatchResultFinalCustomFillOneRoute($category));
@@ -136,7 +136,7 @@ class ResultRouteFinalStageController extends Controller
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
 
-            if($event->is_additional_final) {
+            if($event->is_sort_group_final) {
                 $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
             }
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
@@ -157,7 +157,7 @@ class ResultRouteFinalStageController extends Controller
             return trans_choice('somewords.'.$gender, 10);
         });
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-        if($event->is_additional_final) {
+        if($event->is_sort_group_final) {
             $grid->column('category_id', 'Категория')->display(function ($category_id) {
                 $owner_id = Admin::user()->id;
                 $event = Event::where('owner_id', '=', $owner_id)

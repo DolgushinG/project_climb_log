@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateParticipantsTable extends Migration
+class CreateResultFranceSystemQualificationTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,20 +13,22 @@ class CreateParticipantsTable extends Migration
      */
     public function up()
     {
-        Schema::create('participants', function (Blueprint $table) {
+        Schema::create('result_france_system_qualification', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('owner_id');
             $table->integer('event_id');
+            $table->integer('user_id');
             $table->string('gender');
             $table->integer('number_set_id')->nullable();
-            $table->integer('user_id');
             $table->integer('category_id')->nullable();
-            $table->float('points')->nullable();
-            $table->integer('user_place')->nullable();
-            $table->boolean('active');
+            $table->integer('amount_top')->nullable();
+            $table->integer('amount_try_top')->nullable();
+            $table->integer('amount_zone')->nullable();
+            $table->integer('amount_try_zone')->nullable();
+            $table->integer('place')->nullable();
+            $table->boolean('active')->nullable();
             $table->boolean('is_paid')->default(0);
             $table->string('bill')->nullable();
-            $table->json('result_for_edit')->nullable();
             $table->timestamps();
         });
     }
@@ -38,6 +40,6 @@ class CreateParticipantsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('participants');
+        Schema::dropIfExists('result_france_system_qualification');
     }
 }

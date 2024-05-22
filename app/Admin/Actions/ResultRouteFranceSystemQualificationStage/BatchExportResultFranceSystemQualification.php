@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Admin\Actions\ResultRouteQualificationLikeFinalStage;
+namespace App\Admin\Actions\ResultRouteFranceSystemQualificationStage;
 
 use App\Admin\CustomAction\ActionExport;
 use App\Exports\QualificationResultExport;
@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
-class BatchExportResultQualificationLikeFinal extends Action
+class BatchExportResultFranceSystemQualification extends Action
 {
     public $name = 'Экспорт';
 

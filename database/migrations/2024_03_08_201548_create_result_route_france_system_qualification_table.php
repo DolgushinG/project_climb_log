@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateResultRouteQualificationLikeFinalTable extends Migration
+class CreateResultRouteFranceSystemQualificationTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateResultRouteQualificationLikeFinalTable extends Migration
      */
     public function up()
     {
-        Schema::create('result_route_qualification_like_final', function (Blueprint $table) {
+        Schema::create('result_route_france_system_qualification', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('owner_id');
             $table->integer('event_id');
@@ -39,6 +39,6 @@ class CreateResultRouteQualificationLikeFinalTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('result_route_qualification_like_final');
+        Schema::dropIfExists('result_route_france_system_qualification');
     }
 }

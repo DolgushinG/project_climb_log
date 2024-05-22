@@ -3,11 +3,11 @@
 namespace App\Admin\Actions\ResultRouteSemiFinalStage;
 
 use App\Models\Event;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFinalStage;
-use App\Models\ResultRouteQualificationLikeFinal;
+use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
 use App\Models\User;
@@ -37,10 +37,10 @@ class BatchResultSemiFinal extends Action
             } else {
                 $amount_zone  = 0;
             }
-            if($event->is_qualification_counting_like_final){
-                $participant = ResultQualificationLikeFinal::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+            if($event->is_france_system_qualification){
+                $participant = ResultFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
             } else {
-                $participant = Participant::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+                $participant = ResultQualificationClassic::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
             }
             $category_id = $participant->category_id;
             $gender = $participant->gender;

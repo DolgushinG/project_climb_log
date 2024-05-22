@@ -19,12 +19,12 @@ use App\Exports\ExportSemiFinalParticipant;
 use App\Exports\SemiFinalProtocolCardsExport;
 use App\Exports\SemiFinalResultExport;
 use App\Models\Event;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFinalStage;
-use App\Models\ResultRouteQualificationLikeFinal;
+use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultSemiFinalStage;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Http\Controllers\Controller;
@@ -141,7 +141,7 @@ class ResultRouteSemiFinalStageController extends Controller
             $tools->append(new BatchExportResultSemiFinal);
 //            $tools->append(new BatchResultSemiFinal);
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-            if($event->is_additional_semifinal){
+            if($event->is_sort_group_semifinal){
                 $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
                 foreach ($categories as $category){
                     $tools->append(new BatchResultSemiFinalCustomFillOneRoute($category));
@@ -157,7 +157,7 @@ class ResultRouteSemiFinalStageController extends Controller
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-            if($event->is_additional_semifinal) {
+            if($event->is_sort_group_semifinal) {
                 $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
             }
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
@@ -180,7 +180,7 @@ class ResultRouteSemiFinalStageController extends Controller
             return trans_choice('somewords.'.$gender, 10);
         });
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-        if($event->is_additional_semifinal) {
+        if($event->is_sort_group_semifinal) {
             $grid->column('category_id', 'Категория')->display(function ($category_id) {
                 $owner_id = Admin::user()->id;
                 $event = Event::where('owner_id', '=', $owner_id)
@@ -258,7 +258,7 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     protected function getUsers(): object
     {
-        $participant = Participant::where('owner_id', '=', Admin::user()->id)
+        $participant = ResultQualificationClassic::where('owner_id', '=', Admin::user()->id)
             ->where('active', '=', 1)
             ->pluck('user_id')->toArray();
         return User::whereIn('id', $participant)->pluck('middlename', 'id');
@@ -285,8 +285,8 @@ class ResultRouteSemiFinalStageController extends Controller
                         ->where('user_id', '=', $user->id)
                         ->get();
                     break;
-                case 'qualification_like_final':
-                    $result_user = ResultRouteQualificationLikeFinal::where('owner_id', '=', $owner_id)
+                case 'france_system_qualification':
+                    $result_user = ResultRouteFranceSystemQualification::where('owner_id', '=', $owner_id)
                         ->where('event_id', '=', $model->id)
                         ->where('user_id', '=', $user->id)
                         ->get();
@@ -313,17 +313,17 @@ class ResultRouteSemiFinalStageController extends Controller
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
         }
-        $users_sorted = Participant::counting_final_place($model->id, $users_with_result, $type);
+        $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result, $type);
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user){
             $fields = ['result'];
             $users_sorted[$index] = collect($user)->except($fields)->toArray();
-            if($type == 'final' || $type == 'qualification_like_final'){
-                if($type == 'qualification_like_final'){
-                    $result = ResultQualificationLikeFinal::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
+            if($type == 'final' || $type == 'france_system_qualification'){
+                if($type == 'france_system_qualification'){
+                    $result = ResultFranceSystemQualification::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
                     if (!$result){
-                        $result = new ResultQualificationLikeFinal;
+                        $result = new ResultFranceSystemQualification;
                     }
                 } else {
                     $result = ResultFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();

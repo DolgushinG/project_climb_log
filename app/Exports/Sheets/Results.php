@@ -5,10 +5,10 @@ namespace App\Exports\Sheets;
 use App\Models\Event;
 use App\Models\EventAndCoefficientRoute;
 use App\Models\Grades;
-use App\Models\Participant;
-use App\Models\ResultParticipant;
+use App\Models\ResultQualificationClassic;
+use App\Models\ResultRouteQualificationClassic;
 use App\Models\ResultRouteFinalStage;
-use App\Models\ResultRouteQualificationLikeFinal;
+use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Models\Route;
 use App\Models\Set;
@@ -132,8 +132,8 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                             case 'SemiFinal':
                                 $count = ResultRouteSemiFinalStage::count_route_in_semifinal_stage($this->event_id);
                                 break;
-                            case 'QualificationLikeFinal':
-                                $count = ResultRouteQualificationLikeFinal::count_route_in_qualification_final($this->event_id);
+                            case 'FranceSystemQualification':
+                                $count = ResultRouteFranceSystemQualification::count_route_in_qualification_final($this->event_id);
                         }
                         for($i = 1; $i <= $count; $i++){
                             $sheet->mergeCells($merge_cells[$i][0].'2:'.$merge_cells[$i][1].'2');
@@ -183,8 +183,8 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $final[] = 'Попытки на ZONE';
                 }
                 return $final;
-            case 'QualificationLikeFinal':
-                $qualification_like_final = [
+            case 'FranceSystemQualification':
+                $france_system_qualification = [
                     'Место',
                     'Участник(Фамилия Имя)',
                     'Сумма TOP',
@@ -192,14 +192,14 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     'Сумма ZONE',
                     'Сумма попыток на ZONE',
                 ];
-                $count = ResultRouteQualificationLikeFinal::count_route_in_qualification_final($this->event_id);
+                $count = ResultRouteFranceSystemQualification::count_route_in_qualification_final($this->event_id);
                 for($i = 1; $i <= $count; $i++){
-                    $qualification_like_final[] = 'TOP';
-                    $qualification_like_final[] = 'Попытки на TOP';
-                    $qualification_like_final[] = 'ZONE';
-                    $qualification_like_final[] = 'Попытки на ZONE';
+                    $france_system_qualification[] = 'TOP';
+                    $france_system_qualification[] = 'Попытки на TOP';
+                    $france_system_qualification[] = 'ZONE';
+                    $france_system_qualification[] = 'Попытки на ZONE';
                 }
-                return $qualification_like_final;
+                return $france_system_qualification;
             case 'Qualification':
                 $qualification = [
                     'Место',
@@ -233,8 +233,8 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         if($this->type == 'Final'){
             return self::get_final('result_final_stage');
         }
-        if($this->type == 'QualificationLikeFinal'){
-            return self::get_final('result_qualification_like_final');
+        if($this->type == 'FranceSystemQualification'){
+            return self::get_final('result_france_system_qualification');
         }
         if($this->type == 'Qualification'){
             return self::get_qualification();
@@ -259,18 +259,18 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
 
     public function get_qualification(){
         $users = User::query()
-            ->leftJoin('participants', 'users.id', '=', 'participants.user_id')
-            ->where('participants.event_id', '=', $this->event_id)
-            ->where('participants.category_id', '=', $this->category->id)
+            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+            ->where('result_qualification_classic.event_id', '=', $this->event_id)
+            ->where('result_qualification_classic.category_id', '=', $this->category->id)
             ->select(
                 'users.id',
-                'participants.user_place',
+                'result_qualification_classic.user_place',
                 'users.middlename',
-                'participants.points',
-                'participants.owner_id',
-                'participants.number_set_id',
+                'result_qualification_classic.points',
+                'result_qualification_classic.owner_id',
+                'result_qualification_classic.number_set_id',
             )
-            ->where('participants.gender', '=', $this->gender)->get()->sortBy('user_place')->toArray();
+            ->where('result_qualification_classic.gender', '=', $this->gender)->get()->sortBy('user_place')->toArray();
         if(!$users){
             return collect([]);
         }
@@ -304,11 +304,11 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     }
                 }
             } else {
-                $qualification_result = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
-                $amount_passed_flash = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 1)->get()->count();
-                $amount_passed_redpoint = ResultParticipant::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 2)->get()->count();
+                $qualification_result = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+                $amount_passed_flash = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 1)->get()->count();
+                $amount_passed_redpoint = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 2)->get()->count();
                 $amount_passed_routes = $amount_passed_flash+$amount_passed_redpoint;
-                $place = Participant::get_places_participant_in_qualification($this->event_id, $user['id'], $this->gender, $this->category->id, true);
+                $place = ResultQualificationClassic::get_places_participant_in_qualification($this->event_id, $user['id'], $this->gender, $this->category->id, true);
                 $set = Set::find($user['number_set_id']);
                 $users[$index]['user_place'] = $place;
                 $users[$index]['number_set_id'] = $set->number_set;
@@ -379,8 +379,8 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             if($table == 'result_final_stage'){
                 $final_result = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
             }
-            if($table === "result_qualification_like_final"){
-                $final_result = ResultRouteQualificationLikeFinal::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+            if($table === "result_france_system_qualification"){
+                $final_result = ResultRouteFranceSystemQualification::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
             }
             if($table === "result_semifinal_stage"){
                 $final_result = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();

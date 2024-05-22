@@ -56,14 +56,14 @@ $(document).ready(function() {
         }
     });
 
-    document.querySelectorAll('#is_qualification_counting_like_final').forEach(input => {
+    document.querySelectorAll('#is_france_system_qualification').forEach(input => {
         input.addEventListener('click', radio_button);
     });
 
     document.querySelectorAll('#is_semifinal').forEach(input => {
         input.addEventListener('click', radio_button);
     });
-    document.querySelectorAll('#is_additional_final').forEach(input => {
+    document.querySelectorAll('#is_sort_group_final').forEach(input => {
         input.addEventListener('click', radio_button);
     });
     document.querySelectorAll('#mode').forEach(input => {
@@ -75,8 +75,8 @@ $(document).ready(function() {
     restoreSwitch('is_need_sport_category')
 
     restoreRadioButtons('is_semifinal')
-    restoreRadioButtons('is_qualification_counting_like_final')
-    restoreRadioButtons('is_additional_final')
+    restoreRadioButtons('is_france_system_qualification')
+    restoreRadioButtons('is_sort_group_final')
     restoreRadioButtons('mode')
 
     var addButton = document.querySelector('.categories-add');
@@ -134,13 +134,13 @@ $(document).ready(function() {
     });
     $('form').find('input:not([type=\"file\"]), input:not([type=\"radio\"]), select, textarea').each(function() {
         var inputName = $(this).attr('name');
-        if(inputName === 'is_qualification_counting_like_final'){
+        if(inputName === 'is_france_system_qualification'){
             return;
         }
         if(inputName === 'is_semifinal'){
             return;
         }
-        if(inputName === 'is_additional_final'){
+        if(inputName === 'is_sort_group_final'){
             return;
         }
         if(inputName === 'mode'){

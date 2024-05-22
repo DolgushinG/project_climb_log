@@ -33,7 +33,7 @@ class GradesController extends Controller
             ->row(function(Row $row) {
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
                 if($event){
-                    if($event->is_qualification_counting_like_final){
+                    if($event->is_france_system_qualification){
                         $row->column(4, function (Column $column) {
                             $column->row($this->france_system_routes());
                         });
@@ -287,7 +287,7 @@ class GradesController extends Controller
         $form->hidden('owner_id', '')->value(Admin::user()->id);
         $form->hidden('event_id', '')->value($event->id);
 
-        if(!$event->is_qualification_counting_like_final){
+        if(!$event->is_france_system_qualification){
             $form->hidden('count_routes', 'Кол-во трасс');
             Admin::style(".select2-selection__arrow {
                 display: None;

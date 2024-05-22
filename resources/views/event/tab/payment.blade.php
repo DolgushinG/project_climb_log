@@ -7,7 +7,7 @@
     </div>
     @auth
         @if(\App\Models\User::user_participant($event->id))
-            @if(\App\Models\ResultParticipant::is_pay_participant(Auth()->user()->id, $event->id))
+            @if(\App\Models\ResultRouteQualificationClassic::is_pay_participant(Auth()->user()->id, $event->id))
                 <div class="container text-center pt-2 pb-2">
                     <span class="badge bg-success" style="font-size: 22px"> ОПЛАЧЕНО </span><br>
                 </div>
@@ -26,7 +26,8 @@
                                 </h5>
                                 <div class="row">
                                     <div class="col">
-                                        <button type="button" style="color: white!important;" class="btn btn-primary showbuttonsave" id="crop">Отправить чек
+                                        <button type="button" style="color: white!important;"
+                                                class="btn btn-primary showbuttonsave" id="crop">Отправить чек
                                         </button>
                                     </div>
                                 </div>
@@ -44,16 +45,18 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" style="color: white!important;" class="btn btn-secondary" id="modalclose" data-dismiss="modal">
+                                <button type="button" style="color: white!important;" class="btn btn-secondary"
+                                        id="modalclose" data-dismiss="modal">
                                     Отмена
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                @if(\App\Models\ResultParticipant::is_sended_bill(Auth()->user()->id, $event->id))
+                @if(\App\Models\ResultRouteQualificationClassic::is_sended_bill(Auth()->user()->id, $event->id))
                     <div class="container text-center pt-2 pb-2">
-                        <div class="text-dark large mt-1" style="font-size: 22px">  Чек отправлен (На проверке..)  </div><br>
+                        <div class="text-dark large mt-1" style="font-size: 22px"> Чек отправлен (На проверке..)</div>
+                        <br>
                     </div>
                 @else
                     <div id="attachBill" class="container text-center pt-2 pb-2" data-event-id="{{$event->id}}">
@@ -70,7 +73,8 @@
                 @endif
                 @if($event->link_payment)
                     <div class="container text-center pt-2 pb-2">
-                        <a class="btn btn-primary" style="font-size: 22px" href="{{$event->link_payment}}">Оплатить</a><br>
+                        <a class="btn btn-primary" style="font-size: 22px"
+                           href="{{$event->link_payment}}">Оплатить</a><br>
                     </div>
                 @endif
                 @if($event->img_payment)

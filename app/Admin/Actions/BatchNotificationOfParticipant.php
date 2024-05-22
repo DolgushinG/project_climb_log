@@ -5,8 +5,8 @@ namespace App\Admin\Actions;
 use App\Admin\CustomAction\ActionExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
-use App\Models\Participant;
-use App\Models\ResultQualificationLikeFinal;
+use App\Models\ResultQualificationClassic;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultSemiFinalStage;
 use App\Models\User;
 use Encore\Admin\Actions\Action;
@@ -27,8 +27,8 @@ class BatchNotificationOfParticipant extends Action
     public function handle(Request $request)
     {
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        if($event->is_qualification_counting_like_final){
-            $table = 'result_qualification_like_final';
+        if($event->is_france_system_qualification){
+            $table = 'result_france_system_qualification';
         } else {
             $table = 'participant';
         }
@@ -42,7 +42,7 @@ class BatchNotificationOfParticipant extends Action
         if($request->message && $request->subject){
             if(count($users) > 0){
                 foreach ($users as $user){
-                    Participant::send_message_from_climbing_gym($request->subject, $request->message, $user, $event->climbing_gym_name);
+                    ResultQualificationClassic::send_message_from_climbing_gym($request->subject, $request->message, $user, $event->climbing_gym_name);
                 }
                 return $this->response()->success('Отправлено')->refresh();
             }

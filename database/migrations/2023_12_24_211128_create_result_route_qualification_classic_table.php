@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateResultParticipantTable extends Migration
+class CreateResultRouteQualificationClassicTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateResultParticipantTable extends Migration
      */
     public function up()
     {
-        Schema::create('result_participant', function (Blueprint $table) {
+        Schema::create('result_route_qualification_classic', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('owner_id');
             $table->string('gender');
@@ -34,6 +34,6 @@ class CreateResultParticipantTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('result_participant');
+        Schema::dropIfExists('result_route_qualification_classic');
     }
 }

@@ -11,7 +11,7 @@
                 <div class="col">
                     <div class="container">
                         <div class="row">
-                            @if(\App\Models\Participant::is_active_participant($event->id, Auth()->user()->id))
+                            @if(\App\Models\ResultQualificationClassic::is_active_participant($event->id, Auth()->user()->id))
                                 <h1> Ваш результат уже был добавлен </h1>
                             @else
                                 <h1> Внести результаты </h1>
@@ -19,8 +19,10 @@
 
                                 </div>
                                 <div class="text-right">
-                                    <button type="button" class="btn btn-dark" id="all-flash">Отметить все FLASH</button>
-                                    <button type="button" class="btn btn-dark" id="all-redpoint">Отметить все REDPOINT</button>
+                                    <button type="button" class="btn btn-dark" id="all-flash">Отметить все FLASH
+                                    </button>
+                                    <button type="button" class="btn btn-dark" id="all-redpoint">Отметить все REDPOINT
+                                    </button>
                                 </div>
                                 <table class="table">
                                     <thead>
@@ -39,20 +41,26 @@
                                             <th>{{$route->grade}}</th>
                                             <td>
                                                 <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
-                                                       name="{{$route->count}}" id="failed-{{$route->count}}" autocomplete="off"
+                                                       name="{{$route->count}}" id="failed-{{$route->count}}"
+                                                       autocomplete="off"
                                                        checked>
-                                                <label class="btn btn-outline-danger btn-failed" for="failed-{{$route->count}}">Не пролез</label>
+                                                <label class="btn btn-outline-danger btn-failed"
+                                                       for="failed-{{$route->count}}">Не пролез</label>
                                             </td>
                                             <td>
-                                                <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}" class="btn-check"
-                                                       name="{{$route->count}}" id="flash-{{$route->count}}" autocomplete="off">
-                                                <label class="btn btn-outline-success  btn-flash" for="flash-{{$route->count}}">FLASH</label>
+                                                <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
+                                                       class="btn-check"
+                                                       name="{{$route->count}}" id="flash-{{$route->count}}"
+                                                       autocomplete="off">
+                                                <label class="btn btn-outline-success  btn-flash"
+                                                       for="flash-{{$route->count}}">FLASH</label>
                                             </td>
                                             <td>
                                                 <input type="radio" data-id="all-redpoint" class="btn-check"
                                                        data-grade="{{$route->grade}}" name="{{$route->count}}"
                                                        id="redpoint-{{$route->count}}" autocomplete="off">
-                                                <label class="btn btn-outline-danger btn-redpoint" for="redpoint-{{$route->count}}">REDPOINT</label>
+                                                <label class="btn btn-outline-danger btn-redpoint"
+                                                       for="redpoint-{{$route->count}}">REDPOINT</label>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -65,7 +73,7 @@
                                         Внести
                                     </button>
                                 </div>
-                            <!-- End Table with stripped rows -->
+                                <!-- End Table with stripped rows -->
                             @endif
                         </div>
                     </div>
@@ -94,11 +102,34 @@
         }
     </script>
     <script>
+        function reset_flash(){
+            let check = document.querySelector("#all-flash"),
+                radios = document.querySelectorAll("[data-id='all-flash']");
+            for (i = 0; i < radios.length; i++) {
+                //And the elements are radios
+                if (radios[i].checked === true) {
+                    radios[i].checked = false;
+                    check.textContent = "Отметить все FLASH"
+                }
+            }//if
+        }
+        function reset_redpoint(){
+            let check = document.querySelector("#all-redpoint"),
+                radios = document.querySelectorAll("[data-id='all-redpoint']");
+            for (i = 0; i < radios.length; i++) {
+                //And the elements are radios
+                if (radios[i].checked === true) {
+                    radios[i].checked = false;
+                    check.textContent = "Отметить все REDPOINT"
+                }
+            }//if
+        }
         $(document).on('click', '#all-flash', function (e) {
             var check = document.querySelector("#all-flash"),
                 radios = document.querySelectorAll("[data-id='all-flash']");
 
-            if (check.textContent === "Отметить все FLASH") {
+            if (check.textContent.trim() === "Отметить все FLASH") {
+                reset_redpoint()
                 for (i = 0; i < radios.length; i++) {
                     if (radios[i].checked === false) {
                         radios[i].checked = true;
@@ -107,6 +138,7 @@
                 }//for
                 //If the second radio is checked
             } else {
+
                 for (i = 0; i < radios.length; i++) {
                     //And the elements are radios
                     if (radios[i].checked === true) {
@@ -121,7 +153,8 @@
             var check = document.querySelector("#all-redpoint"),
                 radios = document.querySelectorAll("[data-id='all-redpoint']");
 
-            if (check.textContent === "Отметить все REDPOINT") {
+            if (check.textContent.trim() === "Отметить все REDPOINT") {
+                reset_flash()
                 for (i = 0; i < radios.length; i++) {
                     if (radios[i].checked === false) {
                         radios[i].checked = true;
@@ -134,7 +167,7 @@
                     //And the elements are radios
                     if (radios[i].checked === true) {
                         radios[i].checked = false;
-                        check.textContent = "Отметить все  REDPOINT"
+                        check.textContent = "Отметить все REDPOINT"
                     }
                 }//if
             }//for
@@ -180,17 +213,18 @@
                     }, 3000);
                 },
                 error: function (xhr, status, error) {
-                    button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...')
                     setTimeout(function () {
                         button.removeClass('btn-save-change')
-                        button.addClass('btn-failed-change')
-                        button.text(xhr.message)
-                    }, 3000);
+                        button.addClass('btn-failed-result-page-change')
+                        $('.spinner-border.spinner-border-sm').remove()
+                        button.text(xhr.responseJSON.message)
+                    }, 1000);
                     setTimeout(function () {
-                        button.removeClass('btn-failed-change')
-                        button.addClass('btn-save-change')
+                        button.removeClass('btn-failed-result-page-change')
+                        let button_css = document.getElementById('btn-send-result')
+                        button_css.removeAttribute("disabled");
                         button.text('Внести')
-                    }, 6000);
+                    }, 8000);
 
                 },
 

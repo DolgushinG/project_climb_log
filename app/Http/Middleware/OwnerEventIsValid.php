@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Event;
-use App\Models\Participant;
+use App\Models\ResultQualificationClassic;
 use Closure;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
