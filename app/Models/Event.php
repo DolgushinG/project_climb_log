@@ -227,12 +227,12 @@ class Event extends Model
         }
         $participants = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
-            ->where('result_qualification_classic.event_id', '=', $event->id
+            ->where('result_qualification_classic.event_id', '=', $event->id)
             ->select(
                 'users.id',
                 'result_qualification_classic.category_id',
                 'users.gender',
-            )->get();
+                )->get();
         foreach ($participants as $participant) {
             if ($format == 1) {
                 $points = self::get_result_format_n_route($event, $participant);
