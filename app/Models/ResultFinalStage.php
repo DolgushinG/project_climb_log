@@ -31,6 +31,7 @@ class ResultFinalStage extends Model
                     $merged_users = ResultRouteQualificationClassic::get_participant_qualification_only_one_group($event, $amount_the_best_participant_to_go_final, $one_group);
                 } else {
                     $merged_users = ResultRouteQualificationClassic::get_participant_qualification_group($event, $amount_the_best_participant_to_go_final);
+
                 }
             } else {
                 $merged_users = ResultRouteQualificationClassic::get_participant_qualification_gender($event, $amount_the_best_participant_to_go_final);

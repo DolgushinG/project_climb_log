@@ -227,7 +227,7 @@ class Event extends Model
         }
         $participants = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
-            ->where('result_qualification_classic.event_id', '=', $event->id)
+            ->where('result_qualification_classic.event_id', '=', $event->id
             ->select(
                 'users.id',
                 'result_qualification_classic.category_id',
