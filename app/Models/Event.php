@@ -489,11 +489,11 @@ class Event extends Model
      */
     public static function getUsersSorted($users, $fields, $model, $type, $owner_id): array
     {
-        if (count($users->toArray()) == 0){
+        if (count($users->toArray()) == 0) {
             return [];
         }
         $users_with_result = [];
-        foreach ($users as $index => $user){
+        foreach ($users as $index => $user) {
             switch ($type) {
                 case 'final':
                     $result_user = ResultRouteFinalStage::where('owner_id', '=', $owner_id)
@@ -514,7 +514,7 @@ class Event extends Model
                         ->get();
             }
             $result = ResultRouteSemiFinalStage::merge_result_user_in_stage($result_user);
-            if($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null){
+            if ($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null) {
                 $users_with_result[$index] = collect($user->toArray())->except($fields);
                 $users_with_result[$index]['result'] = $result;
                 $users_with_result[$index]['place'] = null;
@@ -522,7 +522,7 @@ class Event extends Model
                 $users_with_result[$index]['owner_id'] = $owner_id;
                 $users_with_result[$index]['user_id'] = $user->id;
                 $users_with_result[$index]['event_id'] = $model->id;
-                $users_with_result[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
+                $users_with_result[$index]['gender'] = trans_choice('somewords.' . $user->gender, 10);
                 $users_with_result[$index]['amount_top'] = $result['amount_top'];
                 $users_with_result[$index]['amount_zone'] = $result['amount_zone'];
                 $users_with_result[$index]['amount_try_top'] = $result['amount_try_top'];
@@ -532,37 +532,37 @@ class Event extends Model
         $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result, $type);
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
-        foreach ($users_sorted as $index => $user){
+        foreach ($users_sorted as $index => $user) {
             $fields = ['result'];
             $users_sorted[$index] = collect($user)->except($fields)->toArray();
-            if($type == 'final' || $type == 'france_system_qualification'){
-                if($type == 'france_system_qualification'){
+            if ($type == 'final' || $type == 'france_system_qualification') {
+                if ($type == 'france_system_qualification') {
                     $result = ResultFranceSystemQualification::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
-                    if (!$result){
+                    if (!$result) {
                         $result = new ResultFranceSystemQualification;
                     }
                 } else {
                     $result = ResultFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
-                    if (!$result){
+                    if (!$result) {
                         $result = new ResultFinalStage;
                     }
                 }
             } else {
                 $result = ResultSemiFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
-                if (!$result){
+                if (!$result) {
                     $result = new ResultSemiFinalStage;
                 }
             }
             $category_id = ParticipantCategory::where('id', $users_sorted[$index]['category_id'])->where('event_id', $model->id)->first();
-            if($category_id){
+            if ($category_id) {
                 $category_id = $category_id->id;
                 $result->category_id = $category_id;
             } else {
-                Log::error('It has not found category_id '.$users_sorted[$index]['category_id'].' '.$model->id);
+                Log::error('It has not found category_id ' . $users_sorted[$index]['category_id'] . ' ' . $model->id);
             }
             $result->event_id = $users_sorted[$index]['event_id'];
             $result->user_id = $users_sorted[$index]['user_id'];
-            $result->gender = trans_choice('somewords.'.$users_sorted[$index]['gender'], 10);
+            $result->gender = trans_choice('somewords.' . $users_sorted[$index]['gender'], 10);
             $result->owner_id = $users_sorted[$index]['owner_id'];
             $result->amount_top = $users_sorted[$index]['amount_top'];
             $result->amount_zone = $users_sorted[$index]['amount_zone'];
