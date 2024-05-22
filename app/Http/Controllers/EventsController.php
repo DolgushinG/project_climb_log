@@ -366,6 +366,9 @@ class EventsController extends Controller
             return response()->json(['success' => false, 'message' => 'Результаты уже были добавлены или отсутствует регистрация'], 422);
         }
         $count_routes = Grades::where('event_id', $request->event_id)->first();
+        if (!$count_routes){
+            return response()->json(['success' => false, 'message' => 'По данной трассе не найдены трассы'], 422);
+        }
         # Проверяем что есть результат был отмечен, умножение происходит на 2 потому что из 3 результатов failed passed и flash два из них false
         # Не должно быть меньше этого, то есть если не отмечена хотя бы одна трасса она будет больше чем $count_routes * 2
         $amount_false = Event::validate_result($request->result);
