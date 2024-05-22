@@ -248,12 +248,12 @@ class EventsController extends Controller
     public function get_final_france_system_results(Request $request, $start_date, $climbing_gym, $title)
     {
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-        $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
-        $routes = array();
-        for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
-            $routes[] = $route;
-        }
         if($event){
+            $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
+            $routes = array();
+            for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
+                $routes[] = $route;
+            }
             $result_each_routes = array();
             if($event->is_sort_group_final) {
                 foreach ($event->categories as $category) {

@@ -23,6 +23,7 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /var/www/project_climb_log
+            git checkout production
             git reset --hard
             git pull
             /usr/bin/php artisan down

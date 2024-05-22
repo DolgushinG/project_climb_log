@@ -57,13 +57,6 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           tox -e chrome
-          cp -r tests/output ${{ github.workspace }}/artifact
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifact
-          path: ${{ github.workspace }}/artifact/*
-        if: always()
   test_part_2:
     needs: [ build ]
     runs-on: ubuntu-latest
@@ -82,13 +75,6 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           tox -e chrome2
-          cp -r tests/output ${{ github.workspace }}/artifact
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifact
-          path: ${{ github.workspace }}/artifact/*
-        if: always()
   test_part_3:
     needs: [ build ]
     runs-on: ubuntu-latest
@@ -107,13 +93,6 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           tox -e chrome3
-          cp -r tests/output ${{ github.workspace }}/artifact
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifact
-          path: ${{ github.workspace }}/artifact/*
-        if: always()
 
 
 
