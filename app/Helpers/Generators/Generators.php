@@ -17,10 +17,8 @@ use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
 use Carbon\Carbon;
-use Database\Seeders\ParticipantSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use stdClass;
 
 class Generators
 {
@@ -100,7 +98,6 @@ class Generators
                 $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         }
-
         DB::table($table)->insert($participants);
     }
 

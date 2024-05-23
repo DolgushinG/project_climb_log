@@ -3,11 +3,8 @@
 namespace App\Exports;
 
 use App\Exports\Sheets\ProtocolCards;
-use App\Exports\Sheets\Results;
 use App\Models\Event;
 use App\Models\ParticipantCategory;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class SemiFinalProtocolCardsExport implements WithMultipleSheets

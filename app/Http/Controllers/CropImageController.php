@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class CropImageController extends Controller

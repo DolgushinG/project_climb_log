@@ -3,7 +3,6 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Event;
-use App\Models\Format;
 use App\Models\Grades;
 use App\Http\Controllers\Controller;
 use App\Models\Route;
@@ -15,7 +14,6 @@ use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Illuminate\Http\Request;
-use PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\F;
 
 class GradesController extends Controller
 {

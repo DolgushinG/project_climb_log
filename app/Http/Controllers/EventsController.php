@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\ExportCardParticipantFranceSystem;
 use App\Helpers\Helpers;
 use App\Http\Requests\StoreRequest;
-use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
-use App\Models\EventAndCoefficientRoute;
 use App\Models\Grades;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
@@ -18,17 +15,12 @@ use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
-use Encore\Admin\Admin;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Maatwebsite\Excel\Facades\Excel;
 use stdClass;
-use function Symfony\Component\String\s;
 
 class EventsController extends Controller
 {
@@ -196,9 +188,9 @@ class EventsController extends Controller
     public function get_qualification_france_system_results(Request $request, $start_date, $climbing_gym, $title)
     {
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-        $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
-        $routes = Route::where('event_id', $event->id)->pluck('route_id');
         if($event){
+            $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
+            $routes = Route::where('event_id', $event->id)->pluck('route_id');
             if($event->is_france_system_qualification){
                 $result_each_routes = array();
                 foreach ($event->categories as $category) {
@@ -218,12 +210,12 @@ class EventsController extends Controller
     public function get_semifinal_france_system_results(Request $request, $start_date, $climbing_gym, $title)
     {
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-        $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
-        $routes = array();
-        for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
-            $routes[] = $route;
-        }
         if($event){
+            $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
+            $routes = array();
+            for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
+                $routes[] = $route;
+            }
             $result_each_routes = array();
             if($event->is_sort_group_semifinal){
                 foreach ($event->categories as $category) {

@@ -18,15 +18,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        for($i = 1;$i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
+        for($i = 2;$i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
             $types = ['classic', 'child', 'custom_1', 'custom_2'];
             Generators::event_create(1, $i, $types[array_rand($types)]);
-            $categories = Event::find($i)->categories;
+            $event = Event::where('owner_id', $i)->first();
+            $categories = $event->categories;
             foreach ($categories as $category){
                 $participant_category = new ParticipantCategory;
                 $participant_category->category = $category;
-                $participant_category->owner_id = $i;
-                $participant_category->event_id = $i;
+                $participant_category->owner_id = $event->owner_id;
+                $participant_category->event_id = $event->id;
                 $participant_category->save();
             }
         }

@@ -4,11 +4,8 @@ namespace App\Admin\CustomAction;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
-use Encore\Admin\Actions\Action;
-use Encore\Admin\Actions\BatchAction;
 use Encore\Admin\Actions\RowAction;
 use Encore\Admin\Facades\Admin;
-use Illuminate\Database\Eloquent\Collection;
 
 class ActionRejectBill extends RowAction
 {

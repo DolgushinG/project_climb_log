@@ -16,8 +16,8 @@ class ParticipantCategoriesSeeder extends Seeder
     public function run()
     {
 
-        for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
-            $event_categories = Event::find($i)->categories;
+        for($i = 2; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
+            $event_categories = Event::where($i)->categories;
             $participants = array();
             foreach ($event_categories as $category){
                 $participants[] = ['owner_id' => $i,'event_id' => $i,'category' => $category];

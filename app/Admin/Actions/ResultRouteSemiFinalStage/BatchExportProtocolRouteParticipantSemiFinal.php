@@ -3,10 +3,7 @@
 namespace App\Admin\Actions\ResultRouteSemiFinalStage;
 
 use App\Models\Event;
-use App\Models\ParticipantCategory;
-use App\Models\Set;
 use Encore\Admin\Actions\Action;
-use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
 
 class BatchExportProtocolRouteParticipantSemiFinal extends Action

@@ -4,8 +4,6 @@ namespace App\Exports;
 
 use App\Exports\Sheets\Results;
 use App\Models\ParticipantCategory;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class FranceSystemQualificationResultExport implements WithMultipleSheets

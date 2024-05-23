@@ -2,16 +2,10 @@
 
 namespace App\Helpers;
 
-use App\Models\Event;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
 use DateInterval;
 use DatePeriod;
 use DateTime;
 use Illuminate\Support\Facades\Storage;
-use Imagick;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class Helpers
 {

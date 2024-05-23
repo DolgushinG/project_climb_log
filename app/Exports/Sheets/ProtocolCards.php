@@ -3,23 +3,11 @@
 namespace App\Exports\Sheets;
 
 use App\Models\Event;
-use App\Models\EventAndCoefficientRoute;
-use App\Models\Grades;
-use App\Models\ResultQualificationClassic;
-use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
-use App\Models\ResultRouteQualificationClassic;
-use App\Models\ResultRouteFinalStage;
-use App\Models\ResultRouteFranceSystemQualification;
-use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
-use App\Models\Set;
-use App\Models\User;
-use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;

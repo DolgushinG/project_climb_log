@@ -2,20 +2,13 @@
 
 namespace App\Admin\Actions\ResultRouteFranceSystemQualificationStage;
 
-use App\Admin\Controllers\ResultRouteSemiFinalStageController;
 use App\Models\Event;
 use App\Models\Grades;
-use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFranceSystemQualification;
-use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteFranceSystemQualification;
-use App\Models\ResultRouteSemiFinalStage;
-use App\Models\ResultSemiFinalStage;
 use App\Models\User;
 use Encore\Admin\Actions\Action;
-use Encore\Admin\Actions\BatchAction;
-use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

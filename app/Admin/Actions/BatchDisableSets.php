@@ -2,22 +2,10 @@
 
 namespace App\Admin\Actions;
 
-use App\Admin\CustomAction\ActionExport;
-use App\Exports\QualificationResultExport;
-use App\Helpers\Generators\Generators;
 use App\Models\Event;
-use App\Models\ResultQualificationClassic;
-use App\Models\ParticipantCategory;
-use App\Models\ResultRouteQualificationClassic;
-use App\Models\ResultFranceSystemQualification;
-use App\Models\ResultSemiFinalStage;
-use App\Models\Set;
 use Encore\Admin\Actions\Action;
-use Encore\Admin\Actions\BatchAction;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 
 class BatchDisableSets extends Action
 {
