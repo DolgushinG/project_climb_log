@@ -5,8 +5,6 @@ namespace App\Exports;
 use App\Exports\Sheets\Results;
 use App\Models\Event;
 use App\Models\ParticipantCategory;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class AllResultExport implements WithMultipleSheets

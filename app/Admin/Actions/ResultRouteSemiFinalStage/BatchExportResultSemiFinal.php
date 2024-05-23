@@ -2,16 +2,9 @@
 
 namespace App\Admin\Actions\ResultRouteSemiFinalStage;
 
-use App\Admin\CustomAction\ActionExport;
-use App\Exports\QualificationResultExport;
 use App\Models\Event;
-use App\Models\ResultSemiFinalStage;
 use Encore\Admin\Actions\Action;
-use Encore\Admin\Actions\BatchAction;
-use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 
 class BatchExportResultSemiFinal extends Action
 {

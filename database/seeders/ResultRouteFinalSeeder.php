@@ -21,19 +21,19 @@ class ResultRouteFinalSeeder extends Seeder
         {
 
             #!!! НЕ АКТУАЛЬНО НА ДАННЫЙ МОМЕНТ ПОДУМАТЬ НАД УДАЛЕНИМ
-            $event = Event::find($event_id);
+            $event = Event::where('owner_id', $owner_id)->first();
             if($event->is_semifinal){
-                $result_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'female', 6)->toArray();
-                $result_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event_id, 'male', 6)->toArray();
+                $result_female = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', 6)->toArray();
+                $result_male = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', 6)->toArray();
             } else {
-                $result_female = ResultQualificationClassic::better_participants($event_id, 'female', 6)->toArray();
-                $result_male = ResultQualificationClassic::better_participants($event_id, 'male', 6)->toArray();
+                $result_female = ResultQualificationClassic::better_participants($event->id, 'female', 6)->toArray();
+                $result_male = ResultQualificationClassic::better_participants($event->id, 'male', 6)->toArray();
             }
             $final_users = array_merge($result_female, $result_male);
 
             $result = array();
             foreach ($final_users as $user) {
-                $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                $participant = ResultQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user['id'])->first();
                 for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {
@@ -57,7 +57,7 @@ class ResultRouteFinalSeeder extends Seeder
             }
             DB::table('result_route_final_stage')->insert($result);
         }
-        for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
+        for($i = 2; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
             prepare_data_result_route_passed_with_owner($i, $i);
             Event::refresh_final_points_all_participant_in_final($i, $i);
         }

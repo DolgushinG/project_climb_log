@@ -18,8 +18,8 @@ class GradesSeeder extends Seeder
      */
     public function run()
     {
-        for($i = 1; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
-            $event = Event::find($i);
+        for($i = 2; $i <= AdminRoleAndUsersSeeder::COUNT_EVENTS; $i++){
+            $event = Event::where('owner_id', $i)->first();
             $event_id = $event->id;
             if(!$event->is_france_system_qualification){
                 Route::generation_route($i, $event_id, $event->count_routes, Grades::getRoutes());

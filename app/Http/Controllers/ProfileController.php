@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
-use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
 use App\Models\ResultRouteQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
@@ -13,7 +12,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Activitylog\Models\Activity;
-use function Symfony\Component\String\s;
 
 class ProfileController extends Controller
 {

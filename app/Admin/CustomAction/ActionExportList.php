@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Admin\CustomAction;
-use App\Models\Event;
 use Encore\Admin\Actions\RowAction;
 use Encore\Admin\Facades\Admin;
 

@@ -2,8 +2,6 @@
 
 namespace App\Admin\Actions;
 
-use App\Admin\CustomAction\ActionExport;
-use App\Exports\QualificationResultExport;
 use App\Helpers\Generators\Generators;
 use App\Models\Event;
 use App\Models\Grades;
@@ -12,15 +10,11 @@ use App\Models\ParticipantCategory;
 use App\Models\ResultRouteQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFranceSystemQualification;
-use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
 use Encore\Admin\Actions\Action;
-use Encore\Admin\Actions\BatchAction;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 
 class BatchGenerateParticipant extends Action
 {
@@ -31,7 +25,7 @@ class BatchGenerateParticipant extends Action
     public function handle(Request $request)
     {
         $owner_id = \Encore\Admin\Facades\Admin::user()->id;
-        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+        $event = Event::where('owner_id', $owner_id)->where('active', 1)->first();
         $count = intval($request->count);
         if($event->is_france_system_qualification){
             $table_result = 'result_france_system_qualification';

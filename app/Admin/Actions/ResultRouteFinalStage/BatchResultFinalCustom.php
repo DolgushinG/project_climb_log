@@ -9,8 +9,6 @@ use App\Models\ResultFinalStage;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteFranceSystemQualification;
-use App\Models\ResultRouteSemiFinalStage;
-use App\Models\ResultSemiFinalStage;
 use App\Models\User;
 use Encore\Admin\Actions\Action;
 use Encore\Admin\Admin;
