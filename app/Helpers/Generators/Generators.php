@@ -211,9 +211,10 @@ class Generators
 
             $result = array();
             foreach ($users as $user) {
-                $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 if($event->is_france_system_qualification){
                     $participant = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                } else {
+                    $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 }
                 for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
                     $amount_zone = rand(0, 1);
