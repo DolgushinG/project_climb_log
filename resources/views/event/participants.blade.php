@@ -124,8 +124,15 @@
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             $(document).ready(function () {
                 {
-                    let nav = $('li.nav-item')
-                    nav.addClass("pl-3");
+                    let navs = document.querySelectorAll('li.nav-item')
+                    navs.forEach(el => {
+                        el.classList.add("w-100");
+                    });
+                    let nav_link = document.querySelectorAll('button.nav-link')
+                    nav_link.forEach(el => {
+                        el.classList.add("w-100");
+                    });
+
                 }
             });
         }

@@ -220,6 +220,7 @@ class Event extends Model
 
     public static function refresh_final_points_all_participant($event)
     {
+        $event_id = $event->id;
         $format = $event->mode ?? null;
         if (!$format) {
             Log::info('Обновление без формата 1 или 2, пока что недоступно потому что используется формат подсчета как финал)');
@@ -227,39 +228,56 @@ class Event extends Model
         }
         $participants = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
-            ->where('result_qualification_classic.event_id', '=', $event->id)
+            ->where('result_qualification_classic.event_id', '=', $event_id)
             ->select(
                 'users.id',
                 'result_qualification_classic.category_id',
                 'users.gender',
-                )->get();
-        foreach ($participants as $participant) {
+                )->where('active', 1);
+        $users_id = $participants->pluck('id');
+        foreach ($participants->get() as $participant) {
             if ($format == 1) {
                 $points = self::get_result_format_n_route($event, $participant);
             }
             if ($format == 2) {
                 $points = self::get_result_format_all_route($event, $participant);
             }
-            $final_participant_result = ResultQualificationClassic::where('user_id', '=', $participant->id)->where('event_id', '=', $event->id)->first();
+            $final_participant_result = ResultQualificationClassic::where('user_id', '=', $participant->id)->where('event_id', '=', $event_id)->first();
+            if(!$participant){
+                Log::error('Category id not found -event_id - '.$participant->id.'user_id'.$event_id);
+            }
             $category_id = $participant->category_id;
             if ($event->is_auto_categories && $category_id == null) {
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $participant->id), 3);
                 $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed);
-                $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                $category_id = ParticipantCategory::where('event_id', '=', $event_id)->where('category', $category)->first()->id;
                 $final_participant_result->category_id = $category_id;
             }
             $final_participant_result->points = $points;
-            $final_participant_result->event_id = $event->id;
+            $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $participant->id;
             $final_participant_result->save();
-            if ($event->is_sort_group_final) {
-                $place = ResultQualificationClassic::get_places_participant_in_qualification($event->id, $participant->id, $participant->gender, $category_id, true);
-            } else {
-                $place = ResultQualificationClassic::get_places_participant_in_qualification(event_id: $event->id, user_id: $participant->id, gender: $participant->gender, get_place_user: true);
+        }
+
+        $categories = ParticipantCategory::where('event_id', '=', $event_id)->get();
+
+        if ($event->is_sort_group_final) {
+            foreach (['female', 'male'] as $gender) {
+                foreach ($categories as $category) {
+                    $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)
+                        ->where('category_id', $category->id)
+                        ->where('event_id', $event_id)
+                        ->where('gender', $gender)
+                        ->orderBy('points', 'DESC')
+                        ->get();
+                    ResultQualificationClassic::update_places_in_qualification_classic($event_id, $participants_for_update);
+                }
             }
-            $participant_result = ResultQualificationClassic::where('user_id', '=', $participant->id)->where('event_id', '=', $event->id)->first();
-            $participant_result->user_place = $place;
-            $participant_result->save();
+        } else {
+            foreach (['female', 'male'] as $gender){
+                $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('gender', $gender)->orderBy('points', 'DESC')->get();
+                ResultQualificationClassic::update_places_in_qualification_classic($event_id, $participants_for_update);
+            }
         }
     }
 
@@ -350,7 +368,6 @@ class Event extends Model
                     $all_group_participants['male'][$category] = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id);
                     $all_group_participants['female'][$category] = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id);
                 }
-
                 foreach ($all_group_participants as $group_participants) {
                     foreach ($group_participants as $participants) {
                         Event::getUsersSorted($participants, $fields, $event, 'final', $event->owner_id);
@@ -411,9 +428,10 @@ class Event extends Model
     public function insert_final_participant_result($event_id, $points, $user_id, $gender)
     {
         $final_participant_result = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first();
+        $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->pluck('user_id')->toArray();
         $final_participant_result->points = $final_participant_result->points + $points;
         $final_participant_result->active = 1;
-        $final_participant_result->user_place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $user_id, $gender, $final_participant_result->category_id, true);
+        $final_participant_result->user_place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter, $user_id, $gender, $final_participant_result->category_id, true);
         $final_participant_result->save();
     }
 
@@ -428,7 +446,8 @@ class Event extends Model
             $category_id = $final_participant_result->category_id;
         }
         if ($final_participant_result->user_place) {
-            $final_participant_result->user_place = ResultQualificationClassic::get_places_participant_in_qualification($event->id, $user_id, $gender, $category_id, true);
+            $users_for_filter = ResultQualificationClassic::where('event_id', $event->id)->pluck('user_id')->toArray();
+            $final_participant_result->user_place = ResultQualificationClassic::get_places_participant_in_qualification($event->id, $users_for_filter, $user_id, $gender, $category_id, true);
         }
         $final_participant_result->save();
     }
@@ -569,7 +588,6 @@ class Event extends Model
             $result->amount_try_top = $users_sorted[$index]['amount_try_top'];
             $result->amount_try_zone = $users_sorted[$index]['amount_try_zone'];
             $result->place = $users_sorted[$index]['place'];
-
 
             $result->save();
         }

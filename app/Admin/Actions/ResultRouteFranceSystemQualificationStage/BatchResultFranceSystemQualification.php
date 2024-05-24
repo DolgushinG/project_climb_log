@@ -11,6 +11,7 @@ use App\Models\User;
 use Encore\Admin\Actions\Action;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BatchResultFranceSystemQualification extends Action
 {
@@ -67,7 +68,11 @@ class BatchResultFranceSystemQualification extends Action
         $result_france_system_qualification = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
             $user = User::where('middlename', $res)->first()->id;
-            $category_id = ResultFranceSystemQualification::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
+            $res_fra = ResultFranceSystemQualification::where('event_id', $event->id)->where('user_id', $user)->first();
+            if(!$res_fra){
+                Log::error('Category id not found -event_id - '.$event->id.'user_id'.$user);
+            }
+            $category_id = $res_fra->category_id;
             $category = ParticipantCategory::find($category_id)->category;
             $result[$index] = $res.' ['.$category.']';
             if(in_array($index, $result_france_system_qualification)){
