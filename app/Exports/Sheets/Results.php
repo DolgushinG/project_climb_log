@@ -283,6 +283,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             "owner_id" => "",
             "number_set_id" => "",
         );
+        $users_for_filter = ResultQualificationClassic::where('event_id', $this->event_id)->pluck('user_id')->toArray();
         foreach ($users as $index => $user) {
             if ($index == 'empty_row') {
                 $count = Grades::where('event_id', $this->event_id)->first()->count_routes;
@@ -308,7 +309,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $amount_passed_flash = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 1)->get()->count();
                 $amount_passed_redpoint = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 2)->get()->count();
                 $amount_passed_routes = $amount_passed_flash+$amount_passed_redpoint;
-                $place = ResultQualificationClassic::get_places_participant_in_qualification($this->event_id, $user['id'], $this->gender, $this->category->id, true);
+                $place = ResultQualificationClassic::get_places_participant_in_qualification($this->event_id, $users_for_filter, $user['id'], $this->gender, $this->category->id, true);
                 $set = Set::find($user['number_set_id']);
                 $users[$index]['user_place'] = $place;
                 $users[$index]['number_set_id'] = $set->number_set;

@@ -56,6 +56,7 @@ class ResultQualificationClassic extends Model
 
         $user_places = array();
         foreach ($duplicate_arrays as $index => $d_array){
+            $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->pluck('user_id')->toArray();
             if($type == 'final'){
                 $is_semifinal = Event::find($event_id)->is_semifinal;
                 if($is_semifinal){
@@ -63,7 +64,7 @@ class ResultQualificationClassic extends Model
                 } else {
                     $gender = User::find($d_array['user_id'])->gender;
                     $category_id = ResultQualificationClassic::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
-                    $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
+                    $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter, $d_array['user_id'], $gender, $category_id, true);
                 }
             } else {
                 $gender = User::find($d_array['user_id'])->gender;
@@ -71,7 +72,7 @@ class ResultQualificationClassic extends Model
                     $place = ResultQualificationClassic::get_place_participant_in_france_system_qualification($event_id, $d_array['user_id']);
                 } else {
                     $category_id = ResultQualificationClassic::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
-                    $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $d_array['user_id'], $gender, $category_id, true);
+                    $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter, $d_array['user_id'], $gender, $category_id, true);
                 }
 
             }
@@ -133,8 +134,17 @@ class ResultQualificationClassic extends Model
         return ResultFranceSystemQualification::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
     }
 
-    public static function get_places_participant_in_qualification($event_id, $user_id, $gender, $category_id=null, $get_place_user = false){
-        $users_id = User::where('gender', '=', $gender)->pluck('id');
+    public static function update_places_in_qualification_classic($event_id, $participants)
+    {
+        foreach ($participants as $index => $participant){
+            $participant_result = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $participant->user_id)->first();
+            $participant_result->user_place = $index+1;
+            $participant_result->save();
+        }
+    }
+
+    public static function get_places_participant_in_qualification($event_id, $filter_users, $user_id, $gender, $category_id=null, $get_place_user = false){
+        $users_id = User::whereIn('id', $filter_users)->where('gender', '=', $gender)->pluck('id');
         if($category_id){
             $all_participant_event = ResultQualificationClassic::whereIn('user_id', $users_id)->where('category_id', '=', $category_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
         } else {
@@ -237,8 +247,9 @@ class ResultQualificationClassic extends Model
             )
             ->where('result_qualification_classic.gender', '=', $gender)->get()->sortBy('user_place')->toArray();
         $event = Event::find($event_id);
+        $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->pluck('user_id')->toArray();
         foreach ($users as $index => $user){
-            $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $user['id'], $gender, $category_id, true);
+            $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter,  $user['id'], $gender, $category_id, true);
             $set = Set::find($user['number_set_id']);
             $users[$index]['user_place'] = $place;
             if($event->is_input_set != 1){
