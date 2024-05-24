@@ -30,7 +30,7 @@ class Generators
                     ->withOwnerId($i)
                     ->withCity($i)
                     ->withClimbingGym($i)
-                    ->withSemiFinal(1)
+                    ->withSemiFinal(0)
                     ->is_sort_group_final(0)
                     ->is_france_system_qualification(0)
                     ->amount_point_flash(1.2)
@@ -57,7 +57,7 @@ class Generators
                     ->withOwnerId($i)
                     ->withCity($i)
                     ->withClimbingGym($i)
-                    ->withSemiFinal(1)
+                    ->withSemiFinal(0)
                     ->is_sort_group_final(1)
                     ->is_france_system_qualification(0)
                     ->mode(1)
@@ -69,7 +69,7 @@ class Generators
                     ->withOwnerId($i)
                     ->withCity($i)
                     ->withClimbingGym($i)
-                    ->withSemiFinal(1)
+                    ->withSemiFinal(0)
                     ->is_sort_group_final(0)
                     ->is_france_system_qualification(0)
                     ->mode(2)
@@ -205,8 +205,8 @@ class Generators
 
         if($table === 'result_route_final_stage') {
             ResultRouteFinalStage::where('event_id', $event_id)->delete();
-            $event = Event::find($event_id);
 
+            $event = Event::find($event_id);
             $users = ResultFinalStage::get_final_participant($event, null, true);
 
             $result = array();
@@ -237,7 +237,9 @@ class Generators
                     $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'], 'user_id' => $user['id'],'category_id' => $participant->category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
                 }
             }
+
             DB::table('result_route_final_stage')->insert($result);
+            Log::info('result_route_final_stage step 1');
             Event::refresh_final_points_all_participant_in_final($event_id);
         }
     }

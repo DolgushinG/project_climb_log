@@ -243,6 +243,9 @@ class Event extends Model
                 $points = self::get_result_format_all_route($event, $participant);
             }
             $final_participant_result = ResultQualificationClassic::where('user_id', '=', $participant->id)->where('event_id', '=', $event_id)->first();
+            if(!$participant){
+                Log::error('Category id not found -event_id - '.$participant->id.'user_id'.$event_id);
+            }
             $category_id = $participant->category_id;
             if ($event->is_auto_categories && $category_id == null) {
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $participant->id), 3);
@@ -365,7 +368,6 @@ class Event extends Model
                     $all_group_participants['male'][$category] = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id);
                     $all_group_participants['female'][$category] = ResultSemiFinalStage::better_of_participants_semifinal_stage($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id);
                 }
-
                 foreach ($all_group_participants as $group_participants) {
                     foreach ($group_participants as $participants) {
                         Event::getUsersSorted($participants, $fields, $event, 'final', $event->owner_id);
@@ -586,7 +588,6 @@ class Event extends Model
             $result->amount_try_top = $users_sorted[$index]['amount_try_top'];
             $result->amount_try_zone = $users_sorted[$index]['amount_try_zone'];
             $result->place = $users_sorted[$index]['place'];
-
 
             $result->save();
         }

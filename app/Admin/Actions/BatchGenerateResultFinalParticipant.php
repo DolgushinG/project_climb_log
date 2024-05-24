@@ -24,7 +24,7 @@ class BatchGenerateResultFinalParticipant extends Action
 
     public function dialog()
     {
-        $this->confirm('Подтвердить генерацию результатов полуфинала по результатам квалификации');
+        $this->confirm('Подтвердить генерацию результатов финала по результатам квалификации или полуфинала');
     }
 
     public function html()

@@ -14,6 +14,7 @@ use Encore\Admin\Actions\Action;
 use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BatchResultSemiFinalCustom extends Action
 {
@@ -46,6 +47,9 @@ class BatchResultSemiFinalCustom extends Action
                 $participant = ResultFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
             } else {
                 $participant = ResultQualificationClassic::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+            }
+            if(!$participant){
+                Log::error('Category id not found -event_id - '.$results['event_id'].'user_id'.$results['user_id']);
             }
             $category_id = $participant->category_id;
             $gender = $participant->gender;

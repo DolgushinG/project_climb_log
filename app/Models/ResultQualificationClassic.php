@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use function Symfony\Component\String\s;
 
@@ -58,13 +59,17 @@ class ResultQualificationClassic extends Model
         foreach ($duplicate_arrays as $index => $d_array){
             $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->pluck('user_id')->toArray();
             if($type == 'final'){
-                $is_semifinal = Event::find($event_id)->is_semifinal;
-                if($is_semifinal){
+                $event = Event::find($event_id);
+                if($event->is_semifinal){
                     $place = ResultQualificationClassic::get_place_participant_in_semifinal($event_id, $d_array['user_id']);
                 } else {
-                    $gender = User::find($d_array['user_id'])->gender;
-                    $category_id = ResultQualificationClassic::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
-                    $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter, $d_array['user_id'], $gender, $category_id, true);
+                    if($event->is_france_system_qualification){
+                        $place = ResultQualificationClassic::get_place_participant_in_france_system_qualification($event_id, $d_array['user_id']);
+                    } else {
+                        $gender = User::find($d_array['user_id'])->gender;
+                        $category_id = ResultQualificationClassic::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
+                        $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter, $d_array['user_id'], $gender, $category_id, true);
+                    }
                 }
             } else {
                 $gender = User::find($d_array['user_id'])->gender;
