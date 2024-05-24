@@ -30,7 +30,10 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /var/www/stage-dev.project_climb_log
-            export
+            echo ${{ github.event_name }}
+            echo ${{ github.ref }}
+            echo ${{ github.event.pull_request.head.ref }}
+            echo ${{ github.event.pull_request.base.ref }}
 #            git checkout ${GITHUB_REF##*/}
 #            /usr/bin/php artisan down
 #            /usr/bin/php artisan optimize
