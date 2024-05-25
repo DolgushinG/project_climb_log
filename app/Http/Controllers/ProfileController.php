@@ -139,11 +139,12 @@ class ProfileController extends Controller
             'email.string' => 'Поле email не корректно',
             'email.email' => 'Поле email не корректно',
             'email.max:255' => 'Поле email не корректно',
+            'email.unique' => 'Этот email уже зарегистрирован, возможно вы уже имеете аккаунт с этой почтой',
         );
         $validator = Validator::make($request->all(), [
             'firstname' => 'string',
             'lastname' => 'string',
-            'email' => 'email|string|max:255',
+            'email' => 'email|string|unique:users',
         ],$messages);
         if ($validator->fails())
         {
