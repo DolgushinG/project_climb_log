@@ -74,6 +74,7 @@
                                             @if($event->is_registration_state)
                                                 @include('event.selects.birthday')
                                                 @include('event.selects.genders')
+                                                @include('event.selects.sport_categories')
                                                 @include('event.selects.categories')
                                                 @if(!$event->is_input_set)
                                                     @include('event.selects.sets_take_part')
@@ -82,7 +83,14 @@
                                             @else
                                                 @include('event.buttons.reg-close')
                                             @endif
-                                            <div id="error-message" class="text-danger"></div>
+                                            <div style="display:none;" id="error-message" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>
+                                            <div style="display:none;" id="warning-message" class="alert alert-warning alert-dismissible fade show" role="alert">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>
                                         @endif
                                         <div class="modal fade" id="scrollingModal" tabindex="-1">
                                             <div class="modal-dialog">

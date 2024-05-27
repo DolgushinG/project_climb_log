@@ -30,11 +30,12 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /var/www/stage-dev.project_climb_log
-            git checkout ${{ github.ref_name }}
+            git checkout ${{ github.head_ref || github.ref_name }}
             git reset --hard
             git pull
             /usr/bin/php artisan down
             /usr/bin/php artisan optimize
+            /usr/bin/php artisan migrate
             /usr/bin/php artisan config:clear
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh

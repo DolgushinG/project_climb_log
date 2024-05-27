@@ -5,8 +5,7 @@
             <option selected disabled value="">Открыть для выбора категории
             </option>
             @foreach($event->categories as $category)
-                <option
-                    value="{{$category}}">{{$category}}</option>
+                <option value="{{$category}}">{{$category}}</option>
             @endforeach
         </select>
         <label for="floatingSelectCategory">Выбрать категорию</label>

@@ -5,26 +5,35 @@
             @php
                 $number_set = \App\Models\ResultQualificationClassic::participant_number_set(Auth()->user()->id, $event->id);
             @endphp
-            @if($set->number_set === $number_set)
-                <option selected value="{{$set->number_set}}">
-                    Сет {{$set->number_set}} @lang('somewords.'.$set->day_of_week)
-                    @isset($set->date[$set->day_of_week])
-                        {{$set->date[$set->day_of_week]}}
-                    @endisset
-                    {{$set->time}} (еще мест {{$set->free}})
-                </option>
-            @else
-                @if($set->free != 0)
-                    <option value="{{$set->number_set}}">Сет {{$set->number_set}}
-                        @lang('somewords.'.$set->day_of_week)
+
+                @if($set->number_set === $number_set)
+                    <option data-set="current" data-free="{{$set->free}}" selected value="{{$set->number_set}}">
+                        Сет {{$set->number_set}} @lang('somewords.'.$set->day_of_week)
                         @isset($set->date[$set->day_of_week])
                             {{$set->date[$set->day_of_week]}}
                         @endisset
-                        {{$set->time}} (еще
-                        мест {{$set->free}})
+                        {{$set->time}} (Ваш сет)
                     </option>
-                @endif
-            @endif
+                @else
+                    @if($set->free > 0)
+                        <option data-set="" data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
+                            @lang('somewords.'.$set->day_of_week)
+                            @isset($set->date[$set->day_of_week])
+                                {{$set->date[$set->day_of_week]}}
+                            @endisset
+                            {{$set->time}} (еще
+                            мест {{$set->free}})
+                        </option>
+                    @else
+                        <option data-set="" data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
+                            @lang('somewords.'.$set->day_of_week)
+                            @isset($set->date[$set->day_of_week])
+                                {{$set->date[$set->day_of_week]}}
+                            @endisset
+                            {{$set->time}} (мест нет)
+                        </option>
+                   @endif
+               @endif
         @endforeach
     </select>
     <label for="floatingSelectChangeSet">Выбрать время для сета</label>

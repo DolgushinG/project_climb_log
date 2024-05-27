@@ -6,6 +6,7 @@ use App\Helpers\Helpers;
 use App\Http\Requests\StoreRequest;
 use App\Models\Event;
 use App\Models\Grades;
+use App\Models\ListOfPendingParticipant;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
@@ -31,6 +32,7 @@ class EventsController extends Controller
         $event_public_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         $event_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
         $pre_show = false;
+        $user_id = Auth()->user()->id ?? null;
         if($event_public_exist){
             $event = $event_public_exist;
         } else {
@@ -39,11 +41,21 @@ class EventsController extends Controller
                 $event = $event_exist;
             }
         }
+        $is_show_button_list_pending = false;
         if($event_public_exist || $pre_show){
             $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('number_set')->get();
             foreach ($sets as $set){
-                $participants_event = ResultQualificationClassic::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
+                if($event->is_france_system_qualification){
+                    $participants_event = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
+//                    $participant = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('user_id','=',$user_id)->first();
+                } else {
+                    $participants_event = ResultQualificationClassic::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
+//                    $participant = ResultQualificationClassic::where('event_id','=',$event->id)->where('user_id','=',$user_id)->first();
+                }
                 $set->free = $set->max_participants - $participants_event;
+                if($set->free <= 0){
+                    $is_show_button_list_pending = true;
+                }
                 $a = $set->max_participants;
                 $b = $set->free;
 
@@ -59,10 +71,14 @@ class EventsController extends Controller
                 $set->procent = intval($percent);
                 $set->date = Helpers::getDatesByDayOfWeek($event_exist->start_date, $event_exist->end_date);
             }
+
             $is_show_button_final = boolval(ResultFinalStage::where('event_id', $event->id)->first());
+
+            $is_add_to_list_pending = boolval(ListOfPendingParticipant::where('event_id', $event->id)->where('user_id', $user_id)->first());
+            $list_pending = ListOfPendingParticipant::where('event_id', $event->id)->where('user_id', $user_id)->first();
             $is_show_button_semifinal = boolval(ResultSemiFinalStage::where('event_id', $event->id)->first());
             $sport_categories = User::sport_categories;
-            return view('welcome', compact(['event', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
+            return view('welcome', compact(['event','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('404');
         }
@@ -288,7 +304,7 @@ class EventsController extends Controller
             }
             $participant = new ResultQualificationClassic;
         }
-        $event = Event::find($request->event_id);
+
         if($event->is_input_set != 1){
             $number_set = $request->number_set;
             $set = Set::where('number_set', $number_set)->where('owner_id', $event->owner_id)->first();
@@ -301,22 +317,32 @@ class EventsController extends Controller
         }
 
         $participant->event_id = $request->event_id;
-        $participant->gender = $request->gender;
+        if($request->gender){
+            $participant->gender = $request->gender;
+        } else {
+            $participant->gender = $user->gender;
+        }
         $participant->user_id = $request->user_id;
         $participant->owner_id = $event->owner_id;
         $participant->active = 0;
         $participant->save();
         $user = User::find($request->user_id);
         if($user){
-            $user->gender = $request->gender;
-            $user->sport_category = $request->sport_category;
-            $user->birthday = $request->birthday;
+            if($request->gender){
+                $user->gender = $request->gender;
+            }
+            if($request->sport_category){
+                $user->sport_category = $request->sport_category;
+            }
+            if($request->birthday){
+                $user->birthday = $request->birthday;
+            }
             $user->save();
         }
 
         if ($participant->save()) {
-            if($user && $event){
-                ResultQualificationClassic::send_main_about_take_part($event, $user);
+            if($user && $event && $participant){
+                ResultQualificationClassic::send_main_about_take_part($event, $user, $participant);
             }
             return response()->json(['success' => true, 'message' => 'Успешная регистрация'], 201);
         } else {
@@ -329,10 +355,17 @@ class EventsController extends Controller
         if(!$event || !$event->is_registration_state){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
+        $set = Set::where('owner_id',$event->owner_id)->where('number_set', $request->number_set)->first();
         if($event->is_france_system_qualification){
             $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+            $participants_event = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
         } else {
             $participant = ResultQualificationClassic::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+            $participants_event = ResultQualificationClassic::where('event_id','=', $event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
+        }
+        $free = $set->max_participants - $participants_event;
+        if($free <= 0){
+            return response()->json(['success' => false, 'message' => 'В выбранном сете нет мест'], 422);
         }
         $event = Event::find($request->event_id);
         $number_set = $request->number_set;
@@ -496,6 +529,60 @@ class EventsController extends Controller
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return response()->json(['success' => false, 'message' => 'Произошла ошибка'], 422);
+        }
+    }
+
+    public function addToListPending(Request $request)
+    {
+        $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
+        $user = User::find($request->user_id);
+        if (!$event || !$event->is_registration_state || str_contains($user->email, 'telegram')) {
+            return response()->json(['success' => false, 'message' => 'ошибка внесения в лист ожидания'], 422);
+        }
+        if (!$request->number_sets) {
+            return response()->json(['success' => false, 'message' => 'Вы не выбрали сет'], 422);
+        }
+        $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
+        if ($event->is_input_set != 1) {
+            $list_pending = ListOfPendingParticipant::where('event_id', $request->event_id)->where('user_id', $request->user_id)->first();
+            if (!$list_pending) {
+                $list_pending = new ListOfPendingParticipant;
+            }
+            if ($event->is_auto_categories) {
+                $list_pending->category_id = 0;
+            } else {
+                $list_pending->category_id = $participant_categories->id;
+            }
+            $list_pending->user_id = $request->user_id;
+            $list_pending->event_id = $request->event_id;
+            $list_pending->number_sets = $request->number_sets;
+            $user = User::find($request->user_id);
+            if($user){
+                if($request->gender){
+                    $user->gender = $request->gender;
+                }
+                if($request->sport_category){
+                    $user->sport_category = $request->sport_category;
+                }
+                if($request->birthday){
+                    $user->birthday = $request->birthday;
+                }
+                $user->save();
+            }
+            if ($list_pending->save()) {
+                if($user && $event && $list_pending){
+                    ResultQualificationClassic::send_main_about_list_pending($event, $user, $list_pending);
+                }
+                return response()->json(['success' => true, 'message' => 'Успешно']);
+            }
+        }
+    }
+
+    public function removeFromListPending(Request $request)
+    {
+        $list_pending = ListOfPendingParticipant::where('event_id', $request->event_id)->where('user_id', $request->user_id)->first();
+        if ($list_pending->delete()) {
+            return response()->json(['success' => true, 'message' => 'Успешное удалено']);
         }
     }
 }
