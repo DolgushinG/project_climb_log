@@ -72,9 +72,9 @@
                                             @endif
                                         @else
                                             @if($event->is_registration_state)
-                                                @include('event.selects.birthday') <br>
-                                                @include('event.selects.genders')<br>
-                                                @include('event.selects.sport_categories')<br>
+                                                @include('event.selects.birthday')
+                                                @include('event.selects.genders')
+                                                @include('event.selects.sport_categories')
                                                 @include('event.selects.categories')
                                                 @if(!$event->is_input_set)
                                                     @include('event.selects.sets_take_part')

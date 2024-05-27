@@ -505,6 +505,11 @@ $(document).ready(function () {
             btn_participant_change_set.attr('disabled', true)
             btn_participant_change_set.text('Вы уже в этом сете')
         } else {
+            if(free == null){
+                let btn_participant_change_set = $('#btn-participant-change-set')
+                btn_participant_change_set.attr('disabled', false)
+                btn_participant_change_set.text('Изменить сет')
+            }
             if(free > 0) {
                 let btn_participant_change_set = $('#btn-participant-change-set')
                 btn_participant_change_set.attr('disabled', false)
