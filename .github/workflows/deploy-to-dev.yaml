@@ -13,7 +13,7 @@
 name: Python application
 
 on:
-  pull_request:
+  push:
     branches: [ "cl*" ]
 
 jobs:
@@ -30,7 +30,9 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /var/www/stage-dev.project_climb_log
-            git checkout ${{ github.ref_name }}
+            branch=$(git branch -r --contains ${{ github.ref }} --format "%(refname:lstrip=3)")
+            echo ::set-env name=BRANCH::$branch
+            git checkout ${{ env.BRANCH }}
             git reset --hard
             git pull
             /usr/bin/php artisan down
