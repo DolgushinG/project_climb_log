@@ -193,21 +193,10 @@
                 url: '/sendResultParticipant',
                 data: {'result': results, 'event_id': event_id, 'user_id': user_id, 'owner_id': owner_id},
                 success: function (xhr, status, error) {
-                    // button.removeClass('btn-save-change')
-                    // button.addClass('btn-edit-change')
                     button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Почти почти...')
-
                     setTimeout(function () {
                         button.text(xhr.message)
-                    }, 3000);
-                    setTimeout(function () {
-                        button.text('Да результаты добавлены...')
-                        button.removeClass('btn btn-dark rounded-pill')
-                        button.addClass('btn border-t-neutral-500 rounded-pil')
-                        button.attr("disabled", "true");
-                        button.css('pointer-events', 'none');
-                    }, 6000);
-
+                    }, 1000);
                     setTimeout(function () {
                         window.location.href = xhr.link;
                     }, 3000);
@@ -224,7 +213,7 @@
                         let button_css = document.getElementById('btn-send-result')
                         button_css.removeAttribute("disabled");
                         button.text('Внести')
-                    }, 8000);
+                    }, 3000);
 
                 },
 
