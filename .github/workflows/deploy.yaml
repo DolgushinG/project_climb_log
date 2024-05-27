@@ -27,6 +27,7 @@ jobs:
             git reset --hard
             git pull
             /usr/bin/php artisan down
+            /usr/bin/php artisan migrate
             /usr/bin/php artisan optimize
             /usr/bin/php artisan config:clear
             export NVM_DIR=~/.nvm
