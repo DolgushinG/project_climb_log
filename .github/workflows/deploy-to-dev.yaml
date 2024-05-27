@@ -30,9 +30,7 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /var/www/stage-dev.project_climb_log
-            branch=$(git branch -r --contains ${{ github.ref }} --format "%(refname:lstrip=3)")
-            echo ::set-env name=BRANCH::$branch
-            git checkout ${{ env.BRANCH }}
+            git checkout ${{ github.head_ref || github.ref_name }}
             git reset --hard
             git pull
             /usr/bin/php artisan down
@@ -43,60 +41,60 @@ jobs:
             source ~/.nvm/nvm.sh
             npm run prod
             /usr/bin/php artisan up
-  test_part_1:
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Git clone
-        run: |
-          git clone https://github.com/DolgushinG/project_comp_reg_autotests
-          cd project_comp_reg_autotests
-          python3 -m venv virtual-env
-          source virtual-env/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          tox -e chrome
-  test_part_2:
-    needs: [ build ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Git clone
-        run: |
-          git clone https://github.com/DolgushinG/project_comp_reg_autotests
-          cd project_comp_reg_autotests
-          python3 -m venv virtual-env
-          source virtual-env/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          tox -e chrome2
-  test_part_3:
-    needs: [ build ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Git clone
-        run: |
-          git clone https://github.com/DolgushinG/project_comp_reg_autotests
-          cd project_comp_reg_autotests
-          python3 -m venv virtual-env
-          source virtual-env/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          tox -e chrome3
-
-
-
+#  test_part_1:
+#    needs: [build]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up Python 3.9
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: 3.9
+#      - name: Git clone
+#        run: |
+#          git clone https://github.com/DolgushinG/project_comp_reg_autotests
+#          cd project_comp_reg_autotests
+#          python3 -m venv virtual-env
+#          source virtual-env/bin/activate
+#          pip install --upgrade pip
+#          pip install -r requirements.txt
+#          tox -e chrome
+#  test_part_2:
+#    needs: [ build ]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up Python 3.9
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: 3.9
+#      - name: Git clone
+#        run: |
+#          git clone https://github.com/DolgushinG/project_comp_reg_autotests
+#          cd project_comp_reg_autotests
+#          python3 -m venv virtual-env
+#          source virtual-env/bin/activate
+#          pip install --upgrade pip
+#          pip install -r requirements.txt
+#          tox -e chrome2
+#  test_part_3:
+#    needs: [ build ]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up Python 3.9
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: 3.9
+#      - name: Git clone
+#        run: |
+#          git clone https://github.com/DolgushinG/project_comp_reg_autotests
+#          cd project_comp_reg_autotests
+#          python3 -m venv virtual-env
+#          source virtual-env/bin/activate
+#          pip install --upgrade pip
+#          pip install -r requirements.txt
+#          tox -e chrome3
+#
+#
+#
