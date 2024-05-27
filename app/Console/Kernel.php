@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('queue:work')->everyMinute()->withoutOverlapping();
         $schedule->command('events:update-status')->hourly();
         $schedule->command('participant:update-reg-status')->hourly();
-        $schedule->command('sets:update-sets-participant')->everyMinute();
+        $schedule->command('sets:update-sets-participant')->everyTenMinutes();
 
     }
 
