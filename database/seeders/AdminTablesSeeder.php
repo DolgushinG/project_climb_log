@@ -375,6 +375,10 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "role_id" => 2,
+                    "menu_id" => 18
+                ],
+                [
+                    "role_id" => 2,
                     "menu_id" => 19
                 ],
                 [

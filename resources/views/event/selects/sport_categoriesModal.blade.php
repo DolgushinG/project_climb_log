@@ -1,7 +1,7 @@
 @if($event->is_need_sport_category)
     @if(!Auth::user()->sport_category)
         <div class="form-floating mb-3">
-            <select class="form-select" id="floatingSelectSportCategory"
+            <select class="form-select" id="floatingSelectSportCategoryModal"
                     aria-label="Floating label select example" autocomplete="off" required>
                 <option selected disabled value="">Открыть для выбора разряда
                 </option>

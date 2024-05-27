@@ -3,8 +3,9 @@
     <h3>Вы приняли участие в соревновании <h3/><br>
     <h2><strong>{{ $details['title'] }}</strong><h2/><br>
 {{--        <img width="100%" src="{{asset('storage/'.$details['image'])}}" alt="">   <br>--}}
+    <h3>Ваш сет  : <strong>{{ $details['number_set']}} @lang('somewords.'.$details['set_day_of_week']) {{$details['set_date']}} {{$details['set_time']}}</strong><h3/><br>
     <h3>Дата старта  : <strong>{{ $details['event_start_date'] }}</strong><h3/><br>
-    <h3><strong>Для завершения регистрации пожалуйста оплатите участие</strong><br>
+    <h3><strong>Для завершения регистрации, пожалуйста, оплатите участие</strong><br>
         @isset($details['pay_time_expired'])
             <h3 style="color:red"><strong>или регистрация сгорит через {{$details['pay_time_expired']}} - {{\App\Helpers\Helpers::echo_days($details['pay_time_expired'])}}</strong><br>
         @endisset

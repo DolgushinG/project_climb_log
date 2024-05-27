@@ -18,19 +18,21 @@ $(document).on('click','#btn-participant', function(e) {
         // Проверяем, что значение не пустое
         if (setsValue === "") {
             // Выводим сообщение об ошибке
-            document.getElementById("error-message").innerText = "Пожалуйста выберите сет для участия";
+            document.getElementById("error-message").innerText = "Пожалуйста выберите сет для участия, если сеты заняты добавьтесь в лист ожидания";
+            document.getElementById("error-message").style.display = "block";
             return; // Прерываем выполнение функции
         }
     }
 
     if (birthday) {
         // Получаем значение выбранного элемента
-        var birthdayValue = sets.value.trim();
+        var birthdayValue = birthday.value.trim();
 
         // Проверяем, что значение не пустое
         if (birthdayValue === "") {
             // Выводим сообщение об ошибке
-            document.getElementById("error-message").innerText = "Пожалуйста установить дата рождения для участия";
+            document.getElementById("error-message").innerText = "Пожалуйста укажите дату рождения для участия";
+            document.getElementById("error-message").style.display = "block";
             return; // Прерываем выполнение функции
         }
     }
@@ -43,6 +45,7 @@ $(document).on('click','#btn-participant', function(e) {
         if (categoryValue === "") {
             // Выводим сообщение об ошибке
             document.getElementById("error-message").innerText = "Пожалуйста выберите категорию для участия";
+            document.getElementById("error-message").style.display = "block";
             return; // Прерываем выполнение функции
         }
     }
@@ -55,6 +58,7 @@ $(document).on('click','#btn-participant', function(e) {
         if (sportCategoryValue === "") {
             // Выводим сообщение об ошибке
             document.getElementById("error-message").innerText = "Пожалуйста выберите разряд для участия";
+            document.getElementById("error-message").style.display = "block";
             return; // Прерываем выполнение функции
         }
     }
@@ -65,15 +69,18 @@ $(document).on('click','#btn-participant', function(e) {
         // Проверяем, что значение не пустое
         if (genderValue === "") {
             // Выводим сообщение об ошибке
-            document.getElementById("error-message").innerText = "Пожалуйста выберите разряд для участия";
+            document.getElementById("error-message").innerText = "Пожалуйста укажите ваш пол для участия";
+            document.getElementById("error-message").style.display = "block";
             return; // Прерываем выполнение функции
         }
     }
     // Если все селекты заполнены, очищаем сообщение об ошибке
     document.getElementById("error-message").innerText = "";
+    document.getElementById("error-message").style.display = "none";
 
     let button = $('#btn-participant')
     let event_id = document.getElementById('btn-participant').getAttribute('data-id')
+    let free_set = sets.options[sets.selectedIndex].getAttribute("data-free")
     let link = document.getElementById('btn-participant').getAttribute('data-link')
     let is_france_system_qualification = document.getElementById('btn-participant').getAttribute('data-format')
     let user_id = document.getElementById('btn-participant').getAttribute('data-user-id')
@@ -83,6 +90,7 @@ $(document).on('click','#btn-participant', function(e) {
         url: '/takePart',
         data: {
             'number_set': setsValue,
+            'free_set': free_set,
             'event_id': event_id,
             'user_id': user_id,
             'category': categoryValue,
@@ -98,28 +106,17 @@ $(document).on('click','#btn-participant', function(e) {
             }, 1500);
             setTimeout(function () {
                 window.location.reload();
-                // getInfoPayment(event_id, '#payment')
-                // getInfoPaymentBll(event_id, '#paymentTab')
-                // button.text('Оплатить')
-                // button.removeClass('btn btn-dark rounded-pill')
-                // button.attr('id', '#btn')
-                // button.addClass('btn btn-warning rounded-pill')
-                // button.attr('data-bs-toggle', 'modal')
-                // button.attr('data-bs-target', '#scrollingModal')
-
             }, 3000);
         },
         error: function(xhr, status, error) {
 
             button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Обработка...')
             setTimeout(function () {
-                button.removeClass('btn-save-change')
                 button.addClass('btn-failed-change')
-                button.text(xhr.message)
+                button.text(xhr.responseJSON.message)
             }, 1500);
             setTimeout(function () {
                 button.removeClass('btn-failed-change')
-                button.addClass('btn-save-change')
                 button.text('Участвовать')
             }, 3000);
 
@@ -155,7 +152,6 @@ function getInfoPaymentBll(event_id, id) {
         },
     });
 }
-
 $(document).on('click','#btn-participant-change-set', function(e) {
     $.ajaxSetup({
         headers: {
@@ -182,26 +178,173 @@ $(document).on('click','#btn-participant-change-set', function(e) {
 
             setTimeout(function () {
                 button.text(xhr.message)
-            }, 3000);
+            }, 1000);
             setTimeout(function () {
                 button.text('Сет изменен')
-            }, 6000);
+            }, 2000);
+            setTimeout(function () {
+                window.location.reload();
+            }, 3000);
+        },
+        error: function(xhr, status, error) {
+            button.text('').append('<i id="spinner" class="fa fa-spinner fa-spin"></i> Обработка...')
+            setTimeout(function () {
+                button.text(xhr.responseJSON.message)
+            }, 3000);
             setTimeout(function () {
                 button.text('Изменить сет')
             }, 6000);
+
+        },
+
+    });
+});
+$(document).on('click','#add-to-list-pending', function(e) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    let category = document.getElementById("floatingSelectCategoryModal");
+    let sport_category = document.getElementById("floatingSelectSportCategoryModal");
+    let birthday = document.getElementById("birthdayModal");
+    let gender = document.getElementById("floatingSelectGenderModal");
+
+    if (category) {
+        var categoryValue = category.value.trim();
+        if (categoryValue === "") {
+            document.getElementById("error-message-modal").innerText = "Пожалуйста выберите категорию для добавление в лист ожидания";
+            document.getElementById("error-message-modal").style.display = "block";
+            return; // Прерываем выполнение функции
+        }
+    }
+    let checkboxes = [...document.querySelectorAll('#list_pending .form-check-input:checked')].map(e => e.checked);
+    if (checkboxes.length === 0) {
+        document.getElementById("error-message-modal").innerText = "Пожалуйста выберите сет";
+        document.getElementById("error-message-modal").style.display = "block";
+        return; // Прерываем выполнение функции
+    }
+    console.log(birthday)
+    if (birthday) {
+        // Получаем значение выбранного элемента
+        var birthdayValue = birthday.value.trim();
+
+        // Проверяем, что значение не пустое
+        if (birthdayValue === "") {
+            // Выводим сообщение об ошибке
+            document.getElementById("error-message-modal").innerText = "Пожалуйста укажите дату рождения для участия";
+            document.getElementById("error-message-modal").style.display = "block";
+            return; // Прерываем выполнение функции
+        }
+    }
+
+    if (sport_category) {
+        // Получаем значение выбранного элемента
+        var sportCategoryValue = sport_category.value.trim();
+
+        // Проверяем, что значение не пустое
+        if (sportCategoryValue === "") {
+            // Выводим сообщение об ошибке
+            document.getElementById("error-message-modal").innerText = "Пожалуйста выберите разряд для участия";
+            document.getElementById("error-message-modal").style.display = "block";
+            return; // Прерываем выполнение функции
+        }
+    }
+    if (gender) {
+        // Получаем значение выбранного элемента
+        var genderValue = gender.value.trim();
+
+        // Проверяем, что значение не пустое
+        if (genderValue === "") {
+            // Выводим сообщение об ошибке
+            document.getElementById("error-message-modal").innerText = "Пожалуйста укажите ваш пол для участия";
+            document.getElementById("error-message-modal").style.display = "block";
+            return; // Прерываем выполнение функции
+        }
+    }
+    const data = [...document.querySelectorAll('.form-check-input:checked')].map(e => e.value);
+    let button = $('#add-to-list-pending')
+    button.attr("disabled", true);
+    let button_close = $('#list-pending-close')
+    let event_id = document.getElementById('add-to-list-pending').getAttribute('data-event-id')
+    let user_id = document.getElementById('add-to-list-pending').getAttribute('data-user-id')
+    e.preventDefault()
+    $.ajax({
+        type: 'POST',
+        url: '/addToListPending',
+        data: {
+            'category': categoryValue,
+            'number_sets': data,
+            'event_id': event_id,
+            'user_id': user_id,
+            'gender': genderValue,
+            'sport_category': sportCategoryValue,
+            'birthday': birthdayValue,
+        },
+        success: function(xhr, status, error) {
+            document.getElementById("error-message-modal").style.display = "none";
+            button.text('').append('<i id="spinner" class="fa fa-spinner fa-spin ml-2"></i> Обработка...')
+            setTimeout(function () {
+                button.text(xhr.message)
+            }, 3000);
+            setTimeout(function () {
+                window.location.reload();
+            }, 6000);
         },
         error: function(xhr, status, error) {
-            button.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
-                '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+            button.text('').append('<i id="spinner" class="fa fa-spinner fa-spin"></i> Обработка...')
             setTimeout(function () {
                 button.removeClass('btn-save-change')
                 button.addClass('btn-failed-change')
-                button.text(xhr.message)
+                button.text(xhr.responseJSON.message)
             }, 3000);
             setTimeout(function () {
                 button.removeClass('btn-failed-change')
                 button.addClass('btn-save-change')
-                button.text('Изменить сет')
+                button.text('Добавить')
+            }, 6000);
+
+        },
+
+    });
+});
+
+$(document).on('click','#add-to-list-pending-remove', function(e) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    let button_close = $('#list-pending-close')
+    let button_remove = $('#add-to-list-pending-remove')
+    let event_id = document.getElementById('add-to-list-pending').getAttribute('data-event-id')
+    let user_id = document.getElementById('add-to-list-pending').getAttribute('data-user-id')
+    e.preventDefault()
+    $.ajax({
+        type: 'POST',
+        url: '/removeFromListPending',
+        data: {
+            'event_id': event_id,
+            'user_id': user_id
+        },
+        success: function(xhr, status, error) {
+            document.getElementById("error-message-modal").style.display = "none";
+            button_remove.text('').append('<i id="spinner" class="fa fa-spinner fa-spin ml-2"></i> Обработка...')
+            setTimeout(function () {
+                button_remove.text(xhr.message)
+            }, 2000);
+            setTimeout(function () {
+                button_remove.attr("disabled", false);
+                window.location.reload();
+            }, 3000);
+        },
+        error: function(xhr, status, error) {
+            button.text('').append('<i id="spinner" class="fa fa-spinner fa-spin"></i> Обработка...')
+            setTimeout(function () {
+                button.text(xhr.responseJSON.message)
+            }, 3000);
+            setTimeout(function () {
+                button.text('Убрать из листа ожидания')
             }, 6000);
 
         },
@@ -345,6 +488,34 @@ $("#crop").click(function () {
 $(document).ready(function () {
     $(document).on('click', '#modalclose', function (e) {
         $modal.modal('hide');
+    })
+    $(document).on('click', '#floatingSelect', function (e) {
+        let free = e.target.getAttribute('data-free')
+        if (free > 0) {
+            let btn_participant = $('#btn-participant')
+            btn_participant.attr('disabled', false)
+            btn_participant.text('Участвовать')
+        }
+    })
+    $(document).on('click', '#floatingSelectChangeSet', function (e) {
+        let free = e.target.getAttribute('data-free')
+        let data_set = e.target.getAttribute('data-set')
+        if(data_set === "current"){
+            let btn_participant_change_set = $('#btn-participant-change-set')
+            btn_participant_change_set.attr('disabled', true)
+            btn_participant_change_set.text('Вы уже в этом сете')
+        } else {
+            if(free > 0) {
+                let btn_participant_change_set = $('#btn-participant-change-set')
+                btn_participant_change_set.attr('disabled', false)
+                btn_participant_change_set.text('Изменить сет')
+            } else {
+                let btn_participant_change_set = $('#btn-participant-change-set')
+                btn_participant_change_set.attr('disabled', true)
+                btn_participant_change_set.text('Этот сет заполнен')
+            }
+        }
+
     })
 });
 
