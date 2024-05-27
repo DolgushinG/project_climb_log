@@ -489,7 +489,40 @@ $(document).ready(function () {
     $(document).on('click', '#modalclose', function (e) {
         $modal.modal('hide');
     })
-})
+    $(document).on('click', '#floatingSelect', function (e) {
+        let free = this.options[this.selectedIndex].getAttribute('data-free')
+        if (free > 0) {
+            let btn_participant = $('#btn-participant')
+            btn_participant.attr('disabled', false)
+            btn_participant.text('Участвовать')
+        }
+    })
+    $(document).on('click', '#floatingSelectChangeSet', function (e) {
+        let free = this.options[this.selectedIndex].getAttribute('data-free')
+        let data_set = this.options[this.selectedIndex].getAttribute('data-set')
+        if(data_set === "current"){
+            let btn_participant_change_set = $('#btn-participant-change-set')
+            btn_participant_change_set.attr('disabled', true)
+            btn_participant_change_set.text('Вы уже в этом сете')
+        } else {
+            if(free == null){
+                let btn_participant_change_set = $('#btn-participant-change-set')
+                btn_participant_change_set.attr('disabled', false)
+                btn_participant_change_set.text('Изменить сет')
+            }
+            if(free > 0) {
+                let btn_participant_change_set = $('#btn-participant-change-set')
+                btn_participant_change_set.attr('disabled', false)
+                btn_participant_change_set.text('Изменить сет')
+            } else {
+                let btn_participant_change_set = $('#btn-participant-change-set')
+                btn_participant_change_set.attr('disabled', true)
+                btn_participant_change_set.text('Этот сет заполнен')
+            }
+        }
+
+    })
+});
 
 
 
