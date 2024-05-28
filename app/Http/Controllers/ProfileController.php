@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Activitylog\Models\Activity;
+use Illuminate\Validation\Rule;
+
 
 class ProfileController extends Controller
 {
@@ -142,14 +144,16 @@ class ProfileController extends Controller
             'email.unique' => 'Этот email уже зарегистрирован, возможно вы уже имеете аккаунт с этой почтой',
         );
         $validator = Validator::make($request->all(), [
-            'firstname' => 'string',
-            'lastname' => 'string',
-            'email' => 'email|string|unique:users',
-        ],$messages);
-        if ($validator->fails())
-        {
-            return response()->json(['error' => true,'message'=> $validator->errors()->all()],422);
-        }
+                'firstname' => 'string',
+                'lastname' => 'string',
+                'email' => [
+                    'email',
+                    'string',
+                    // Исключаем текущего пользователя из проверки уникальности email
+                    Rule::unique('users')->ignore(Auth()->user()->id),
+                ],
+            ], $messages);
+
         if (!filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
             return response()->json(['error' => true,'message'=> ['Поле email не корректно']],422);
         }
