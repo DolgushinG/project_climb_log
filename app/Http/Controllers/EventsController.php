@@ -312,7 +312,7 @@ class EventsController extends Controller
         }
         if($event->is_auto_categories){
             $participant->category_id = 0;
-        }else{
+        } else {
             $participant->category_id = $participant_categories->id;
         }
 

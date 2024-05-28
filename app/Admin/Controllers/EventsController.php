@@ -274,7 +274,7 @@ class EventsController extends Controller
         })->tab('Оплата', function ($form) {
             $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
             $form->image('img_payment', 'QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
-            $form->text('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
+            $form->number('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
         })->tab('Параметры соревнования', function ($form) use ($id) {
             $form->radio('is_france_system_qualification','Настройка подсчета квалификации')

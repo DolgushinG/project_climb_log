@@ -489,7 +489,7 @@ $(document).ready(function () {
     $(document).on('click', '#modalclose', function (e) {
         $modal.modal('hide');
     })
-    $(document).on('click', '#floatingSelect', function (e) {
+    $(document).on('change', '#floatingSelect', function (e) {
         let free = this.options[this.selectedIndex].getAttribute('data-free')
         if (free > 0) {
             let btn_participant = $('#btn-participant')
@@ -497,7 +497,7 @@ $(document).ready(function () {
             btn_participant.text('Участвовать')
         }
     })
-    $(document).on('click', '#floatingSelectChangeSet', function (e) {
+    $(document).on('change', '#floatingSelectChangeSet', function (e) {
         let free = this.options[this.selectedIndex].getAttribute('data-free')
         let data_set = this.options[this.selectedIndex].getAttribute('data-set')
         if(data_set === "current"){
