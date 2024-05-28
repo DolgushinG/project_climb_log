@@ -57,12 +57,12 @@ class CreateEventsTable extends Migration
             $table->integer('mode')->nullable();
             $table->integer('mode_amount_routes')->nullable();
             $table->boolean('active')->default(0);
-            $table->boolean('is_input_set')->nullable();
-            $table->boolean('is_registration_state')->nullable();
-            $table->boolean('is_need_pay_for_reg')->nullable();
+            $table->boolean('is_input_set')->default(0);
+            $table->boolean('is_registration_state')->default(1);
+            $table->boolean('is_need_pay_for_reg')->default(1);
             $table->boolean('registration_time_expired')->nullable();
             $table->datetime('datetime_registration_state')->nullable();
-            $table->boolean('is_send_result_state')->nullable();
+            $table->boolean('is_send_result_state')->default(0);
             $table->boolean('is_open_send_result_state')->default(1);
             $table->datetime('datetime_send_result_state')->nullable();
             $table->boolean('is_public')->default(0);
