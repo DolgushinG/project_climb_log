@@ -1,14 +1,8 @@
 @extends('layouts.main_page.app')
 
 @section('content')
-    <section id="contact" class="d-flex align-items-center">
-        <div class="container" data-aos="zoom-out" data-aos-delay="100">
-            Согласие обработки персональных данных
-        </div>
-    </section><!-- End Hero -->
-    <main id="main" class="main">
-        <section class="list-route">
-            <div class="row gy-4">
+    <section class="list-route">
+            <div class="row mt-3 gy-4">
                 <div class="col">
                     <div class="container">
                         <div class="row">
@@ -226,5 +220,4 @@
                 </div>
             </div>
         </section>
-    </main>
 @endsection

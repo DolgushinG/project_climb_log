@@ -1,11 +1,6 @@
 @extends('layouts.main_page.app')
 
 @section('content')
-    <section id="contact" class="d-flex align-items-center">
-        <div class="container" data-aos="zoom-out" data-aos-delay="100">
-        </div>
-    </section><!-- End Hero -->
-    <main id="main" class="main">
         <section class="list-route">
             <div class="row gy-4">
                 <div class="col">
@@ -80,11 +75,6 @@
                 </div>
             </div>
         </section>
-        <section id="contact" class="d-flex align-items-center">
-            <div class="container" data-aos="zoom-out" data-aos-delay="100">
-            </div>
-        </section><!-- End Hero -->
-    </main>
     <script>
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             $(document).ready(function () {

@@ -35,11 +35,16 @@
 
 </head>
 
-<body>
+<body class="light-mode">
+
+<div class="container-fluid">
+
+    <div class="main-content-wrapper">
 @include('layouts.main_page.header')
 @include('cookie.cookies')
 @yield("content")
 @include('layouts.main_page.footer')
+
 <div id="preloader"></div>
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
         class="bi bi-arrow-up-short"></i></a>
@@ -61,6 +66,7 @@
 
 <!-- Template Main JS File -->
 <script src="{{asset('js/main.js')}}"></script>
-
+    </div>
+</div>
 </body>
 </html>

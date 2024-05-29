@@ -1,13 +1,8 @@
 @extends('layouts.main_page.app')
 @section('content')
-    <section id="contact" class="d-flex align-items-center">
-        <div class="container" data-aos="zoom-out" data-aos-delay="100">
-        </div>
-    </section><!-- End Hero -->
-    <main id="main">
-        <section class="section contact">
-            <div class="row m-2 gy-4 w-80">
-                <div class="col-xl-12">
+    <section class="section contact">
+            <div class="row mt-3 w-80">
+                <div class="col-xl-12 mb-3">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Мужчины <span
@@ -42,11 +37,15 @@
                                                         <td>{{$res['city']}}</td>
                                                         <td>
                                                             @foreach($routes as $route)
+                                                                <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">М{{$route}}</span>
+                                                            @endforeach
+                                                                <br>
+                                                            @foreach($routes as $route)
                                                                 @isset($res['amount_try_top_'.$route])
                                                                     @if($res['amount_try_top_'.$route] > 0)
-                                                                        <span class="bg-success result-try" style="border-radius: 5px 5px 0 0;">{{$res['amount_try_top_'.$route]}}</span>
+                                                                        <span class="bg-success result-try">{{$res['amount_try_top_'.$route]}}</span>
                                                                     @else
-                                                                        <span class="bg-danger result-try" style="color:white;border-radius: 5px 5px 0 0;">-</span>
+                                                                        <span class="bg-danger result-try">-</span>
                                                                     @endif
                                                                 @endisset
                                                             @endforeach
@@ -91,11 +90,15 @@
                                                     <td>{{$res['city']}}</td>
                                                     <td>
                                                         @foreach($routes as $route)
+                                                            <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">М{{$route}}</span>
+                                                        @endforeach
+                                                        @foreach($routes as $route)
+                                                            <br>
                                                             @isset($res['amount_try_top_'.$route])
                                                                 @if($res['amount_try_top_'.$route] > 0)
-                                                                    <span class="bg-success result-try" style="border-radius: 5px 5px 0 0;">{{$res['amount_try_top_'.$route]}}</span>
+                                                                    <span class="bg-success result-try">{{$res['amount_try_top_'.$route]}}</span>
                                                                 @else
-                                                                    <span class="bg-danger result-try" style="color:white;border-radius: 5px 5px 0 0;">-</span>
+                                                                    <span class="bg-danger result-try">-</span>
                                                                 @endif
                                                             @endisset
                                                         @endforeach
@@ -155,11 +158,15 @@
                                                         <td>{{$res['city']}}</td>
                                                         <td>
                                                             @foreach($routes as $route)
+                                                                <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">Ж{{$route}}</span>
+                                                            @endforeach
+                                                            <br>
+                                                            @foreach($routes as $route)
                                                                 @isset($res['amount_try_top_'.$route])
                                                                     @if($res['amount_try_top_'.$route] > 0)
-                                                                        <span class="bg-success result-try" style="border-radius: 5px 5px 0 0;">{{$res['amount_try_top_'.$route]}}</span>
+                                                                        <span class="bg-success result-try">{{$res['amount_try_top_'.$route]}}</span>
                                                                     @else
-                                                                        <span class="bg-danger result-try" style="color:white;border-radius: 5px 5px 0 0;">-</span>
+                                                                        <span class="bg-danger result-try">-</span>
                                                                     @endif
                                                                 @endisset
                                                             @endforeach
@@ -203,11 +210,15 @@
                                                     <td>{{$res['city']}}</td>
                                                     <td>
                                                         @foreach($routes as $route)
+                                                            <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">Ж{{$route}}</span>
+                                                        @endforeach
+                                                        <br>
+                                                        @foreach($routes as $route)
                                                             @isset($res['amount_try_top_'.$route])
                                                                 @if($res['amount_try_top_'.$route] > 0)
-                                                                    <span class="bg-success result-try" style="border-radius: 5px 5px 0 0;">{{$res['amount_try_top_'.$route]}}</span>
+                                                                    <span class="bg-success result-try">{{$res['amount_try_top_'.$route]}}</span>
                                                                 @else
-                                                                    <span class="bg-danger result-try" style="color:white;border-radius: 5px 5px 0 0;">-</span>
+                                                                    <span class="bg-danger result-try">-</span>
                                                                 @endif
                                                             @endisset
                                                         @endforeach
@@ -235,5 +246,4 @@
                 </div>
             </div>
         </section>
-    </main><!-- End #main -->
 @endsection

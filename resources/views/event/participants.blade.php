@@ -1,24 +1,19 @@
 @extends('layouts.main_page.app')
 @section('content')
-    <section id="contact" class="d-flex align-items-center">
-        <div class="container" data-aos="zoom-out" data-aos-delay="100">
-        </div>
-    </section><!-- End Hero -->
-    <main id="main" class="main">
-        <section class="section contact">
-            <div class="row">
+    <section class="section contact">
+            <div class="row mt-3">
                 @if($days)
                     @foreach($days as $day)
                         <div class="col-md-2"></div>
-                        <div class="col-md-8">
+                        <div class="col-md-8 mb-2">
                             <div class="card">
                                 <div class="card-body">
                                     <!-- Bordered Tabs Justified -->
                                     <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
-                                        @foreach($sets as $set)
+                                        @foreach($sets as $index => $set)
                                             @if($day->day_of_week === $set->day_of_week)
                                                 <li class="nav-item" role="presentation">
-                                                    <button class="nav-link" style="font-size: 10px" id="{{$set->id}}-tab"
+                                                    <button class="nav-link {{ $index == 0 ? 'active' : '' }}" style="font-size: 10px" id="{{$set->id}}-tab"
                                                             data-bs-toggle="tab"
                                                             data-bs-target="#bordered-justified-{{$set->id}}" type="button"
                                                             role="tab" aria-controls="{{$set->id}}"
@@ -32,9 +27,9 @@
                                         @endforeach
                                     </ul>
                                     <div class="tab-content pt-2" id="borderedTabJustifiedContent">
-                                        @foreach($sets as $set)
+                                        @foreach($sets as $index => $set)
                                             @if($day->day_of_week == $set->day_of_week)
-                                                <div class="tab-pane fade show" id="bordered-justified-{{$set->id}}"
+                                                <div class="tab-pane fade show {{ $index == 0 ? 'active' : '' }}" id="bordered-justified-{{$set->id}}"
                                                      role="tabpanel" aria-labelledby="{{$set->id}}-tab">
                                                     <table class="table table-sm table">
                                                         <thead>
@@ -68,13 +63,13 @@
                         <div class="col-md-2"></div>
                     @endforeach
                 @else
-                    <div class="col">
+                    <div class="col mb-3">
                         <div class="card">
                             <div class="card-body">
                                 <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
-                                    @foreach(['male', 'female'] as $var)
+                                    @foreach(['male', 'female'] as $index => $var)
                                         <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="{{$var}}-tab"
+                                            <button class="nav-link {{ $index == 0 ? 'active' : '' }}" id="{{$var}}-tab"
                                                     data-bs-toggle="tab"
                                                     data-bs-target="#bordered-justified-{{$var}}" type="button"
                                                     role="tab" aria-controls="{{$var}}"
@@ -83,8 +78,8 @@
                                     @endforeach
                                 </ul>
                                 <div class="tab-content pt-2" id="borderedTabJustifiedContent">
-                                    @foreach(['male', 'female'] as $var)
-                                        <div class="tab-pane fade show" id="bordered-justified-{{$var}}"
+                                    @foreach(['male', 'female'] as $index => $var)
+                                        <div class="tab-pane fade show {{ $index == 0 ? 'active' : '' }}" id="bordered-justified-{{$var}}"
                                              role="tabpanel" aria-labelledby="{{$var}}-tab">
                                             <table class="table table-sm table-striped">
                                                 <thead>
@@ -119,7 +114,6 @@
                @endif
             </div>
         </section>
-    </main><!-- End #main -->
     <script>
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             $(document).ready(function () {
