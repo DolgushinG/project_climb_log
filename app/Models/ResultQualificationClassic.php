@@ -368,9 +368,14 @@ class ResultQualificationClassic extends Model
     public static function send_main_about_take_part($event, $user, $participant)
     {
         if (!str_contains($user->email, 'telegram')) {
-            $set = Set::find($participant->number_set_id);
-            $dates = Helpers::getDatesByDayOfWeek($event->start_date, $event->end_date);
-            $set_date = $dates[$set->day_of_week] ?? '';
+            if($event->is_input_set != 1){
+                $set = Set::find($participant->number_set_id);
+                $dates = Helpers::getDatesByDayOfWeek($event->start_date, $event->end_date);
+                $set_date = $dates[$set->day_of_week] ?? '';
+            } else{
+                $set_date = '';
+            }
+
             $details = array();
             $details['title'] = $event->title;
             $details['number_set'] = $set->number_set;

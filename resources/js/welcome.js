@@ -14,7 +14,6 @@ $(document).on('click','#btn-participant', function(e) {
     if (sets) {
         // Получаем значение выбранного элемента
         var setsValue = sets.value.trim();
-
         // Проверяем, что значение не пустое
         if (setsValue === "") {
             // Выводим сообщение об ошибке
@@ -80,7 +79,7 @@ $(document).on('click','#btn-participant', function(e) {
 
     let button = $('#btn-participant')
     let event_id = document.getElementById('btn-participant').getAttribute('data-id')
-    let free_set = sets.options[sets.selectedIndex].getAttribute("data-free")
+
     let link = document.getElementById('btn-participant').getAttribute('data-link')
     let is_france_system_qualification = document.getElementById('btn-participant').getAttribute('data-format')
     let user_id = document.getElementById('btn-participant').getAttribute('data-user-id')
@@ -90,7 +89,6 @@ $(document).on('click','#btn-participant', function(e) {
         url: '/takePart',
         data: {
             'number_set': setsValue,
-            'free_set': free_set,
             'event_id': event_id,
             'user_id': user_id,
             'category': categoryValue,

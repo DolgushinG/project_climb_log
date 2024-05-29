@@ -2,7 +2,7 @@
 
 @section('content')
         <section class="list-route">
-            <div class="row gy-4">
+            <div class="row mt-3 gy-4">
                 <div class="col">
                     <div class="container">
                         <div class="row">
@@ -14,7 +14,7 @@
 
                                 </div>
                                 <div class="text-right">
-                                    <button type="button" class="btn btn-dark" id="all-flash">Отметить все FLASH
+                                    <button type="button" class="btn btn-dark mb-2" id="all-flash">Отметить все FLASH
                                     </button>
                                     <button type="button" class="btn btn-dark" id="all-redpoint">Отметить все REDPOINT
                                     </button>
@@ -22,11 +22,11 @@
                                 <table class="table">
                                     <thead>
                                     <tr>
-                                        <th scope="col">Номер трассы</th>
+                                        <th scope="col">№ трассы</th>
                                         <th id="grade" scope="col">Категория</th>
                                         <th scope="col">Не пролез</th>
-                                        <th scope="col">Flash</th>
-                                        <th scope="col">Redpoint</th>
+                                        <th scope="col">Флэш</th>
+                                        <th scope="col">Редпоинт</th>
                                     </tr>
                                     </thead>
                                     <tbody>
