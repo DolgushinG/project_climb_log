@@ -143,7 +143,7 @@ class EventsController extends Controller
                         $participants[$index_user]['category'] = $categories[$participants[$index]['category_id']];
                     } else {
                         $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
-                        $category = $categories[$participants[$index]['category_id']] ?? 'Нет категории';
+                        $category = $categories[$participants[$index]['category_id']] ?? 'Нет группы';
                         $participants[$index_user]['category'] = $category;
                         $participants[$index_user]['number_set'] = $set->number_set;
                         $participants[$index_user]['time'] = $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10);

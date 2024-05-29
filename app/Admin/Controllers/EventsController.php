@@ -327,6 +327,9 @@ class EventsController extends Controller
                     ->when(0, function (Form $form) {
                     })->when(1, function (Form $form) {
                         $form->html('<h4 style="color: red" >Автоопределение категории по параметрам работает только при фестивальной системе</h4>');
+                        $form->html('<h5 style="color: black" >Пример заполнения 1 группа от 4 до 6B, 2 группа от 6B+ до 7A</h5>');
+                        $form->html('<h5 style="color: black" >Категории от и до не должны совпадать, например от 4 до 6B и от 6B до 7A</h5>');
+                        $form->html('<h5 style="color: black" >6B категория получиться в двух группах, что некорректно для работы</h5>');
                         $form->table('options_categories', '', function ($table) use ($form){
                             $table->select('Категория участника')->options($form->model()->categories)->readonly();
                             $table->select('От какой категории сложности определять эту категорию')->options(Grades::getGrades())->width('30px');
