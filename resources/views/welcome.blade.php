@@ -1,17 +1,11 @@
 @extends('layouts.main_page.app')
 @section('content')
-    <section id="contact" class="d-flex align-items-center">
-        <div class="container" data-aos="zoom-out" data-aos-delay="100">
-        </div>
-    </section><!-- End Hero -->
-    <!-- Slider Start -->
-    <main id="main" class="main">
-        <section class="section contact d-flex align-items-center">
-            <div class="row w-100">
+    <section class="section contact d-flex align-items-center">
+        <div class="row w-100 mt-4">
                 <div class="col-md-1"></div>
                 <div class="col-md-4">
                     <div class="card p-4">
-                        <div class="container ">
+                        <div class="container">
                             <h4 class="text-center">{{$event->title}}</h4>
                             <img class="img img-responsive" src="{{asset('storage/'.$event->image)}}" alt="">
                             <div class="d-grid gap-2 mt-3">
@@ -164,6 +158,7 @@
                                     </li>
                                 @endif
                             </ul>
+
                             <div class="tab-content pt-2" id="borderedTabJustifiedContent">
                                 <div class="tab-pane fade show active" id="bordered-justified-info" role="tabpanel"
                                      aria-labelledby="info-tab">
@@ -205,7 +200,6 @@
                     </div>
                 </div>
             </div>
-        </section>
-    </main><!-- End #main -->
+    </section>
     <script src="{{asset('js/welcome.js')}}"></script>
 @endsection

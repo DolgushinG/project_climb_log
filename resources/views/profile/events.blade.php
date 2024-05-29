@@ -5,7 +5,7 @@
     </div>
 @else
     @foreach($events as $event)
-    <div class="accordion" id="accordion{{$event->id}}">
+    <div class="accordion mb-2" id="accordion{{$event->id}}">
         <div class="accordion-item">
             <h2 class="accordion-header" id="heading{{$event->id}}">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{$event->id}}" aria-expanded="true" aria-controls="collapse{{$event->id}}">
