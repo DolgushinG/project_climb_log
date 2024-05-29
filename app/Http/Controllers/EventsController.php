@@ -136,13 +136,19 @@ class EventsController extends Controller
             }
             $index = 0;
             $categories = ParticipantCategory::where('event_id', $event->id)->pluck('category', 'id')->toArray();
+
             foreach ($participants as $index_user => $user) {
                 if ($index <= count($participants)) {
                     if($event->is_input_set == 1){
                         $participants[$index_user]['category'] = $categories[$participants[$index]['category_id']];
                     } else {
                         $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
-                        $participants[$index_user]['category'] = $categories[$participants[$index]['category_id']];
+                        if(isset($participants[$index]['category_id'])){
+                            $category = $categories[$participants[$index]['category_id']];
+                        } else {
+                            $category = 'Нет категории';
+                        }
+                        $participants[$index_user]['category'] = $category;
                         $participants[$index_user]['number_set'] = $set->number_set;
                         $participants[$index_user]['time'] = $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10);
                     }
