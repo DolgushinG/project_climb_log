@@ -12,6 +12,7 @@ use App\Models\Event;
 use App\Http\Controllers\Controller;
 use App\Models\Format;
 use App\Models\Grades;
+use App\Models\OwnerPayments;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFranceSystemQualification;
@@ -271,9 +272,39 @@ class EventsController extends Controller
             $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
             $form->hidden('admin_link', 'Ссылка на сореванование')->placeholder('Ссылка');
 //            $form->disableSubmit();
-        })->tab('Оплата', function ($form) {
+        })->tab('Оплата', function ($form) use ($id) {
             $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
             $form->image('img_payment', 'QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
+            $payments = OwnerPayments::where('event_id', $id)->first();
+            if($payments){
+                if($payments->amount_for_pay > 0){
+                    $form->tableamount('options_amount_price','Настройка оплаты' , function ($table) {
+                        $table->text('Название');
+                        $table->number('Сумма');
+                        $table->text('Ссылка на оплату');
+                        Admin::style('
+                        .remove {
+                          display: none;
+                        }
+                        .add-amount{
+                            display: none;
+                        }');
+                    });
+                } else {
+                    $form->tableamount('options_amount_price','Настройка оплаты' , function ($table) {
+                        $table->text('Название');
+                        $table->number('Сумма');
+                        $table->text('Ссылка на оплату');
+                    });
+                }
+            } else {
+                $form->tableamount('options_amount_price','Настройка оплаты' , function ($table) {
+                    $table->text('Название');
+                    $table->number('Сумма');
+                    $table->text('Ссылка на оплату');
+                });
+            }
+
             $form->number('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма')->required();
             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
         })->tab('Параметры соревнования', function ($form) use ($id) {
@@ -319,9 +350,13 @@ class EventsController extends Controller
             if($this->is_fill_results(intval($id))){
                 $form->html('<h5> Доступно только изменение категорий, так как были добавлены результаты, нельзя удалить или добавить новые</h5>');
                 $form->customlist('categories', 'Категории участников');
+                $form->table('options_categories', '', function ($table) use ($form){
+                    $table->select('Категория участника')->options($form->model()->categories)->attribute('disabled', 'true')->readonly();
+                    $table->select('От какой категории сложности определять эту категорию')->attribute('disabled', 'true')->options(Grades::getGrades())->width('30px');
+                    $table->select('До какой категории сложности определять эту категорию')->attribute('disabled', 'true')->options(Grades::getGrades())->width('30px');
+                });
             } else {
                 $form->list('categories', 'Категории участников')->rules('required|min:2');
-
                 $form->radio('is_auto_categories','Настройка категорий')
                     ->options([0 => 'Сами участники выбирают категорию при регистрации', 1 => 'Автоопределение категории по параметрам'])
                     ->when(0, function (Form $form) {

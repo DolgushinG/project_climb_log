@@ -15,6 +15,7 @@ use App\Exports\ExportProtocolRouteParticipant;
 use App\Exports\FranceSystemQualificationResultExport;
 use App\Exports\QualificationResultExport;
 use App\Models\Event;
+use App\Models\OwnerPaymentOperations;
 use App\Models\OwnerPayments;
 use App\Models\ResultQualificationClassic;
 use App\Http\Controllers\Controller;
@@ -138,10 +139,12 @@ class ResultQualificationController extends Controller
     public function update($id, Request $request)
     {
         $type = 'edit';
-        $value = null;
         if ($request->is_paid) {
             $type = 'is_paid';
-            $value = $request->is_paid;
+        }
+        if ($request['name'] == 'amount_start_price') {
+            $type = 'amount_start_price';
+
         }
         if ($request->result_for_edit) {
             $type = 'update';
@@ -258,10 +261,19 @@ class ResultQualificationController extends Controller
         });
 
         if ($event->is_need_pay_for_reg) {
+            $amounts = [];
+            $count = 1;
+//            dd($event->options_amount_price);
+            foreach($event->options_amount_price as $amount)  {
+                $amounts[$count] = $amount['Сумма'];
+                $count++;
+            }
+            $amounts[0] = '0 р';
             $states = [
-                'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
-                'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+                'on' => ['value' => 1, 'text' => 'V', 'color' => 'success'],
+                'off' => ['value' => 0, 'text' => 'X', 'color' => 'default'],
             ];
+            $grid->column('amount_start_price', 'Сумма оплаты')->editable('select', $amounts);
             $grid->column('is_paid', 'Оплата')->switch($states);
             \Encore\Admin\Admin::style('
                         @media only screen and (min-width: 1025px) {
@@ -344,6 +356,7 @@ class ResultQualificationController extends Controller
         ];
         if ($event->is_need_pay_for_reg) {
             $grid->column('is_paid', 'Оплата')->switch($states);
+            $grid->column('amount_start_price', 'Сумма')->select($event->options_amount_price['Сумма']);
 
             \Encore\Admin\Admin::style('
                         @media only screen and (min-width: 1025px) {
@@ -395,6 +408,7 @@ class ResultQualificationController extends Controller
             $form->text('category_id', 'category_id');
             $form->switch('active', 'active');
             $form->switch('is_paid', 'is_paid');
+            $form->switch('amount_start_price', 'amount_start_price');
             $form->saving(function (Form $form) {
                 if ($form->amount_try_top > 0) {
                     $form->amount_top = 1;
@@ -454,38 +468,84 @@ class ResultQualificationController extends Controller
                 }
                 Event::refresh_final_points_all_participant($form->model()->find($id)->event_id);
             }
+            if(intval($form->input('amount_start_price')) > 0){
+                $result = $form->model()->find($id);
+                $result->amount_start_price = $form->input('amount_start_price');
+                $result->save();
+            }
             if ($form->input('is_paid') == "0" || $form->input('is_paid') == "1") {
                 $participant = $form->model()->find($id);
+                if(!$participant->amount_start_price){
+                    throw new \Exception('Перед оплатой надо выбрать сумму оплаты');
+                }
                 $amount_participant = $form->model()->where('event_id', $participant->event_id)->get()->count();
                 $participant->is_paid = $form->input('is_paid');
                 $participant->save();
                 $admin = Admin::user();
                 $event = Event::find($participant->event_id);
                 if ($form->input('is_paid') === "1") {
+                    $amounts = [];
+                    $names = [];
+                    $count = 1;
+                    foreach($event->options_amount_price as $amount)  {
+                        $amounts[$count] = $amount['Сумма'];
+                        $names[$count] = $amount['Название'];
+                        $count++;
+                    }
+                    $amounts[0] = '0 р';
+                    $names[0] = 'Не оплачено';
+
+                    $index = $participant->amount_start_price;
+                    $amount_start_price = $amounts[$index];
+                    $amount_name = $names[$index];
+                    $transaction = OwnerPaymentOperations::where('event_id', $participant->event_id)
+                        ->where('user_id', $participant->user_id)->first();
+                    if (!$transaction) {
+                        $transaction = new OwnerPaymentOperations;
+                    }
+                    $transaction->owner_id = $admin->id;
+                    $transaction->user_id = $participant->user_id;
+                    $transaction->event_id = $participant->event_id;
+                    $transaction->amount = Event::counting_amount_for_pay_participant($amount_start_price);
+                    $transaction->type = $amount_name;
+                    $transaction->save();
+
+                    # Пересчитываем оплату за соревы
                     $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
                     if (!$payments) {
                         $payments = new OwnerPayments;
                     }
+                    $amount = OwnerPaymentOperations::where('event_id', $participant->event_id)->sum('amount');
                     $payments->owner_id = $admin->id;
                     $payments->event_id = $participant->event_id;
                     $payments->event_title = $event->title;
-                    $payments->amount_for_pay = $payments->amount_for_pay + Event::counting_amount_for_pay_participant($event->id);
+                    $payments->amount_for_pay = $amount;
                     $payments->amount_participant = $amount_participant;
-                    $payments->amount_start_price = $event->amount_start_price;
                     $payments->amount_cost_for_service = Event::COST_FOR_EACH_PARTICIPANT;
                     $payments->save();
+
                     $user = User::find($participant->user_id);
                     ResultQualificationClassic::send_confirm_bill($event, $user);
                 }
                 if ($form->input('is_paid') === "0") {
-                    $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
-                    if (!$payments) {
-                        $payments = new OwnerPayments;
-                    }
-                    if ($admin) {
-                        $amount = $payments->amount_for_pay - Event::counting_amount_for_pay_participant($event->id);
+                    $transaction = OwnerPaymentOperations::where('event_id', $participant->event_id)
+                        ->where('user_id', $participant->user_id)->first();
+                    if ($admin && $transaction) {
+                        $transaction->delete();
+                        # Пересчитываем оплату за соревы
+                        $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
+                        if (!$payments) {
+                            $payments = new OwnerPayments;
+                        }
+                        $amount = OwnerPaymentOperations::where('event_id', $participant->event_id)->select('amount')->count();
+                        $payments->owner_id = $admin->id;
+                        $payments->event_id = $participant->event_id;
+                        $payments->event_title = $event->title;
                         $payments->amount_for_pay = $amount;
+                        $payments->amount_participant = $amount_participant;
+                        $payments->amount_cost_for_service = Event::COST_FOR_EACH_PARTICIPANT;
                         $payments->save();
+
                     }
                 }
 

@@ -28,6 +28,7 @@ class CreateResultFranceSystemQualificationTable extends Migration
             $table->integer('place')->nullable();
             $table->boolean('active')->nullable();
             $table->boolean('is_paid')->default(0);
+            $table->integer('amount_start_price')->nullable();
             $table->string('bill')->nullable();
             $table->timestamps();
         });

@@ -3,7 +3,16 @@
 @if($event->is_need_pay_for_reg)
     <div class="container text-center pt-2 pb-2">
         <label> Стартовый взнос: </label>
-        <span class="badge bg-success" style="font-size: 22px"> {{$event->amount_start_price}} руб </span><br>
+        @foreach($event->options_amount_price as $options)
+            <h5> {{$options['Название']}}  - </h5><span class="badge bg-success" style="font-size: 22px"> {{$options['Сумма']}} руб </span><br>
+            @isset($options['Ссылка на оплату'])
+                <div class="container text-center pt-2 pb-2">
+                    <a class="btn btn-primary" style="font-size: 22px"
+                       href="{{$options['Ссылка на оплату']}}">Оплатить</a><br>
+                </div>
+            @endisset
+        @endforeach
+
     </div>
     @auth
         @if(\App\Models\User::user_participant($event->id))
