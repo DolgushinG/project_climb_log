@@ -264,11 +264,16 @@ class ResultQualificationController extends Controller
             $amounts = [];
             $count = 1;
 //            dd($event->options_amount_price);
-            foreach($event->options_amount_price as $amount)  {
-                $amounts[$count] = $amount['Сумма'];
-                $count++;
+            if($event->options_amount_price){
+                foreach($event->options_amount_price as $amount)  {
+                    $amounts[$count] = $amount['Сумма'];
+                    $count++;
+                }
+                $amounts[0] = '0 р';
+            } else {
+                $amounts[0] = 'Нет сумм';
             }
-            $amounts[0] = '0 р';
+
             $states = [
                 'on' => ['value' => 1, 'text' => 'V', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => 'X', 'color' => 'default'],
@@ -355,9 +360,20 @@ class ResultQualificationController extends Controller
             'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
         ];
         if ($event->is_need_pay_for_reg) {
-            $grid->column('is_paid', 'Оплата')->switch($states);
-            $grid->column('amount_start_price', 'Сумма')->select($event->options_amount_price['Сумма']);
 
+            $amounts = [];
+            $count = 1;
+            if($event->options_amount_price){
+                foreach($event->options_amount_price as $amount)  {
+                    $amounts[$count] = $amount['Сумма'];
+                    $count++;
+                }
+                $amounts[0] = '0 р';
+            } else {
+                $amounts[0] = 'Нет сумм';
+            }
+            $grid->column('amount_start_price', 'Сумма оплаты')->editable('select', $amounts);
+            $grid->column('is_paid', 'Оплата')->switch($states);
             \Encore\Admin\Admin::style('
                         @media only screen and (min-width: 1025px) {
                                          img {
