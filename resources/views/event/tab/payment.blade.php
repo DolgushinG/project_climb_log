@@ -8,23 +8,25 @@
 {{--                <p></p>--}}
             </div>
             <div class="row">
-            @foreach($event->options_amount_price as $options)
+                @if($event->options_amount_price)
+                    @foreach($event->options_amount_price as $options)
 
-                    <div class="col-md-4 aos-init aos-animate" data-aos="fade-up" data-aos-delay="100">
-                        <div class="box">
-                            <h3>{{$options['Название']}}</h3>
-                            <h4>{{$options['Сумма']}}<sub>руб</sub></h4>
-                            <ul>
-                                <li>{{$options['Описание']}}</li>
-                            </ul>
-                            @isset($options['Ссылка на оплату'])
-                                <div class="btn-wrap">
-                                    <a href="{{$options['Ссылка на оплату']}}" class="btn-buy">Оплатить</a>
+                            <div class="col-md-4 aos-init aos-animate" data-aos="fade-up" data-aos-delay="100">
+                                <div class="box">
+                                    <h3>{{$options['Название']}}</h3>
+                                    <h4>{{$options['Сумма']}}<sub>руб</sub></h4>
+                                    <ul>
+                                        <li>{{$options['Описание']}}</li>
+                                    </ul>
+                                    @isset($options['Ссылка на оплату'])
+                                        <div class="btn-wrap">
+                                            <a href="{{$options['Ссылка на оплату']}}" class="btn-buy">Оплатить</a>
+                                        </div>
+                                    @endisset
                                 </div>
-                            @endisset
-                        </div>
-                    </div>
-            @endforeach
+                            </div>
+                    @endforeach
+                 @endif
             </div>
         </div>
     </section>
