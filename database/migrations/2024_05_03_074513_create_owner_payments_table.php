@@ -23,7 +23,7 @@ class CreateOwnerPaymentsTable extends Migration
             $table->boolean('is_paid')->default(0);
             $table->string('event_title');
             $table->integer('amount_participant');
-            $table->integer('amount_start_price');
+            $table->integer('amount_start_price')->nullable();
             $table->float('amount_cost_for_service');
             $table->timestamps();
         });

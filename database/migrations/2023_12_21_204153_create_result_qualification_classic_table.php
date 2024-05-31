@@ -24,6 +24,7 @@ class CreateResultQualificationClassicTable extends Migration
             $table->float('points')->nullable();
             $table->integer('user_place')->nullable();
             $table->boolean('active');
+            $table->integer('amount_start_price')->nullable();
             $table->boolean('is_paid')->default(0);
             $table->string('bill')->nullable();
             $table->json('result_for_edit')->nullable();

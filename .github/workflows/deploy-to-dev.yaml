@@ -13,7 +13,8 @@
 name: Python application
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, edited, ready_for_review]
     branches: [ "cl*" ]
 
 jobs:
@@ -31,8 +32,7 @@ jobs:
           script: |
             cd /var/www/stage-dev.project_climb_log
             git checkout ${{ github.head_ref || github.ref_name }}
-            git reset --hard
-            git pull
+            git retch
             /usr/bin/php artisan down
             /usr/bin/php artisan optimize
             /usr/bin/php artisan migrate

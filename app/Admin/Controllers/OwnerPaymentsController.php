@@ -101,9 +101,9 @@ class OwnerPaymentsController extends Controller
             return $amount.' руб.';
         });
         $grid->column('amount_participant', 'Кол-во участников');
-        $grid->column('amount_start_price', 'Стартовый взнос')->display(function ($amount){
-            return $amount.' руб.';
-        });;
+//        $grid->column('amount_start_price', 'Стартовый взнос')->display(function ($amount){
+//            return $amount.' руб.';
+//        });;
         $grid->column('amount_cost_for_service', 'Процент за пользование сервисом')->display(function ($amount){
             return $amount.' % с каждого стартового взноса';
         });
