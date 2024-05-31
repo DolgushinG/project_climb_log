@@ -450,14 +450,14 @@ class EventsController extends Controller
         $form->saved(function (Form $form)  use ($type, $id){
 
             if($type != 'active') {
-                if(!$form->options_amount_price){
-                    $event = $form->model()->find($id);
-                    $event_amount = $event->options_amount_price ?? null;
-                    if($event_amount){
-                        $event->options_amount_price = null;
-                        $event->save();
-                    }
-                }
+//                if(!$form->options_amount_price){
+//                    $event = $form->model()->find($id);
+//                    $event_amount = $event->options_amount_price ?? null;
+//                    if($event_amount){
+//                        $event->options_amount_price = null;
+//                        $event->save();
+//                    }
+//                }
                 if ($form->categories) {
                     $categories = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
                         ->where('event_id', '=', $form->model()->id)->get();
