@@ -281,6 +281,7 @@ class EventsController extends Controller
                     $form->tableamount('options_amount_price','Настройка оплаты' , function ($table) {
                         $table->text('Название');
                         $table->number('Сумма');
+                        $table->textarea('Описание');
                         $table->text('Ссылка на оплату');
                         Admin::style('
                         .remove {
@@ -294,6 +295,7 @@ class EventsController extends Controller
                     $form->tableamount('options_amount_price','Настройка оплаты' , function ($table) {
                         $table->text('Название');
                         $table->number('Сумма');
+                        $table->textarea('Описание');
                         $table->text('Ссылка на оплату');
                     });
                 }
@@ -301,6 +303,7 @@ class EventsController extends Controller
                 $form->tableamount('options_amount_price','Настройка оплаты' , function ($table) {
                     $table->text('Название');
                     $table->number('Сумма');
+                    $table->textarea('Описание');
                     $table->text('Ссылка на оплату');
                 });
             }

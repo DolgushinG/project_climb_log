@@ -88,12 +88,14 @@
 
 <script>
     let inputs_for_amount_price_all = document.querySelectorAll('select.form-control.options_amount_price.Название')
+    let inputs_for_amount_price_all_4 = document.querySelectorAll('textarea.form-control.options_amount_price.Описание')
     let inputs_for_amount_price_all_2 = document.querySelectorAll('.form-control.options_amount_price.Сумма')
     let inputs_for_amount_price_all_3 = document.querySelectorAll('.form-control.options_amount_price.Ссылка.на.оплату')
     let btn_add = document.querySelector('.add-amount.btn.btn-success.btn-sm')
     btn_add.addEventListener('click', function () {
         setTimeout(function() {
             let amount_all = document.querySelectorAll('input.form-control.options_amount_price.Название')
+            let inputs_for_amount_price_all_4 = document.querySelectorAll('textarea.form-control.options_amount_price.Описание')
             let inputs_for_amount_price_all_2 = document.querySelectorAll('input.form-control.options_amount_price.Сумма')
             let inputs_for_amount_price_all_3 = document.querySelectorAll('input.form-control.options_amount_price.Ссылка.на.оплату')
             let btn_remove_for_amount_all_5 = document.querySelectorAll('.options_amount_price._remove_.fom-removed')
@@ -102,6 +104,7 @@
                 amount_all[i].name = "options_amount_price[new_" + new_i + "][Название]"
                 inputs_for_amount_price_all_2[i].name = "options_amount_price[new_" + new_i + "][Сумма]"
                 inputs_for_amount_price_all_3[i].name = "options_amount_price[new_" + new_i + "][Ссылка на оплату]"
+                inputs_for_amount_price_all_4[i].name = "options_amount_price[new_" + new_i + "][Описание]"
                 setTimeout(function() {
                     btn_remove_for_amount_all_5[i].name = 'options_amount_price[new_'+new_i+'][_remove_]'
                 }, 50);

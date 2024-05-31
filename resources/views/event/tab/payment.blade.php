@@ -1,19 +1,33 @@
 <link href="{{asset('plugins/cropper/cropper.css')}}" rel="stylesheet">
 <script src="{{asset('plugins/cropper/cropper.js')}}"></script>
 @if($event->is_need_pay_for_reg)
-    <div class="container text-center pt-2 pb-2">
-        <label> Стартовый взнос: </label>
-        @foreach($event->options_amount_price as $options)
-            <h5> {{$options['Название']}}  - </h5><span class="badge bg-success" style="font-size: 22px"> {{$options['Сумма']}} руб </span><br>
-            @isset($options['Ссылка на оплату'])
-                <div class="container text-center pt-2 pb-2">
-                    <a class="btn btn-primary" style="font-size: 22px"
-                       href="{{$options['Ссылка на оплату']}}">Оплатить</a><br>
-                </div>
-            @endisset
-        @endforeach
+    <section id="pricing" class="pricing">
+        <div class="container aos-init aos-animate" data-aos="fade-up">
+            <div class="section-title">
+                <h2>Цены</h2>
+{{--                <p></p>--}}
+            </div>
+            <div class="row">
+            @foreach($event->options_amount_price as $options)
 
-    </div>
+                    <div class="col-md-4 aos-init aos-animate" data-aos="fade-up" data-aos-delay="100">
+                        <div class="box">
+                            <h3>{{$options['Название']}}</h3>
+                            <h4>{{$options['Сумма']}}<sub>руб</sub></h4>
+                            <ul>
+                                <li>{{$options['Описание']}}</li>
+                            </ul>
+                            @isset($options['Ссылка на оплату'])
+                                <div class="btn-wrap">
+                                    <a href="{{$options['Ссылка на оплату']}}" class="btn-buy">Оплатить</a>
+                                </div>
+                            @endisset
+                        </div>
+                    </div>
+            @endforeach
+            </div>
+        </div>
+    </section>
     @auth
         @if(\App\Models\User::user_participant($event->id))
             @if(\App\Models\ResultRouteQualificationClassic::is_pay_participant(Auth()->user()->id, $event->id))
