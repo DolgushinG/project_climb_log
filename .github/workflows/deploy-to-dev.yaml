@@ -14,7 +14,8 @@ name: Python application
 
 on:
   pull_request:
-    types: [opened, synchronize, edited, ready_for_review]
+    branches: [ "cl*" ]
+  push:
     branches: [ "cl*" ]
 
 jobs:

@@ -149,13 +149,27 @@
                                     </button>
                                 </li>
                                 @if($event->is_registration_state)
-                                    <li class="nav-item flex-fill" role="presentation"
-                                        style="margin-right: 8px!important;">
-                                        <button class="nav-link w-100" id="contact-tab" data-bs-toggle="tab"
-                                                data-bs-target="#bordered-justified-contact" type="button" role="tab"
-                                                aria-controls="contact" aria-selected="false">Стартовый взнос
-                                        </button>
-                                    </li>
+                                    @auth
+                                        @if(\App\Models\User::user_participant($event->id))
+                                            @if(\App\Models\ResultRouteQualificationClassic::is_pay_participant(Auth()->user()->id, $event->id))
+                                                <li class="nav-item flex-fill" role="presentation"
+                                                    style="margin-right: 8px!important;">
+                                                    <button class="nav-link w-100" id="contact-tab" data-bs-toggle="tab"
+                                                            data-bs-target="#bordered-justified-contact" type="button" role="tab"
+                                                            aria-controls="contact" aria-selected="false">Стартовый взнос
+                                                    </button>
+                                                </li>
+                                            @else
+                                                <li class="nav-item flex-fill" role="presentation"
+                                                    style="margin-right: 8px!important;">
+                                                    <button class="nav-link w-100" id="contact-tab" data-bs-toggle="tab"
+                                                            data-bs-target="#bordered-justified-contact" type="button" role="tab"
+                                                            aria-controls="contact" aria-selected="false">Стартовый взнос
+                                                    </button>
+                                                </li>
+                                            @endif
+                                        @endif
+                                    @endauth
                                 @endif
                             </ul>
 
