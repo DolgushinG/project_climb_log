@@ -284,47 +284,58 @@
             </div>
         @endif
     @endauth
+    @guest
+        @if(!$event->info_payment && !$event->options_amount_price)
+            <p>Информации нет</p>
+        @endif
+        @if($event->info_payment)
+            <p>{!! $event->info_payment !!}</p>
+        @endif
+        @if($event->options_amount_price)
+            <section id="pricing" class="pricing">
+                <div class="container aos-init aos-animate"
+                     data-aos="fade-up">
+                    <div class="section-title">
+                        <div class="row">
+                            @foreach($event->options_amount_price as $options)
+                                <div class="col-md-4 aos-init aos-animate"
+                                     data-aos="fade-up"
+                                     data-aos-delay="100">
+                                    <div class="box">
+                                        <h3>{{$options['Название']}}</h3>
+                                        <h4>{{$options['Сумма']}}
+                                            <sub>руб</sub></h4>
+                                        <ul>
+                                            <li>{!! $options['Описание'] !!}</li>
+                                        </ul>
+                                        @auth
+                                            {{--                                    @isset($options['QR код на оплату'])--}}
+                                            {{--                                        <img class="img-fluid img-responsive" src="{{asset('storage/'.$options['QR код на оплату'])}}" alt="qr">--}}
+                                            {{--                                    @endif--}}
+                                            @if(\App\Models\User::user_participant($event->id))
+                                                @isset($options['Ссылка на оплату'])
+                                                    <div class="btn-wrap">
+                                                        <a href="{{$options['Ссылка на оплату']}}"
+                                                           class="btn-buy">Оплатить</a>
+                                                    </div>
+                                                @endisset
+                                            @endif
+                                        @endauth
+                                    </div>
+                                </div>
+                            @endforeach
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endif
+    @endguest
 @else
     @if(!$event->info_payment && !$event->options_amount_price)
         <p>Информации нет</p>
     @endif
     @if($event->info_payment)
         <p>{!! $event->info_payment !!}</p>
-    @endif
-    @if($event->options_amount_price)
-        <section id="pricing" class="pricing">
-            <div class="container aos-init aos-animate"
-                 data-aos="fade-up">
-                <div class="section-title">
-                    <div class="row">
-                        @foreach($event->options_amount_price as $options)
-                            <div class="col-md-4 aos-init aos-animate"
-                                 data-aos="fade-up"
-                                 data-aos-delay="100">
-                                <div class="box">
-                                    <h3>{{$options['Название']}}</h3>
-                                    <h4>{{$options['Сумма']}}
-                                        <sub>руб</sub></h4>
-                                    <ul>
-                                        <li>{!! $options['Описание'] !!}</li>
-                                    </ul>
-                                    @auth
-                                        @if(\App\Models\User::user_participant($event->id))
-                                            @isset($options['Ссылка на оплату'])
-                                                <div class="btn-wrap">
-                                                    <a href="{{$options['Ссылка на оплату']}}"
-                                                       class="btn-buy">Оплатить</a>
-                                                </div>
-                                            @endisset
-                                        @endif
-                                    @endauth
-                                </div>
-                            </div>
-                        @endforeach
-
-                    </div>
-                </div>
-            </div>
-        </section>
     @endif
 @endif
