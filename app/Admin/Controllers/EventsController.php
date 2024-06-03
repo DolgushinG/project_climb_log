@@ -320,7 +320,7 @@ class EventsController extends Controller
 //                            $table->image('QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
                         });
                     }
-                })->default(1)->required();
+                })->required();
         })->tab('Параметры соревнования', function ($form) use ($id) {
             $form->radio('is_france_system_qualification','Настройка подсчета квалификации')
                 ->options([
@@ -364,11 +364,20 @@ class EventsController extends Controller
             if($this->is_fill_results(intval($id))){
                 $form->html('<h5> Доступно только изменение категорий, так как были добавлены результаты, нельзя удалить или добавить новые</h5>');
                 $form->customlist('categories', 'Категории участников');
-                $form->table('options_categories', '', function ($table) use ($form){
-                    $table->select('Категория участника')->options($form->model()->categories)->attribute('disabled', 'true')->readonly();
-                    $table->select('От какой категории сложности определять эту категорию')->attribute('disabled', 'true')->options(Grades::getGrades())->width('30px');
-                    $table->select('До какой категории сложности определять эту категорию')->attribute('disabled', 'true')->options(Grades::getGrades())->width('30px');
-                });
+                $form->radio('is_auto_categories','Настройка категорий')
+                    ->options([0 => 'Сами участники выбирают категорию при регистрации', 1 => 'Автоопределение категории по параметрам'])
+                    ->when(0, function (Form $form) {
+                    })->when(1, function (Form $form) {
+                        $form->html('<h4 style="color: red" >Автоопределение категории по параметрам работает только при фестивальной системе</h4>');
+                        $form->html('<h5 style="color: black" >Пример заполнения 1 группа от 4 до 6B, 2 группа от 6B+ до 7A</h5>');
+                        $form->html('<h5 style="color: black" >Категории от и до не должны совпадать, например от 4 до 6B и от 6B до 7A</h5>');
+                        $form->html('<h5 style="color: black" >6B категория получиться в двух группах, что некорректно для работы</h5>');
+                        $form->table('options_categories', '', function ($table) use ($form){
+                            $table->select('Категория участника')->options($form->model()->categories)->attribute('disabled', 'true')->readonly();
+                            $table->select('От какой категории сложности определять эту категорию')->attribute('disabled', 'true')->options(Grades::getGrades())->width('30px');
+                            $table->select('До какой категории сложности определять эту категорию')->attribute('disabled', 'true')->options(Grades::getGrades())->width('30px');
+                        });
+                    })->required();
             } else {
                 $form->list('categories', 'Категории участников')->rules('required|min:2');
                 $form->radio('is_auto_categories','Настройка категорий')
@@ -384,7 +393,7 @@ class EventsController extends Controller
                             $table->select('От какой категории сложности определять эту категорию')->options(Grades::getGrades())->width('30px');
                             $table->select('До какой категории сложности определять эту категорию')->options(Grades::getGrades())->width('30px');
                         });
-                    })->value(0)->required();
+                    })->required();
                 $form->html('<h4 id="warning-category" style="color: red" >Обязательно проверьте заполнение категорий и обязательных полей</h4>');
             }
             $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states(self::STATES_BTN);
@@ -443,7 +452,6 @@ class EventsController extends Controller
             $tools->disableView();
         });
         $form->saving(function (Form $form) {
-            $form->ignore('setting_payment');
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($events && $events->id != $form->model()->id){
@@ -459,11 +467,7 @@ class EventsController extends Controller
                 $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$title_eng;
             }
         });
-        $form->submitted(function (Form $form) {
-            $form->ignore('setting_payment');
-        });
         $form->saved(function (Form $form)  use ($type, $id){
-            $form->ignore('setting_payment');
             if($type != 'active') {
 //                if(!$form->options_amount_price){
 //                    $event = $form->model()->find($id);

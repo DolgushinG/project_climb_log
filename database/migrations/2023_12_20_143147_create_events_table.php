@@ -37,6 +37,7 @@ class CreateEventsTable extends Migration
             $table->string('img_payment')->nullable();
             $table->longText('info_payment')->nullable();
             $table->integer('amount_start_price')->nullable();
+            $table->boolean('setting_payment')->nullable();
             $table->json('options_amount_price')->nullable();
             $table->integer('is_semifinal')->nullable();
             $table->integer('is_sort_group_final')->nullable();
