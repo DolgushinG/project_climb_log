@@ -14,11 +14,8 @@ name: Python application
 
 on:
   pull_request:
-    types:
-      - opened
-      - edited
-      - labeled
-      - unlabeled
+    branches: [ "cl*" ]
+  push:
     branches: [ "cl*" ]
 
 jobs:
