@@ -30,11 +30,28 @@
     btn_pay_and_bill.addEventListener('click', function (){
         document.querySelector('#contact-tab').click()
         document.querySelector('[data-bs-target="#flush-collapseTwo"]').click()
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            window.scrollTo({
+                top: document.querySelector("#btn-payment").offsetTop + 300,
+                left: 0,
+                behavior: 'smooth'
+            });
+
+        }
+
     })
     let bill = document.querySelector('#bill')
     bill.addEventListener('click', function (){
         document.querySelector('#contact-tab').click()
         document.querySelector('[data-bs-target="#flush-collapseThree"]').click()
+
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            window.scrollTo({
+                top: document.querySelector("#btn-payment").offsetTop + 300,
+                left: 0,
+                behavior: 'smooth'
+            });
+        }
     })
 </script>
 
