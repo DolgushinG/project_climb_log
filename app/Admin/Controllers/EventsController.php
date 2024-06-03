@@ -283,6 +283,7 @@ class EventsController extends Controller
                 })->when(1, function (Form $form) use ($id) {
                     $payments = OwnerPayments::where('event_id', $id)->first();
                     $form->html('Если вы приложили здесь QR код, то здесь он не будет отображаться, проверьте его отображение на странице с соревнованием');
+
                     if($payments){
                         if($payments->amount_for_pay > 0){
                             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
