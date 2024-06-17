@@ -36,7 +36,8 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            if(env('APP_ENV') == "prod"){
+            # 111 код исключение не нужно его слать
+            if(env('APP_ENV') == "prod" && $e->getCode() != 111){
                 $get_msg = substr($e->getMessage(), 0, 1000) . '...';
                 $message = 'Message - '.$get_msg.PHP_EOL.'File - '.$e->getFile().PHP_EOL.'Line - '.$e->getLine();
                 $this->sendTelegramMessage($message);

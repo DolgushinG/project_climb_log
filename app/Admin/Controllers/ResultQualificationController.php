@@ -34,6 +34,7 @@ use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\MessageBag;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ResultQualificationController extends Controller
@@ -270,15 +271,18 @@ class ResultQualificationController extends Controller
                     $count++;
                 }
                 $amounts[0] = '0 р';
+                $grid->column('amount_start_price', 'Сумма оплаты')->editable('select', $amounts);
             } else {
-                $amounts[0] = 'Нет сумм';
+                $grid->column('amount_start_price', 'Сумма оплаты')->display(function ($amount_start_price) use ($event){
+                    return $event->amount_start_price;
+                });
             }
 
             $states = [
                 'on' => ['value' => 1, 'text' => 'V', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => 'X', 'color' => 'default'],
             ];
-            $grid->column('amount_start_price', 'Сумма оплаты')->editable('select', $amounts);
+
             $grid->column('is_paid', 'Оплата')->switch($states);
             \Encore\Admin\Admin::style('
                         @media only screen and (min-width: 1025px) {
@@ -370,7 +374,7 @@ class ResultQualificationController extends Controller
                 }
                 $amounts[0] = '0 р';
             } else {
-                $amounts[0] = 'Нет сумм';
+                $amounts[0] = $event->amount_start_price;
             }
             $grid->column('amount_start_price', 'Сумма оплаты')->editable('select', $amounts);
             $grid->column('is_paid', 'Оплата')->switch($states);
@@ -491,29 +495,35 @@ class ResultQualificationController extends Controller
             }
             if ($form->input('is_paid') == "0" || $form->input('is_paid') == "1") {
                 $participant = $form->model()->find($id);
-                if(!$participant->amount_start_price){
-                    throw new \Exception('Перед оплатой надо выбрать сумму оплаты');
+                $event = Event::find($participant->event_id);
+                if(!$participant->amount_start_price && !$event->amount_start_price && $event->options_amount_price){
+                    throw new \Exception('Перед оплатой надо выбрать сумму оплаты', code: 111);
                 }
+
                 $amount_participant = $form->model()->where('event_id', $participant->event_id)->get()->count();
                 $participant->is_paid = $form->input('is_paid');
                 $participant->save();
                 $admin = Admin::user();
-                $event = Event::find($participant->event_id);
                 if ($form->input('is_paid') === "1") {
-                    $amounts = [];
-                    $names = [];
-                    $count = 1;
-                    foreach($event->options_amount_price as $amount)  {
-                        $amounts[$count] = $amount['Сумма'];
-                        $names[$count] = $amount['Название'];
-                        $count++;
-                    }
-                    $amounts[0] = '0 р';
-                    $names[0] = 'Не оплачено';
+                    if($event->options_amount_price){
+                        $amounts = [];
+                        $names = [];
+                        $count = 1;
+                        foreach($event->options_amount_price as $amount)  {
+                            $amounts[$count] = $amount['Сумма'];
+                            $names[$count] = $amount['Название'];
+                            $count++;
+                        }
+                        $amounts[0] = '0 р';
+                        $names[0] = 'Не оплачено';
 
-                    $index = $participant->amount_start_price;
-                    $amount_start_price = $amounts[$index];
-                    $amount_name = $names[$index];
+                        $index = $participant->amount_start_price;
+                        $amount_start_price = $amounts[$index];
+                        $amount_name = $names[$index];
+                    } else {
+                        $amount_start_price = $event->amount_start_price;
+                        $amount_name = 'Стартовый взнос';
+                    }
                     $transaction = OwnerPaymentOperations::where('event_id', $participant->event_id)
                         ->where('user_id', $participant->user_id)->first();
                     if (!$transaction) {
@@ -553,7 +563,7 @@ class ResultQualificationController extends Controller
                         if (!$payments) {
                             $payments = new OwnerPayments;
                         }
-                        $amount = OwnerPaymentOperations::where('event_id', $participant->event_id)->select('amount')->count();
+                        $amount = OwnerPaymentOperations::where('event_id', $participant->event_id)->sum('amount');
                         $payments->owner_id = $admin->id;
                         $payments->event_id = $participant->event_id;
                         $payments->event_title = $event->title;

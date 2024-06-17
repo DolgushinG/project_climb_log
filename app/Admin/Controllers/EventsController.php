@@ -255,10 +255,10 @@ class EventsController extends Controller
             $form->text('title', 'Название соревнования')->placeholder('Введи название')->required();
 //            $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название');
             $form->hidden('title_eng')->default('1');
-            $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name)->placeholder('Название скалодрома')->required();
+            $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name ?? '')->placeholder('Название скалодрома')->required();
             $form->hidden('climbing_gym_name_eng')->default('1');
-            $form->text('city', 'Город')->value(Admin::user()->city)->placeholder('Город')->required();
-            $form->text('address', 'Адрес')->value(Admin::user()->address)->placeholder('Адрес')->required();
+            $form->text('city', 'Город')->value(Admin::user()->city ?? '')->placeholder('Город')->required();
+            $form->text('address', 'Адрес')->value(Admin::user()->address ?? '')->placeholder('Адрес')->required();
             $form->date('start_date', 'Дата старта')->attribute('inputmode', 'none')->placeholder('гггг:мм:дд')->required();
             # Добавить в будущем автоматическое открытие регистрации
 //            $form->date('start_open_registration_date', 'Дата открытия регистрации')->attribute('inputmode', 'none')->placeholder('гггг:мм:дд');
@@ -321,7 +321,7 @@ class EventsController extends Controller
 //                            $table->image('QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
                         });
                     }
-                })->required();
+                })->default(0);
         })->tab('Параметры соревнования', function ($form) use ($id) {
             $form->radio('is_france_system_qualification','Настройка подсчета квалификации')
                 ->options([
