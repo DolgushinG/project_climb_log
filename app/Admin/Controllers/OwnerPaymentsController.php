@@ -2,14 +2,17 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\OwnerPaymentOperations;
 use App\Models\OwnerPayments;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
+use Encore\Admin\Widgets\Table;
 use Illuminate\Support\Facades\DB;
 
 class OwnerPaymentsController extends Controller
@@ -96,7 +99,21 @@ class OwnerPaymentsController extends Controller
                 return $user->climbing_gym_name;
             });
         }
-        $grid->column('event_title', 'Соревнование');
+        $grid->column('event_title', 'Соревнование')->modal('Детализация', function ($model) {
+            $transactions = User::query()
+                ->leftJoin('owner_payment_operations', 'users.id', '=', 'owner_payment_operations.user_id')
+                ->where('owner_payment_operations.event_id', '=', $model->event_id)
+                ->select(
+                    'users.middlename',
+                    'owner_payment_operations.amount',
+                    'owner_payment_operations.type',
+                )->get();
+            foreach ($transactions as $value){
+                $value->amount = $value->amount.' руб.';
+            }
+            return new Table(['Имя и Фамилия', 'Сумма', 'Тип взноса'], $transactions->toArray());
+        });
+//        $grid->column('event_title', 'Соревнование');
         $grid->column('amount_for_pay', 'Сумма к оплате')->display(function ($amount){
             return $amount.' руб.';
         });
