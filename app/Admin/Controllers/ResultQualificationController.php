@@ -498,7 +498,11 @@ class ResultQualificationController extends Controller
                 $participant = $form->model()->find($id);
                 $event = Event::find($participant->event_id);
                 if(!$participant->amount_start_price && !$event->amount_start_price && $event->options_amount_price){
-                    throw new \Exception('Перед оплатой надо выбрать сумму оплаты', code: 111);
+                    $response = [
+                        'status'  => false,
+                        'message' => "Перед оплатой надо выбрать сумму оплаты",
+                    ];
+                    return response()->json($response);
                 }
 
                 $amount_participant = $form->model()->where('event_id', $participant->event_id)->get()->count();
@@ -533,13 +537,29 @@ class ResultQualificationController extends Controller
                     ResultQualificationClassic::send_confirm_bill($event, $user);
                 }
                 if ($form->input('is_paid') === "0") {
-                    $transaction = OwnerPaymentOperations::where('event_id', $participant->event_id)
-                        ->where('user_id', $participant->user_id)->first();
-                    if ($admin && $transaction) {
-                        $transaction->delete();
-                        # Пересчитываем оплату за соревы
-                        OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
+                    $user_id = $form->model()->find($id)->user_id;
+                    if ($event->is_france_system_qualification) {
+                        $allow_delete = ResultRouteFranceSystemQualification::where('event_id', $event->id)->where('user_id', $user_id)->first();
+                    } else {
+                        $allow_delete = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
                     }
+                    # Не допускать отмену об оплате если результат уже внесен, так как так можно не платить за сервис
+                    if(!$allow_delete){
+                        $transaction = OwnerPaymentOperations::where('event_id', $participant->event_id)
+                            ->where('user_id', $participant->user_id)->first();
+                        if ($admin && $transaction) {
+                            $transaction->delete();
+                            # Пересчитываем оплату за соревы
+                            OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
+                        }
+                    } else {
+                        $response = [
+                            'status'  => false,
+                            'message' => "Отмена оплаты после внесения результатов участника невозможна",
+                        ];
+                        return response()->json($response);
+                    }
+
                 }
 
             }
