@@ -12,11 +12,13 @@ use App\Models\Event;
 use App\Http\Controllers\Controller;
 use App\Models\Format;
 use App\Models\Grades;
+use App\Models\OwnerPaymentOperations;
 use App\Models\OwnerPayments;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFranceSystemQualification;
+use App\Models\ResultRouteQualificationClassic;
 use App\Models\Set;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -160,10 +162,32 @@ class EventsController extends Controller
      *
      * @param int $id
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
     public function destroy($id)
     {
+        $event = Event::find($id);
+
+        if ($event->is_france_system_qualification) {
+            $allow_delete = ResultFranceSystemQualification::where('event_id', $event->id)->first();
+        } else {
+            $allow_delete = ResultQualificationClassic::where('event_id', $event->id)->first();
+        }
+
+        # Для тестов удаление соревнований возможно
+        if(Admin::user()->username == "Tester2"){
+            $allow_delete = null;
+        }
+        # Не допускать удаление если есть участники
+        if($allow_delete){
+            $response = [
+                'status'  => false,
+                'message' => "Удаление соревнования невозможно, так как в нем есть участники",
+            ];
+            return response()->json($response);
+        }
+
         return $this->form('destroy')->destroy($id);
     }
 
@@ -456,7 +480,11 @@ class EventsController extends Controller
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($events && $events->id != $form->model()->id){
-                    throw new \Exception('Только одно соревнование может быть опубликовано');
+                    $response = [
+                        'status'  => false,
+                        'message' => "Только одно соревнование может быть опубликовано",
+                    ];
+                    return response()->json($response);
                 }
             }
             if($form->climbing_gym_name){
@@ -530,7 +558,11 @@ class EventsController extends Controller
             if($form->input('active') === "1"){
                 $event_owner = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($event_owner->id != $form->model()->id){
-                    throw new \Exception('Только одно соревнование может быть опубликовано');
+                    $response = [
+                        'status'  => false,
+                        'message' => "Только одно соревнование может быть опубликовано",
+                    ];
+                    return response()->json($response);
                 }
                 $event = $form->model()->find($id);
                 $event->active = 1;
