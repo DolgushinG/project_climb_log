@@ -32,8 +32,9 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /var/www/stage-dev.project_climb_log
-            git checkout ${{ github.head_ref || github.ref_name }}
-            git retch
+            git remote update
+            git fetch
+            git checkout --track origin/${{ github.head_ref || github.ref_name }}
             /usr/bin/php artisan down
             /usr/bin/php artisan optimize
             /usr/bin/php artisan migrate

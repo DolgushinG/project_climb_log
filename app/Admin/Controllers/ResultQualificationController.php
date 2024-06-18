@@ -486,7 +486,8 @@ class ResultQualificationController extends Controller
                     Cache::forget('result_male_cache_' . $category->category);
                     Cache::forget('result_female_cache_' . $category->category);
                 }
-                Event::refresh_final_points_all_participant($form->model()->find($id)->event_id);
+                $event = Event::find($form->model()->find($id)->event_id);
+                Event::refresh_final_points_all_participant($event);
             }
             if(intval($form->input('amount_start_price')) > 0){
                 $result = $form->model()->find($id);
@@ -524,31 +525,9 @@ class ResultQualificationController extends Controller
                         $amount_start_price = $event->amount_start_price;
                         $amount_name = 'Стартовый взнос';
                     }
-                    $transaction = OwnerPaymentOperations::where('event_id', $participant->event_id)
-                        ->where('user_id', $participant->user_id)->first();
-                    if (!$transaction) {
-                        $transaction = new OwnerPaymentOperations;
-                    }
-                    $transaction->owner_id = $admin->id;
-                    $transaction->user_id = $participant->user_id;
-                    $transaction->event_id = $participant->event_id;
-                    $transaction->amount = Event::counting_amount_for_pay_participant($amount_start_price);
-                    $transaction->type = $amount_name;
-                    $transaction->save();
-
+                    OwnerPaymentOperations::execute_payment_operations($participant, $admin, $amount_start_price, $amount_name);
                     # Пересчитываем оплату за соревы
-                    $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
-                    if (!$payments) {
-                        $payments = new OwnerPayments;
-                    }
-                    $amount = OwnerPaymentOperations::where('event_id', $participant->event_id)->sum('amount');
-                    $payments->owner_id = $admin->id;
-                    $payments->event_id = $participant->event_id;
-                    $payments->event_title = $event->title;
-                    $payments->amount_for_pay = $amount;
-                    $payments->amount_participant = $amount_participant;
-                    $payments->amount_cost_for_service = Event::COST_FOR_EACH_PARTICIPANT;
-                    $payments->save();
+                    OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
 
                     $user = User::find($participant->user_id);
                     ResultQualificationClassic::send_confirm_bill($event, $user);
@@ -559,19 +538,7 @@ class ResultQualificationController extends Controller
                     if ($admin && $transaction) {
                         $transaction->delete();
                         # Пересчитываем оплату за соревы
-                        $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
-                        if (!$payments) {
-                            $payments = new OwnerPayments;
-                        }
-                        $amount = OwnerPaymentOperations::where('event_id', $participant->event_id)->sum('amount');
-                        $payments->owner_id = $admin->id;
-                        $payments->event_id = $participant->event_id;
-                        $payments->event_title = $event->title;
-                        $payments->amount_for_pay = $amount;
-                        $payments->amount_participant = $amount_participant;
-                        $payments->amount_cost_for_service = Event::COST_FOR_EACH_PARTICIPANT;
-                        $payments->save();
-
+                        OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
                     }
                 }
 
