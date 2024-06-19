@@ -16,7 +16,7 @@
                                 <div class="text-right">
                                     <button type="button" class="btn btn-dark mb-2" id="all-flash">Отметить все FLASH
                                     </button>
-                                    <button type="button" class="btn btn-dark" id="all-redpoint">Отметить все REDPOINT
+                                    <button type="button" class="btn btn-dark mb-2" id="all-redpoint">Отметить все REDPOINT
                                     </button>
                                 </div>
                                 <table class="table">

@@ -96,4 +96,13 @@ class Helpers
             return "дней";
         }
     }
+
+    public static function custom_response($message, $status=false)
+    {
+        $response = [
+            'status'  => $status,
+            'message' => $message,
+        ];
+        return response()->json($response);
+    }
 }
