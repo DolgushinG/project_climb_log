@@ -153,7 +153,10 @@ class ProfileController extends Controller
                     Rule::unique('users')->ignore(Auth()->user()->id),
                 ],
             ], $messages);
-
+        if ($validator->fails())
+        {
+            return response()->json(['error' => true,'message'=> $validator->errors()->all()],422);
+        }
         if (!filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
             return response()->json(['error' => true,'message'=> ['Поле email не корректно']],422);
         }

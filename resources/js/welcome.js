@@ -457,7 +457,6 @@ $("#crop").click(function () {
             var event_id = document.getElementById('attachBill').getAttribute('data-event-id')
             var block_checking_bill = document.getElementById('checkingBill')
             let button_pay = $('#btn-payment')
-            let button_bill = $('#bill')
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -472,7 +471,7 @@ $("#crop").click(function () {
                     button_pay.text('Чек отправлен (На проверке..)')
                     button_pay.attr('disabled', 'disabled')
                     block_attach_bill.style.display = 'none';
-                    button_bill.style.display = 'none';
+                    document.querySelector('#bill').style.display = 'None'
                     setTimeout(function () {
                         block_checking_bill.style.display = 'block';
                     }, 1000);

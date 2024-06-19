@@ -312,7 +312,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $place = ResultQualificationClassic::get_places_participant_in_qualification($this->event_id, $users_for_filter, $user['id'], $this->gender, $this->category->id, true);
                 $set = Set::find($user['number_set_id']);
                 $users[$index]['user_place'] = $place;
-                $users[$index]['number_set_id'] = $set->number_set;
+                $users[$index]['number_set_id'] = $set->number_set ?? '';
                 $users[$index]['amount_passed_routes'] = $amount_passed_routes;
                 $users[$index]['amount_passed_flash'] = $amount_passed_flash;
                 $users[$index]['amount_passed_redpoint'] = $amount_passed_redpoint;
