@@ -14,6 +14,7 @@ use App\Exports\ExportListParticipant;
 use App\Exports\ExportProtocolRouteParticipant;
 use App\Exports\FranceSystemQualificationResultExport;
 use App\Exports\QualificationResultExport;
+use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\OwnerPaymentOperations;
 use App\Models\OwnerPayments;
@@ -173,20 +174,34 @@ class ResultQualificationController extends Controller
      *
      * @param int $id
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id, Request $request)
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if ($event->is_france_system_qualification) {
             $result = ResultFranceSystemQualification::find($id);
-            ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
-            $model = ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
-            $model->amount_top = null;
-            $model->amount_try_top = null;
-            $model->amount_zone = null;
-            $model->amount_try_zone = null;
-            $model->save();
+            $result_route = ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+            if($result_route){
+                ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+                $model = ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+                $model->amount_top = null;
+                $model->amount_try_top = null;
+                $model->amount_zone = null;
+                $model->amount_try_zone = null;
+                $model->save();
+            } else {
+                ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+            }
+        } else {
+            $result = ResultQualificationClassic::find($id);
+            $result_route = ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+            if($result_route){
+                return Helpers::custom_response("Нельзя удалить юзера с результатами");
+            } else {
+                ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+            }
+
         }
     }
 
@@ -229,7 +244,7 @@ class ResultQualificationController extends Controller
 //            $actions->disableEdit();
 //            $actions->append(new ActionRejectBill($actions->getKey(), $event->id));
 //            $actions->disableView();
-            $actions->disableDelete();
+//            $actions->disableDelete();
         });
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.birthday', __('Дата Рождения'));
