@@ -62,7 +62,7 @@ jobs:
           pip install -r requirements.txt
           tox -e chrome
   test_part_2:
-    needs: [ build ]
+    needs: [ test_part_1 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -80,7 +80,7 @@ jobs:
           pip install -r requirements.txt
           tox -e chrome2
   test_part_3:
-    needs: [ build ]
+    needs: [ test_part_2 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
