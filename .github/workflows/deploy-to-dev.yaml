@@ -35,6 +35,7 @@ jobs:
             git remote update
             git fetch
             git checkout --track origin/${{ github.head_ref || github.ref_name }}
+            git pull
             /usr/bin/php artisan down
             /usr/bin/php artisan optimize
             /usr/bin/php artisan migrate
