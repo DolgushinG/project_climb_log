@@ -90,55 +90,54 @@ class BatchResultFinalCustom extends Action
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_final; $i++){
-            $this->hidden('final_route_id_'.$i, 'Трасса'.$i)->value($i);
-            $this->integer('show_final_route_id_'.$i, 'Трасса '.$i);
+            $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
             $this->integer('amount_try_top_'.$i, 'Попытки на топ');
             $this->integer('amount_try_zone_'.$i, 'Попытки на зону');
         }
         Admin::script("// Получаем все элементы с атрибутом modal
-        const elementsWithModalAttribute = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
-        const elementsWithIdAttribute = document.querySelectorAll('[id=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
+        const elementsWithModalAttribute4 = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
+        const elementsWithIdAttribute4 = document.querySelectorAll('[id=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
 
         // Создаем объект для отслеживания счетчика для каждого modal
-        const modalCounters = {};
-        const idCounters = {};
+        const modalCounters4 = {};
+        const idCounters4 = {};
 
         // Перебираем найденные элементы
-        elementsWithModalAttribute.forEach(element => {
-            const modalValue = element.getAttribute('modal');
+        elementsWithModalAttribute4.forEach(element => {
+            const modalValue4 = element.getAttribute('modal');
 
             // Проверяем, существует ли уже счетчик для данного modal
-            if (modalValue in modalCounters) {
+            if (modalValue4 in modalCounters4) {
                 // Если счетчик уже существует, инкрементируем его значение
-                modalCounters[modalValue]++;
+                modalCounters4[modalValue4]++;
             } else {
                 // Если счетчика еще нет, создаем его и устанавливаем значение 1
-                modalCounters[modalValue] = 1;
+                modalCounters4[modalValue4] = 1;
             }
 
             // Получаем номер элемента для данного modal
-            const elementNumber = modalCounters[modalValue];
+            const elementNumber4 = modalCounters4[modalValue4];
 
             // Устанавливаем новое значение modal
-            element.setAttribute('modal', `\${modalValue}-\${elementNumber}`);
+            element.setAttribute('modal', `\${modalValue4}-\${elementNumber4}`);
         });
-        elementsWithIdAttribute.forEach(element => {
-            const idValue = element.getAttribute('id');
+        elementsWithIdAttribute4.forEach(element => {
+            const idValue4 = element.getAttribute('id');
 
             // Проверяем, существует ли уже счетчик для данного modal
-            if (idValue in idCounters) {
+            if (idValue4 in idCounters4) {
                 // Если счетчик уже существует, инкрементируем его значение
-                idCounters[idValue]++;
+                idCounters4[idValue4]++;
             } else {
                 // Если счетчика еще нет, создаем его и устанавливаем значение 1
-                idCounters[idValue] = 1;
+                idCounters4[idValue4] = 1;
             }
 
             // Получаем номер элемента для данного modal
-            const elementNumber = idCounters[idValue];
+            const elementNumber4 = idCounters4[idValue4];
 
             // Устанавливаем новое значение modal
-            element.setAttribute('id', `\${idValue}-\${elementNumber}`);
+            element.setAttribute('id', `\${idValue4}-\${elementNumber4}`);
         });
 
         ");

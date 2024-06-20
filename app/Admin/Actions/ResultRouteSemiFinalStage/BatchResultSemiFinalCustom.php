@@ -142,8 +142,7 @@ class BatchResultSemiFinalCustom extends Action
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
-            $this->hidden('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
-            $this->integer('show_final_route_id_'.$i, 'Трасса '.$i);
+            $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
             $this->integer('amount_try_top_'.$i, 'Попытки на топ');
             $this->integer('amount_try_zone_'.$i, 'Попытки на зону');
         }

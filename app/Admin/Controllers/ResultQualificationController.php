@@ -15,6 +15,7 @@ use App\Exports\ExportProtocolRouteParticipant;
 use App\Exports\FranceSystemQualificationResultExport;
 use App\Exports\QualificationResultExport;
 use App\Helpers\Helpers;
+use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
 use App\Models\OwnerPaymentOperations;
 use App\Models\OwnerPayments;
@@ -502,7 +503,9 @@ class ResultQualificationController extends Controller
                     Cache::forget('result_female_cache_' . $category->category);
                 }
                 $event = Event::find($form->model()->find($id)->event_id);
-                Event::refresh_final_points_all_participant($event);
+                UpdateResultParticipants::dispatch($event);
+                # Выяснить почему перерасчет стал таким долгим или он был таким?
+//                Event::refresh_final_points_all_participant($event);
             }
             if(intval($form->input('amount_start_price')) > 0){
                 $result = $form->model()->find($id);

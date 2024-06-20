@@ -35,6 +35,7 @@ jobs:
             git remote update
             git fetch
             git checkout --track origin/${{ github.head_ref || github.ref_name }}
+            git pull
             /usr/bin/php artisan down
             /usr/bin/php artisan optimize
             /usr/bin/php artisan migrate
@@ -62,7 +63,7 @@ jobs:
           pip install -r requirements.txt
           tox -e chrome
   test_part_2:
-    needs: [ build ]
+    needs: [ test_part_1 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -80,7 +81,7 @@ jobs:
           pip install -r requirements.txt
           tox -e chrome2
   test_part_3:
-    needs: [ build ]
+    needs: [ test_part_2 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
