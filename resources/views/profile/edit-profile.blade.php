@@ -27,6 +27,12 @@
             </div>
         </div>
         <div class="row mb-3">
+            <label for="city" class="col-md-4 col-lg-3 col-form-label">Контакты для быстрой связи</label>
+            <div class="col-md-8 col-lg-9">
+                <input name="contact" placeholder="" type="text" class="form-control" id="contact" value="{{$user->contact}}">
+            </div>
+        </div>
+        <div class="row mb-3">
             <label for="birthday" class="col-md-4 col-lg-3 col-form-label">Год рождения</label>
             <div class="col-md-8 col-lg-9">
                 <input name="birthday" type="date" class="form-control" id="birthday" value="{{$user->birthday}}">

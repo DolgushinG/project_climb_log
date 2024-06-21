@@ -154,6 +154,7 @@ class EventsController extends Controller
         } else {
             return view('404');
         }
+//        dd($days, $participants, $sets);
         return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
     }
 

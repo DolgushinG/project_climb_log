@@ -110,6 +110,7 @@ class ResultQualificationController extends Controller
         $show->field('user.middlename', __('Имя и Фамилия'));
         $show->field('user.birthday', __('Дата Рождения'));
         $show->field('user.email', __('Почта'));
+        $show->field('user.contact', __('Контакт'));
         $show->field('user.city', __('Город'));
         $show->field('user.team', __('Команда'));
         $show->field('user.sports_category', __('Разряд'));

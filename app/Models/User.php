@@ -51,6 +51,7 @@ class User extends Authenticatable
         'year',
         'sport_category',
         'skill',
+        'phone',
         'city',
         'team',
         'email',
