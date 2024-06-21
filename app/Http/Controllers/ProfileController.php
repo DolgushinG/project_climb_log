@@ -168,6 +168,7 @@ class ProfileController extends Controller
         $user->middlename = $request->firstname.' '.$request->lastname;
         $user->city = $request->city;
         $user->gender = $request->gender;
+        $user->contact = $request->contact;
         $user->sport_category = $request->sport_category;
         $user->team = $request->team;
         $user->birthday = $request->birthday;

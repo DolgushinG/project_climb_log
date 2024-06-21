@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
             $table->string('gender')->nullable();
             $table->string('birthday')->nullable();
             $table->string('city')->nullable();
+            $table->string('contact')->nullable();
             $table->string('year')->nullable();
             $table->string('team')->nullable();
             $table->string('is_notify_about_new_event')->nullable();

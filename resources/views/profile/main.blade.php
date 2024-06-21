@@ -17,6 +17,13 @@
                         <h4></h4>
                     </div>
                 @endif
+                    @if(!$user->contact)
+                        <div class="alert alert-warning  alert-dismissible fade show w-100" role="alert">
+                            <p> Рекомендуется добавить номер телефона, телеграмм или другой способ</p>
+                            <p> Чтобы организаторы в случае каких то вопросов могли быстро уведомить вас индивидуально</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                 <div class="col-lg-4" id="profileCard">
                     @include('profile.card')
                 </div>
