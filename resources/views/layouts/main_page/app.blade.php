@@ -37,9 +37,8 @@
 
 <body class="light-mode">
 
-<div class="container-fluid">
-
-    <div class="main-content-wrapper">
+{{--<div class="container-fluid">--}}
+<div class="main-content-wrapper">
 @include('layouts.main_page.header')
 @include('cookie.cookies')
 @yield("content")
@@ -66,7 +65,7 @@
 
 <!-- Template Main JS File -->
 <script src="{{asset('js/main.js')}}"></script>
-    </div>
 </div>
+{{--</div>--}}
 </body>
 </html>

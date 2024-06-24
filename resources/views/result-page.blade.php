@@ -22,8 +22,8 @@
                                 <table class="table">
                                     <thead>
                                     <tr>
-                                        <th scope="col">№ трассы</th>
-                                        <th id="grade" scope="col">Категория</th>
+                                        <th scope="col">№</th>
+                                        <th id="grade" style="font-size: 11px" scope="col">Категория</th>
                                         <th scope="col">Не пролез</th>
                                         <th scope="col">Флэш</th>
                                         <th scope="col">Редпоинт</th>
@@ -38,7 +38,7 @@
                                                 <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                        name="{{$route->count}}" id="failed-{{$route->count}}"
                                                        autocomplete="off"
-                                                       checked>
+                                                       >
                                                 <label class="btn btn-outline-danger btn-failed"
                                                        for="failed-{{$route->count}}">Не пролез</label>
                                             </td>
@@ -54,7 +54,7 @@
                                                 <input type="radio" data-id="all-redpoint" class="btn-check"
                                                        data-grade="{{$route->grade}}" name="{{$route->count}}"
                                                        id="redpoint-{{$route->count}}" autocomplete="off">
-                                                <label class="btn btn-outline-danger btn-redpoint"
+                                                <label class="btn btn-outline-warning btn-redpoint"
                                                        for="redpoint-{{$route->count}}">REDPOINT</label>
                                             </td>
                                         </tr>

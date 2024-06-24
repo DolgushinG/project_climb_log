@@ -165,7 +165,7 @@ class EventsController extends Controller
         if($event){
             if(!$event->is_france_system_qualification){
 //                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
-                $user_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+                $user_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('active','=', 1)->pluck('user_id')->toArray();
                 $stats = new stdClass();
                 $female_categories = array();
                 $male_categories = array();

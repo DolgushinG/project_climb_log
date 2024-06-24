@@ -239,6 +239,7 @@ class ResultQualificationClassic extends Model
         $users = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
             ->where('result_qualification_classic.event_id', '=', $event_id)
+            ->where('result_qualification_classic.active', '=', 1)
             ->where('result_qualification_classic.category_id', '=', $category_id)
             ->select(
                 'users.id',
@@ -253,7 +254,7 @@ class ResultQualificationClassic extends Model
             )
             ->where('result_qualification_classic.gender', '=', $gender)->get()->sortBy('user_place')->toArray();
         $event = Event::find($event_id);
-        $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->pluck('user_id')->toArray();
+        $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->where('active', 1)->pluck('user_id')->toArray();
         foreach ($users as $index => $user){
             $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter,  $user['id'], $gender, $category_id, true);
             $set = Set::find($user['number_set_id']);
