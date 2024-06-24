@@ -238,7 +238,7 @@ class Event extends Model
             $category_id = $participant->category_id;
             if ($event->is_auto_categories && $category_id == null) {
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $participant->id), 3);
-                $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed);
+                $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $participant->id);
                 $category_id = ParticipantCategory::where('event_id', '=', $event_id)->where('category', $category)->first()->id;
                 $final_participant_result->category_id = $category_id;
             }
@@ -431,7 +431,7 @@ class Event extends Model
         $final_participant_result = ResultQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
         if (!$event->is_auto_categories && $final_participant_result->category_id == null) {
             $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $user_id), 3);
-            $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed);
+            $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
             $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
         } else {
             $category_id = $final_participant_result->category_id;
