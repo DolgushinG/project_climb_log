@@ -393,14 +393,11 @@ class EventsController extends Controller
                     ->options([0 => 'Сами участники выбирают категорию при регистрации', 1 => 'Автоопределение категории по параметрам'])
                     ->when(0, function (Form $form) {
                     })->when(1, function (Form $form) {
-                        $form->html('<h4 style="color: red" >Автоопределение категории по параметрам работает только при фестивальной системе</h4>');
-                        $form->html('<h5 style="color: black" >Пример заполнения 1 группа от 4 до 6B, 2 группа от 6B+ до 7A</h5>');
-                        $form->html('<h5 style="color: black" >Категории от и до не должны совпадать, например от 4 до 6B и от 6B до 7A</h5>');
-                        $form->html('<h5 style="color: black" >6B категория получиться в двух группах, что некорректно для работы</h5>');
+                        $form->html('<h4 style="color: red" >Изменение настроек при внесенных результатах может повлечь не корректную работу</h4>');
                         $form->table('options_categories', '', function ($table) use ($form){
-                            $table->select('Категория участника')->options($form->model()->categories)->attribute('disabled', 'true')->readonly();
-                            $table->select('От какой категории сложности определять эту категорию')->attribute('disabled', 'true')->options(Grades::getGrades())->width('30px');
-                            $table->select('До какой категории сложности определять эту категорию')->attribute('disabled', 'true')->options(Grades::getGrades())->width('30px');
+                            $table->select('Категория участника')->options($form->model()->categories)->readonly();
+                            $table->select('От какой категории сложности определять эту категорию')->options(Grades::getGrades())->width('30px');
+                            $table->select('До какой категории сложности определять эту категорию')->options(Grades::getGrades())->width('30px');
                         });
                     })->required();
             } else {
@@ -506,6 +503,7 @@ class EventsController extends Controller
 //                        $event->save();
 //                    }
 //                }
+//                dd($form);
                 if ($form->categories) {
                     $categories = ParticipantCategory::where('owner_id', '=', Admin::user()->id)
                         ->where('event_id', '=', $form->model()->id)->get();
