@@ -302,7 +302,7 @@ class ResultQualificationClassic extends Model
         return $maxKey;
     }
 
-    public static function get_category_from_result($event, $the_best_route)
+    public static function get_category_from_result($event, $the_best_route, $user_id)
     {
         $participant_categories = ParticipantCategory::where('event_id', $event->id)->get()->pluck('category')->toArray();
         $new_convert_options = self::convert_categories($event->options_categories, $participant_categories);
@@ -323,6 +323,17 @@ class ResultQualificationClassic extends Model
                      }
                  }
             }
+        }
+         # Это условие нужно для того чтобы подсветить результат который возможно требует внимания
+        if(count($result) > 1){
+            $res = ResultQualificationClassic::where('user_id', $user_id)->where('event_id', $event->id)->first();
+            if($res){
+                $res->is_recheck = 1;
+                $res->save();
+            } else {
+                Log::error('Не найден результат в автопереносе при сомнительном результате');
+            }
+
         }
         return self::findMaxKey($result);
     }

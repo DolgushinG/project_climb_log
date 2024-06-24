@@ -6,6 +6,7 @@ use App\Models\ResultQualificationClassic;
 use App\Models\ResultFinalStage;
 use App\Models\ResultRouteQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
+use App\Models\ResultSemiFinalStage;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -120,11 +121,18 @@ class ProfileController extends Controller
         foreach ($events as $event){
             if($event->is_france_system_qualification){
                 $event['amount_participant'] = ResultFranceSystemQualification::where('event_id', '=', $event->id)->get()->count();
+                $res_qualification = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+                $res_qualification_place = $res_qualification->place ?? '';
             } else {
                 $event['amount_participant'] = ResultQualificationClassic::where('event_id', '=', $event->id)->get()->count();
+                $res_qualification = ResultQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+                $res_qualification_place = $res_qualification->user_place ?? '';
             }
-            $participant = ResultFinalStage::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
-            $event['user_place'] = $participant->user_place ?? 'Нет результата';
+            $res_final = ResultFinalStage::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+            $res_semifinal = ResultSemiFinalStage::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+            $event['user_final_place'] = $res_final->place ?? '';
+            $event['user_semifinal_place'] = $res_semifinal->place ?? '';
+            $event['user_qualification_place'] = $res_qualification_place;
         }
         return view('profile.events', compact(['events']));
     }

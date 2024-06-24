@@ -15,14 +15,24 @@
             <div id="collapse{{$event->id}}" class="accordion-collapse collapse show" aria-labelledby="heading{{$event->id}}" data-bs-parent="#accordion{{$event->id}}">
                 <div class="accordion-body">
                     <ul class="list-group">
-                        @if($event->user_place == 'Нет результата')
+                        @if($event->user_qualification_place)
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                {{$event->user_place}}
+                                [КВАЛИФИКАЦИЯ] Место
+                                <span class="badge bg-primary rounded-pill">{{$event->user_qualification_place}}</span>
                             </li>
-                        @else
+                        @endif
+                        @if($event->is_semifinal)
+                            @if($event->user_semifinal_place)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    [ПОЛУФИНАЛ] Место
+                                    <span class="badge bg-primary rounded-pill">{{$event->user_semifinal_place}}</span>
+                                </li>
+                            @endif
+                        @endif
+                        @if($event->user_final_place)
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Место
-                                <span class="badge bg-primary rounded-pill">{{$event->user_place}}</span>
+                                [ФИНАЛ] Место
+                                <span class="badge bg-primary rounded-pill">{{$event->user_final_place}}</span>
                             </li>
                         @endif
 

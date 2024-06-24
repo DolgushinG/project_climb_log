@@ -145,15 +145,19 @@ class ResultQualificationController extends Controller
         $type = 'edit';
         if ($request->is_paid) {
             $type = 'is_paid';
+            return $this->form($type, $id)->update($id);
         }
         if ($request['name'] == 'amount_start_price') {
             $type = 'amount_start_price';
+            return $this->form($type, $id)->update($id);
         }
         if ($request->result_for_edit) {
             $type = 'update';
+            return $this->form($type, $id)->update($id);
         }
         if ($request->gender) {
             $type = 'gender';
+            return $this->form($type, $id)->update($id);
         }
         return $this->form($type, $id)->update($id);
     }
@@ -272,6 +276,15 @@ class ResultQualificationController extends Controller
             ->help('При некорректном раставлением мест, необходимо пересчитать результаты')
             ->sortable();
         $grid->column('points', 'Баллы')->sortable();
+        if ($event->is_auto_categories) {
+            $grid->column('is_recheck', 'Результат с вопросом')->using([0 => 'ОК', 1 => 'Внимание'])->display(function ($title, $column) {
+                if ($this->is_recheck == 1) {
+                    return $column->label('warning');
+                } else {
+                    return $column->label('success');
+                }
+            });
+        }
         $grid->column('active', 'Результаты')->using([0 => 'Не внес', 1 => 'Внес'])->display(function ($title, $column) {
             if ($this->active == 0) {
                 return $column->label('default');
@@ -497,6 +510,7 @@ class ResultQualificationController extends Controller
             if ($type == 'update') {
                 $user_id = $form->model()->find($id)->user_id;
                 $event_id = $form->model()->find($id)->event_id;
+
                 $routes = $form->result_for_edit;
                 foreach ($routes as $route) {
                     $result = ResultRouteQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
