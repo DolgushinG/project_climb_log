@@ -221,7 +221,7 @@ class Event extends Model
             ->select(
                 'users.id',
                 'result_qualification_classic.category_id',
-                'users.gender',
+                'result_qualification_classic.gender',
                 )->where('active', 1);
         $users_id = $participants->pluck('id');
         foreach ($participants->get() as $participant) {
@@ -325,9 +325,10 @@ class Event extends Model
             $all_group_participants = array();
             foreach ($event->categories as $category) {
                 $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-                $part_nt = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('category_id', $category_id)->distinct()->pluck('user_id');
-                $all_group_participants['male'][$category] = User::whereIn('id', $part_nt)->where('gender', '=', 'male')->get();
-                $all_group_participants['female'][$category] = User::whereIn('id', $part_nt)->where('gender', '=', 'female')->get();
+                $part_male_nt = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('category_id', $category_id)->distinct()->pluck('user_id');
+                $part_female_nt = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('category_id', $category_id)->distinct()->pluck('user_id');
+                $all_group_participants['male'][$category] = User::whereIn('id', $part_male_nt)->get();
+                $all_group_participants['female'][$category] = User::whereIn('id', $part_female_nt)->get();
             }
             foreach ($all_group_participants as $group_participants) {
                 foreach ($group_participants as $participants) {
@@ -335,9 +336,10 @@ class Event extends Model
                 }
             }
         } else {
-            $participant_users_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
-            $participants_female = User::whereIn('id', $participant_users_id)->where('gender', 'female')->get();
-            $participants_male = User::whereIn('id', $participant_users_id)->where('gender', 'male')->get();
+            $participant_users_female_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('gender', 'female')->pluck('user_id')->toArray();
+            $participant_users_male_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('gender', 'male')->pluck('user_id')->toArray();
+            $participants_female = User::whereIn('id', $participant_users_female_id)->get();
+            $participants_male = User::whereIn('id', $participant_users_male_id)->get();
             Event::getUsersSorted($participants_female, $fields, $event, 'france_system_qualification', Admin::user()->id);
             Event::getUsersSorted($participants_male, $fields, $event, 'france_system_qualification', Admin::user()->id);
         }

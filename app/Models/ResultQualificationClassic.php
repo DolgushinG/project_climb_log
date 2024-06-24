@@ -150,11 +150,11 @@ class ResultQualificationClassic extends Model
     }
 
     public static function get_places_participant_in_qualification($event_id, $filter_users, $user_id, $gender, $category_id=null, $get_place_user = false){
-        $users_id = User::whereIn('id', $filter_users)->where('gender', '=', $gender)->pluck('id');
+        $users_id = User::whereIn('id', $filter_users)->pluck('id');
         if($category_id){
-            $all_participant_event = ResultQualificationClassic::whereIn('user_id', $users_id)->where('category_id', '=', $category_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
+            $all_participant_event = ResultQualificationClassic::whereIn('user_id', $users_id)->where('gender', '=', $gender)->where('category_id', '=', $category_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
         } else {
-            $all_participant_event = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
+            $all_participant_event = ResultQualificationClassic::whereIn('user_id', $users_id)->where('gender', '=', $gender)->where('event_id', '=', $event_id)->orderBy('points', 'DESC')->get();
         }
         $user_places = array();
         foreach ($all_participant_event as $index => $user){
@@ -171,12 +171,12 @@ class ResultQualificationClassic extends Model
     {
 
         if($category_id){
-            $active_participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('category_id', '=', $category_id)->where('active', '=', 1)->pluck('user_id')->toArray();
+            $active_participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where('category_id', '=', $category_id)->where('active', '=', 1)->pluck('user_id')->toArray();
         } else {
-            $active_participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('active', '=', 1)->pluck('user_id')->toArray();
+            $active_participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where('active', '=', 1)->pluck('user_id')->toArray();
         }
         if ($active_participant) {
-            return count(User::whereIn('id', $active_participant)->where('gender', '=', $gender)->get()->toArray());
+            return count(User::whereIn('id', $active_participant)->get()->toArray());
         } else {
             return 1;
         }
@@ -193,11 +193,11 @@ class ResultQualificationClassic extends Model
 
     public static function better_participants($event_id, $gender, $amount_better, $category_id = null){
         if($category_id){
-            $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('category_id', '=', $category_id)->pluck('user_id')->toArray();
+            $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where('category_id', '=', $category_id)->pluck('user_id')->toArray();
         } else {
-            $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->pluck('user_id')->toArray();
+            $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->pluck('user_id')->toArray();
         }
-        $users_id = User::whereIn('id', $participant_users_id)->where('gender', '=', $gender)->pluck('id');
+        $users_id = User::whereIn('id', $participant_users_id)->pluck('id');
         $participant_sort_id = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->sortByDesc('points')->pluck('user_id');
         $after_slice_participant_final_sort_id = array_slice($participant_sort_id->toArray(), 0, $amount_better);
         return User::whereIn('id', $after_slice_participant_final_sort_id)->get();

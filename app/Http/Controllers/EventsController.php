@@ -165,12 +165,13 @@ class EventsController extends Controller
         if($event){
             if(!$event->is_france_system_qualification){
 //                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
-                $user_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('active','=', 1)->pluck('user_id')->toArray();
+                $user_male_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('active','=', 1)->pluck('user_id')->toArray();
+                $user_female_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('active','=', 1)->pluck('user_id')->toArray();
                 $stats = new stdClass();
                 $female_categories = array();
                 $male_categories = array();
-                $stats->male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->get()->count();
-                $stats->female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->get()->count();
+                $stats->male = User::whereIn('id', $user_male_ids)->get()->count();
+                $stats->female = User::whereIn('id', $user_female_ids)->get()->count();
                 $result_male = array();
                 $result_female = array();
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
@@ -185,8 +186,8 @@ class EventsController extends Controller
                     $result_female[] = $result_female_cache;
 //                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
 //                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
-                    $user_female = User::whereIn('id', $user_ids)->where('gender', '=', 'female')->pluck('id');
-                    $user_male = User::whereIn('id', $user_ids)->where('gender', '=', 'male')->pluck('id');
+                    $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
+                    $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
                     $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
                     $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
                 }
@@ -329,7 +330,6 @@ class EventsController extends Controller
         $participant->owner_id = $event->owner_id;
         $participant->active = 0;
         $participant->save();
-        $user = User::find($request->user_id);
         if($user){
             if($request->gender){
                 $user->gender = $request->gender;

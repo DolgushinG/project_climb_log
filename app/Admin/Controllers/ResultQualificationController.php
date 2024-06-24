@@ -148,10 +148,12 @@ class ResultQualificationController extends Controller
         }
         if ($request['name'] == 'amount_start_price') {
             $type = 'amount_start_price';
-
         }
         if ($request->result_for_edit) {
             $type = 'update';
+        }
+        if ($request->gender) {
+            $type = 'gender';
         }
         return $this->form($type, $id)->update($id);
     }
@@ -250,9 +252,9 @@ class ResultQualificationController extends Controller
         });
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.birthday', __('Дата Рождения'));
-        $grid->column('user.gender', __('Пол'))->display(function ($gender) {
-            return trans_choice('somewords.' . $gender, 10);
-        });
+        $grid->column('gender', __('Пол'))
+            ->help('Если случается перенос, из одного пола в другой, необходимо обязательно пересчитать результаты')
+            ->select(['male' => 'Муж', 'female' => 'Жен']);
         $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
         $p_categories = ResultQualificationClassic::where('event_id', $event->id)->whereIn('category_id', $category)->get();
 
@@ -363,9 +365,10 @@ class ResultQualificationController extends Controller
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->column('user.middlename', __('Участник'));
-        $grid->column('user.gender', __('Пол'))->display(function ($gender) {
+        $grid->column('gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.' . $gender, 10);
-        });
+        })->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
+            ->select(['male' => 'Муж', 'female' => 'Жен']);
         $grid->column('number_set_id', 'Номер сета')
             ->select(ResultQualificationClassic::number_sets(Admin::user()->id));
         $grid->column('category_id', 'Категория')
@@ -435,6 +438,7 @@ class ResultQualificationController extends Controller
             $form->text('event_id', 'event_id');
             $form->text('user_id', 'user_id');
             $form->text('route_id', 'final_route_id');
+            $form->text('gender', 'gender');
             $form->text('amount_try_top', 'amount_try_top');
             $form->text('amount_try_zone', 'amount_try_zone');
             $form->hidden('amount_zone', 'amount_zone');
@@ -482,6 +486,7 @@ class ResultQualificationController extends Controller
                 $footer->disableEditingCheck();
                 $footer->disableCreatingCheck();
             });
+            $form->hidden('gender', 'gender');
             $form->table('result_for_edit', 'Таблица результата', function ($table) {
                 $table->text('route_id', 'Номер маршрут')->readonly();
                 $table->text('grade', 'Категория')->readonly();
