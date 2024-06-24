@@ -1,7 +1,7 @@
 @extends('layouts.main_page.app')
 @section('content')
     <section class="section-bg contact">
-            <div class="row mt-3">
+            <div class="row m-3">
                 <div class="col-xl-12 mb-3">
                     <div class="card">
                         <div class="card-body">
