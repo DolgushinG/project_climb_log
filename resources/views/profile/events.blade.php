@@ -17,21 +17,21 @@
                     <ul class="list-group">
                         @if($event->user_qualification_place)
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                [КВАЛИФИКАЦИЯ] Место
+                                 <span class="badge bg-info rounded-pill">[КВАЛИФИКАЦИЯ] Место </span>
                                 <span class="badge bg-primary rounded-pill">{{$event->user_qualification_place}}</span>
                             </li>
                         @endif
                         @if($event->is_semifinal)
                             @if($event->user_semifinal_place)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    [ПОЛУФИНАЛ] Место
+                                    <span class="badge bg-info rounded-pill">[ПОЛУФИНАЛ] Место</span>
                                     <span class="badge bg-primary rounded-pill">{{$event->user_semifinal_place}}</span>
                                 </li>
                             @endif
                         @endif
                         @if($event->user_final_place)
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                [ФИНАЛ] Место
+                                <span class="badge bg-info rounded-pill">[ФИНАЛ] Место</span>
                                 <span class="badge bg-primary rounded-pill">{{$event->user_final_place}}</span>
                             </li>
                         @endif
