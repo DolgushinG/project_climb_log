@@ -284,6 +284,7 @@ class EventsController extends Controller
         } else {
             return view('404');
         }
+//        dd($result_each_routes, $routes);
         return view('event.france_system_final_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
 
