@@ -34,7 +34,7 @@
                                                     <th scope="col">
                                                         <b>Имя
                                                     </th>
-                                                    <th scope="col">Город</th>
+{{--                                                    <th scope="col">Город</th>--}}
                                                     <th scope="col">Суммарные баллы</th>
                                                 </tr>
                                                 </thead>
@@ -45,7 +45,7 @@
                                                             <tr>
                                                                 <td>{{$res["user_place"]}}</td>
                                                                 <td>{{$res['middlename']}}</td>
-                                                                <td>{{$res['city']}}</td>
+{{--                                                                <td>{{$res['city']}}</td>--}}
                                                                 <td>{{$res['points']}}</td>
                                                             </tr>
                                                         @endif
@@ -94,7 +94,7 @@
                                                 <th scope="col">
                                                     <b>Имя
                                                 </th>
-                                                <th scope="col">Город</th>
+{{--                                                <th scope="col">Город</th>--}}
                                                 <th scope="col">Суммарные баллы</th>
                                             </tr>
                                         </thead>
@@ -105,7 +105,7 @@
                                                         <tr>
                                                             <td>{{$res["user_place"]}}</td>
                                                             <td>{{$res['middlename']}}</td>
-                                                            <td>{{$res['city']}}</td>
+{{--                                                            <td>{{$res['city']}}</td>--}}
                                                             <td>{{$res['points']}}</td>
                                                         </tr>
                                                     @endif
