@@ -768,5 +768,4 @@ class ResultQualificationController extends Controller
         $participant->save();
     }
 
-
 }

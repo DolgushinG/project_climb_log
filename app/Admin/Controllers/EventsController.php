@@ -221,7 +221,7 @@ class EventsController extends Controller
             $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника'));
             $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника'));
         });
-        $event = Event::where('owner_id', '=', \App\Admin\Extensions\Facades\Admin::user()->id)->where('active', 1)->first();
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         if($event){
             $grid->tools(function (Grid\Tools $tools) use ($event) {
                 $tools->append(new BatchNotificationOfParticipant);
