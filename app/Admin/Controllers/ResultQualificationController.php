@@ -17,6 +17,7 @@ use App\Exports\QualificationResultExport;
 use App\Helpers\Helpers;
 use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
+use App\Models\Grades;
 use App\Models\OwnerPaymentOperations;
 use App\Models\OwnerPayments;
 use App\Models\ResultQualificationClassic;
@@ -36,6 +37,8 @@ use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -130,7 +133,7 @@ class ResultQualificationController extends Controller
         return $content
             ->header(trans('admin.create'))
             ->description(trans('admin.description'))
-            ->body($this->form('create'));
+            ->body($this->form('create_france_system_result'));
     }
 
     /**
@@ -142,6 +145,7 @@ class ResultQualificationController extends Controller
      */
     public function update($id, Request $request)
     {
+
         $type = 'edit';
         if ($request->is_paid) {
             $type = 'is_paid';
@@ -149,6 +153,10 @@ class ResultQualificationController extends Controller
         }
         if ($request['name'] == 'amount_start_price') {
             $type = 'amount_start_price';
+            return $this->form($type, $id)->update($id);
+        }
+        if ($request->result_for_edit_france_system_qualification) {
+            $type = 'update';
             return $this->form($type, $id)->update($id);
         }
         if ($request->result_for_edit) {
@@ -198,6 +206,9 @@ class ResultQualificationController extends Controller
                 $model->amount_zone = null;
                 $model->amount_try_zone = null;
                 $model->save();
+
+                $result->result_for_edit_france_system_qualification = null;
+                $result->save();
             } else {
                 ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
             }
@@ -362,31 +373,58 @@ class ResultQualificationController extends Controller
             $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
+//            $event = Event::where('owner_id', '=', Admin::user()->id)
+//                ->where('active', '=', 1)->first();
+//            $grades = Grades::where('event_id', $event->id)->first();
+//            if($grades){
+//                $button = "<a class='send-add btn btn-sm btn-success' href='/admin/result-qualification/create'><i class='fa fa-arrow-down'></i> Внести результат</a>
+//                <style>
+//                    .send-add {margin-top:8px;}
+//                 @media screen and (max-width: 767px) {
+//                        .send-add {margin-top:8px;}
+//                    }
+//                </style>
+//
+//            ";
+//            } else {
+//                $button = "<a class='send-add btn btn-sm btn-success disabled' href='/admin/result-qualification/create'><i class='fa fa-arrow-down'></i>Внести результат (Необходимо настроить трассы) </a>
+//                <style>
+//                    .send-add {margin-top:8px;}
+//                 @media screen and (max-width: 767px) {
+//                        .send-add {margin-top:8px;}
+//                    }
+//                </style>
+//
+//            ";
+//            }
+//            $tools->append($button);
             $tools->append(new BatchExportResultFranceSystemQualification);
             $tools->append(new BatchResultFranceSystemQualification);
             $tools->append(new BatchGenerateParticipant);
             $tools->append(new BatchExportProtocolRouteParticipantsQualification);
         });
         $grid->actions(function ($actions) {
-            $actions->disableEdit();
+//            $actions->disableEdit();
 //            $actions->disableDelete();
 //            $actions->disableView();
         });
 
         $grid->disableExport();
         $grid->disableFilter();
+
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->column('user.middlename', __('Участник'));
-        $grid->column('gender', __('Пол'))->display(function ($gender) {
-            return trans_choice('somewords.' . $gender, 10);
-        })->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
+        $grid->column('gender', __('Пол'))
+            ->help('Если случается перенос, из одного пола в другой, необходимо обязательно пересчитать результаты')
             ->select(['male' => 'Муж', 'female' => 'Жен']);
         $grid->column('number_set_id', 'Номер сета')
             ->select(ResultQualificationClassic::number_sets(Admin::user()->id));
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+        $grid->column('user.sport_category', __('Разряд'));
+        $grid->column('user.birthday', __('Год рождения'));
         $grid->column('place', __('Место'))->sortable();
         $grid->column('amount_top', __('Кол-во топов'));
         $grid->column('amount_try_top', __('Кол-во попыток на топ'));
@@ -396,7 +434,7 @@ class ResultQualificationController extends Controller
             'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
             'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
         ];
-        if ($event->is_need_pay_for_reg) {
+        if ($event->is_need_pay_for_reg && $event->amount_start_price || $event->options_amount_price) {
 
             $amounts = [];
             $count = 1;
@@ -406,28 +444,34 @@ class ResultQualificationController extends Controller
                     $count++;
                 }
                 $amounts[0] = '0 р';
+                $grid->column('amount_start_price', 'Сумма оплаты')->editable('select', $amounts);
             } else {
-                $amounts[0] = $event->amount_start_price;
+                $grid->column('amount_start_price', 'Сумма оплаты')->display(function ($amount_start_price) use ($event){
+                    if(!$event->amount_start_price){
+                        return '0 р';
+                    } else {
+                        return $event->amount_start_price;
+                    }
+                });
             }
-            $grid->column('amount_start_price', 'Сумма оплаты')->editable('select', $amounts);
             $grid->column('is_paid', 'Оплата')->switch($states);
             \Encore\Admin\Admin::style('
-                        @media only screen and (min-width: 1025px) {
-                                         img {
-                                        position: relative;
-                                        transition: transform 0.25s ease;
-        //                             transform-origin: center center;
-                                }
-                                img:hover {
-                                    -webkit-transform: scale(5.5);
-                                    transform: scale(5.5);
-                                    margin-top: -50px; /* половина высоты изображения */
-                                    margin-left: -50px; /* половина ширины изображения */
-                                    z-index: 9999;
-                                    position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
-                                    z-index: 9999;
-                                }
-                        }
+                    @media only screen and (min-width: 1025px) {
+                                     img {
+                                    position: relative;
+                                    transition: transform 0.25s ease;
+    //                             transform-origin: center center;
+                            }
+                            img:hover {
+                                -webkit-transform: scale(5.5);
+                                transform: scale(5.5);
+                                margin-top: -50px; /* половина высоты изображения */
+                                margin-left: -50px; /* половина ширины изображения */
+                                z-index: 9999;
+                                position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
+                                z-index: 9999;
+                            }
+                    }
 
             ');
             $grid->column('bill', 'Чек участника')->image('', 100, 100);
@@ -446,35 +490,37 @@ class ResultQualificationController extends Controller
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if ($event->is_france_system_qualification) {
             $form = new Form(new ResultFranceSystemQualification);
-            $form->display('ID');
-            $form->hidden('owner_id')->value(Admin::user()->id);
-            $form->text('event_id', 'event_id');
-            $form->text('user_id', 'user_id');
-            $form->text('route_id', 'final_route_id');
-            $form->text('gender', 'gender');
-            $form->text('amount_try_top', 'amount_try_top');
-            $form->text('amount_try_zone', 'amount_try_zone');
-            $form->hidden('amount_zone', 'amount_zone');
-            $form->hidden('amount_top', 'amount_top');
-            $form->display(trans('admin.created_at'));
-            $form->display(trans('admin.updated_at'));
-            $form->text('number_set_id', 'number_set');
-            $form->text('category_id', 'category_id');
-            $form->switch('active', 'active');
-            $form->switch('is_paid', 'is_paid');
-            $form->switch('amount_start_price', 'amount_start_price');
-            $form->saving(function (Form $form) {
-                if ($form->amount_try_top > 0) {
-                    $form->amount_top = 1;
-                } else {
-                    $form->amount_top = 0;
+            Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
+                display: None;
                 }
-                if ($form->amount_try_zone > 0) {
-                    $form->amount_zone = 1;
-                } else {
-                    $form->amount_zone = 0;
+                .add.btn.btn-success.btn-sm {
+                display: None;
                 }
+                .input-group-addon{
+                display: None;
+                }
+            ");
+            $count = Grades::where('event_id', $event->id)->first()->count_routes;
+            $arr = array();
+            for($i = 1; $i <= $count; $i++){
+                $arr[] = ['Номер маршрута' => $i, 'Попытки на топ' => 0, 'Попытки на зону' => 0];
+            }
+            $form->tools(function (Form\Tools $tools) {
+                $tools->disableList();
+                $tools->disableDelete();
+                $tools->disableView();
             });
+            $form->footer(function ($footer) {
+                $footer->disableReset();
+                $footer->disableViewCheck();
+                $footer->disableEditingCheck();
+                $footer->disableCreatingCheck();
+            });
+            $form->table('result_for_edit_france_system_qualification', 'Таблица результата', function ($table) use ($event){
+                $table->text('Номер маршрута')->readonly();
+                $table->number('Попытки на топ');
+                $table->number('Попытки на зону');
+            })->value($arr);
         } else {
             $form = new Form(new ResultQualificationClassic);
             Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
@@ -508,21 +554,45 @@ class ResultQualificationController extends Controller
         }
         $form->saving(function (Form $form) use ($type, $id) {
             if ($type == 'update') {
+                $event = Event::find($form->model()->find($id)->event_id);
                 $user_id = $form->model()->find($id)->user_id;
                 $event_id = $form->model()->find($id)->event_id;
-
-                $routes = $form->result_for_edit;
-                foreach ($routes as $route) {
-                    $result = ResultRouteQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
-                    $result->attempt = $route['attempt'];
-                    $result->save();
+                if($form->result_for_edit){
+                    $routes = $form->result_for_edit;
+                    foreach ($routes as $route) {
+                        $result = ResultRouteQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
+                        $result->attempt = $route['attempt'];
+                        $result->save();
+                    }
+                }
+                if($form->result_for_edit_france_system_qualification){
+                    $routes = $form->result_for_edit_france_system_qualification;
+                    foreach ($routes as $route) {
+                        $result = ResultRouteFranceSystemQualification::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['Номер маршрута'])->first();
+                        if (intval($route['Попытки на топ']) > 0) {
+                            $amount_top = 1;
+                        } else {
+                            $amount_top = 0;
+                        }
+                        if (intval($route['Попытки на зону']) > 0) {
+                            $amount_zone = 1;
+                        } else {
+                            $amount_zone = 0;
+                        }
+                        $result->amount_try_top = $route['Попытки на топ'];
+                        $result->amount_top = $amount_top;
+                        $result->amount_zone = $amount_zone;
+                        $result->amount_try_zone = $route['Попытки на зону'];
+                        $result->save();
+                    }
+                    Event::refresh_france_system_qualification_counting($event);
                 }
                 $categories = ParticipantCategory::where('event_id', $event_id)->get();
                 foreach ($categories as $category) {
                     Cache::forget('result_male_cache_' . $category->category);
                     Cache::forget('result_female_cache_' . $category->category);
                 }
-                $event = Event::find($form->model()->find($id)->event_id);
+
                 UpdateResultParticipants::dispatch($event);
                 # Выяснить почему перерасчет стал таким долгим или он был таким?
 //                Event::refresh_final_points_all_participant($event);
@@ -542,7 +612,6 @@ class ResultQualificationController extends Controller
                     ];
                     return response()->json($response);
                 }
-
                 $amount_participant = $form->model()->where('event_id', $participant->event_id)->get()->count();
                 $participant->is_paid = $form->input('is_paid');
                 $participant->save();
@@ -698,6 +767,5 @@ class ResultQualificationController extends Controller
         $participant->bill = null;
         $participant->save();
     }
-
 
 }

@@ -127,6 +127,16 @@ class EventsController extends Controller
         if($request->title){
             $type = 'edit';
         }
+        if(!$request->options_amount_price){
+            $event = Event::where('title', $request->title)->where('owner_id', Admin::user()->id)->first();
+            if($event){
+                if($event->options_amount_price){
+                    $event->options_amount_price = null;
+                    $event->save();
+                }
+            }
+        }
+
         return $this->form($type, $id)->update($id);
     }
 
@@ -211,7 +221,7 @@ class EventsController extends Controller
             $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника'));
             $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника'));
         });
-        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         if($event){
             $grid->tools(function (Grid\Tools $tools) use ($event) {
                 $tools->append(new BatchNotificationOfParticipant);
@@ -479,7 +489,7 @@ class EventsController extends Controller
                 if($events && $events->id != $form->model()->id){
                     $response = [
                         'status'  => false,
-                        'message' => "Только одно соревнование может быть опубликовано",
+                        'message' => "Только одно соревнование может быть активировано",
                     ];
                     return response()->json($response);
                 }
@@ -558,7 +568,7 @@ class EventsController extends Controller
                 if($event_owner->id != $form->model()->id){
                     $response = [
                         'status'  => false,
-                        'message' => "Только одно соревнование может быть опубликовано",
+                        'message' => "Только одно соревнование может быть активировано",
                     ];
                     return response()->json($response);
                 }

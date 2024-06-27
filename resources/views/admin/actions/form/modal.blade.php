@@ -7,9 +7,16 @@
             </div>
             <form>
             <div class="modal-body">
-                @foreach($fields as $field)
-                    {!! $field->render() !!}
-                @endforeach
+                @if($modal_size == 'modal-lg')
+                    @foreach($fields as $field)
+                        <div class="col-md-4"> {!! $field->render() !!}</div>
+                    @endforeach
+                @else
+                    @foreach($fields as $field)
+                        {!! $field->render() !!}
+                    @endforeach
+                @endif
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('admin.close') }}</button>

@@ -10,6 +10,9 @@ class ResultFranceSystemQualification extends Model
 
     public $timestamps = true;
 
+    protected $casts = [
+        'result_for_edit_france_system_qualification' =>'json',
+    ];
 
     public function event()
     {

@@ -143,6 +143,7 @@ class Generators
                 } else {
                     Log::error('Category has not found '.$category.' category_random'.$event_categories[array_rand($event_categories)].' event_id'.$event_id);
                 }
+                $result_for_edit = [];
                 for ($route = 1; $route <= $count_routes; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {
@@ -162,7 +163,16 @@ class Generators
                         $amount_try_top = 0;
                     }
                     $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $participant->gender,'user_id' => $participant->user_id,'category_id' => $category_id, 'route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
+                    $result_for_edit[] = array(
+                        'Номер маршрута' => $route,
+                        'Попытки на топ' => $amount_try_top,
+                        'Попытки на зону' => $amount_try_zone
+                    );
                 }
+                $participant = ResultFranceSystemQualification::where('event_id', $event_id)->where('user_id', $participant->user_id)->first();
+                $participant->active = 1;
+                $participant->result_for_edit_france_system_qualification = $result_for_edit;
+                $participant->save();
             }
             DB::table('result_route_france_system_qualification')->insert($result);
         }

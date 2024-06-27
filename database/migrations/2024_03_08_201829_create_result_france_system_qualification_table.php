@@ -25,6 +25,7 @@ class CreateResultFranceSystemQualificationTable extends Migration
             $table->integer('amount_try_top')->nullable();
             $table->integer('amount_zone')->nullable();
             $table->integer('amount_try_zone')->nullable();
+            $table->integer('result_for_edit_france_system_qualification')->nullable();
             $table->integer('place')->nullable();
             $table->boolean('active')->nullable();
             $table->boolean('is_paid')->default(0);

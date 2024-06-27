@@ -63,10 +63,18 @@ class EventsController extends Controller
                     $percent = 0;
                 } elseif ($a < $b) {
                     $diff = $b - $a;
-                    $percent = $diff / $b * 100;
+                    if($b != 0){
+                        $percent = $diff / $b * 100;
+                    } else {
+                        $percent = 0;
+                    }
                 } else {
                     $diff = $a - $b;
-                    $percent = $diff / $a * 100;
+                    if( $a != 0){
+                        $percent = $diff / $a * 100;
+                    } else {
+                        $percent = 0;
+                    }
                 }
                 $set->procent = intval($percent);
                 $set->date = Helpers::getDatesByDayOfWeek($event_exist->start_date, $event_exist->end_date);
@@ -210,7 +218,11 @@ class EventsController extends Controller
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if($event){
             $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
-            $routes = Route::where('event_id', $event->id)->pluck('route_id');
+            $routes_amount = Grades::where('event_id', $event->id)->first()->count_routes;
+            $routes = [];
+            for($i = 1; $i <= $routes_amount; $i++){
+                $routes[] = $i;
+            }
             if($event->is_france_system_qualification){
                 $result_each_routes = array();
                 foreach ($event->categories as $category) {
