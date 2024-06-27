@@ -499,6 +499,7 @@ class Event extends Model
      */
     public static function getUsersSorted($users, $fields, $model, $type, $owner_id): array
     {
+
         if (count($users->toArray()) == 0) {
             return [];
         }

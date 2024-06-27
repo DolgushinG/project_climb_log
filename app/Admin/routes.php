@@ -31,7 +31,7 @@ Route::group([
         $router->get('exports/events/list/participant/{id}', 'ResultQualificationController@listParticipantExcel')->name('listParticipantExcel');
         $router->get('exports/events/{event_id}/final/participants', 'ResultRouteFinalStageController@finalParticipantExcel')->name('finalParticipantExcel');
         $router->get('exports/events/{event_id}/semifinal/participants', 'ResultRouteSemiFinalStageController@semifinalParticipantExcel')->name('semifinalParticipantExcel');
-        $router->get('exports/events/{event_id}/{stage}/{set_id}/{gender}/{category_id}', 'ResultQualificationClassicController@protocolRouteExcel')->name('protocolRouteExcel');
+        $router->get('exports/events/{event_id}/{stage}/{set_id}/{gender}/{category_id}', 'ResultQualificationController@protocolRouteExcel')->name('protocolRouteExcel');
         $router->get('exports/events/csv/qualification/{id}', 'ResultQualificationController@exportQualificationCsv')->name('exportQualificationCsv');
         $router->get('exports/events/ods/qualification/{id}', 'ResultQualificationController@exportQualificationOds')->name('exportQualificationOds');
         $router->get('exports/events/excel/semifinal/{id}', 'ResultRouteSemiFinalStageController@exportSemiFinalExcel')->name('exportSemiFinalExcel');

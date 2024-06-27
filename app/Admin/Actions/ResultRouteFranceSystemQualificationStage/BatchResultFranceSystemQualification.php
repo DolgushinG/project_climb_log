@@ -26,6 +26,7 @@ class BatchResultFranceSystemQualification extends Action
         $grades = Grades::where('event_id', $event->id)->first();
         $result_qualification_like = ResultFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
         $data = array();
+        $result_for_edit = [];
         for($i = 1; $i <= $grades->count_routes; $i++){
             if($results['amount_try_top_'.$i] > 0 || $results['amount_try_top_'.$i] != null){
                 $amount_top  = 1;
@@ -48,9 +49,15 @@ class BatchResultFranceSystemQualification extends Action
                 'amount_zone' => $amount_zone,
                 'amount_try_zone' => intval($results['amount_try_zone_'.$i]),
             );
+            $result_for_edit[] = array(
+                'Номер маршрута' => intval($results['route_id_'.$i]),
+                'Попытки на топ' => intval($results['amount_try_top_'.$i]),
+                'Попытки на зону' => intval($results['amount_try_zone_'.$i])
+            );
         }
         $participant = ResultFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
         $participant->active = 1;
+        $participant->result_for_edit_france_system_qualification = $result_for_edit;
         $participant->save();
         DB::table('result_route_france_system_qualification')->insert($data);
         Event::refresh_france_system_qualification_counting($event);

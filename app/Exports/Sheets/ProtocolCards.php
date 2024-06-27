@@ -81,11 +81,12 @@ class ProtocolCards implements WithTitle, WithCustomStartCell, ShouldAutoSize, W
                     }
                     if($this->type == 'final'){
                         $merged_users = ResultFinalStage::get_final_participant($this->event, $this->category);
+
                     }
                     $participants = array();
                     foreach ($merged_users as $user){
-                        if($user->gender == $this->gender){
-                            $participants[] = $user->middlename;
+                        if($user['gender'] == $this->gender){
+                            $participants[] = $user['middlename'];
                         }
                     }
                     foreach($participants as $participant){
