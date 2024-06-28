@@ -144,8 +144,6 @@ class BatchResultFinalCustom extends Action
 
             // Устанавливаем новое значение modal
             element.setAttribute('id', `\${idValue4}-\${elementNumber4}`);
-            element.setAttribute('id', `\${idValue4}-\${elementNumber4}`);
-            element.setAttribute('id', `\${idValue4}-\${elementNumber4}`);
         });
 
         ");
