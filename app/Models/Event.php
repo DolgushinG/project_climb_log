@@ -50,10 +50,21 @@ class Event extends Model
         return boolval(Event::where('owner_id', '=', $owner_id)->where('active', '=', 1)->first());
     }
 
+    public function participant_final_stage()
+    {
+        return $this->belongsTo(ResultFinalStage::class);
+    }
+
+    public function participant_semifinal_stage()
+    {
+        return $this->belongsTo(ResultSemiFinalStage::class);
+    }
     public function participant()
     {
         return $this->hasOne(ResultQualificationClassic::class);
     }
+
+
 
     public function ownerPayments()
     {
@@ -524,6 +535,16 @@ class Event extends Model
                         ->where('user_id', '=', $user->id)
                         ->get();
             }
+//            var_dump('user_id', $user->id);
+////            if(count($result_user->toArray()) == 0){
+////                return [];
+////            }
+////
+////            $result_user = [];
+//            if($user->id == 1){
+//                dd('users ',$users, 'event ',$model, 'type ',$type, 'owner_id ',$owner_id, '$result_user ',$result_user, 'user_id ',$user->id, 'user_id ',$model->id);
+//            }
+
             $result = ResultRouteSemiFinalStage::merge_result_user_in_stage($result_user);
             if ($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null) {
                 $users_with_result[$index] = collect($user->toArray())->except($fields);
@@ -540,6 +561,7 @@ class Event extends Model
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
         }
+
         $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result, $type);
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
@@ -603,4 +625,39 @@ class Event extends Model
         return $amount_false;
     }
 
+
+    public static function send_result_final($event_id, $owner_id, $user_id, $category_id, $result_for_edit, $gender)
+    {
+        $participant = ResultFinalStage::where('event_id', $event_id)->where('user_id', $user_id)->first();
+        if(!$participant){
+            $participant = new ResultFinalStage;
+            $new_result_for_edit = $result_for_edit;
+        } else {
+            $new_result_for_edit = array_merge($participant->result_for_edit_final, $result_for_edit);
+        }
+        $participant->owner_id = $owner_id;
+        $participant->event_id = $event_id;
+        $participant->user_id = $user_id;
+        $participant->category_id = $category_id;
+        $participant->gender = $gender;
+        $participant->result_for_edit_final = $new_result_for_edit;
+        $participant->save();
+    }
+    public static function send_result_semifinal($event_id, $owner_id,$user_id, $category_id, $result_for_edit, $gender)
+    {
+        $participant = ResultSemiFinalStage::where('event_id', $event_id)->where('user_id', $user_id)->first();
+        if(!$participant){
+            $participant = new ResultSemiFinalStage;
+            $new_result_for_edit = $result_for_edit;
+        } else {
+            $new_result_for_edit = array_merge($participant->result_for_edit_final, $result_for_edit);
+        }
+        $participant->owner_id = $owner_id;
+        $participant->event_id = $event_id;
+        $participant->user_id = $user_id;
+        $participant->category_id = $category_id;
+        $participant->gender = $gender;
+        $participant->result_for_edit_semifinal = $new_result_for_edit;
+        $participant->save();
+    }
 }

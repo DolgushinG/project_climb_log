@@ -20,6 +20,9 @@ class ResultRouteSemiFinalStage extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function category(){
+        return $this->belongsTo(ParticipantCategory::class);
+    }
 
     public static function merge_result_user_in_stage($result){
         $final_result = array('user_id' => null, 'event_id' => null, 'amount_top' => null,'amount_try_top' => null, 'amount_zone' => null, 'amount_try_zone' => null);

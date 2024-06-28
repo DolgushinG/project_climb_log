@@ -3,21 +3,23 @@
 namespace App\Admin\Actions\ResultRouteFinalStage;
 
 use App\Models\Event;
+use App\Models\ResultFinalStage;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
-use App\Models\ResultFinalStage;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteFranceSystemQualification;
+use App\Models\ResultSemiFinalStage;
 use App\Models\User;
 use Encore\Admin\Actions\Action;
 use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BatchResultFinalCustom extends Action
 {
-    protected $selector = '.result-add-final';
+    protected $selector = '.result-add';
 
     public $category;
 
@@ -31,6 +33,7 @@ class BatchResultFinalCustom extends Action
         $results = $request->toArray();
         $event = Event::find($results['event_id']);
         $data = array();
+        $result_for_edit = array();
         for($i = 1; $i <= $event->amount_routes_in_final; $i++){
             if($results['amount_try_top_'.$i] > 0 || $results['amount_try_top_'.$i] != null){
                 $amount_top  = 1;
@@ -47,9 +50,13 @@ class BatchResultFinalCustom extends Action
             } else {
                 $participant = ResultQualificationClassic::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
             }
+            if(!$participant){
+                Log::error('Category id not found -event_id - '.$results['event_id'].'user_id'.$results['user_id']);
+            }
             $category_id = $participant->category_id;
             $gender = $participant->gender;
-            $data[] = array('owner_id' => \Encore\Admin\Facades\Admin::user()->id,
+            $owner_id = \Encore\Admin\Facades\Admin::user()->id;
+            $data[] = array('owner_id' => $owner_id,
                 'user_id' => intval($results['user_id']),
                 'event_id' => intval($results['event_id']),
                 'final_route_id' => intval($results['final_route_id_'.$i]),
@@ -59,9 +66,15 @@ class BatchResultFinalCustom extends Action
                 'amount_try_top' => intval($results['amount_try_top_'.$i]),
                 'amount_zone' => $amount_zone,
                 'amount_try_zone' => intval($results['amount_try_zone_'.$i]),
-                );
+            );
+            $result_for_edit[] = array(
+                'Номер маршрута' => intval($results['final_route_id_'.$i]),
+                'Попытки на топ' => intval($results['amount_try_top_'.$i]),
+                'Попытки на зону' => intval($results['amount_try_zone_'.$i])
+            );
         }
         DB::table('result_route_final_stage')->insert($data);
+        Event::send_result_final(intval($results['event_id']), $owner_id, intval($results['user_id']), $category_id, $result_for_edit, $gender);
         Event::refresh_final_points_all_participant_in_final($event->id);
         return $this->response()->success('Результат успешно внесен')->refresh();
     }
@@ -86,13 +99,6 @@ class BatchResultFinalCustom extends Action
             if(in_array($index, $result_final)){
                 $result[$index] = $res.' ['.$category.']'.' [Уже добавлен]';
             }
-        }
-        $this->select('user_id', 'Участник')->options($result)->required();
-        $this->hidden('event_id', '')->value($event->id);
-        for($i = 1; $i <= $event->amount_routes_in_final; $i++){
-            $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
-            $this->integer('amount_try_top_'.$i, 'Попытки на топ');
-            $this->integer('amount_try_zone_'.$i, 'Попытки на зону');
         }
         Admin::script("// Получаем все элементы с атрибутом modal
         const elementsWithModalAttribute4 = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
@@ -141,15 +147,23 @@ class BatchResultFinalCustom extends Action
         });
 
         ");
+        $this->select('user_id', 'Участник')->options($result)->required();
+        $this->hidden('event_id', '')->value($event->id);
+        for($i = 1; $i <= $event->amount_routes_in_final; $i++){
+            $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
+            $this->integer('amount_try_top_'.$i, 'Попытки на топ');
+            $this->integer('amount_try_zone_'.$i, 'Попытки на зону');
+        }
+
     }
 
     public function html()
     {
-       return "<a class='result-add-final btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category}</a>
+       return "<a class='result-add btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category}</a>
                  <style>
-                 .result-add-final {margin-top:8px;}
+                 .result-add {margin-top:8px;}
                  @media screen and (max-width: 767px) {
-                        .result-add-final {margin-top:8px;}
+                        .result-add {margin-top:8px;}
                     }
                 </style>
             ";

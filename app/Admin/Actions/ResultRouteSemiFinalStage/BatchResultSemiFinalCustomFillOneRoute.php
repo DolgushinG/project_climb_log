@@ -31,6 +31,7 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
         $results = $request->toArray();
         $event = Event::find($results['event_id']);
         $data = array();
+        $result_for_edit = array();
         if($results['amount_try_top'] > 0 || $results['amount_try_top'] != null){
             $amount_top  = 1;
         } else {
@@ -48,7 +49,8 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
         }
         $category_id = $participant->category_id;
         $gender = $participant->gender;
-        $data[] = array('owner_id' => \Encore\Admin\Facades\Admin::user()->id,
+        $owner_id = \Encore\Admin\Facades\Admin::user()->id;
+        $data[] = array('owner_id' => $owner_id,
             'user_id' => intval($results['user_id']),
             'event_id' => intval($results['event_id']),
             'final_route_id' => intval($results['final_route_id']),
@@ -59,6 +61,11 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
             'amount_zone' => $amount_zone,
             'amount_try_zone' => intval($results['amount_try_zone']),
         );
+        $result_for_edit[] = array(
+            'Номер маршрута' => intval($results['final_route_id']),
+            'Попытки на топ' => intval($results['amount_try_top']),
+            'Попытки на зону' => intval($results['amount_try_zone'])
+        );
         $final_route_id = intval($results['final_route_id']);
         $user = User::find(intval($results['user_id']))->middlename;
 
@@ -68,6 +75,7 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
             return $this->response()->error('Результат уже есть по '.$user.' и трассе '.$final_route_id);
         } else {
             DB::table('result_route_semifinal_stage')->insert($data);
+            Event::send_result_semifinal(intval($results['event_id']), $owner_id, intval($results['user_id']), $category_id, $result_for_edit, $gender);
             Event::refresh_final_points_all_participant_in_semifinal($event->id);
             return $this->response()->success('Результат успешно внесен')->refresh();
         }

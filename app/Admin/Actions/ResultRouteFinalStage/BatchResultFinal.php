@@ -7,6 +7,7 @@ use App\Models\ResultQualificationClassic;
 use App\Models\ResultFinalStage;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFinalStage;
+use App\Models\User;
 use Encore\Admin\Actions\Action;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ class BatchResultFinal extends Action
 {
     public $name = 'Внести результат финала';
 
-    protected $selector = '.send-add';
+    protected $selector = '.result-add-final';
 
     public function handle(Request $request)
     {
@@ -33,13 +34,14 @@ class BatchResultFinal extends Action
         $category_id = $participant->category_id;
         $gender = $participant->gender;
         $data = array();
+        $result_for_edit = [];
         for($i = 1; $i <= $event->amount_routes_in_final; $i++){
-            if($results['amount_try_top_'.$i] > 0 || $results['amount_try_top_'.$i] != null){
+            if(intval($results['amount_try_top_'.$i]) > 0){
                 $amount_top  = 1;
             } else {
                 $amount_top  = 0;
             }
-            if($results['amount_try_zone_'.$i] > 0 || $results['amount_try_zone_'.$i] != null){
+            if(intval($results['amount_try_zone_'.$i]) > 0){
                 $amount_zone  = 1;
             } else {
                 $amount_zone  = 0;
@@ -55,10 +57,34 @@ class BatchResultFinal extends Action
                 'amount_zone' => $amount_zone,
                 'amount_try_zone' => intval($results['amount_try_zone_'.$i]),
             );
+            $result_for_edit[] = array(
+                'Номер маршрута' => intval($results['final_route_id_'.$i]),
+                'Попытки на топ' => intval($results['amount_try_top_'.$i]),
+                'Попытки на зону' => intval($results['amount_try_zone_'.$i])
+            );
         }
-        DB::table('result_route_final_stage')->insert($data);
-        Event::refresh_final_points_all_participant_in_final($event->id);
-        return $this->response()->success('Результат успешно внесен')->refresh();
+        $result = ResultRouteFinalStage::where('event_id', $results['event_id']
+        )->where('user_id', $results['user_id'])->first();
+        $user = User::find(intval($results['user_id']))->middlename;
+        if($result){
+            return $this->response()->error('Результат уже есть по '.$user);
+        } else {
+            $participant_final = ResultFinalStage::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+            if(!$participant_final){
+                $participant_final = new ResultFinalStage;
+            }
+            $participant_final->owner_id = \Encore\Admin\Facades\Admin::user()->id;
+            $participant_final->event_id = $results['event_id'];
+            $participant_final->user_id = $results['user_id'];
+            $participant_final->category_id = $category_id;
+            $participant_final->gender = $gender;
+            $participant_final->result_for_edit_final = $result_for_edit;
+            $participant_final->save();
+            DB::table('result_route_final_stage')->insert($data);
+            Event::refresh_final_points_all_participant_in_final($event->id);
+            return $this->response()->success('Результат успешно внесен')->refresh();
+        }
+
     }
 
     public function form()
@@ -68,9 +94,9 @@ class BatchResultFinal extends Action
             ->where('active', '=', 1)->first();
         $merged_users = ResultFinalStage::get_final_participant($event);
         $result = $merged_users->pluck( 'middlename','id');
-        $result_semifinal = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
+        $result_final = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
-            if(in_array($index, $result_semifinal)){
+            if(in_array($index, $result_final)){
                 $result[$index] = $res.' [Уже добавлен]';
             }
         }
@@ -86,11 +112,11 @@ class BatchResultFinal extends Action
 
     public function html()
     {
-        return "<a class='send-add btn btn-sm btn-primary'><i class='fa fa-arrow-down'></i> Внести результат</a>
+        return "<a class='result-add-final btn btn-sm btn-primary'><i class='fa fa-arrow-down'></i> Внести результат</a>
                 <style>
-                  .send-add {margin-top:8px;}
+                  .result-add-final {margin-top:8px;}
                  @media screen and (max-width: 767px) {
-                         .send-add {margin-top:8px;}
+                         .result-add-final {margin-top:8px;}
                     }
                 </style>
             ";

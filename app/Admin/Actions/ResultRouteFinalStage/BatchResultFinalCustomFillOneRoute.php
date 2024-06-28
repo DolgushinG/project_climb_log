@@ -31,6 +31,7 @@ class BatchResultFinalCustomFillOneRoute extends Action
         $results = $request->toArray();
         $event = Event::find($results['event_id']);
         $data = array();
+        $result_for_edit = array();
         if($results['amount_try_top'] > 0 || $results['amount_try_top'] != null){
             $amount_top  = 1;
         } else {
@@ -48,7 +49,8 @@ class BatchResultFinalCustomFillOneRoute extends Action
         }
         $category_id = $participant->category_id;
         $gender = $participant->gender;
-        $data[] = array('owner_id' => \Encore\Admin\Facades\Admin::user()->id,
+        $owner_id = \Encore\Admin\Facades\Admin::user()->id;
+        $data[] = array('owner_id' => $owner_id,
             'user_id' => intval($results['user_id']),
             'event_id' => intval($results['event_id']),
             'final_route_id' => intval($results['final_route_id']),
@@ -59,6 +61,11 @@ class BatchResultFinalCustomFillOneRoute extends Action
             'amount_zone' => $amount_zone,
             'amount_try_zone' => intval($results['amount_try_zone']),
         );
+        $result_for_edit[] = array(
+            'Номер маршрута' => intval($results['final_route_id']),
+            'Попытки на топ' => intval($results['amount_try_top']),
+            'Попытки на зону' => intval($results['amount_try_zone'])
+        );
         $final_route_id = intval($results['final_route_id']);
         $user = User::find(intval($results['user_id']))->middlename;
 
@@ -68,6 +75,7 @@ class BatchResultFinalCustomFillOneRoute extends Action
             return $this->response()->error('Результат уже есть по '.$user.' и трассе '.$final_route_id);
         } else {
             DB::table('result_route_final_stage')->insert($data);
+            Event::send_result_final(intval($results['event_id']), $owner_id, intval($results['user_id']), $category_id, $result_for_edit, $gender);
             Event::refresh_final_points_all_participant_in_final($event->id);
             return $this->response()->success('Результат успешно внесен')->refresh();
         }
@@ -104,59 +112,61 @@ class BatchResultFinalCustomFillOneRoute extends Action
                 }
             }
         }
+
         $routes = [];
         for($i = 1; $i <= $event->amount_routes_in_final; $i++){
             $routes[$i] = $i;
         }
+
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
         $this->select('final_route_id', 'Трасса')->options($routes);
         $this->integer('amount_try_top', 'Попытки на топ');
         $this->integer('amount_try_zone', 'Попытки на зону');
         Admin::script("// Получаем все элементы с атрибутом modal
-        const elementsWithModalAttribute3 = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute\"]');
-        const elementsWithIdAttribute3 = document.querySelectorAll('[id=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute\"]');
+        const elementsWithModalAttribute = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute\"]');
+        const elementsWithIdAttribute = document.querySelectorAll('[id=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute\"]');
 
         // Создаем объект для отслеживания счетчика для каждого modal
-        const modalCounters3 = {};
-        const idCounters3 = {};
+        const modalCounters= {};
+        const idCounters = {};
 
         // Перебираем найденные элементы
-        elementsWithModalAttribute3.forEach(element => {
-            const modalValue3 = element.getAttribute('modal');
+        elementsWithModalAttribute.forEach(element => {
+            const modalValue = element.getAttribute('modal');
 
             // Проверяем, существует ли уже счетчик для данного modal
-            if (modalValue3 in modalCounters3) {
+            if (modalValue in modalCounters) {
                 // Если счетчик уже существует, инкрементируем его значение
-                modalCounters3[modalValue3]++;
+                modalCounters[modalValue]++;
             } else {
                 // Если счетчика еще нет, создаем его и устанавливаем значение 1
-                modalCounters3[modalValue3] = 1;
+                modalCounters[modalValue] = 1;
             }
 
             // Получаем номер элемента для данного modal
-            const elementNumber3 = modalCounters3[modalValue3];
+            const elementNumber = modalCounters[modalValue];
 
             // Устанавливаем новое значение modal
-            element.setAttribute('modal', `\${modalValue3}-\${elementNumber3}`);
+            element.setAttribute('modal', `\${modalValue}-\${elementNumber}`);
         });
-        elementsWithIdAttribute3.forEach(element => {
-            const idValue3 = element.getAttribute('id');
+        elementsWithIdAttribute.forEach(element => {
+            const idValue = element.getAttribute('id');
 
             // Проверяем, существует ли уже счетчик для данного modal
-            if (idValue3 in idCounters3) {
+            if (idValue in idCounters) {
                 // Если счетчик уже существует, инкрементируем его значение
-                idCounters3[idValue3]++;
+                idCounters[idValue]++;
             } else {
                 // Если счетчика еще нет, создаем его и устанавливаем значение 1
-                idCounters3[idValue3] = 1;
+                idCounters[idValue] = 1;
             }
 
             // Получаем номер элемента для данного modal
-            const elementNumber3 = idCounters3[idValue3];
+            const elementNumber = idCounters[idValue];
 
             // Устанавливаем новое значение modal
-            element.setAttribute('id', `\${idValue3}-\${elementNumber3}`);
+            element.setAttribute('id', `\${idValue}-\${elementNumber}`);
         });
 
         ");

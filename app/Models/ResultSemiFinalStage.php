@@ -2,16 +2,28 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ResultSemiFinalStage extends Model
 {
+    use HasFactory;
     protected $table = 'result_semifinal_stage';
     public $timestamps = true;
-
+    protected $casts = [
+        'result_for_edit_semifinal' =>'json',
+    ];
     public function event()
     {
         return $this->belongsTo(Event::class)->where('active', '=', 1);
+    }
+    public function category(){
+        return $this->belongsTo(ParticipantCategory::class);
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function user()
