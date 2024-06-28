@@ -650,7 +650,7 @@ class Event extends Model
             $participant = new ResultSemiFinalStage;
             $new_result_for_edit = $result_for_edit;
         } else {
-            $new_result_for_edit = array_merge($participant->result_for_edit_final, $result_for_edit);
+            $new_result_for_edit = array_merge($participant->result_for_edit_semifinal, $result_for_edit);
         }
         $participant->owner_id = $owner_id;
         $participant->event_id = $event_id;
