@@ -28,6 +28,9 @@ class ResultRouteQualificationClassic extends Model
 
     protected $table = 'result_route_qualification_classic';
 
+    public function category(){
+        return $this->belongsTo(ParticipantCategory::class);
+    }
     public static function get_flash_value_for_mode_ten_better_route($attempt, $event_id, $route)
     {
         $event_route =  Route::where('event_id', $event_id)->where('grade', $route->grade)->first();

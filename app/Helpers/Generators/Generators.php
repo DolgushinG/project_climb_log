@@ -188,6 +188,7 @@ class Generators
                 if($event->is_france_system_qualification){
                     $participant = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 }
+                $result_for_edit = [];
                 for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {
@@ -207,7 +208,23 @@ class Generators
                         $amount_try_top = 0;
                     }
                     $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'],'category_id' => $participant->category_id,'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
+                    $result_for_edit[] = array(
+                        'Номер маршрута' => $route,
+                        'Попытки на топ' => $amount_try_top,
+                        'Попытки на зону' => $amount_try_zone
+                    );
                 }
+                $participant_semifinal = ResultSemiFinalStage::where('event_id', $event_id)->where('user_id', $participant->user_id)->first();
+                if(!$participant_semifinal){
+                    $participant_semifinal = new ResultSemiFinalStage;
+                }
+                $participant_semifinal->owner_id = $owner_id;
+                $participant_semifinal->event_id = $event_id;
+                $participant_semifinal->user_id = $user['id'];
+                $participant_semifinal->category_id = $participant->category_id;
+                $participant_semifinal->gender = $user['gender'];
+                $participant_semifinal->result_for_edit_semifinal = $result_for_edit;
+                $participant_semifinal->save();
             }
             DB::table('result_route_semifinal_stage')->insert($result);
             Event::refresh_final_points_all_participant_in_semifinal($event_id);
@@ -218,14 +235,15 @@ class Generators
 
             $event = Event::find($event_id);
             $users = ResultFinalStage::get_final_participant($event, null, true);
-
             $result = array();
+
             foreach ($users as $user) {
                 if($event->is_france_system_qualification){
                     $participant = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 } else {
                     $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 }
+                $result_for_edit = [];
                 for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
                     $amount_zone = rand(0, 1);
                     if ($amount_zone) {
@@ -245,11 +263,27 @@ class Generators
                         $amount_try_top = 0;
                     }
                     $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'], 'user_id' => $user['id'],'category_id' => $participant->category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
-                }
-            }
 
+                    $result_for_edit[] = array(
+                        'Номер маршрута' => $route,
+                        'Попытки на топ' => $amount_try_top,
+                        'Попытки на зону' => $amount_try_zone
+                    );
+                }
+
+                $participant_final = ResultFinalStage::where('event_id', $event_id)->where('user_id', $participant->user_id)->first();
+                if(!$participant_final){
+                    $participant_final = new ResultFinalStage;
+                }
+                $participant_final->owner_id = $owner_id;
+                $participant_final->event_id = $event_id;
+                $participant_final->user_id = $user['id'];
+                $participant_final->category_id = $participant->category_id;
+                $participant_final->gender = $user['gender'];
+                $participant_final->result_for_edit_final = $result_for_edit;
+                $participant_final->save();
+            }
             DB::table('result_route_final_stage')->insert($result);
-            Log::info('result_route_final_stage step 1');
             Event::refresh_final_points_all_participant_in_final($event_id);
         }
     }

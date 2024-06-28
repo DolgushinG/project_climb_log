@@ -7,6 +7,7 @@ use App\Models\ResultQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
+use App\Models\User;
 use Encore\Admin\Actions\Action;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,7 @@ class BatchResultSemiFinal extends Action
         $results = $request->toArray();
         $event = Event::find($results['event_id']);
         $data = array();
+        $result_for_edit = [];
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
             if($results['amount_try_top_'.$i] > 0 || $results['amount_try_top_'.$i] != null){
                 $amount_top  = 1;
@@ -55,10 +57,35 @@ class BatchResultSemiFinal extends Action
                 'amount_zone' => $amount_zone,
                 'amount_try_zone' => intval($results['amount_try_zone_'.$i]),
                 );
+            $result_for_edit[] = array(
+                'Номер маршрута' => intval($results['final_route_id_'.$i]),
+                'Попытки на топ' => intval($results['amount_try_top_'.$i]),
+                'Попытки на зону' => intval($results['amount_try_zone_'.$i])
+            );
         }
-        DB::table('result_route_semifinal_stage')->insert($data);
-        Event::refresh_final_points_all_participant_in_semifinal($event->id);
-        return $this->response()->success('Результат успешно внесен')->refresh();
+        $result = ResultRouteSemiFinalStage::where('event_id', $results['event_id']
+        )->where('user_id', $results['user_id'])->first();
+        $user = User::find(intval($results['user_id']))->middlename;
+        if($result){
+            return $this->response()->error('Результат уже есть по '.$user);
+        } else {
+            $participant_semifinal = ResultSemiFinalStage::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+            if(!$participant_semifinal){
+                $participant_semifinal = new ResultSemiFinalStage;
+            }
+            $participant_semifinal->owner_id = \Encore\Admin\Facades\Admin::user()->id;
+            $participant_semifinal->event_id = $results['event_id'];
+            $participant_semifinal->user_id = $results['user_id'];
+            $participant_semifinal->category_id = $category_id;
+            $participant_semifinal->gender = $gender;
+            $participant_semifinal->result_for_edit_semifinal = $result_for_edit;
+            $participant_semifinal->save();
+
+            DB::table('result_route_semifinal_stage')->insert($data);
+            Event::refresh_final_points_all_participant_in_semifinal($event->id);
+            return $this->response()->success('Результат успешно внесен')->refresh();
+        }
+
     }
 
     public function form()

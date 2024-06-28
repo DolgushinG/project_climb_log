@@ -20,11 +20,12 @@ class CreateResultSemiFinalStageTable extends Migration
             $table->string('category_id');
             $table->string('gender');
             $table->integer('user_id');
-            $table->integer('amount_top');
-            $table->integer('amount_try_top');
-            $table->integer('amount_zone');
-            $table->integer('amount_try_zone');
-            $table->string('place');
+            $table->json('result_for_edit_semifinal');
+            $table->integer('amount_top')->nullable();
+            $table->integer('amount_try_top')->nullable();
+            $table->integer('amount_zone')->nullable();
+            $table->integer('amount_try_zone')->nullable();
+            $table->string('place')->nullable();
             $table->timestamps();
         });
     }

@@ -23,6 +23,9 @@ class ResultFranceSystemQualification extends Model
         return $this->belongsTo(Set::class);
     }
 
+    public function category(){
+        return $this->belongsTo(ParticipantCategory::class);
+    }
     public function user()
     {
         return $this->belongsTo(User::class);

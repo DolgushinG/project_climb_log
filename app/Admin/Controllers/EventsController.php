@@ -81,16 +81,16 @@ class EventsController extends Controller
                             $participant_is_active = $participant->where('active', 1)->count();
                             $sum = $participant_is_not_paid + $participant_is_not_active;
                         }
-                        $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/participants', $sum_participant ?? 0));
-                        $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/participants', $participant_is_paid ?? 0));
+                        $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/result-qualification', $sum_participant ?? 0));
+                        $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/result-qualification', $participant_is_paid ?? 0));
                         if ($event) {
                             if (!$event->is_france_system_qualification) {
-                                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
-                                $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
+                                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', 'result-qualification', $participant_is_active ?? 0));
+                                $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/result-qualification', $sum ?? 0));
                             }
                         } else {
-                            $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/participants', $participant_is_active ?? 0));
-                            $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/participants', $sum ?? 0));
+                            $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/result-qualification', $participant_is_active ?? 0));
+                            $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/result-qualification', $sum ?? 0));
                         }
                     })->body($this->grid());
             }

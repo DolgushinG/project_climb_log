@@ -23,6 +23,10 @@ class ResultRouteFranceSystemQualification extends Model
         return $count_routes;
     }
 
+    public function category(){
+        return $this->belongsTo(ParticipantCategory::class);
+    }
+
 
     public function event()
     {

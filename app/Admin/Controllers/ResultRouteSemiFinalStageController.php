@@ -100,9 +100,20 @@ class ResultRouteSemiFinalStageController extends Controller
         return $content
             ->header(trans('admin.edit'))
             ->description(trans('admin.description'))
-            ->body($this->form()->edit($id));
+            ->body($this->form('edit', $id)->edit($id));
     }
 
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function update($id)
+    {
+        return $this->form('update', $id)->update($id);
+    }
     /**
      * Create interface.
      *
@@ -114,7 +125,7 @@ class ResultRouteSemiFinalStageController extends Controller
         return $content
             ->header(trans('admin.create'))
             ->description(trans('admin.description'))
-            ->body($this->form());
+            ->body($this->form('create'));
     }
 
     /**
@@ -133,7 +144,6 @@ class ResultRouteSemiFinalStageController extends Controller
         });
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultSemiFinal);
-//            $tools->append(new BatchResultSemiFinal);
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
             if($event->is_sort_group_semifinal){
                 $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
@@ -157,7 +167,7 @@ class ResultRouteSemiFinalStageController extends Controller
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
         });
         $grid->actions(function ($actions) {
-            $actions->disableEdit();
+//            $actions->disableEdit();
 //            $actions->disableDelete();
             $actions->disableView();
         });
@@ -217,32 +227,67 @@ class ResultRouteSemiFinalStageController extends Controller
      *
      * @return Form
      */
-    protected function form()
+    protected function form($type, $id = null)
     {
-        $form = new Form(new ResultRouteSemiFinalStage);
+        $form = new Form(new ResultSemiFinalStage());
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
+                display: None;
+                }
+                .add.btn.btn-success.btn-sm {
+                display: None;
+                }
+                .input-group-addon{
+                display: None;
+                }
+            ");
+        $count = $event->amount_routes_in_semifinal;
+        $arr = array();
+        for($i = 1; $i <= $count; $i++){
+            $arr[] = ['Номер маршрута' => $i, 'Попытки на топ' => 0, 'Попытки на зону' => 0];
+        }
+        $form->tools(function (Form\Tools $tools) {
+            $tools->disableList();
+            $tools->disableDelete();
+            $tools->disableView();
+        });
+        $form->footer(function ($footer) {
+            $footer->disableReset();
+            $footer->disableViewCheck();
+            $footer->disableEditingCheck();
+            $footer->disableCreatingCheck();
+        });
+        $form->table('result_for_edit_semifinal', 'Таблица результата', function ($table) use ($event){
+            $table->text('Номер маршрута')->readonly();
+            $table->number('Попытки на топ');
+            $table->number('Попытки на зону');
+        })->value($arr);
+        $form->saving(function (Form $form) use ($type, $id) {
+            if($form->result_for_edit_semifinal){
+                $user_id = $form->model()->find($id)->user_id;
+                $event_id = $form->model()->find($id)->event_id;
+                $routes = $form->result_for_edit_semifinal;
+                foreach ($routes as $route) {
+                    $result = ResultRouteSemiFinalStage::where('user_id', $user_id)->where('event_id', $event_id)->where('final_route_id', $route['Номер маршрута'])->first();
+                    if (intval($route['Попытки на топ']) > 0) {
+                        $amount_top = 1;
+                    } else {
+                        $amount_top = 0;
+                    }
+                    if (intval($route['Попытки на зону']) > 0) {
+                        $amount_zone = 1;
+                    } else {
+                        $amount_zone = 0;
+                    }
+                    $result->amount_try_top = $route['Попытки на топ'];
+                    $result->amount_top = $amount_top;
+                    $result->amount_zone = $amount_zone;
+                    $result->amount_try_zone = $route['Попытки на зону'];
+                    $result->save();
+                }
+              Event::refresh_final_points_all_participant_in_semifinal($event_id);
+            }
 
-        $form->display('ID');
-        $form->hidden('owner_id')->value(Admin::user()->id);
-        $form->text('event_id', 'event_id');
-        $form->text('user_id', 'user_id');
-        $form->text('final_route_id', 'final_route_id');
-        $form->text('amount_try_top', 'amount_try_top');
-        $form->text('amount_try_zone', 'amount_try_zone');
-        $form->hidden('amount_zone', 'amount_try_zone');
-        $form->hidden('amount_top', 'amount_try_zone');
-        $form->display(trans('admin.created_at'));
-        $form->display(trans('admin.updated_at'));
-        $form->saving(function (Form $form) {
-            if($form->amount_try_top > 0){
-                $form->amount_top  = 1;
-            } else {
-                $form->amount_top  = 0;
-            }
-            if($form->amount_try_zone > 0){
-                $form->amount_zone  = 1;
-            } else {
-                $form->amount_zone  = 0;
-            }
         });
         return $form;
     }

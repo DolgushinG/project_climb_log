@@ -13,6 +13,15 @@ class ParticipantCategory extends Model
         return $this->belongsTo(ResultQualificationClassic::class);
     }
 
+    public function participant_final_stage()
+    {
+        return $this->belongsTo(ResultFinalStage::class);
+    }
+    public function participant_semifinal_stage()
+    {
+        return $this->belongsTo(ResultSemiFinalStage::class);
+    }
+
     public function getUserCategory($owner_id)
     {
         $event = Event::where('owner_id', '=', $owner_id)

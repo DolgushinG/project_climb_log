@@ -18,7 +18,14 @@ class BatchForceRecoutingResultFinalGender extends Action
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         $event->is_sort_group_final = 0;
         $event->save();
-        ResultFinalStage::where('event_id', $event->id)->delete();
+        $result_final = ResultFinalStage::where('event_id', $event->id)->first();
+        if($result_final){
+            $result_final->amount_try_top = null;
+            $result_final->amount_top = null;
+            $result_final->amount_try_zone = null;
+            $result_final->amount_zone = null;
+            $result_final->save();
+        }
         Event::refresh_final_points_all_participant_in_final($event->id);
         return $this->response()->success('Пересчитано')->refresh();
     }
