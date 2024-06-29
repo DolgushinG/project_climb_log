@@ -434,12 +434,14 @@ class EventsController extends Controller
 
         })->tab('Управление соревнованием', function ($form) use ($id){
             $form->switch('is_registration_state', 'Регистрация ')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+
             $form->switch('is_need_pay_for_reg', 'Включить оплату для регистрации')
                 ->help('Например оплата будет происходит в другом месте или оплачивается только вход')
                 ->states(self::STATES_BTN)->default(1);
             $form->number('registration_time_expired', 'Через сколько дней сгорит регистрации без оплаты')->help('Если 0 то сгорать не будет')->default(0);
             $form->datetime('datetime_registration_state', 'Дата закрытия регистрации [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
             $form->switch('is_send_result_state', 'Отправка результатов')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            $form->switch('is_access_user_edit_result', 'Дать доступ к редактированию результата')->help('Участник может сам редактировать свой результат')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->switch('is_open_send_result_state', 'Открыть полные результаты')->help('Даже если включить, кнопка появиться только после закрытия внесения результатов')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->datetime('datetime_send_result_state', 'Дата закрытия отправки результатов [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();

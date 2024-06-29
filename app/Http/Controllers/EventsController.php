@@ -18,6 +18,7 @@ use App\Models\Set;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -402,9 +403,12 @@ class EventsController extends Controller
             return response()->json(['success' => false, 'message' => 'Регистрация была закрыта'], 422);
         }
         $user_id = $request->user_id;
-        $participant_active = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
-        if (!$participant_active){
-            return response()->json(['success' => false, 'message' => 'Результаты уже были добавлены или отсутствует регистрация'], 422);
+        # Если не дан доступ из админки к редактированию то запрещать повторную отправку
+        if(!$event->is_access_user_edit_result){
+            $participant_active = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
+            if (!$participant_active){
+                return response()->json(['success' => false, 'message' => 'Результаты уже были добавлены или отсутствует регистрация'], 422);
+            }
         }
         $count_routes = Grades::where('event_id', $request->event_id)->first();
         if (!$count_routes){
@@ -527,8 +531,18 @@ class EventsController extends Controller
             $route_class->count = $route->route_id;
             $routes[$route->route_id] = $route_class;
         }
+        $user_id = Auth::user()->id;
+        $result_qualification_classic_participant = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
+
+        if($result_qualification_classic_participant){
+            $result_participant = $result_qualification_classic_participant->result_for_edit;
+            $compact = compact('routes', 'event', 'result_participant');
+        } else {
+            $compact = compact('routes', 'event');
+        }
+//        dd($result_participant, $routes);
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
-        return view('result-page', compact('routes', 'event'));
+        return view('result-page', $compact);
     }
 
     public function sendAllResult(Request $request)
