@@ -70,27 +70,28 @@ class EventsController extends Controller
                         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
                         if ($event) {
                             if ($event->is_france_system_qualification) {
-                                $participant = ResultFranceSystemQualification::where('event_id', $event->id);
+                                $sum_participant = ResultFranceSystemQualification::where('event_id', $event->id)->count();
+                                $participant_is_paid = ResultFranceSystemQualification::where('event_id', $event->id)->where('is_paid', 1)->count();
+                                $participant_is_not_active = ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 0)->count();
+                                $participant_is_active = ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->count();
                             } else {
-                                $participant = ResultQualificationClassic::where('event_id', $event->id);
+                                $sum_participant = ResultQualificationClassic::where('event_id', $event->id)->count();
+                                $participant_is_paid = ResultQualificationClassic::where('event_id', $event->id)->where('is_paid', 1)->count();
+                                $participant_is_not_active = ResultQualificationClassic::where('event_id', $event->id)->where('active', 0)->count();
+                                $participant_is_active = ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->count();
                             }
-                            $sum_participant = $participant->count();
-                            $participant_is_paid = $participant->where('is_paid', 1)->count();
-                            $participant_is_not_paid = $participant->where('is_paid', 0)->count();
-                            $participant_is_not_active = $participant->where('active', 0)->count();
-                            $participant_is_active = $participant->where('active', 1)->count();
-                            $sum = $participant_is_not_paid + $participant_is_not_active;
+
                         }
                         $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/result-qualification', $sum_participant ?? 0));
                         $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/result-qualification', $participant_is_paid ?? 0));
                         if ($event) {
                             if (!$event->is_france_system_qualification) {
-                                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', 'result-qualification', $participant_is_active ?? 0));
-                                $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/result-qualification', $sum ?? 0));
+                                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/result-qualification', $participant_is_active ?? 0));
+                                $row->column(3, new InfoBox('Без результата', 'money', 'red', '/admin/result-qualification', $participant_is_not_active ?? 0));
                             }
                         } else {
                             $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/result-qualification', $participant_is_active ?? 0));
-                            $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/result-qualification', $sum ?? 0));
+                            $row->column(3, new InfoBox('Без результата', 'money', 'red', '/admin/result-qualification', $participant_is_not_active ?? 0));
                         }
                     })->body($this->grid());
             }
@@ -300,7 +301,7 @@ class EventsController extends Controller
 //            $form->time('start_time', 'Время старта')->attribute('inputmode', 'none')->placeholder('Время старта')->required();
 //            $form->time('end_time', 'Время окончания')->attribute('inputmode', 'none')->placeholder('Время окончания')->required();
             $form->image('image', 'Афиша')->placeholder('Афиша')->attribute('inputmode', 'none');
-            $form->summernote('description', 'Описание')->placeholder('Описание')->required();
+            $form->summernote('description', 'Положение')->placeholder('Положение')->required();
             $form->text('contact', 'Телефон')->required();
             $form->text('contact_link', 'Ссылка на соц.сеть');
             $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');

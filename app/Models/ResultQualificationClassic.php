@@ -393,12 +393,15 @@ class ResultQualificationClassic extends Model
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
             $details['event_url'] = env('APP_URL').$event->link;
-            $details['link_payment'] = $event->link_payment;
-            if($event->registration_time_expired){
-                $details['pay_time_expired'] = $event->registration_time_expired;
+            if($event->is_need_pay_for_reg){
+                $details['is_need_pay_for_reg'] = true;
+                $details['link_payment'] = $event->link_payment;
+                if($event->registration_time_expired){
+                    $details['pay_time_expired'] = $event->registration_time_expired;
+                }
+                $details['img_payment'] = $event->img_payment;
+                $details['info_payment'] = $event->info_payment;
             }
-            $details['img_payment'] = $event->img_payment;
-            $details['info_payment'] = $event->info_payment;
             $details['image'] = $event->image;
             Mail::to($user->email)->queue(new \App\Mail\TakePart($details));
         }

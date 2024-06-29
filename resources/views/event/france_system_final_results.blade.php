@@ -25,7 +25,7 @@
                                                 <tr>
                                                     <th scope="col" style="background-color:  #106eea; color: white">Место</th>
                                                     <th scope="col" style="background-color:  #106eea; color: white">Фамилия Имя</th>
-                                                    <th scope="col" style="background-color:  #106eea; color: white">Город</th>
+{{--                                                    <th scope="col" style="background-color:  #106eea; color: white">Город</th>--}}
                                                     <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                                 </tr>
                                                 </thead>
@@ -34,7 +34,7 @@
                                                     <tr>
                                                         <th scope="row">{{$res['place']}}</th>
                                                         <td>{{$res['middlename']}}</td>
-                                                        <td>{{$res['city']}}</td>
+{{--                                                        <td>{{$res['city']}}</td>--}}
                                                         <td>
                                                             @foreach($routes as $route)
                                                                 <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">М{{$route}}</span>
@@ -82,7 +82,7 @@
                                             <tr>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Место</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Фамилия Имя</th>
-                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>
+{{--                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>--}}
                                                 <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                             </tr>
                                             </thead>
@@ -91,7 +91,7 @@
                                                 <tr>
                                                     <th scope="row">{{$res['place'] ?? ''}}</th>
                                                     <td>{{$res['middlename']}}</td>
-                                                    <td>{{$res['city']}}</td>
+{{--                                                    <td>{{$res['city']}}</td>--}}
                                                     <td>
                                                         @foreach($routes as $route)
                                                             <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">М{{$route}}</span>
@@ -154,7 +154,7 @@
                                                 <tr>
                                                     <th scope="col" style="background-color:  #106eea; color: white">Место</th>
                                                     <th scope="col" style="background-color:  #106eea; color: white">Фамилия Имя</th>
-                                                    <th scope="col" style="background-color:  #106eea; color: white">Город</th>
+{{--                                                    <th scope="col" style="background-color:  #106eea; color: white">Город</th>--}}
                                                     <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                                 </tr>
                                                 </thead>
@@ -163,7 +163,7 @@
                                                     <tr>
                                                         <th scope="row">{{$res['place']}}</th>
                                                         <td>{{$res['middlename']}}</td>
-                                                        <td>{{$res['city']}}</td>
+{{--                                                        <td>{{$res['city']}}</td>--}}
                                                         <td>
                                                             @foreach($routes as $route)
                                                                 <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">Ж{{$route}}</span>
@@ -210,7 +210,7 @@
                                             <tr>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Место</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Фамилия Имя</th>
-                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>
+{{--                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>--}}
                                                 <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                             </tr>
                                             </thead>
@@ -219,7 +219,7 @@
                                                 <tr>
                                                     <th scope="row">{{$res['place']}}</th>
                                                     <td>{{$res['middlename']}}</td>
-                                                    <td>{{$res['city']}}</td>
+{{--                                                    <td>{{$res['city']}}</td>--}}
                                                     <td>
                                                         @foreach($routes as $route)
                                                             <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">Ж{{$route}}</span>

@@ -173,11 +173,13 @@
                                                 <h2>Контакты</h2>
                                                 <p>{{$event->contact}}</p>
                                             </div>
-                                            <div class="section-title">
-                                                <h2>Соц-сеть</h2>
-                                                <p><a href="{{$event->contact_link}}">Ссылка на соц-сеть</a>
-                                                <p/>
-                                            </div>
+                                            @if($event->contact_link)
+                                                <div class="section-title">
+                                                    <h2>Соц-сеть</h2>
+                                                    <p><a href="{{$event->contact_link}}">Ссылка на соц-сеть</a>
+                                                    <p/>
+                                                </div>
+                                            @endif
                                         </div>
                                     </section>
                                 </div>
