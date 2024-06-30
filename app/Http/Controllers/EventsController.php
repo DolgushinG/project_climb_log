@@ -487,8 +487,18 @@ class EventsController extends Controller
         $participant->result_for_edit = $final_data;
         $participant->save();
 
+        if($event->is_access_user_edit_result){
+            foreach ($final_data as $data){
+                $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $data['user_id'])->where('route_id', $data['route_id'])->first();
+                dd($result_classic_for_edit, $data['attempt']);
+                $result_classic_for_edit->attempt = $data['attempt'];
+                $result_classic_for_edit->save();
+            }
+        } else {
+            $result = ResultRouteQualificationClassic::insert($final_data);
+        }
 
-        $result = ResultRouteQualificationClassic::insert($final_data);
+
 
         $participants = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
@@ -514,10 +524,6 @@ class EventsController extends Controller
         }
     }
 
-
-
-
-
     public function listRoutesEvent(Request $request, $start_date, $climbing_gym, $title) {
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if(!$event){
@@ -532,17 +538,14 @@ class EventsController extends Controller
             $routes[$route->route_id] = $route_class;
         }
         $user_id = Auth::user()->id;
-        $result_qualification_classic_participant = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
-
+        $result_qualification_classic_participant = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
         if($result_qualification_classic_participant){
             $result_participant = $result_qualification_classic_participant->result_for_edit;
-            $compact = compact('routes', 'event', 'result_participant');
         } else {
-            $compact = compact('routes', 'event');
+            $result_participant = null;
         }
-//        dd($result_participant, $routes);
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
-        return view('result-page', $compact);
+        return view('result-page', compact('routes', 'event', 'result_participant'));
     }
 
     public function sendAllResult(Request $request)

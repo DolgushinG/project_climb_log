@@ -107,6 +107,7 @@ class GradesController extends Controller
             }
 
         }
+
         return $this->form('update')->update($grade->id);
     }
 

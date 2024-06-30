@@ -373,41 +373,16 @@ class ResultQualificationController extends Controller
             $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
-//            $event = Event::where('owner_id', '=', Admin::user()->id)
-//                ->where('active', '=', 1)->first();
-//            $grades = Grades::where('event_id', $event->id)->first();
-//            if($grades){
-//                $button = "<a class='send-add btn btn-sm btn-success' href='/admin/result-qualification/create'><i class='fa fa-arrow-down'></i> Внести результат</a>
-//                <style>
-//                    .send-add {margin-top:8px;}
-//                 @media screen and (max-width: 767px) {
-//                        .send-add {margin-top:8px;}
-//                    }
-//                </style>
-//
-//            ";
-//            } else {
-//                $button = "<a class='send-add btn btn-sm btn-success disabled' href='/admin/result-qualification/create'><i class='fa fa-arrow-down'></i>Внести результат (Необходимо настроить трассы) </a>
-//                <style>
-//                    .send-add {margin-top:8px;}
-//                 @media screen and (max-width: 767px) {
-//                        .send-add {margin-top:8px;}
-//                    }
-//                </style>
-//
-//            ";
-//            }
-//            $tools->append($button);
             $tools->append(new BatchExportResultFranceSystemQualification);
             $tools->append(new BatchResultFranceSystemQualification);
             $tools->append(new BatchGenerateParticipant);
             $tools->append(new BatchExportProtocolRouteParticipantsQualification);
         });
-        $grid->actions(function ($actions) {
-//            $actions->disableEdit();
-//            $actions->disableDelete();
-//            $actions->disableView();
-        });
+//        $grid->actions(function ($actions) {
+////            $actions->disableEdit();
+////            $actions->disableDelete();
+////            $actions->disableView();
+//        });
 
         $grid->disableExport();
         $grid->disableFilter();

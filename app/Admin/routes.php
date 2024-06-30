@@ -17,6 +17,7 @@ Route::group([
     $router->get('/', 'HomeController@index')->name('home');
     Route::middleware(['owner'])->group(function ($router) {
         $router->resource('events', EventsController::class);
+        $router->get('events/clone/{id}', 'EventsController@cloneEvent')->name('cloneEvent');
         $router->resource('result-qualification', ResultQualificationController::class);
         $router->resource('grades', GradesController::class);
         $router->resource('formats', FormatsController::class);

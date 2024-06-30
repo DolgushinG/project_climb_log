@@ -79,20 +79,24 @@
                                                        for="flash-{{$route->count}}">FLASH</label>
                                             </td>
                                             <td>
-                                                @if($result_participant[$index-1]['attempt'] == '2')
-                                                    <input type="radio" data-id="all-redpoint" class="btn-check"
-                                                           data-grade="{{$route->grade}}" name="{{$route->count}}"
-                                                           id="redpoint-{{$route->count}}" autocomplete="off" checked>
-                                                @else
-                                                    <input type="radio" data-id="all-redpoint" class="btn-check"
-                                                           data-grade="{{$route->grade}}" name="{{$route->count}}"
-                                                           id="redpoint-{{$route->count}}" autocomplete="off">
+                                                @if($result_participant)
+                                                    @if($result_participant[$index-1]['attempt'] == '2')
+                                                        <input type="radio" data-id="all-redpoint" class="btn-check"
+                                                               data-grade="{{$route->grade}}" name="{{$route->count}}"
+                                                               id="redpoint-{{$route->count}}" autocomplete="off" checked>
+                                                    @else
+                                                        <input type="radio" data-id="all-redpoint" class="btn-check"
+                                                               data-grade="{{$route->grade}}" name="{{$route->count}}"
+                                                               id="redpoint-{{$route->count}}" autocomplete="off">
+                                                   @endif
                                                 @endif
 
                                                 <label class="btn btn-outline-warning btn-redpoint"
                                                        for="redpoint-{{$route->count}}">REDPOINT</label>
                                             </td>
+
                                         </tr>
+
                                     @endforeach
                                     </tbody>
                                 </table>

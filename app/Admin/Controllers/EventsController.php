@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\BatchNotificationOfParticipant;
+use App\Admin\CustomAction\ActionCloneEvent;
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionExportCardParticipantFranceSystem;
 use App\Admin\CustomAction\ActionExportCardParticipantFestival;
@@ -219,6 +220,7 @@ class EventsController extends Controller
             $actions->disableView();
             $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
             $actions->append(new ActionExportList($actions->getKey(), 'Список участников'));
+            $actions->append(new ActionCloneEvent($actions->getKey(), 'Клонировать'));
             $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника'));
             $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника'));
         });
@@ -589,7 +591,17 @@ class EventsController extends Controller
         return $form;
     }
 
-
+    public function cloneEvent(Request $request)
+    {
+        if($request){
+            $event_original = Event::find($request->id);
+            $event_clone = $event_original->replicate();
+            $event_clone->is_public = 0;
+            $event_clone->active = 0;
+            $event_clone->is_registration_state = 0;
+            $event_clone->save();
+        }
+    }
 
     public function exportAllExcel(Request $request)
     {
