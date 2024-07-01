@@ -109,22 +109,34 @@ class EventsController extends Controller
         if($event) {
             if($event->is_france_system_qualification){
                 $table = 'result_france_system_qualification';
+                $participants = User::query()
+                    ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+                    ->where($table.'.event_id', '=', $event->id)
+                    ->select(
+                        'users.id',
+                        'users.middlename',
+                        'users.city',
+                        'users.team',
+                        $table.'.gender',
+                        $table.'.number_set_id',
+                        $table.'.category_id',
+                    )->get()->toArray();
             } else {
                 $table = 'result_qualification_classic';
+                $participants = User::query()
+                    ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+                    ->where($table.'.event_id', '=', $event->id)
+                    ->where($table.'.is_other_event', '=', 0)
+                    ->select(
+                        'users.id',
+                        'users.middlename',
+                        'users.city',
+                        'users.team',
+                        $table.'.gender',
+                        $table.'.number_set_id',
+                        $table.'.category_id',
+                    )->get()->toArray();
             }
-            $participants = User::query()
-                ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-                ->where($table.'.event_id', '=', $event->id)
-                ->where($table.'.is_other_event', '=', 0)
-                ->select(
-                    'users.id',
-                    'users.middlename',
-                    'users.city',
-                    'users.team',
-                    $table.'.gender',
-                    $table.'.number_set_id',
-                    $table.'.category_id',
-                )->get()->toArray();
             if($event->is_input_set != 1){
                 $days = Set::where('owner_id', '=', $event->owner_id)->select('day_of_week')->distinct()->get();
                 $sets = Set::where('owner_id', '=', $event->owner_id)->get();
@@ -150,7 +162,12 @@ class EventsController extends Controller
             foreach ($participants as $index_user => $user) {
                 if ($index <= count($participants)) {
                     if($event->is_input_set == 1){
-                        $participants[$index_user]['category'] = $categories[$participants[$index]['category_id']];
+                        if($participants[$index_user]['category'] && $categories[$participants[$index]['category_id']]){
+                            $participants[$index_user]['category'] = $categories[$participants[$index]['category_id']];
+                        } else {
+                            $participants[$index_user]['category'] = 'Нет группы';
+                        }
+
                     } else {
                         $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
                         $category = $categories[$participants[$index]['category_id']] ?? 'Нет группы';

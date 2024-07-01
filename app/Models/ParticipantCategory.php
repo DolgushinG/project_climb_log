@@ -27,7 +27,7 @@ class ParticipantCategory extends Model
         $event = Event::where('owner_id', '=', $owner_id)
             ->where('active', 1)->first();
         $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('category', 'id')->toArray();
-        $categories[0] = 'Неизвестно[без результата]';
+        $categories[0] = 'Не определена';
         return $categories;
     }
 
