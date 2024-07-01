@@ -303,13 +303,8 @@ class ResultQualificationController extends Controller
 //            return $categories[$category] ?? 'не определена';
 //        });
         if (!$event->is_input_set) {
-            if($event->is_open_main_rating){
-                $grid->column('number_set_id', 'Номер сета')
-                    ->select(Set::getParticipantSets(Admin::user()->id));
-            } else {
-                $grid->column('number_set_id', 'Номер сета')
-                    ->select(Set::getParticipantSets(Admin::user()->id));
-            }
+            $grid->column('number_set_id', 'Номер сета')
+                ->select(Set::getParticipantSets(Admin::user()->id));
         }
         $grid->column('user_place', 'Место в квалификации')
             ->help('При некорректном раставлением мест, необходимо пересчитать результаты')
