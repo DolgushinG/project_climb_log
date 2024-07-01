@@ -190,6 +190,8 @@ class Generators
             foreach ($users as $user) {
                 if($event->is_france_system_qualification){
                     $participant = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                    $category_id = $participant->category_id;
+
                 } else {
                     $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                     if($event->is_open_main_rating){
@@ -255,6 +257,7 @@ class Generators
             foreach ($users as $user) {
                 if($event->is_france_system_qualification){
                     $participant = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                    $category_id = $participant->category_id;
                 } else {
                     $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                     if($event->is_open_main_rating){
