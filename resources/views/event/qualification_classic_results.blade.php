@@ -43,10 +43,16 @@
                                                     @if($res['gender'] == "male")
                                                         @if($res['category_id'] == $category['id'])
                                                             <tr>
-                                                                <td>{{$res["user_place"]}}</td>
                                                                 <td>{{$res['middlename']}}</td>
-{{--                                                                <td>{{$res['city']}}</td>--}}
-                                                                <td>{{$res['points']}}</td>
+                                                                @if($event->is_open_main_rating)
+                                                                    <td>{{$res["user_global_place"]}}</td>
+                                                                    {{--                                                                <td>{{$res['city']}}</td>--}}
+                                                                    <td>{{$res['global_points']}}</td>
+                                                                @else
+                                                                    <td>{{$res["user_place"]}}</td>
+                                                                    {{--                                                                <td>{{$res['city']}}</td>--}}
+                                                                    <td>{{$res['points']}}</td>
+                                                                @endif
                                                             </tr>
                                                         @endif
                                                     @endif
@@ -103,10 +109,18 @@
                                                 @if($res['gender'] == "female")
                                                     @if($res['category_id'] == $category['id'])
                                                         <tr>
-                                                            <td>{{$res["user_place"]}}</td>
                                                             <td>{{$res['middlename']}}</td>
-{{--                                                            <td>{{$res['city']}}</td>--}}
-                                                            <td>{{$res['points']}}</td>
+
+                                                            @if($event->is_open_main_rating)
+                                                                <td>{{$res["user_global_place"]}}</td>
+                                                                {{--                                                                <td>{{$res['city']}}</td>--}}
+                                                                <td>{{$res['global_points']}}</td>
+                                                            @else
+                                                                <td>{{$res["user_place"]}}</td>
+                                                                {{--                                                                <td>{{$res['city']}}</td>--}}
+                                                                <td>{{$res['points']}}</td>
+                                                            @endif
+
                                                         </tr>
                                                     @endif
                                                 @endif

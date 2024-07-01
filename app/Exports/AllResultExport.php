@@ -35,6 +35,14 @@ class AllResultExport implements WithMultipleSheets
                 $sheets[] = new Results($this->event_id, $stage, $gender, $category);
             }
         }
+        if($event->is_open_main_rating){
+            foreach ($genders as $gender) {
+                foreach ($categories as $category){
+                    $sheets[] = new Results($this->event_id, 'MergeQualification', $gender, $category);
+                }
+            }
+        }
+
         if($event->is_sort_group_semifinal){
             $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
             foreach ($genders as $gender) {

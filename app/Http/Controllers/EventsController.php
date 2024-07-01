@@ -191,6 +191,8 @@ class EventsController extends Controller
                     $result_female_cache = Cache::remember('result_female_cache_'.$category->category, 60 * 60, function () use ($event, $category) {
                         return ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     });
+//                    $result_male_cache = ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+//                    $result_female_cache =  ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     $result_male[] = $result_male_cache;
                     $result_female[] = $result_female_cache;
 //                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
@@ -206,6 +208,7 @@ class EventsController extends Controller
                 $stats->female_categories = $female_categories;
                 $stats->male_categories = $male_categories;
                 $categories = $categories->toArray();
+//                dd($result);
             }
         } else {
             return view('404');
@@ -486,11 +489,10 @@ class EventsController extends Controller
         $participant = ResultQualificationClassic::where('event_id', $request->event_id)->where('user_id', $request->user_id)->first();
         $participant->result_for_edit = $final_data;
         $participant->save();
-
-        if($event->is_access_user_edit_result){
+        $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $request->user_id)->first();
+        if($event->is_access_user_edit_result && $result_classic_for_edit){
             foreach ($final_data as $data){
                 $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $data['user_id'])->where('route_id', $data['route_id'])->first();
-                dd($result_classic_for_edit, $data['attempt']);
                 $result_classic_for_edit->attempt = $data['attempt'];
                 $result_classic_for_edit->save();
             }
@@ -538,8 +540,9 @@ class EventsController extends Controller
             $routes[$route->route_id] = $route_class;
         }
         $user_id = Auth::user()->id;
-        $result_qualification_classic_participant = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
-        if($result_qualification_classic_participant){
+        $result_route_qualification_classic_participant = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
+        if($result_route_qualification_classic_participant){
+            $result_qualification_classic_participant = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
             $result_participant = $result_qualification_classic_participant->result_for_edit;
         } else {
             $result_participant = null;
