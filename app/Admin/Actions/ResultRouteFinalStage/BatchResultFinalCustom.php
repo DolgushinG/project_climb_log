@@ -94,24 +94,24 @@ class BatchResultFinalCustom extends Action
             $merged_users = ResultFinalStage::get_final_participant($event, $this->category);
         }
         $result = $merged_users->pluck( 'middlename','id');
-//        $result_final = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
-//        foreach ($result as $index => $res){
-//            $user = User::where('middlename', $res)->first()->id;
-//            if($event->is_france_system_qualification) {
-//                $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
-//            } else {
-//                if($event->is_open_main_rating){
-//                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->global_category_id;
-//                } else {
-//                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
-//                }
-//            }
-//            $category = ParticipantCategory::find($category_id)->category;
-//            $result[$index] = $res.' ['.$category.']';
-//            if(in_array($index, $result_final)){
-//                $result[$index] = $res.' ['.$category.']'.' [Уже добавлен]';
-//            }
-//        }
+        $result_final = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
+        foreach ($result as $index => $res){
+            $user = User::where('middlename', $res)->first()->id;
+            if($event->is_france_system_qualification) {
+                $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
+            } else {
+                if($event->is_open_main_rating){
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->global_category_id;
+                } else {
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
+                }
+            }
+            $category = ParticipantCategory::find($category_id)->category;
+            $result[$index] = $res.' ['.$category.']';
+            if(in_array($index, $result_final)){
+                $result[$index] = $res.' ['.$category.']'.' [Уже добавлен]';
+            }
+        }
         Admin::script("// Получаем все элементы с атрибутом modal
         const elementsWithModalAttribute4 = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
         const elementsWithIdAttribute4 = document.querySelectorAll('[id=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
