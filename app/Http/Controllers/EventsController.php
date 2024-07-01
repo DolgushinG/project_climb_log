@@ -162,7 +162,7 @@ class EventsController extends Controller
             foreach ($participants as $index_user => $user) {
                 if ($index <= count($participants)) {
                     if($event->is_input_set == 1){
-                        if($participants[$index_user]['category'] && $categories[$participants[$index]['category_id']]){
+                        if(isset($participants[$index_user]['category']) && isset($categories[$participants[$index]['category_id']])){
                             $participants[$index_user]['category'] = $categories[$participants[$index]['category_id']];
                         } else {
                             $participants[$index_user]['category'] = 'Нет группы';
