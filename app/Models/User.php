@@ -87,7 +87,7 @@ class User extends Authenticatable
             $participant = ResultFranceSystemQualification::where('user_id',  $user_id)->where('event_id', $event_id)->first();
         } else {
             $participant = ResultQualificationClassic::where('user_id', '=', $user_id)
-                ->where('event_id', '=', $event_id)->first();
+                ->where('event_id', '=', $event_id)->where('is_other_event', 0)->first();
         }
         if($participant){
             return true;

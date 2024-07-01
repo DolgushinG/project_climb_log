@@ -18,6 +18,7 @@ use App\Models\Set;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -114,6 +115,7 @@ class EventsController extends Controller
             $participants = User::query()
                 ->leftJoin($table, 'users.id', '=', $table.'.user_id')
                 ->where($table.'.event_id', '=', $event->id)
+                ->where($table.'.is_other_event', '=', 0)
                 ->select(
                     'users.id',
                     'users.middlename',
@@ -131,7 +133,7 @@ class EventsController extends Controller
                     if($event->is_france_system_qualification){
                         $sets[$index]->count_participant = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
                     } else {
-                        $sets[$index]->count_participant = ResultQualificationClassic::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
+                        $sets[$index]->count_participant = ResultQualificationClassic::where('event_id', '=', $event->id)->where('is_other_event', 0)->where('number_set_id', $set)->count();
                     }
                     $sets[$index]->date = Helpers::getDatesByDayOfWeek($event->start_date, $event->end_date);
                     if($sets[$index]->count_participant == 0){
@@ -190,14 +192,24 @@ class EventsController extends Controller
                     $result_female_cache = Cache::remember('result_female_cache_'.$category->category, 60 * 60, function () use ($event, $category) {
                         return ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     });
+//                    $result_male_cache = ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+//                    $result_female_cache =  ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     $result_male[] = $result_male_cache;
                     $result_female[] = $result_female_cache;
 //                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
 //                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
                     $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
-                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
-                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                    if($event->is_open_main_rating){
+                        $columns = ['column_place' => 'user_global_place', 'column_points' => 'global_points', 'column_category_id' => 'global_category_id'];
+                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
+                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
+                    } else {
+                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                        $columns = ['column_place' => 'user_place', 'column_points' => 'points', 'column_category_id' => 'category_id'];
+                    }
+
                 }
                 $result_male_final = Helpers::arrayValuesRecursive($result_male);
                 $result_female_final = Helpers::arrayValuesRecursive($result_female);
@@ -205,11 +217,14 @@ class EventsController extends Controller
                 $stats->female_categories = $female_categories;
                 $stats->male_categories = $male_categories;
                 $categories = $categories->toArray();
+//                dd($result);
+
+
             }
         } else {
             return view('404');
         }
-        return view('event.qualification_classic_results', compact(['event', 'result',  'categories', 'stats']));
+        return view('event.qualification_classic_results', compact(['event', 'result',  'categories', 'stats', 'columns']));
     }
 
 
@@ -254,14 +269,14 @@ class EventsController extends Controller
                     $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
                     $users_female2 = Event::get_france_system_result('result_semifinal_stage', $event->id, 'female', $category)->toArray();
                     $users_male2 = Event::get_france_system_result('result_semifinal_stage', $event->id, 'male', $category)->toArray();
-                    $result_each_routes['male'][$category->id] = $users_female2;
-                    $result_each_routes['female'][$category->id] = $users_male2;
+                    $result_each_routes['male'][$category->id] = $users_male2;
+                    $result_each_routes['female'][$category->id] = $users_female2;
                 }
             } else {
                 $users_female2 = Event::get_france_system_result('result_semifinal_stage', $event->id, 'female')->toArray();
                 $users_male2 = Event::get_france_system_result('result_semifinal_stage', $event->id, 'male')->toArray();
-                $result_each_routes['male'] = $users_female2;
-                $result_each_routes['female'] = $users_male2;
+                $result_each_routes['male'] = $users_male2;
+                $result_each_routes['female'] = $users_female2;
             }
         } else {
             return view('404');
@@ -284,14 +299,14 @@ class EventsController extends Controller
                     $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
                     $users_female2 = Event::get_france_system_result('result_final_stage', $event->id, 'female', $category)->toArray();
                     $users_male2 = Event::get_france_system_result('result_final_stage', $event->id, 'male', $category)->toArray();
-                    $result_each_routes['male'][$category->id] = $users_female2;
-                    $result_each_routes['female'][$category->id] = $users_male2;
+                    $result_each_routes['male'][$category->id] = $users_male2;
+                    $result_each_routes['female'][$category->id] = $users_female2;
                 }
             } else {
                 $users_female2 = Event::get_france_system_result('result_final_stage', $event->id, 'female')->toArray();
                 $users_male2 = Event::get_france_system_result('result_final_stage', $event->id, 'male')->toArray();
-                $result_each_routes['male'] = $users_female2;
-                $result_each_routes['female'] = $users_male2;
+                $result_each_routes['male'] = $users_male2;
+                $result_each_routes['female'] = $users_female2;
             }
         } else {
             return view('404');
@@ -402,9 +417,12 @@ class EventsController extends Controller
             return response()->json(['success' => false, 'message' => 'Регистрация была закрыта'], 422);
         }
         $user_id = $request->user_id;
-        $participant_active = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
-        if (!$participant_active){
-            return response()->json(['success' => false, 'message' => 'Результаты уже были добавлены или отсутствует регистрация'], 422);
+        # Если не дан доступ из админки к редактированию то запрещать повторную отправку
+        if(!$event->is_access_user_edit_result){
+            $participant_active = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
+            if (!$participant_active){
+                return response()->json(['success' => false, 'message' => 'Результаты уже были добавлены или отсутствует регистрация'], 422);
+            }
         }
         $count_routes = Grades::where('event_id', $request->event_id)->first();
         if (!$count_routes){
@@ -482,9 +500,18 @@ class EventsController extends Controller
         $participant = ResultQualificationClassic::where('event_id', $request->event_id)->where('user_id', $request->user_id)->first();
         $participant->result_for_edit = $final_data;
         $participant->save();
+        $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $request->user_id)->first();
+        if($event->is_access_user_edit_result && $result_classic_for_edit){
+            foreach ($final_data as $data){
+                $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $data['user_id'])->where('route_id', $data['route_id'])->first();
+                $result_classic_for_edit->attempt = $data['attempt'];
+                $result_classic_for_edit->save();
+            }
+        } else {
+            $result = ResultRouteQualificationClassic::insert($final_data);
+        }
 
 
-        $result = ResultRouteQualificationClassic::insert($final_data);
 
         $participants = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
@@ -510,10 +537,6 @@ class EventsController extends Controller
         }
     }
 
-
-
-
-
     public function listRoutesEvent(Request $request, $start_date, $climbing_gym, $title) {
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if(!$event){
@@ -527,8 +550,16 @@ class EventsController extends Controller
             $route_class->count = $route->route_id;
             $routes[$route->route_id] = $route_class;
         }
+        $user_id = Auth::user()->id;
+        $result_route_qualification_classic_participant = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
+        if($result_route_qualification_classic_participant){
+            $result_qualification_classic_participant = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
+            $result_participant = $result_qualification_classic_participant->result_for_edit;
+        } else {
+            $result_participant = null;
+        }
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
-        return view('result-page', compact('routes', 'event'));
+        return view('result-page', compact('routes', 'event', 'result_participant'));
     }
 
     public function sendAllResult(Request $request)

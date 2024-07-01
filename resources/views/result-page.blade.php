@@ -6,12 +6,19 @@
                 <div class="col">
                     <div class="container">
                         <div class="row">
-                            @if(\App\Models\ResultQualificationClassic::is_active_participant($event->id, Auth()->user()->id))
+                            @if(\App\Models\ResultQualificationClassic::is_active_participant($event->id, Auth()->user()->id) && !$event->is_access_user_edit_result)
+                                <section class="list-route">
+                                    <div class="row mt-3 gy-4">
+                                    </div>
+                                </section>
                                 <h1> Ваш результат уже был добавлен </h1>
+                                <section class="list-route">
+                                    <div class="row mt-3 gy-4">
+                                    </div>
+                                </section>
                             @else
                                 <h1> Внести результаты </h1>
                                 <div>
-
                                 </div>
                                 <div class="text-right">
                                     <button type="button" class="btn btn-dark mb-2" id="all-flash">Отметить все FLASH
@@ -30,34 +37,77 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    @foreach($routes as $route)
+                                    @foreach($routes as $index => $route)
                                         <tr>
                                             <th>{{$route->count}}</th>
                                             <th>{{$route->grade}}</th>
                                             <td>
-                                                <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
-                                                       name="{{$route->count}}" id="failed-{{$route->count}}"
-                                                       autocomplete="off"
-                                                       >
+                                                @if($result_participant)
+                                                    @if($result_participant[$index]['attempt'] == '0')
+                                                        <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                               name="{{$route->count}}" id="failed-{{$route->count}}"
+                                                               autocomplete="off" checked>
+                                                    @else
+                                                        <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                               name="{{$route->count}}" id="failed-{{$route->count}}"
+                                                               autocomplete="off">
+                                                    @endif
+
+                                                @else
+                                                    <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                           name="{{$route->count}}" id="failed-{{$route->count}}"
+                                                           autocomplete="off">
+                                                @endif
                                                 <label class="btn btn-outline-danger btn-failed"
                                                        for="failed-{{$route->count}}">Не пролез</label>
                                             </td>
                                             <td>
-                                                <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
-                                                       class="btn-check"
-                                                       name="{{$route->count}}" id="flash-{{$route->count}}"
-                                                       autocomplete="off">
+                                                @if($result_participant)
+                                                    @if($result_participant[$index]['attempt'] == '1')
+                                                        <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
+                                                               class="btn-check"
+                                                               name="{{$route->count}}" id="flash-{{$route->count}}"
+                                                               autocomplete="off" checked>
+                                                    @else
+                                                        <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
+                                                               class="btn-check"
+                                                               name="{{$route->count}}" id="flash-{{$route->count}}"
+                                                               autocomplete="off">
+                                                    @endif
+
+                                                @else
+                                                    <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
+                                                           class="btn-check"
+                                                           name="{{$route->count}}" id="flash-{{$route->count}}"
+                                                           autocomplete="off">
+                                                @endif
+
                                                 <label class="btn btn-outline-success  btn-flash"
                                                        for="flash-{{$route->count}}">FLASH</label>
                                             </td>
                                             <td>
-                                                <input type="radio" data-id="all-redpoint" class="btn-check"
-                                                       data-grade="{{$route->grade}}" name="{{$route->count}}"
-                                                       id="redpoint-{{$route->count}}" autocomplete="off">
+                                                @if($result_participant)
+                                                    @if($result_participant[$index]['attempt'] == '2')
+                                                        <input type="radio" data-id="all-redpoint" class="btn-check"
+                                                               data-grade="{{$route->grade}}" name="{{$route->count}}"
+                                                               id="redpoint-{{$route->count}}" autocomplete="off" checked>
+                                                    @else
+                                                        <input type="radio" data-id="all-redpoint" class="btn-check"
+                                                               data-grade="{{$route->grade}}" name="{{$route->count}}"
+                                                               id="redpoint-{{$route->count}}" autocomplete="off">
+                                                   @endif
+                                                @else
+                                                    <input type="radio" data-id="all-redpoint" class="btn-check"
+                                                           data-grade="{{$route->grade}}" name="{{$route->count}}"
+                                                           id="redpoint-{{$route->count}}" autocomplete="off">
+                                                @endif
+
                                                 <label class="btn btn-outline-warning btn-redpoint"
                                                        for="redpoint-{{$route->count}}">REDPOINT</label>
                                             </td>
+
                                         </tr>
+
                                     @endforeach
                                     </tbody>
                                 </table>

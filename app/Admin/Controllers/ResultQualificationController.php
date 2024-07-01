@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\BatchGenerateParticipant;
+use App\Admin\Actions\BatchMergeResult;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportProtocolRouteParticipantsQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportResultFranceSystemQualification;
@@ -26,6 +27,7 @@ use App\Models\ParticipantCategory;
 use App\Models\ResultRouteQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFranceSystemQualification;
+use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
@@ -147,6 +149,10 @@ class ResultQualificationController extends Controller
     {
 
         $type = 'edit';
+        if($request->category_id){
+            $type = 'update';
+            return $this->form($type, $id)->update($id);
+        }
         if ($request->is_paid) {
             $type = 'is_paid';
             return $this->form($type, $id)->update($id);
@@ -243,7 +249,11 @@ class ResultQualificationController extends Controller
             $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
             $p_categories = ResultQualificationClassic::where('event_id', $event->id)->whereIn('category_id', $category)->get();
             if ($p_categories->isNotEmpty()) {
-                $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+                if($event->is_open_main_rating){
+                    $selector->select('global_category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+                } else {
+                    $selector->select('category_id', 'Общая Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+                }
             }
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
             $selector->select('active', 'Результаты ', [1 => 'Добавил', 0 => 'Не добавил']);
@@ -254,10 +264,21 @@ class ResultQualificationController extends Controller
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
-        $grid->tools(function (Grid\Tools $tools) {
+        $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchResultQualification);
+            if(!$event->is_registration_state && !$event->is_france_system_qualification){
+                $tools->append(new BatchMergeResult);
+            }
+            $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+            if($event->is_france_system_qualification){
+                $is_enabled = Grades::where('event_id', $event->id)->first();
+            } else {
+                $is_enabled = Route::where('event_id', $event->id)->first();
+            }
+            if($is_enabled){
+                $tools->append(new BatchGenerateParticipant);
+            }
             $tools->append(new BatchForceRecouting);
-            $tools->append(new BatchGenerateParticipant);
         });
         $grid->actions(function ($actions) use ($event) {
 //            $actions->disableEdit();
@@ -272,13 +293,15 @@ class ResultQualificationController extends Controller
             ->select(['male' => 'Муж', 'female' => 'Жен']);
         $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
         $p_categories = ResultQualificationClassic::where('event_id', $event->id)->whereIn('category_id', $category)->get();
-
         if ($p_categories->isNotEmpty()) {
             $grid->column('category_id', 'Категория')
                 ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
                 ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         }
-
+//        $categories = (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id);
+//        $grid->column('category_id', 'Общая Категория')->display(function ($category) use ($categories) {
+//            return $categories[$category] ?? 'не определена';
+//        });
         if (!$event->is_input_set) {
             $grid->column('number_set_id', 'Номер сета')
                 ->select(Set::getParticipantSets(Admin::user()->id));
@@ -287,12 +310,30 @@ class ResultQualificationController extends Controller
             ->help('При некорректном раставлением мест, необходимо пересчитать результаты')
             ->sortable();
         $grid->column('points', 'Баллы')->sortable();
+        if($event->is_open_main_rating){
+            $grid->column('global_points', 'Общие Баллы');
+            $grid->column('user_global_place', 'Общее Место')->sortable();
+            $categories = (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id);
+            $grid->column('global_category_id', 'Общая Категория')->display(function ($category) use ($categories) {
+                return $categories[$category] ?? 'не определена';
+            });
+        }
+
         if ($event->is_auto_categories) {
             $grid->column('is_recheck', 'Результат с вопросом')->using([0 => 'ОК', 1 => 'Внимание'])->display(function ($title, $column) {
                 if ($this->is_recheck == 1) {
                     return $column->label('warning');
                 } else {
                     return $column->label('success');
+                }
+            });
+        }
+        if ($event->is_open_main_rating) {
+            $grid->column('is_other_event', 'Перенесен из других сорев')->display(function ($state) {
+                if (intval($state) == 1) {
+                    return 'Да';
+                } else {
+                    return 'Нет';
                 }
             });
         }
@@ -373,41 +414,16 @@ class ResultQualificationController extends Controller
             $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
-//            $event = Event::where('owner_id', '=', Admin::user()->id)
-//                ->where('active', '=', 1)->first();
-//            $grades = Grades::where('event_id', $event->id)->first();
-//            if($grades){
-//                $button = "<a class='send-add btn btn-sm btn-success' href='/admin/result-qualification/create'><i class='fa fa-arrow-down'></i> Внести результат</a>
-//                <style>
-//                    .send-add {margin-top:8px;}
-//                 @media screen and (max-width: 767px) {
-//                        .send-add {margin-top:8px;}
-//                    }
-//                </style>
-//
-//            ";
-//            } else {
-//                $button = "<a class='send-add btn btn-sm btn-success disabled' href='/admin/result-qualification/create'><i class='fa fa-arrow-down'></i>Внести результат (Необходимо настроить трассы) </a>
-//                <style>
-//                    .send-add {margin-top:8px;}
-//                 @media screen and (max-width: 767px) {
-//                        .send-add {margin-top:8px;}
-//                    }
-//                </style>
-//
-//            ";
-//            }
-//            $tools->append($button);
             $tools->append(new BatchExportResultFranceSystemQualification);
             $tools->append(new BatchResultFranceSystemQualification);
             $tools->append(new BatchGenerateParticipant);
             $tools->append(new BatchExportProtocolRouteParticipantsQualification);
         });
-        $grid->actions(function ($actions) {
-//            $actions->disableEdit();
-//            $actions->disableDelete();
-//            $actions->disableView();
-        });
+//        $grid->actions(function ($actions) {
+////            $actions->disableEdit();
+////            $actions->disableDelete();
+////            $actions->disableView();
+//        });
 
         $grid->disableExport();
         $grid->disableFilter();
@@ -557,6 +573,11 @@ class ResultQualificationController extends Controller
                 $event = Event::find($form->model()->find($id)->event_id);
                 $user_id = $form->model()->find($id)->user_id;
                 $event_id = $form->model()->find($id)->event_id;
+                if(intval($form->input('category_id')) > 0){
+                    $result = $form->model()->find($id);
+                    $result->category_id = $form->input('category_id');
+                    $result->save();
+                }
                 if($form->result_for_edit){
                     $routes = $form->result_for_edit;
                     foreach ($routes as $route) {

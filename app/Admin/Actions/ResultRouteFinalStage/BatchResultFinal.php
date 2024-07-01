@@ -31,7 +31,11 @@ class BatchResultFinal extends Action
         if(!$participant){
           Log::error('Category id not found -event_id - '.$results['event_id'].'user_id'.$results['user_id']);
         }
-        $category_id = $participant->category_id;
+        if($event->is_open_main_rating){
+            $category_id = $participant->global_category_id;
+        } else {
+            $category_id = $participant->category_id;
+        }
         $gender = $participant->gender;
         $data = array();
         $result_for_edit = [];
@@ -92,7 +96,11 @@ class BatchResultFinal extends Action
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $merged_users = ResultFinalStage::get_final_participant($event);
+        if($event->is_open_main_rating){
+            $merged_users = ResultFinalStage::get_final_global_participant($event);
+        } else {
+            $merged_users = ResultFinalStage::get_final_participant($event);
+        }
         $result = $merged_users->pluck( 'middlename','id');
         $result_final = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){

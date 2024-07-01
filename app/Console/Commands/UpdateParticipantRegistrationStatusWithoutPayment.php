@@ -36,7 +36,7 @@ class UpdateParticipantRegistrationStatusWithoutPayment extends Command
                 $participants = ResultFranceSystemQualification::where('event_id', $event->id)->get();
             } else {
                 // Если нет, получаем участников события из таблицы Participant
-                $participants = ResultQualificationClassic::where('event_id', $event->id)->get();
+                $participants = ResultQualificationClassic::where('event_id', $event->id)->where('is_other_event', 0)->get();
             }
 
             // Перебираем каждого участника события

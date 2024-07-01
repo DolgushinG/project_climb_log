@@ -233,7 +233,7 @@ class Event extends Model
                 'users.id',
                 'result_qualification_classic.category_id',
                 'result_qualification_classic.gender',
-                )->where('active', 1);
+                )->where('active', 1)->where('is_other_event', 0);
         $users_id = $participants->pluck('id');
         foreach ($participants->get() as $participant) {
             if ($format == 1) {
@@ -280,7 +280,6 @@ class Event extends Model
             }
         }
     }
-
     public static function refresh_final_points_all_participant_in_semifinal($event_id)
     {
         $event = Event::find($event_id);
@@ -311,8 +310,14 @@ class Event extends Model
                 $all_group_participants = array();
                 foreach ($event->categories as $category) {
                     $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-                    $all_group_participants['male'][$category] = ResultQualificationClassic::better_participants($event->id, 'male', $amount_the_best_participant, $category_id);
-                    $all_group_participants['female'][$category] = ResultQualificationClassic::better_participants($event->id, 'female', $amount_the_best_participant, $category_id);
+                    if($event->is_open_main_rating){
+                        $all_group_participants['male'][$category] = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount_the_best_participant, $category_id);
+                        $all_group_participants['female'][$category] = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount_the_best_participant, $category_id);
+                    } else {
+                        $all_group_participants['male'][$category] = ResultQualificationClassic::better_participants($event->id, 'male', $amount_the_best_participant, $category_id);
+                        $all_group_participants['female'][$category] = ResultQualificationClassic::better_participants($event->id, 'female', $amount_the_best_participant, $category_id);
+                    }
+
                 }
                 foreach ($all_group_participants as $group_participants) {
                     foreach ($group_participants as $participants) {
@@ -320,8 +325,13 @@ class Event extends Model
                     }
                 }
             } else {
-                $users_male = ResultQualificationClassic::better_participants($event_id, 'male', $amount_the_best_participant);
-                $users_female = ResultQualificationClassic::better_participants($event_id, 'female', $amount_the_best_participant);
+                if($event->is_open_main_rating){
+                    $users_male = ResultQualificationClassic::better_global_participants($event_id, 'male', $amount_the_best_participant);
+                    $users_female = ResultQualificationClassic::better_global_participants($event_id, 'female', $amount_the_best_participant);
+                } else {
+                    $users_male = ResultQualificationClassic::better_participants($event_id, 'male', $amount_the_best_participant);
+                    $users_female = ResultQualificationClassic::better_participants($event_id, 'female', $amount_the_best_participant);
+                }
                 Event::getUsersSorted($users_female, $fields, $event, 'semifinal', $event->owner_id);
                 Event::getUsersSorted($users_male, $fields, $event, 'semifinal', $event->owner_id);
             }
@@ -407,8 +417,14 @@ class Event extends Model
                     $all_group_participants = array();
                     foreach ($event->categories as $category) {
                         $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-                        $all_group_participants['male'][$category] = ResultQualificationClassic::better_participants($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id);
-                        $all_group_participants['female'][$category] = ResultQualificationClassic::better_participants($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id);
+                        if($event->is_open_main_rating){
+                            $all_group_participants['male'][$category] = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id);
+                            $all_group_participants['female'][$category] = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id);
+                        } else {
+                            $all_group_participants['male'][$category] = ResultQualificationClassic::better_participants($event->id, 'male', $amount_the_best_participant_to_go_final, $category_id);
+                            $all_group_participants['female'][$category] = ResultQualificationClassic::better_participants($event->id, 'female', $amount_the_best_participant_to_go_final, $category_id);
+                        }
+
                     }
                     foreach ($all_group_participants as $group_participants) {
                         foreach ($group_participants as $participants) {
@@ -416,8 +432,13 @@ class Event extends Model
                         }
                     }
                 } else {
-                    $users_female = ResultQualificationClassic::better_participants($event_id, 'female', $amount_the_best_participant_to_go_final);
-                    $users_male = ResultQualificationClassic::better_participants($event_id, 'male', $amount_the_best_participant_to_go_final);
+                    if($event->is_open_main_rating){
+                        $users_female = ResultQualificationClassic::better_global_participants($event_id, 'female', $amount_the_best_participant_to_go_final);
+                        $users_male = ResultQualificationClassic::better_global_participants($event_id, 'male', $amount_the_best_participant_to_go_final);
+                    } else {
+                        $users_female = ResultQualificationClassic::better_participants($event_id, 'female', $amount_the_best_participant_to_go_final);
+                        $users_male = ResultQualificationClassic::better_participants($event_id, 'male', $amount_the_best_participant_to_go_final);
+                    }
                     Event::getUsersSorted($users_female, $fields, $event, 'final', $event->owner_id);
                     Event::getUsersSorted($users_male, $fields, $event, 'final', $event->owner_id);
                 }
@@ -535,15 +556,6 @@ class Event extends Model
                         ->where('user_id', '=', $user->id)
                         ->get();
             }
-//            var_dump('user_id', $user->id);
-////            if(count($result_user->toArray()) == 0){
-////                return [];
-////            }
-////
-////            $result_user = [];
-//            if($user->id == 1){
-//                dd('users ',$users, 'event ',$model, 'type ',$type, 'owner_id ',$owner_id, '$result_user ',$result_user, 'user_id ',$user->id, 'user_id ',$model->id);
-//            }
 
             $result = ResultRouteSemiFinalStage::merge_result_user_in_stage($result_user);
             if ($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null) {
@@ -660,4 +672,84 @@ class Event extends Model
         $participant->result_for_edit_semifinal = $new_result_for_edit;
         $participant->save();
     }
+
+    public static function merge_point($users_ids, $event_ids, $active_event)
+    {
+        # Чисто подсчет очков
+        foreach ($users_ids as $user_id) {
+            for ($i = 0; $i < count($event_ids); $i++) {
+                $gender = null;
+                $users_result = ResultQualificationClassic::where('event_id', $event_ids[$i])->where('active', 1)->where('user_id', $user_id)->first();
+                $active_event_result = ResultQualificationClassic::where('event_id', $active_event->id)->where('active', 1)->where('user_id', $user_id)->first();
+                if ($users_result) {
+                    $gender = $users_result->gender;
+                    if ($active_event_result) {
+                        $active_event_result->global_points = $users_result->points + $active_event_result->global_points;
+                        $active_event_result->save();
+                    } else {
+                        $owner_id = Admin::user()->id;
+                        $active_event_result = new ResultQualificationClassic;
+                        $global_points = $users_result->points;
+                        $active_event_result->owner_id = $owner_id;
+                        $active_event_result->event_id = $active_event->id;
+                        $active_event_result->user_id = $user_id;
+                        $active_event_result->gender = $gender;
+                        $active_event_result->global_points = $global_points;
+                        $active_event_result->category_id = 0;
+                        $active_event_result->number_set_id = 0;
+                        $active_event_result->active = 1;
+                        $active_event_result->is_other_event = 1;
+                        $active_event_result->save();
+                    }
+                }
+            }
+        }
+    }
+    public static function merge_auto_categories($event, $users_ids, $event_ids)
+    {
+        $event_ids[] = $event->id;
+        foreach ($users_ids as $user_id){
+            $users_result = ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->where('user_id', $user_id)->first();
+            if(isset($users_result)){
+                $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_global_list_passed_route($event_ids, $user_id), 3);
+                $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
+                $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                $users_result->global_category_id = $category_id;
+                $users_result->save();
+            }
+        }
+
+    }
+    public static function counting_global_place($event)
+    {
+        $participants = User::query()
+            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+            ->where('result_qualification_classic.event_id', '=', $event->id)
+            ->select(
+                'users.id',
+                'result_qualification_classic.global_category_id',
+                'result_qualification_classic.gender',
+            )->where('active', 1);
+        $users_id = $participants->pluck('id');
+        $categories = ParticipantCategory::where('event_id', '=', $event->id)->get();
+        if ($event->is_sort_group_final) {
+            foreach (['female', 'male'] as $gender) {
+                foreach ($categories as $category) {
+                    $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)
+                        ->where('global_category_id', $category->id)
+                        ->where('event_id', $event->id)
+                        ->where('gender', $gender)
+                        ->orderBy('global_points', 'desc')
+                        ->get();
+                    ResultQualificationClassic::update_global_places_in_qualification_classic($event->id, $participants_for_update);
+                }
+            }
+        } else {
+            foreach (['female', 'male'] as $gender){
+                $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event->id)->where('gender', $gender)->orderBy('global_points', 'DESC')->get();
+                ResultQualificationClassic::update_global_places_in_qualification_classic($event->id, $participants_for_update);
+            }
+        }
+    }
+
 }

@@ -114,7 +114,7 @@ class ProfileController extends Controller
 
     public function getTabContentEvents() {
         $user_id = Auth()->user()->id;
-        $participant = ResultQualificationClassic::where('user_id', '=', $user_id)->pluck('event_id');
+        $participant = ResultQualificationClassic::where('user_id', '=', $user_id)->where('is_other_event', 0)->pluck('event_id');
         $res_france_system_qualification = ResultFranceSystemQualification::where('user_id', '=', $user_id)->pluck('event_id');
         $events_ids = $res_france_system_qualification->merge($participant);
         $events = Event::whereIn('id', $events_ids->toArray())->get();
@@ -124,8 +124,8 @@ class ProfileController extends Controller
                 $res_qualification = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
                 $res_qualification_place = $res_qualification->place ?? '';
             } else {
-                $event['amount_participant'] = ResultQualificationClassic::where('event_id', '=', $event->id)->get()->count();
-                $res_qualification = ResultQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+                $event['amount_participant'] = ResultQualificationClassic::where('event_id', '=', $event->id)->where('is_other_event', 0)->get()->count();
+                $res_qualification = ResultQualificationClassic::where('event_id', '=', $event->id)->where('is_other_event', 0)->where('user_id', '=', $user_id)->first();
                 $res_qualification_place = $res_qualification->user_place ?? '';
             }
             $res_final = ResultFinalStage::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();

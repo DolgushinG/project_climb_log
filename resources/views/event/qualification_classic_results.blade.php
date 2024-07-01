@@ -41,12 +41,13 @@
                                                 <tbody>
                                                 @foreach($result as $res)
                                                     @if($res['gender'] == "male")
-                                                        @if($res['category_id'] == $category['id'])
+                                                        @if($res[$columns['column_category_id']] == $category['id'])
                                                             <tr>
-                                                                <td>{{$res["user_place"]}}</td>
+                                                                {{--                                                        $res[$columns['column_place']] place - ключ который отдается от бэка--}}
+                                                                {{--                                                        $res[$columns['column_points']] points - ключ который отдается от бэка--}}
+                                                                <td>{{$res[$columns['column_place']]}}</td>
                                                                 <td>{{$res['middlename']}}</td>
-{{--                                                                <td>{{$res['city']}}</td>--}}
-                                                                <td>{{$res['points']}}</td>
+                                                                <td>{{$res[$columns['column_points']]}}</td>
                                                             </tr>
                                                         @endif
                                                     @endif
@@ -101,12 +102,13 @@
                                             <tbody>
                                             @foreach($result as $res)
                                                 @if($res['gender'] == "female")
-                                                    @if($res['category_id'] == $category['id'])
+                                                    @if($res[$columns['column_category_id']] == $category['id'])
                                                         <tr>
-                                                            <td>{{$res["user_place"]}}</td>
+                                                            {{--                                                        $res[$columns['column_place']] place - ключ который отдается от бэка--}}
+                                                            {{--                                                        $res[$columns['column_points']] points - ключ который отдается от бэка--}}
+                                                            <td>{{$res[$columns['column_place']]}}</td>
                                                             <td>{{$res['middlename']}}</td>
-{{--                                                            <td>{{$res['city']}}</td>--}}
-                                                            <td>{{$res['points']}}</td>
+                                                            <td>{{$res[$columns['column_points']]}}</td>
                                                         </tr>
                                                     @endif
                                                 @endif

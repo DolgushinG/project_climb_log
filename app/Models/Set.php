@@ -8,7 +8,9 @@ class Set extends Model
 {
     public static function getParticipantSets($owner_id)
     {
-        return Set::where('owner_id', $owner_id)->pluck('number_set', 'id')->toArray();
+        $sets =  Set::where('owner_id', $owner_id)->pluck('number_set', 'id')->toArray();
+        $sets[0] = '-';
+        return $sets;
     }
     public function participant()
     {

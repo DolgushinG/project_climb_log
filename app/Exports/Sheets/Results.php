@@ -39,7 +39,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
     }
     public function styles(Worksheet $sheet)
     {
-        if($this->type == 'Qualification'){
+        if($this->type == 'Qualification' || $this->type == 'MergeQualification'){
             return [
                 1    => ['font' => ['bold' => true]],
             ];
@@ -54,12 +54,14 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
 
     public function startCell(): string
     {
-        if ($this->type == 'Qualification'){
-            return 'A1';
-        } else {
-            return 'A3';
+        switch ($this->type){
+            case 'MergeQualification':
+            case 'Qualification':
+                return 'A1';
+                break;
+            default :
+                return 'A3';
         }
-
     }
 
     public function registerEvents(): array {
@@ -77,7 +79,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                         ],
                     ];
 
-                    if($this->type != 'Qualification') {
+                    if($this->type == 'Final' || $this->type == 'SemiFinal' || $this->type == 'FranceSystemQualification') {
                         $sheet->mergeCells('A1:C1');
                         $sheet->setCellValue('A1', $this->title());
                         $sheet->getStyle('A1')->applyFromArray($style);
@@ -215,6 +217,12 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $qualification[] = 'Трасса '.$i;
                 }
                 return $qualification;
+            case 'MergeQualification':
+                return [
+                    'Место',
+                    'Участник(Фамилия Имя)',
+                    'Суммарные Баллы',
+                ];
             default:
                 return [];
         }
@@ -238,6 +246,9 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         }
         if($this->type == 'Qualification'){
             return self::get_qualification();
+        }
+        if($this->type == 'MergeQualification'){
+            return self::get_merge_qualification();
         }
         return collect([]);
     }
@@ -340,7 +351,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $users[$index]['route_result_'.$result->route_id] = $attempt;
                 }
             }
-            $users[$index] = collect($users[$index])->except('id', 'owner_id');
+            $users[$index] = collect($users[$index])->except('id', 'owner_id', 'user_global_place', 'global_points');
         }
         $users_need_sorted = collect($users)->toArray();
         usort($users_need_sorted, function ($a, $b) {
@@ -355,6 +366,53 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         });
         return collect($users_need_sorted);
 
+    }
+    public function get_merge_qualification(){
+        $users = User::query()
+            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+            ->where('result_qualification_classic.event_id', '=', $this->event_id)
+            ->where('result_qualification_classic.global_category_id', '=', $this->category->id)
+            ->select(
+                'users.id',
+                'result_qualification_classic.user_global_place',
+                'users.middlename',
+                'result_qualification_classic.global_points',
+                'result_qualification_classic.owner_id',
+            )
+            ->where('result_qualification_classic.gender', '=', $this->gender)->get()->sortBy('user_global_place')->toArray();
+        if(!$users){
+            return collect([]);
+        }
+        $users['empty_row'] = array(
+            "id" => "",
+            "user_global_place" => "",
+            "middlename" => "",
+            "points" => "",
+            "owner_id" => "",
+            "number_set_id" => "",
+        );
+        $users_for_filter = ResultQualificationClassic::where('event_id', $this->event_id)->pluck('user_id')->toArray();
+        foreach ($users as $index => $user) {
+            if ($index == 'empty_row') {
+                $users[$index]['user_global_place'] = '';
+            } else {
+                $global_place = ResultQualificationClassic::get_places_participant_in_qualification($this->event_id, $users_for_filter, $user['id'], $this->gender, $this->category->id, true, true);
+                $users[$index]['user_global_place'] = $global_place;
+            }
+            $users[$index] = collect($users[$index])->except('id', 'owner_id');
+        }
+        $users_need_sorted = collect($users)->toArray();
+        usort($users_need_sorted, function ($a, $b) {
+            // Проверяем, если значение 'user_place' пустое, перемещаем его в конец
+            if (empty($a['user_global_place'])) {
+                return 1; // $a должно быть после $b
+            } elseif (empty($b['user_global_place'])) {
+                return -1; // $a должно быть перед $b
+            } else {
+                return $a['user_global_place'] <=> $b['user_global_place'];
+            }
+        });
+        return collect($users_need_sorted);
     }
 
     public function get_final($table){

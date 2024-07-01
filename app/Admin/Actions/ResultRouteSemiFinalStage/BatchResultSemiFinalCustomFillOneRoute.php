@@ -47,7 +47,11 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
         } else {
             $participant = ResultQualificationClassic::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
         }
-        $category_id = $participant->category_id;
+        if($event->is_open_main_rating){
+            $category_id = $participant->global_category_id;
+        } else {
+            $category_id = $participant->category_id;
+        }
         $gender = $participant->gender;
         $owner_id = \Encore\Admin\Facades\Admin::user()->id;
         $data[] = array('owner_id' => $owner_id,
@@ -87,7 +91,11 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
         $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
-        $merged_users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant, $this->category);
+        if($event->is_open_main_rating){
+            $merged_users = ResultSemiFinalStage::get_global_participant_semifinal($event, $amount_the_best_participant, $this->category);
+        } else {
+            $merged_users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant, $this->category);
+        }
         $result = $merged_users->pluck( 'middlename','id');
         $result_semifinal = ResultRouteSemiFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
@@ -95,7 +103,11 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
             if($event->is_france_system_qualification) {
                 $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
             } else {
-                $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
+                if($event->is_open_main_rating){
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->global_category_id;
+                } else {
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
+                }
             }
             $category = ParticipantCategory::find($category_id)->category;
             $result[$index] = $res.' ['.$category.']';

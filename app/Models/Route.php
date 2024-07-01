@@ -25,6 +25,7 @@ class Route extends Model
             }
         }
         Route::where('event_id', $event_id)->delete();
+
         Grades::settings_routes($amount_routes, $grades);
     }
 }

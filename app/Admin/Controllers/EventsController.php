@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\BatchNotificationOfParticipant;
+use App\Admin\CustomAction\ActionCloneEvent;
 use App\Admin\CustomAction\ActionExport;
 use App\Admin\CustomAction\ActionExportCardParticipantFranceSystem;
 use App\Admin\CustomAction\ActionExportCardParticipantFestival;
@@ -70,27 +71,28 @@ class EventsController extends Controller
                         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
                         if ($event) {
                             if ($event->is_france_system_qualification) {
-                                $participant = ResultFranceSystemQualification::where('event_id', $event->id);
+                                $sum_participant = ResultFranceSystemQualification::where('event_id', $event->id)->count();
+                                $participant_is_paid = ResultFranceSystemQualification::where('event_id', $event->id)->where('is_paid', 1)->count();
+                                $participant_is_not_active = ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 0)->count();
+                                $participant_is_active = ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->count();
                             } else {
-                                $participant = ResultQualificationClassic::where('event_id', $event->id);
+                                $sum_participant = ResultQualificationClassic::where('event_id', $event->id)->count();
+                                $participant_is_paid = ResultQualificationClassic::where('event_id', $event->id)->where('is_paid', 1)->count();
+                                $participant_is_not_active = ResultQualificationClassic::where('event_id', $event->id)->where('active', 0)->count();
+                                $participant_is_active = ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->count();
                             }
-                            $sum_participant = $participant->count();
-                            $participant_is_paid = $participant->where('is_paid', 1)->count();
-                            $participant_is_not_paid = $participant->where('is_paid', 0)->count();
-                            $participant_is_not_active = $participant->where('active', 0)->count();
-                            $participant_is_active = $participant->where('active', 1)->count();
-                            $sum = $participant_is_not_paid + $participant_is_not_active;
+
                         }
                         $row->column(3, new InfoBox('Кол-во участников', 'users', 'aqua', '/admin/result-qualification', $sum_participant ?? 0));
                         $row->column(3, new InfoBox('Оплачено', 'money', 'green', '/admin/result-qualification', $participant_is_paid ?? 0));
                         if ($event) {
                             if (!$event->is_france_system_qualification) {
-                                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', 'result-qualification', $participant_is_active ?? 0));
-                                $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/result-qualification', $sum ?? 0));
+                                $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/result-qualification', $participant_is_active ?? 0));
+                                $row->column(3, new InfoBox('Без результата', 'money', 'red', '/admin/result-qualification', $participant_is_not_active ?? 0));
                             }
                         } else {
                             $row->column(3, new InfoBox('Внесли результат', 'book', 'yellow', '/admin/result-qualification', $participant_is_active ?? 0));
-                            $row->column(3, new InfoBox('Не оплаченых и без результата', 'money', 'red', '/admin/result-qualification', $sum ?? 0));
+                            $row->column(3, new InfoBox('Без результата', 'money', 'red', '/admin/result-qualification', $participant_is_not_active ?? 0));
                         }
                     })->body($this->grid());
             }
@@ -218,6 +220,7 @@ class EventsController extends Controller
             $actions->disableView();
             $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
             $actions->append(new ActionExportList($actions->getKey(), 'Список участников'));
+            $actions->append(new ActionCloneEvent($actions->getKey(), 'Клонировать'));
             $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника'));
             $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника'));
         });
@@ -300,7 +303,7 @@ class EventsController extends Controller
 //            $form->time('start_time', 'Время старта')->attribute('inputmode', 'none')->placeholder('Время старта')->required();
 //            $form->time('end_time', 'Время окончания')->attribute('inputmode', 'none')->placeholder('Время окончания')->required();
             $form->image('image', 'Афиша')->placeholder('Афиша')->attribute('inputmode', 'none');
-            $form->summernote('description', 'Описание')->placeholder('Описание')->required();
+            $form->summernote('description', 'Положение')->placeholder('Положение')->required();
             $form->text('contact', 'Телефон')->required();
             $form->text('contact_link', 'Ссылка на соц.сеть');
             $form->hidden('link', 'Ссылка на сореванование')->placeholder('Ссылка');
@@ -433,12 +436,14 @@ class EventsController extends Controller
 
         })->tab('Управление соревнованием', function ($form) use ($id){
             $form->switch('is_registration_state', 'Регистрация ')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+
             $form->switch('is_need_pay_for_reg', 'Включить оплату для регистрации')
                 ->help('Например оплата будет происходит в другом месте или оплачивается только вход')
                 ->states(self::STATES_BTN)->default(1);
             $form->number('registration_time_expired', 'Через сколько дней сгорит регистрации без оплаты')->help('Если 0 то сгорать не будет')->default(0);
             $form->datetime('datetime_registration_state', 'Дата закрытия регистрации [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
             $form->switch('is_send_result_state', 'Отправка результатов')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            $form->switch('is_access_user_edit_result', 'Дать доступ к редактированию результата')->help('Участник может сам редактировать свой результат')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->switch('is_open_send_result_state', 'Открыть полные результаты')->help('Даже если включить, кнопка появиться только после закрытия внесения результатов')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->datetime('datetime_send_result_state', 'Дата закрытия отправки результатов [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
@@ -586,7 +591,21 @@ class EventsController extends Controller
         return $form;
     }
 
-
+    public function cloneEvent(Request $request)
+    {
+        if($request){
+            $event_original = Event::find($request->id);
+            $event_clone = $event_original->replicate();
+            $event_clone->is_public = 0;
+            $event_clone->title = $event_clone->title.'-copy';
+            $event_clone->title_eng = $event_clone->title_eng.'-copy';
+            $event_clone->link = $event_clone->link.'-copy';
+            $event_clone->admin_link = $event_clone->admin_link.'-copy';
+            $event_clone->active = 0;
+            $event_clone->is_registration_state = 0;
+            $event_clone->save();
+        }
+    }
 
     public function exportAllExcel(Request $request)
     {

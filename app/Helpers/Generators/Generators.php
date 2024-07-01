@@ -181,12 +181,24 @@ class Generators
             ResultRouteSemiFinalStage::where('event_id', $event_id)->delete();
             $event = Event::find($event_id);
             $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
-            $users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant, null, true);
+            if($event->is_open_main_rating){
+                $users = ResultSemiFinalStage::get_global_participant_semifinal($event, $amount_the_best_participant, null, true);
+            } else {
+                $users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant, null, true);
+            }
             $result = array();
             foreach ($users as $user) {
-                $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
                 if($event->is_france_system_qualification){
                     $participant = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                    $category_id = $participant->category_id;
+
+                } else {
+                    $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                    if($event->is_open_main_rating){
+                        $category_id = $participant->global_category_id;
+                    } else {
+                        $category_id = $participant->category_id;
+                    }
                 }
                 $result_for_edit = [];
                 for ($route = 1; $route <= $event->amount_routes_in_semifinal; $route++) {
@@ -207,7 +219,7 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'],'category_id' => $participant->category_id,'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'],'category_id' => $category_id,'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
                     $result_for_edit[] = array(
                         'Номер маршрута' => $route,
                         'Попытки на топ' => $amount_try_top,
@@ -221,7 +233,7 @@ class Generators
                 $participant_semifinal->owner_id = $owner_id;
                 $participant_semifinal->event_id = $event_id;
                 $participant_semifinal->user_id = $user['id'];
-                $participant_semifinal->category_id = $participant->category_id;
+                $participant_semifinal->category_id = $category_id;
                 $participant_semifinal->gender = $user['gender'];
                 $participant_semifinal->result_for_edit_semifinal = $result_for_edit;
                 $participant_semifinal->save();
@@ -234,14 +246,25 @@ class Generators
             ResultRouteFinalStage::where('event_id', $event_id)->delete();
 
             $event = Event::find($event_id);
-            $users = ResultFinalStage::get_final_participant($event, null, true);
+            if($event->is_open_main_rating){
+                $users = ResultFinalStage::get_final_global_participant($event, null, true);
+            } else {
+                $users = ResultFinalStage::get_final_participant($event, null, true);
+            }
+
             $result = array();
 
             foreach ($users as $user) {
                 if($event->is_france_system_qualification){
                     $participant = ResultRouteFranceSystemQualification::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                    $category_id = $participant->category_id;
                 } else {
                     $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
+                    if($event->is_open_main_rating){
+                        $category_id = $participant->global_category_id;
+                    } else {
+                        $category_id = $participant->category_id;
+                    }
                 }
                 $result_for_edit = [];
                 for ($route = 1; $route <= $event->amount_routes_in_final; $route++) {
@@ -262,7 +285,7 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'], 'user_id' => $user['id'],'category_id' => $participant->category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'], 'user_id' => $user['id'],'category_id' => $category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
 
                     $result_for_edit[] = array(
                         'Номер маршрута' => $route,
@@ -278,7 +301,7 @@ class Generators
                 $participant_final->owner_id = $owner_id;
                 $participant_final->event_id = $event_id;
                 $participant_final->user_id = $user['id'];
-                $participant_final->category_id = $participant->category_id;
+                $participant_final->category_id = $category_id;
                 $participant_final->gender = $user['gender'];
                 $participant_final->result_for_edit_final = $result_for_edit;
                 $participant_final->save();

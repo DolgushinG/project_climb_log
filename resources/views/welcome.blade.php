@@ -28,8 +28,14 @@
                                                 @if($event->is_france_system_qualification)
                                                     @include('event.buttons.participant_already')
                                                 @else
-                                                    @include('event.buttons.participant_already')
-                                                    @include('event.buttons.results_have_been_sent_already')
+                                                    @if($event->is_access_user_edit_result)
+                                                        @include('event.buttons.send_result')
+                                                        @include('event.buttons.participant_already')
+                                                        @include('event.buttons.results_have_been_sent_already')
+                                                    @else
+                                                        @include('event.buttons.participant_already')
+                                                        @include('event.buttons.results_have_been_sent_already')
+                                                    @endif
                                                 @endif
                                             @else
                                                 {{--Нужна оплата?--}}
@@ -173,11 +179,13 @@
                                                 <h2>Контакты</h2>
                                                 <p>{{$event->contact}}</p>
                                             </div>
-                                            <div class="section-title">
-                                                <h2>Соц-сеть</h2>
-                                                <p><a href="{{$event->contact_link}}">Ссылка на соц-сеть</a>
-                                                <p/>
-                                            </div>
+                                            @if($event->contact_link)
+                                                <div class="section-title">
+                                                    <h2>Соц-сеть</h2>
+                                                    <p><a href="{{$event->contact_link}}">Ссылка на соц-сеть</a>
+                                                    <p/>
+                                                </div>
+                                            @endif
                                         </div>
                                     </section>
                                 </div>
