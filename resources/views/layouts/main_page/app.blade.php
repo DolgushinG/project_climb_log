@@ -5,8 +5,8 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Climbing Events - Регистрация и подсчет соревнований</title>
-    <meta content="" name="description">
-    <meta content="" name="keywords">
+    <meta content="Регистрация и подсчет соревнований" name="Description">
+    <meta content="Скалолазние,соревнование,управление соревнованиями" name="Keywords">
     <meta name="yandex-verification" content="c806eace423e228c" />
     <script src="{{asset('plugins/jquery/jquery.min.js')}}"></script>
     <!-- Favicons -->
