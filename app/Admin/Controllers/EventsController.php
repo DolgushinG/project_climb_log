@@ -597,6 +597,10 @@ class EventsController extends Controller
             $event_original = Event::find($request->id);
             $event_clone = $event_original->replicate();
             $event_clone->is_public = 0;
+            $event_clone->title = $event_clone->title.'-copy';
+            $event_clone->title_eng = $event_clone->title_eng.'-copy';
+            $event_clone->link = $event_clone->link.'-copy';
+            $event_clone->admin_link = $event_clone->admin_link.'-copy';
             $event_clone->active = 0;
             $event_clone->is_registration_state = 0;
             $event_clone->save();

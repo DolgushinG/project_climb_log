@@ -27,6 +27,7 @@ use App\Models\ParticipantCategory;
 use App\Models\ResultRouteQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFranceSystemQualification;
+use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
@@ -263,11 +264,21 @@ class ResultQualificationController extends Controller
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
-        $grid->tools(function (Grid\Tools $tools) {
+        $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchResultQualification);
-            $tools->append(new BatchMergeResult);
+            if($event->is_registration_state && !$event->is_france_system_qualification){
+                $tools->append(new BatchMergeResult);
+            }
+            $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+            if($event->is_france_system_qualification){
+                $is_enabled = Grades::where('event_id', $event->id)->first();
+            } else {
+                $is_enabled = Route::where('event_id', $event->id)->first();
+            }
+            if($is_enabled){
+                $tools->append(new BatchGenerateParticipant);
+            }
             $tools->append(new BatchForceRecouting);
-            $tools->append(new BatchGenerateParticipant);
         });
         $grid->actions(function ($actions) use ($event) {
 //            $actions->disableEdit();
@@ -294,8 +305,12 @@ class ResultQualificationController extends Controller
 //        }
 
         if (!$event->is_input_set) {
-            $grid->column('number_set_id', 'Номер сета')
-                ->select(Set::getParticipantSets(Admin::user()->id));
+            if($event->is_open_main_rating){
+                $grid->column('number_set_id', 'Номер сета');
+            } else {
+                $grid->column('number_set_id', 'Номер сета')
+                    ->select(Set::getParticipantSets(Admin::user()->id));
+            }
         }
         $grid->column('user_place', 'Место в квалификации')
             ->help('При некорректном раставлением мест, необходимо пересчитать результаты')
@@ -316,6 +331,15 @@ class ResultQualificationController extends Controller
                     return $column->label('warning');
                 } else {
                     return $column->label('success');
+                }
+            });
+        }
+        if ($event->is_open_main_rating) {
+            $grid->column('is_other_event', 'Перенесен из других сорев')->display(function ($state) {
+                if (intval($state) == 1) {
+                    return 'Да';
+                } else {
+                    return 'Нет';
                 }
             });
         }

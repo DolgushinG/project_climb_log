@@ -20,7 +20,7 @@ class CreateResultQualificationClassicTable extends Migration
             $table->string('gender');
             $table->integer('number_set_id')->nullable();
             $table->integer('user_id');
-            $table->integer('is_other_event');
+            $table->integer('is_other_event')->default(0);
             $table->integer('category_id')->nullable();
             $table->integer('global_category_id')->nullable();
             $table->float('points')->nullable();

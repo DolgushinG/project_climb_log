@@ -115,6 +115,7 @@ class EventsController extends Controller
             $participants = User::query()
                 ->leftJoin($table, 'users.id', '=', $table.'.user_id')
                 ->where($table.'.event_id', '=', $event->id)
+                ->where($table.'.is_other_event', '=', 0)
                 ->select(
                     'users.id',
                     'users.middlename',
@@ -132,7 +133,7 @@ class EventsController extends Controller
                     if($event->is_france_system_qualification){
                         $sets[$index]->count_participant = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
                     } else {
-                        $sets[$index]->count_participant = ResultQualificationClassic::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
+                        $sets[$index]->count_participant = ResultQualificationClassic::where('event_id', '=', $event->id)->where('is_other_event', 0)->where('number_set_id', $set)->count();
                     }
                     $sets[$index]->date = Helpers::getDatesByDayOfWeek($event->start_date, $event->end_date);
                     if($sets[$index]->count_participant == 0){
@@ -185,14 +186,14 @@ class EventsController extends Controller
                 $result_female = array();
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
                 foreach ($categories as $category) {
-                    $result_male_cache = Cache::remember('result_male_cache_'.$category->category, 60 * 60, function () use ($event, $category) {
-                        return ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-                    });
-                    $result_female_cache = Cache::remember('result_female_cache_'.$category->category, 60 * 60, function () use ($event, $category) {
-                        return ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
-                    });
-//                    $result_male_cache = ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-//                    $result_female_cache =  ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+//                    $result_male_cache = Cache::remember('result_male_cache_'.$category->category, 60 * 60, function () use ($event, $category) {
+//                        return ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+//                    });
+//                    $result_female_cache = Cache::remember('result_female_cache_'.$category->category, 60 * 60, function () use ($event, $category) {
+//                        return ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+//                    });
+                    $result_male_cache = ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                    $result_female_cache =  ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     $result_male[] = $result_male_cache;
                     $result_female[] = $result_female_cache;
 //                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();

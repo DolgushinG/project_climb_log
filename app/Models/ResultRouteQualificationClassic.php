@@ -176,6 +176,37 @@ class ResultRouteQualificationClassic extends Model
         return $merged_users;
     }
 
+    public static function get_global_participant_qualification_group($event, $amount, $gender=null)
+    {
+        $all_group_participants = array();
+        foreach ($event->categories as $category){
+            $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
+            $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount, $category_id);
+            $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount, $category_id);
+        }
+
+        $merged_users = collect();
+        foreach ($all_group_participants as $participant) {
+            foreach ($participant as $a){
+                $merged_users[] = $a;
+            }
+        }
+        return $merged_users;
+    }
+    public static function get_global_participant_qualification_only_one_group($event, $amount, $group)
+    {
+        $all_group_participants = array();
+        $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount, $group->id);
+        $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount, $group->id);
+        $merged_users = collect();
+        foreach ($all_group_participants as $participant) {
+            foreach ($participant as $a){
+                $merged_users[] = $a;
+            }
+        }
+        return $merged_users;
+    }
+
     public static function get_participant_qualification_only_one_group($event, $amount, $group)
     {
         $all_group_participants = array();
@@ -203,6 +234,12 @@ class ResultRouteQualificationClassic extends Model
             $users_female = ResultQualificationClassic::better_participants($event->id, 'female', $amount);
             $users_male = ResultQualificationClassic::better_participants($event->id, 'male', $amount);
         }
+        return $users_male->merge($users_female);
+    }
+    public static function get_global_participant_qualification_gender($event, $amount)
+    {
+        $users_female = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount);
+        $users_male = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount);
         return $users_male->merge($users_female);
     }
 }

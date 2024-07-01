@@ -222,6 +222,19 @@ class ResultQualificationClassic extends Model
         $after_slice_participant_final_sort_id = array_slice($participant_sort_id->toArray(), 0, $amount_better);
         return User::whereIn('id', $after_slice_participant_final_sort_id)->get();
     }
+    public static function better_global_participants($event_id, $gender, $amount_better, $category_id = null){
+        if($category_id){
+            $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where('global_category_id', '=', $category_id)->pluck('user_id')->toArray();
+        } else {
+            $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->pluck('user_id')->toArray();
+        }
+        $users_id = User::whereIn('id', $participant_users_id)->pluck('id');
+
+
+        $participant_sort_id = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->sortByDesc('global_points')->pluck('user_id');
+        $after_slice_participant_final_sort_id = array_slice($participant_sort_id->toArray(), 0, $amount_better);
+        return User::whereIn('id', $after_slice_participant_final_sort_id)->get();
+    }
 
     public function user()
     {
@@ -258,38 +271,40 @@ class ResultQualificationClassic extends Model
     {
         $event = Event::find($event_id);
         if($event->is_open_main_rating){
-            $place = 'user_global_place';
-            $points = 'global_points';
+            $column_place = 'user_global_place';
+            $column_points = 'global_points';
+            $column_category_id = 'global_category_id';
             $global = true;
         } else {
-            $place = 'user_place';
-            $points = 'points';
+            $column_place = 'user_place';
+            $column_points = 'points';
+            $column_category_id = 'category_id';
             $global = false;
         }
         $users = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
             ->where('result_qualification_classic.event_id', '=', $event_id)
             ->where('result_qualification_classic.active', '=', 1)
-            ->where('result_qualification_classic.category_id', '=', $category_id)
+            ->where('result_qualification_classic.'.$column_category_id, '=', $category_id)
             ->select(
                 'users.id',
                 'users.city',
-                'result_qualification_classic.'.$place,
+                'result_qualification_classic.'.$column_place,
                 'users.middlename',
-                'result_qualification_classic.'.$points,
+                'result_qualification_classic.'.$column_points,
                 'result_qualification_classic.owner_id',
                 'result_qualification_classic.gender',
-                'result_qualification_classic.category_id',
+                'result_qualification_classic.'.$column_category_id,
                 'result_qualification_classic.number_set_id',
             )
-            ->where('result_qualification_classic.gender', '=', $gender)->get()->sortBy($place)->toArray();
+            ->where('result_qualification_classic.gender', '=', $gender)->get()->sortBy($column_place)->toArray();
         $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->where('active', 1)->pluck('user_id')->toArray();
         foreach ($users as $index => $user){
             $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter,  $user['id'], $gender, $category_id, true, $global);
             $set = Set::find($user['number_set_id']);
             $users[$index][$place] = $place;
             if($event->is_input_set != 1){
-                $users[$index]['number_set_id'] = $set->number_set;
+                $users[$index]['number_set_id'] = $set->number_set ?? '';
             }
 
         }

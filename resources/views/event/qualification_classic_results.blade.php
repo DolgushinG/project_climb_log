@@ -41,19 +41,26 @@
                                                 <tbody>
                                                 @foreach($result as $res)
                                                     @if($res['gender'] == "male")
-                                                        @if($res['category_id'] == $category['id'])
-                                                            <tr>
-                                                                <td>{{$res['middlename']}}</td>
-                                                                @if($event->is_open_main_rating)
-                                                                    <td>{{$res["user_global_place"]}}</td>
-                                                                    {{--                                                                <td>{{$res['city']}}</td>--}}
-                                                                    <td>{{$res['global_points']}}</td>
-                                                                @else
+                                                        @if($event->is_open_main_rating)
+                                                            @if($res['global_category_id'] == $category['id'])
+                                                                <tr>
+                                                                    <td>{{$res['middlename']}}</td>
+
+                                                                        <td>{{$res["user_global_place"]}}</td>
+                                                                        {{--                                                                <td>{{$res['city']}}</td>--}}
+                                                                        <td>{{$res['global_points']}}</td>
+                                                                </tr>
+                                                            @endif
+                                                        @else
+                                                            @if($res['category_id'] == $category['id'])
+                                                                <tr>
+                                                                    <td>{{$res['middlename']}}</td>
+
                                                                     <td>{{$res["user_place"]}}</td>
                                                                     {{--                                                                <td>{{$res['city']}}</td>--}}
                                                                     <td>{{$res['points']}}</td>
-                                                                @endif
-                                                            </tr>
+                                                                </tr>
+                                                            @endif
                                                         @endif
                                                     @endif
                                                 @endforeach
@@ -107,21 +114,26 @@
                                             <tbody>
                                             @foreach($result as $res)
                                                 @if($res['gender'] == "female")
-                                                    @if($res['category_id'] == $category['id'])
-                                                        <tr>
-                                                            <td>{{$res['middlename']}}</td>
+                                                    @if($event->is_open_main_rating)
+                                                        @if($res['global_category_id'] == $category['id'])
+                                                            <tr>
+                                                                <td>{{$res['middlename']}}</td>
 
-                                                            @if($event->is_open_main_rating)
                                                                 <td>{{$res["user_global_place"]}}</td>
                                                                 {{--                                                                <td>{{$res['city']}}</td>--}}
                                                                 <td>{{$res['global_points']}}</td>
-                                                            @else
+                                                            </tr>
+                                                        @endif
+                                                    @else
+                                                        @if($res['category_id'] == $category['id'])
+                                                            <tr>
+                                                                <td>{{$res['middlename']}}</td>
+
                                                                 <td>{{$res["user_place"]}}</td>
                                                                 {{--                                                                <td>{{$res['city']}}</td>--}}
                                                                 <td>{{$res['points']}}</td>
-                                                            @endif
-
-                                                        </tr>
+                                                            </tr>
+                                                        @endif
                                                     @endif
                                                 @endif
                                             @endforeach

@@ -44,8 +44,12 @@ class BatchResultSemiFinal extends Action
             if(!$participant){
                 Log::error('Category id not found -event_id - '.$results['event_id'].'user_id'.$results['user_id']);
             }
-            $category_id = $participant->category_id;
             $gender = $participant->gender;
+            if($event->is_open_main_rating){
+                $category_id = $participant->global_category_id;
+            } else {
+                $category_id = $participant->category_id;
+            }
             $data[] = array('owner_id' => \Encore\Admin\Facades\Admin::user()->id,
                 'user_id' => intval($results['user_id']),
                 'event_id' => intval($results['event_id']),
@@ -56,7 +60,8 @@ class BatchResultSemiFinal extends Action
                 'amount_try_top' => intval($results['amount_try_top_'.$i]),
                 'amount_zone' => $amount_zone,
                 'amount_try_zone' => intval($results['amount_try_zone_'.$i]),
-                );
+            );
+
             $result_for_edit[] = array(
                 'Номер маршрута' => intval($results['final_route_id_'.$i]),
                 'Попытки на топ' => intval($results['amount_try_top_'.$i]),
@@ -94,7 +99,11 @@ class BatchResultSemiFinal extends Action
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
         $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
-        $merged_users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant);
+        if($event->is_open_main_rating){
+            $merged_users = ResultSemiFinalStage::get_global_participant_semifinal($event, $amount_the_best_participant);
+        } else {
+            $merged_users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant);
+        }
         $result = $merged_users->pluck( 'middlename','id');
         $result_semifinal = ResultRouteSemiFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){

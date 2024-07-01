@@ -38,10 +38,33 @@ class ResultFinalStage extends Model
                     $merged_users = ResultRouteQualificationClassic::get_participant_qualification_only_one_group($event, $amount_the_best_participant_to_go_final, $one_group);
                 } else {
                     $merged_users = ResultRouteQualificationClassic::get_participant_qualification_group($event, $amount_the_best_participant_to_go_final);
-
                 }
             } else {
                 $merged_users = ResultRouteQualificationClassic::get_participant_qualification_gender($event, $amount_the_best_participant_to_go_final);
+            }
+        }
+
+        if($get_array){
+            return $merged_users->toArray();
+        } else {
+            return $merged_users;
+        }
+
+    }
+    public static function get_final_global_participant($event, $one_group=null, $get_array=false)
+    {
+        $amount_the_best_participant_to_go_final = $event->amount_the_best_participant_to_go_final ?? 10;
+        if($event->is_semifinal){
+            $merged_users = self::get_participant_semifinal($event, $amount_the_best_participant_to_go_final, $one_group);
+        } else {
+            if($event->is_sort_group_final){
+                if($one_group){
+                    $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_only_one_group($event, $amount_the_best_participant_to_go_final, $one_group);
+                } else {
+                    $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_group($event, $amount_the_best_participant_to_go_final);
+                }
+            } else {
+                $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_gender($event, $amount_the_best_participant_to_go_final);
             }
         }
 
@@ -64,6 +87,5 @@ class ResultFinalStage extends Model
         }
         return $users_male->merge($users_female);
     }
-
 
 }
