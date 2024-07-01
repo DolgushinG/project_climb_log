@@ -332,7 +332,7 @@ class ResultQualificationClassic extends Model
                 }
             });
         }
-
+//        dd($users_need_sorted);
         return collect($users_need_sorted);
     }
 

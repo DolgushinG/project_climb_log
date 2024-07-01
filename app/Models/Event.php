@@ -695,6 +695,8 @@ class Event extends Model
                         $active_event_result->user_id = $user_id;
                         $active_event_result->gender = $gender;
                         $active_event_result->global_points = $global_points;
+                        $active_event_result->category_id = 0;
+                        $active_event_result->number_set_id = 0;
                         $active_event_result->active = 1;
                         $active_event_result->is_other_event = 1;
                         $active_event_result->save();

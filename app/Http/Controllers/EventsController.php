@@ -200,8 +200,16 @@ class EventsController extends Controller
 //                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
                     $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
-                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
-                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                    if($event->is_open_main_rating){
+                        $columns = ['column_place' => 'user_global_place', 'column_points' => 'global_points', 'column_category_id' => 'global_category_id'];
+                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
+                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
+                    } else {
+                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                        $columns = ['column_place' => 'user_place', 'column_points' => 'points', 'column_category_id' => 'category_id'];
+                    }
+
                 }
                 $result_male_final = Helpers::arrayValuesRecursive($result_male);
                 $result_female_final = Helpers::arrayValuesRecursive($result_female);
@@ -210,11 +218,13 @@ class EventsController extends Controller
                 $stats->male_categories = $male_categories;
                 $categories = $categories->toArray();
 //                dd($result);
+
+
             }
         } else {
             return view('404');
         }
-        return view('event.qualification_classic_results', compact(['event', 'result',  'categories', 'stats']));
+        return view('event.qualification_classic_results', compact(['event', 'result',  'categories', 'stats', 'columns']));
     }
 
 
