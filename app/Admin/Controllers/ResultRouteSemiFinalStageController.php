@@ -156,7 +156,9 @@ class ResultRouteSemiFinalStageController extends Controller
             }
             $tools->append(new BatchForceRecoutingSemiFinalResultGroup);
             $tools->append(new BatchForceRecoutingSemiFinalResultGender);
-            $tools->append(new BatchGenerateResultSemiFinalParticipant);
+            if(Admin::user()->username == "Tester2"){
+                $tools->append(new BatchGenerateResultSemiFinalParticipant);
+            }
             $tools->append(new BatchExportProtocolRouteParticipantSemiFinal);
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {

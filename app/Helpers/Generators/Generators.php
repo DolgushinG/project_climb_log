@@ -194,7 +194,7 @@ class Generators
 
                 } else {
                     $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
-                    if($event->is_open_main_rating){
+                    if($event->is_open_main_rating && $event->is_auto_categories){
                         $category_id = $participant->global_category_id;
                     } else {
                         $category_id = $participant->category_id;
@@ -260,7 +260,7 @@ class Generators
                     $category_id = $participant->category_id;
                 } else {
                     $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->first();
-                    if($event->is_open_main_rating){
+                    if($event->is_open_main_rating && $event->is_auto_categories){
                         $category_id = $participant->global_category_id;
                     } else {
                         $category_id = $participant->category_id;

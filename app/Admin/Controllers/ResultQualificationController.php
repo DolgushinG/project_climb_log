@@ -275,7 +275,7 @@ class ResultQualificationController extends Controller
             } else {
                 $is_enabled = Route::where('event_id', $event->id)->first();
             }
-            if($is_enabled){
+            if($is_enabled && Admin::user()->username == "Tester2"){
                 $tools->append(new BatchGenerateParticipant);
             }
             $tools->append(new BatchForceRecouting);

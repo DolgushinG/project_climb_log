@@ -161,7 +161,13 @@ class ResultQualificationClassic extends Model
 
         if($global){
             $column_points = 'global_points';
-            $column_category_id = 'global_category_id';
+            $event = Event::find($event_id);
+            if($event->is_auto_categoies){
+                $column_category_id = 'global_category_id';
+            } else {
+                $column_category_id = 'category_id';
+            }
+
         } else {
             $column_points = 'points';
             $column_category_id = 'category_id';
@@ -223,13 +229,18 @@ class ResultQualificationClassic extends Model
         return User::whereIn('id', $after_slice_participant_final_sort_id)->get();
     }
     public static function better_global_participants($event_id, $gender, $amount_better, $category_id = null){
+        $event = Event::find($event_id);
+        if($event->is_auto_categories){
+            $column_category_id = 'global_category_id';
+        } else {
+            $column_category_id = 'category_id';
+        }
         if($category_id){
-            $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where('global_category_id', '=', $category_id)->pluck('user_id')->toArray();
+            $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where($column_category_id, '=', $category_id)->pluck('user_id')->toArray();
         } else {
             $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->pluck('user_id')->toArray();
         }
         $users_id = User::whereIn('id', $participant_users_id)->pluck('id');
-
 
         $participant_sort_id = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->sortByDesc('global_points')->pluck('user_id');
         $after_slice_participant_final_sort_id = array_slice($participant_sort_id->toArray(), 0, $amount_better);
@@ -273,7 +284,12 @@ class ResultQualificationClassic extends Model
         if($event->is_open_main_rating){
             $column_place = 'user_global_place';
             $column_points = 'global_points';
-            $column_category_id = 'global_category_id';
+            if($event->is_auto_categories){
+                $column_category_id = 'global_category_id';
+            } else {
+                $column_category_id = 'category_id';
+            }
+
             $global = true;
         } else {
             $column_place = 'user_place';

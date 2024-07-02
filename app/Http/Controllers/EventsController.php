@@ -217,9 +217,15 @@ class EventsController extends Controller
                     $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
                     $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
                     if($event->is_open_main_rating){
-                        $columns = ['column_place' => 'user_global_place', 'column_points' => 'global_points', 'column_category_id' => 'global_category_id'];
-                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
-                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
+                        if($event->is_auto_categories){
+                            $columns = ['column_place' => 'user_global_place', 'column_points' => 'global_points', 'column_category_id' => 'global_category_id'];
+                            $column_category_id = 'global_category_id';
+                        } else {
+                            $columns = ['column_place' => 'user_global_place', 'column_points' => 'global_points', 'column_category_id' => 'category_id'];
+                            $column_category_id = 'category_id';
+                        }
+                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where($column_category_id, '=', $category->id)->get()->count();
+                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where($column_category_id, '=', $category->id)->get()->count();
                     } else {
                         $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
                         $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();

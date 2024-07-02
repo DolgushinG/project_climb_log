@@ -32,12 +32,12 @@ class BatchResultFinalCustomFillOneRoute extends Action
         $event = Event::find($results['event_id']);
         $data = array();
         $result_for_edit = array();
-        if($results['amount_try_top'] > 0 || $results['amount_try_top'] != null){
+        if(intval($results['amount_try_top']) > 0){
             $amount_top  = 1;
         } else {
             $amount_top  = 0;
         }
-        if($results['amount_try_zone'] > 0 || $results['amount_try_zone'] != null){
+        if(intval($results['amount_try_zone']) > 0){
             $amount_zone  = 1;
         } else {
             $amount_zone  = 0;
@@ -47,7 +47,7 @@ class BatchResultFinalCustomFillOneRoute extends Action
         } else {
             $participant = ResultQualificationClassic::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
         }
-        if($event->is_open_main_rating){
+        if($event->is_open_main_rating && $event->is_auto_categories){
             $category_id = $participant->global_category_id;
         } else {
             $category_id = $participant->category_id;
@@ -102,7 +102,7 @@ class BatchResultFinalCustomFillOneRoute extends Action
             if($event->is_france_system_qualification) {
                 $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
             } else {
-                if($event->is_open_main_rating){
+                if($event->is_open_main_rating && $event->is_auto_categories){
                     $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->global_category_id;
                 } else {
                     $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
