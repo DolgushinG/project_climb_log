@@ -77,6 +77,7 @@
                                 <div class="accordion-body">
                                     @if($event->amount_start_price)
                                         <div class="container text-center pt-2 pb-2">
+                                            <label style="font-size: 15px"> Оплата доступна только после регистрации</label> <br>
                                             <label> Стартовый взнос: </label>
                                             <span class="badge bg-success" style="font-size: 22px"> {{$event->amount_start_price}} руб </span><br>
                                         </div>
