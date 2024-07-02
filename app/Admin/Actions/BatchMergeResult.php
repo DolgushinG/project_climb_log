@@ -30,17 +30,21 @@ class BatchMergeResult extends Action
 
         $categories = ParticipantCategory::where('event_id', $active_event->id)->get();
         foreach ($categories as $category) {
-            Cache::forget('result_male_cache_' . $category->category);
-            Cache::forget('result_female_cache_' . $category->category);
+            Cache::forget('result_male_cache_' . $category->category.'_event_id_'.$active_event->id);
+            Cache::forget('result_female_cache_' . $category->category.'_event_id_'.$active_event->id);
         }
-
         if($request && $active_event){
             $event_ids = array_filter($request->event_id);
             $event_ids[] = $active_event->id;
             $users_ids = ResultQualificationClassic::whereIn('event_id', $event_ids)->distinct()->pluck('user_id')->toArray();
+
             Event::merge_point($users_ids, $event_ids, $active_event);
-            Event::merge_auto_categories($active_event, $users_ids, $event_ids);
-            Event::counting_global_place($active_event);
+            if($active_event->is_auto_categories){
+                Event::merge_auto_categories($active_event, $users_ids, $event_ids);
+                Event::counting_global_category_place($active_event);
+            } else {
+                Event::counting_global_points_place($active_event);
+            }
 //            MergeResultsParticipants::dispatch($active_event->id, $users_ids, $event_ids, 'merge_point');
 //            MergeResultsParticipants::dispatch($active_event->id, $users_ids, $event_ids, 'merge_auto_categories');
 //            MergeResultsParticipants::dispatch($active_event->id, $users_ids, $event_ids, 'counting_global_place');

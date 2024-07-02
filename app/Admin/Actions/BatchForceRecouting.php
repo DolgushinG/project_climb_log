@@ -19,8 +19,8 @@ class BatchForceRecouting extends Action
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         $categories = ParticipantCategory::where('event_id', $event->id)->get();
         foreach ($categories as $category) {
-            Cache::forget('result_male_cache_' . $category->category);
-            Cache::forget('result_female_cache_' . $category->category);
+            Cache::forget('result_male_cache_' . $category->category.'_event_id_'.$event->id);
+            Cache::forget('result_female_cache_' . $category->category.'_event_id_'.$event->id);
         }
         Event::refresh_final_points_all_participant($event);
         return $this->response()->success('Пересчитано')->refresh();

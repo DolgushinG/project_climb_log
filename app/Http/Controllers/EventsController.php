@@ -199,10 +199,10 @@ class EventsController extends Controller
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
                 foreach ($categories as $category) {
                     if($stats->male + $stats->female > 100){
-                        $result_male_cache = Cache::remember('result_male_cache_'.$category->category, 60 * 60, function () use ($event, $category) {
+                        $result_male_cache = Cache::remember('result_male_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
                             return ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
                         });
-                        $result_female_cache = Cache::remember('result_female_cache_'.$category->category, 60 * 60, function () use ($event, $category) {
+                        $result_female_cache = Cache::remember('result_female_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
                             return ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                         });
                     } else {
@@ -528,8 +528,6 @@ class EventsController extends Controller
             $result = ResultRouteQualificationClassic::insert($final_data);
         }
 
-
-
         $participants = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
             ->where('result_qualification_classic.event_id', '=', $request->event_id)
@@ -543,8 +541,8 @@ class EventsController extends Controller
         Event::refresh_final_points_all_participant($event);
         $categories = ParticipantCategory::where('event_id', $request->event_id)->get();
         foreach ($categories as $category) {
-            Cache::forget('result_male_cache_'.$category->category);
-            Cache::forget('result_female_cache_'.$category->category);
+            Cache::forget('result_male_cache_'.$category->category.'_event_id_'.$request->event_id);
+            Cache::forget('result_female_cache_'.$category->category.'_event_id_'.$request->event_id);
         }
         if ($result) {
             $event = Event::find($request->event_id);

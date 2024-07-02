@@ -368,6 +368,7 @@ class ResultQualificationClassic extends Model
     {
         $participant_categories = ParticipantCategory::where('event_id', $event->id)->get()->pluck('category')->toArray();
         $new_convert_options = self::convert_categories($event->options_categories, $participant_categories);
+
         $next = [];
         foreach ($new_convert_options as $opt){
             $next[] = self::values_in_range(Grades::grades(), $opt['from'], $opt['to']);
