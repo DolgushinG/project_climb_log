@@ -26,7 +26,15 @@ class Helpers
         }
         return intval($percent);
     }
+    public static function validate_amount_top_and_zone($amount_top, $amount_zone)
+    {
+        return $amount_top == 1 && $amount_zone == 0;
+    }
+    public static function validate_amount_try_top_and_zone($amount_try_top, $amount_try_zone)
+    {
 
+        return intval($amount_try_zone) > intval($amount_try_top);
+    }
     public static function save_qr_code($event)
     {
         $link = $event->link.'/routes';
