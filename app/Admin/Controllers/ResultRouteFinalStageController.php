@@ -121,7 +121,9 @@ class ResultRouteFinalStageController extends Controller
             }
             $tools->append(new BatchForceRecoutingResultFinalGender);
             $tools->append(new BatchForceRecoutingResultFinalGroup);
-            $tools->append(new BatchGenerateResultFinalParticipant);
+            if(Admin::user()->username == "Tester2"){
+                $tools->append(new BatchGenerateResultFinalParticipant);
+            }
             $tools->append(new BatchExportProtocolRouteParticipantFinal);
         });
         $grid->selector(function (Grid\Tools\Selector $selector) {

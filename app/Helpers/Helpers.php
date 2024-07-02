@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Event;
 use DateInterval;
 use DatePeriod;
 use DateTime;

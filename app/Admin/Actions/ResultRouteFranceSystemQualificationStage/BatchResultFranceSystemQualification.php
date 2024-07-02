@@ -34,12 +34,12 @@ class BatchResultFranceSystemQualification extends Action
         $data = array();
         $result_for_edit = [];
         for($i = 1; $i <= $grades->count_routes; $i++){
-            if($results['amount_try_top_'.$i] > 0 || $results['amount_try_top_'.$i] != null){
+            if(intval($results['amount_try_top_'.$i]) > 0){
                 $amount_top  = 1;
             } else {
                 $amount_top  = 0;
             }
-            if($results['amount_try_zone_'.$i] > 0 || $results['amount_try_zone_'.$i] != null){
+            if(intval($results['amount_try_zone_'.$i]) > 0){
                 $amount_zone  = 1;
             } else {
                 $amount_zone  = 0;

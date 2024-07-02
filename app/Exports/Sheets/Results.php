@@ -368,10 +368,16 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
 
     }
     public function get_merge_qualification(){
+        $event = Event::find($this->event_id);
+        if($event->is_auto_categories){
+            $column_category_id = 'global_category_id';
+        } else {
+            $column_category_id = 'category_id';
+        }
         $users = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
             ->where('result_qualification_classic.event_id', '=', $this->event_id)
-            ->where('result_qualification_classic.global_category_id', '=', $this->category->id)
+            ->where('result_qualification_classic.'.$column_category_id, '=', $this->category->id)
             ->select(
                 'users.id',
                 'result_qualification_classic.user_global_place',

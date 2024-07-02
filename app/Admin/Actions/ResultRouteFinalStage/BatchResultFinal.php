@@ -31,7 +31,7 @@ class BatchResultFinal extends Action
         if(!$participant){
           Log::error('Category id not found -event_id - '.$results['event_id'].'user_id'.$results['user_id']);
         }
-        if($event->is_open_main_rating){
+        if($event->is_open_main_rating && $event->is_auto_categories){
             $category_id = $participant->global_category_id;
         } else {
             $category_id = $participant->category_id;
