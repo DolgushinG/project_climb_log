@@ -604,6 +604,14 @@ class EventsController extends Controller
             $event_clone->active = 0;
             $event_clone->is_registration_state = 0;
             $event_clone->save();
+
+            foreach ($event_clone->categories as $category) {
+                $participant_categories = new ParticipantCategory;
+                $participant_categories->owner_id = Admin::user()->id;
+                $participant_categories->event_id = $event_clone->id;
+                $participant_categories->category = $category;
+                $participant_categories->save();
+            }
         }
     }
 

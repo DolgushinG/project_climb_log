@@ -249,10 +249,10 @@ class ResultQualificationController extends Controller
             $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
             $p_categories = ResultQualificationClassic::where('event_id', $event->id)->whereIn('category_id', $category)->get();
             if ($p_categories->isNotEmpty()) {
-                if($event->is_open_main_rating){
+                if($event->is_open_main_rating && $event->is_auto_categories){
                     $selector->select('global_category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
                 } else {
-                    $selector->select('category_id', 'Общая Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
+                    $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
                 }
             }
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
@@ -314,9 +314,11 @@ class ResultQualificationController extends Controller
             $grid->column('global_points', 'Общие Баллы');
             $grid->column('user_global_place', 'Общее Место')->sortable();
             $categories = (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id);
-            $grid->column('global_category_id', 'Общая Категория')->display(function ($category) use ($categories) {
-                return $categories[$category] ?? 'не определена';
-            });
+            if($event->is_auto_categories){
+                $grid->column('global_category_id', 'Общая Категория')->display(function ($category) use ($categories) {
+                    return $categories[$category] ?? 'не определена';
+                });
+            }
         }
 
         if ($event->is_auto_categories) {

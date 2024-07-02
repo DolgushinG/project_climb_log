@@ -67,8 +67,8 @@ class BatchGenerateParticipant extends Action
 
         $categories = ParticipantCategory::where('event_id', $event->id)->get();
         foreach ($categories as $category) {
-            Cache::forget('result_male_cache_' . $category->category);
-            Cache::forget('result_female_cache_' . $category->category);
+            Cache::forget('result_male_cache_' . $category->category.'_event_id_'.$event->id);
+            Cache::forget('result_female_cache_' . $category->category.'_event_id_'.$event->id);
         }
         return $this->response()->success($text)->refresh();
     }
