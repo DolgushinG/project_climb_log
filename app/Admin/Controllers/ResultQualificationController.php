@@ -6,6 +6,8 @@ use App\Admin\Actions\BatchForceRecouting;
 use App\Admin\Actions\BatchGenerateParticipant;
 use App\Admin\Actions\BatchMergeResult;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
+use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustom;
+use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustomFillOneRoute;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportProtocolRouteParticipantsQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportResultFranceSystemQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultFranceSystemQualification;
@@ -417,7 +419,10 @@ class ResultQualificationController extends Controller
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchExportResultFranceSystemQualification);
-            $tools->append(new BatchResultFranceSystemQualification);
+            $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
+            foreach ($categories as $category){
+                $tools->append(new BatchResultFranceSystemQualification($category));
+            }
             $tools->append(new BatchGenerateParticipant);
             $tools->append(new BatchExportProtocolRouteParticipantsQualification);
         });
