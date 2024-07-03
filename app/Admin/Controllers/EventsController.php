@@ -371,8 +371,8 @@ class EventsController extends Controller
                         ->options($formats)->when(1, function (Form $form) {
                             $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->attribute('inputmode', 'none')->value(10);
                         })->when(2, function (Form $form) {
-                            $form->text('amount_point_flash','Балл за флэш')->value(1);
-                            $form->text('amount_point_redpoint','Балл за редпоинт')->value(0.9);
+                            $form->currency('amount_point_flash','Балл за флэш')->default(1)->symbol('');
+                            $form->currency('amount_point_redpoint','Балл за редпоинт')->default(0.9)->symbol('');
                         });
                     $form->radio('is_semifinal','Настройка кол-ва стадий соревнований')
                         ->options([
