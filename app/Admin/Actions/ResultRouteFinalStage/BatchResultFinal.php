@@ -2,7 +2,6 @@
 
 namespace App\Admin\Actions\ResultRouteFinalStage;
 
-use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
 use App\Models\ResultFinalStage;
@@ -51,17 +50,6 @@ class BatchResultFinal extends Action
             } else {
                 $amount_zone  = 0;
             }
-
-            # Если есть ТОП то зона не может быть 0
-            if(Helpers::validate_amount_top_and_zone($amount_top, $amount_zone)){
-                return $this->response()->error('У трассы '.$i.' отмечен ТОП, и получается зона не может быть 0');
-            }
-
-            # Кол-во попыток на зону не может быть меньше чем кол-во на ТОП
-            if(Helpers::validate_amount_try_top_and_zone($results['amount_try_top_'.$i], $results['amount_try_zone_'.$i])){
-                return $this->response()->error('Кол-во попыток на зону не может быть меньше, чем кол-во попыток на ТОП, трасса '.$i );
-            }
-
             $data[] = array('owner_id' => \Encore\Admin\Facades\Admin::user()->id,
                 'user_id' => intval($results['user_id']),
                 'category_id' => $category_id,

@@ -2,7 +2,6 @@
 
 namespace App\Admin\Actions\ResultRouteFinalStage;
 
-use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
@@ -43,17 +42,6 @@ class BatchResultFinalCustomFillOneRoute extends Action
         } else {
             $amount_zone  = 0;
         }
-
-        # Если есть ТОП то зона не может быть 0
-        if(Helpers::validate_amount_top_and_zone($amount_top, $amount_zone)){
-            return $this->response()->error('У трассы '.$results['final_route_id'].' отмечен ТОП, и получается зона не может быть 0');
-        }
-
-        # Кол-во попыток на зону не может быть меньше чем кол-во на ТОП
-        if(Helpers::validate_amount_try_top_and_zone($results['amount_try_top'], $results['amount_try_zone'])){
-            return $this->response()->error('Кол-во попыток на зону не может быть меньше, чем кол-во попыток на ТОП, трасса '.$results['final_route_id'] );
-        }
-
         if($event->is_france_system_qualification){
             $participant = ResultFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
         } else {
