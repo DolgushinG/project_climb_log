@@ -14,9 +14,9 @@ name: Python application
 
 on:
   pull_request:
-    branches: [ "cl*" ]
+    branches: [ "CE*" ]
   push:
-    branches: [ "cl*" ]
+    branches: [ "CE*" ]
 
 jobs:
   build:
