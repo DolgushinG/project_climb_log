@@ -458,7 +458,7 @@ class ResultQualificationClassic extends Model
 
     public static function send_main_about_take_part($event, $user, $participant)
     {
-        if (!str_contains($user->email, 'telegram')) {
+        if (Helpers::valid_email($user->email)) {
             $details = array();
             if($event->is_input_set != 1){
                 $set = Set::find($participant->number_set_id);
@@ -489,7 +489,7 @@ class ResultQualificationClassic extends Model
 
     public static function send_main_about_list_pending($event, $user, $job)
     {
-        if (!str_contains($user->email, 'telegram')) {
+        if (Helpers::valid_email($user->email)) {
             $details = array();
             $details['title'] = $event->title;
             $details['number_sets'] = $job->number_sets;
@@ -502,7 +502,7 @@ class ResultQualificationClassic extends Model
 
     public static function send_confirm_bill($event, $user)
     {
-        if (!str_contains($user->email, 'telegram')) {
+        if (Helpers::valid_email($user->email)) {
             $details = array();
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
@@ -515,7 +515,7 @@ class ResultQualificationClassic extends Model
 
     public static function send_message_from_climbing_gym($subject, $message, $user, $climbing_gym_name)
     {
-        if (!str_contains($user['email'], 'telegram')) {
+        if (Helpers::valid_email($user['email'])) {
             $details = array();
             $details['subject'] = $subject;
             $details['message'] = $message;

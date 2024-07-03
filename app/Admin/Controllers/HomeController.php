@@ -166,7 +166,7 @@ class HomeController extends Controller
         $admin_info = \Encore\Admin\Facades\Admin::user();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', '=', 1)->first();
         if($event){
-            $admin_info['current_event'] = '/event/'.$event->climbing_gym_name_eng.'/'.$event->title_eng;
+            $admin_info['current_event'] = $event->link;
         }
         return view('admin::dashboard.title', compact('admin_info'));
     }

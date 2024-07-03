@@ -9,6 +9,7 @@ use App\Admin\CustomAction\ActionExportCardParticipantFranceSystem;
 use App\Admin\CustomAction\ActionExportCardParticipantFestival;
 use App\Admin\CustomAction\ActionExportList;
 use App\Exports\AllResultExport;
+use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
 use App\Models\Format;
@@ -289,10 +290,10 @@ class EventsController extends Controller
 
             });
             $form->hidden('owner_id')->value(Admin::user()->id);
-            $form->text('title', 'Название соревнования')->placeholder('Введи название')->required();
+            $form->text('title', 'Название соревнования')->placeholder('Допускается ввода букв и цифр из символов можно только ковычки')->required();
 //            $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название');
             $form->hidden('title_eng')->default('1');
-            $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name ?? '')->placeholder('Название скалодрома')->required();
+            $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name ?? '')->placeholder('Допускается ввода букв и цифр из символов можно только ковычки')->required();
             $form->hidden('climbing_gym_name_eng')->default('1');
             $form->text('city', 'Город')->value(Admin::user()->city ?? '')->placeholder('Город')->required();
             $form->text('address', 'Адрес')->value(Admin::user()->address ?? '')->placeholder('Адрес')->required();
@@ -488,7 +489,7 @@ class EventsController extends Controller
             $tools->disableDelete();
             $tools->disableView();
         });
-        $form->saving(function (Form $form) {
+        $form->saving(function (Form $form) use ($type, $id)  {
             if ($form->active === "1" || $form->active === "on") {
                 $events = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
                 if($events && $events->id != $form->model()->id){
@@ -502,8 +503,8 @@ class EventsController extends Controller
             if($form->climbing_gym_name){
                 $climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
                 $title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
-                $form->climbing_gym_name_eng =  $climbing_gym_name_eng;
-                $form->title_eng = $title_eng;
+                $form->climbing_gym_name_eng =  Helpers::formating_string($climbing_gym_name_eng);
+                $form->title_eng =  Helpers::formating_string($title_eng);
                 $form->link = '/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$title_eng;
                 $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$title_eng;
             }

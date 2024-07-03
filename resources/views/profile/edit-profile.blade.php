@@ -72,9 +72,9 @@
                         @endforeach
                     @else
                         @foreach($genders as $gender)
-                                <option value="{{$gender}}">
-                                    @lang('somewords.'.$gender)
-                                </option>
+                            <option value="{{$gender}}">
+                                @lang('somewords.'.$gender)
+                            </option>
                         @endforeach
                     @endif
             </select>
@@ -83,10 +83,10 @@
         <div class="row mb-3">
             <label for="Email" class="col-md-4 col-lg-3 col-form-label">Email</label>
             <div class="col-md-8 col-lg-9">
-                @if(str_contains($user->email, 'telegram'))
-                    <input name="email" type="email" class="form-control" id="email" value="" required>
-                @else
+                @if(\App\Helpers\Helpers::valid_email($user->email))
                     <input name="email" type="email" class="form-control" id="email" value="{{$user->email}}" required>
+                @else
+                    <input name="email" type="email" class="form-control" id="email" value="" required>
                 @endif
                 <div id="result"></div>
             </div>

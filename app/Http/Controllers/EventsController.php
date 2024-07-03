@@ -161,16 +161,25 @@ class EventsController extends Controller
 
             foreach ($participants as $index_user => $user) {
                 if ($index <= count($participants)) {
+                    # Регистрация без сетов + без категории
+                    # Регистрация без сетов + с категории
+                    # Регистрация c сетов + без категории
+                    # Регистрация c сетов + c категории
+
                     if($event->is_input_set == 1){
                         if($participants[$index]['category_id'] == 0){
-                           
                             $participants[$index_user] += ['category' =>  'Нет группы'];
-                        }else{
+                        } else {
                              $participants[$index_user] += ['category' => $categories[$participants[$index]['category_id']]];
-                            }
-                } else {
+                        }
+                    } else {
+                        # Регистрация с сетов + без категории
                         $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
-                        $category = $categories[$participants[$index]['category_id']] ?? 'Нет группы';
+                        if($participants[$index]['category_id'] == 0){
+                            $category = 'Нет группы';
+                        } else {
+                            $category = $categories[$participants[$index]['category_id']] ?? 'Нет группы';
+                        }
                         $participants[$index_user]['category'] = $category;
                         $participants[$index_user]['number_set'] = $set->number_set;
                         $participants[$index_user]['time'] = $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10);
@@ -347,7 +356,7 @@ class EventsController extends Controller
     public function store(StoreRequest $request) {
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
         $user = User::find($request->user_id);
-        if(!$event || !$event->is_registration_state || str_contains($user->email, 'telegram')){
+        if(!$event || !$event->is_registration_state || !Helpers::valid_email($user->email)){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
         $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
@@ -609,8 +618,8 @@ class EventsController extends Controller
     {
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
         $user = User::find($request->user_id);
-        if (!$event || !$event->is_registration_state || str_contains($user->email, 'telegram')) {
-            return response()->json(['success' => false, 'message' => 'ошибка внесения в лист ожидания'], 422);
+        if (!$event || !$event->is_registration_state || !Helpers::valid_email($user->email)) {
+            return response()->json(['success' => false, 'message' => 'Ошибка внесения в лист ожидания'], 422);
         }
         if (!$request->number_sets) {
             return response()->json(['success' => false, 'message' => 'Вы не выбрали сет'], 422);

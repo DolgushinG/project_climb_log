@@ -14,16 +14,26 @@
                             <p>У вас был вход через Telegram, вам необходимо заполнить ваш email для участия в соревнованиях</p>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
-                        <h4></h4>
                     </div>
                 @endif
-                    @if(!$user->contact)
+                @if(str_contains($user->email, 'vkontakte'))
+                    <div class="container d-flex align-items-center" data-aos="zoom-out" data-aos-delay="100">
                         <div class="alert alert-warning  alert-dismissible fade show w-100" role="alert">
-                            <p> Рекомендуется добавить номер телефона, телеграмм или другой способ</p>
-                            <p> Чтобы организаторы в случае каких то вопросов могли быстро уведомить вас индивидуально</p>
+                            <h4 class="alert-heading">Добро пожаловать {{$user->middlename}}! </h4>
+                            <p>У вас был вход через vkontakte, вам необходимо заполнить ваш email для участия в соревнованиях</p>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
-                    @endif
+                    </div>
+                @endif
+                @if(!$user->contact)
+                        <div class="container d-flex align-items-center" data-aos="zoom-out" data-aos-delay="100">
+                            <div class="alert alert-warning  alert-dismissible fade show w-100" role="alert">
+                                <p>Рекомендуется добавить номер телефона, телеграмм или другой способ</p>
+                                <p>Чтобы организаторы в случае каких то вопросов могли быстро уведомить вас индивидуально</p>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </div>
+                @endif
                 <div class="col-lg-4" id="profileCard">
                     @include('profile.card')
                 </div>

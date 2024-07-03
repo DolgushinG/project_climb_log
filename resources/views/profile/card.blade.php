@@ -23,10 +23,10 @@
                     <i class="fa fa-envelope"></i>
                 </div>
                 <div class="list-details" style="overflow: hidden; overflow-wrap: break-word;max-width:250px;">
-                    @if(str_contains($user->email, 'telegram'))
-                        <span></span>
-                    @else
+                    @if(\App\Helpers\Helpers::valid_email($user->email))
                         <span >{{$user->email ?? ''}}</span>
+                    @else
+                        <span></span>
                     @endif
                     <small>Email</small>
                 </div>

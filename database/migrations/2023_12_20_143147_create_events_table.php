@@ -25,13 +25,13 @@ class CreateEventsTable extends Migration
             $table->text('contact_link')->nullable();
             $table->string('image')->nullable();
             $table->string('climbing_gym_name');
-            $table->string('climbing_gym_name_eng');
+            $table->string('climbing_gym_name_eng')->nullable();
             $table->string('city');
             $table->integer('count_routes')->nullable();
             $table->string('title');
-            $table->string('title_eng');
+            $table->string('title_eng')->nullable();
             $table->string('subtitle')->nullable();
-            $table->string('link');
+            $table->string('link')->nullable();
             $table->string('admin_link')->nullable();
             $table->string('link_payment')->nullable();
             $table->string('img_payment')->nullable();
