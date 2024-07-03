@@ -1,11 +1,11 @@
 @extends('layouts.main_page.app')
 @section('content')
     <section class="section contact">
-        <div class="row mt-3">
+        <div class="row m-3">
         </div>
     </section>
     <section class="section contact">
-            <div class="row mt-3">
+            <div class="row m-3">
                 @if(count($participants) != 0 )
                     @if($days)
                         @foreach($days as $day)
@@ -40,7 +40,9 @@
                                                             <thead>
                                                             <tr>
                                                                 <th scope="col">Участник</th>
-                                                                <th scope="col">Группа</th>
+                                                                @if(!$event->is_auto_categories)
+                                                                    <th scope="col">Группа</th>
+                                                                @endif
                                                                 <th scope="col">Город</th>
                                                                 <th scope="col">Команда</th>
                                                             </tr>
@@ -50,7 +52,9 @@
                                                                 @if($participant['number_set'] == $set->number_set)
                                                                     <tr>
                                                                         <td>{{$participant['middlename']}}</td>
-                                                                        <td>{{$participant['category']}}</td>
+                                                                        @if(!$event->is_auto_categories)
+                                                                            <td>{{$participant['category']}}</td>
+                                                                        @endif
                                                                         <td>{{$participant['city']}}</td>
                                                                         <td>{{$participant['team']}}</td>
                                                                     </tr>
@@ -90,7 +94,9 @@
                                                     <thead>
                                                     <tr>
                                                         <th scope="col">Участник</th>
-                                                        <th scope="col">Группа</th>
+                                                        @if(!$event->is_auto_categories)
+                                                            <th scope="col">Группа</th>
+                                                        @endif
                                                         <th scope="col">Город</th>
                                                         <th scope="col">Команда</th>
                                                     </tr>
@@ -101,7 +107,9 @@
 
                                                             <tr>
                                                                 <td>{{$participant['middlename']}}</td>
-                                                                <td>{{$participant['category']}}</td>
+                                                                @if(!$event->is_auto_categories)
+                                                                    <td>{{$participant['category']}}</td>
+                                                                @endif
                                                                 <td>{{$participant['city']}}</td>
                                                                 <td>{{$participant['team']}}</td>
                                                             </tr>

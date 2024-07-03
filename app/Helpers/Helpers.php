@@ -11,6 +11,21 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class Helpers
 {
 
+    public static function valid_email($email)
+    {
+        if(str_contains($email, 'telegram')){
+            return false;
+        }
+        if(str_contains($email, 'vkontakte')){
+            return false;
+        }
+        return true;
+    }
+
+    public static function formating_string($string)
+    {
+        return preg_replace('/[^ \w-]/', '', $string);
+    }
     public static function get_procent($max, $current)
     {
         $a = $max;

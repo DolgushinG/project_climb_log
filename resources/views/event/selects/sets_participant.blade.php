@@ -39,6 +39,6 @@
     <label for="floatingSelectChangeSet">Выбрать время для сета</label>
 </div>
 <button id="btn-participant-change-set" data-id="{{$event->id}}"
-        data-title="{{$event->title_eng}}" data-user-id="{{Auth()->user()->id}}"
+        data-user-id="{{Auth()->user()->id}}"
         class="btn btn-dark rounded-pill">Изменить сет
 </button>

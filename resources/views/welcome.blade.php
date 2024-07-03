@@ -18,7 +18,7 @@
                                     @endif
                                 @endguest
                                 @auth
-                                    @if(!str_contains(\Illuminate\Support\Facades\Auth::user()->email, 'telegram'))
+                                    @if(\App\Helpers\Helpers::valid_email(\Illuminate\Support\Facades\Auth::user()->email))
                                         @if(\App\Models\User::user_participant($event->id))
                                             {{--                                            Открыто/Закрыто изменение участия в сетах--}}
                                             @if(!$event->is_input_set && $event->is_registration_state && !\App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))

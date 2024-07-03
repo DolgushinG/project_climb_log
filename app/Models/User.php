@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\Helpers;
 use App\Notifications\CustomResetPasswordNotification;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -140,7 +141,7 @@ class User extends Authenticatable
 
     public static function send_new_device($user, $ip, $device)
     {
-        if (!str_contains($user->email, 'telegram')) {
+        if (Helpers::valid_email($user->email)) {
             $details = array();
             $details['middlename'] = $user->middlename;
             $details['device'] = $device;
@@ -151,7 +152,7 @@ class User extends Authenticatable
     }
     public static function send_auth_socialize($user, $socialize)
     {
-        if (!str_contains($user->email, 'telegram')) {
+        if (Helpers::valid_email($user->email)) {
             $details = array();
             $details['middlename'] = $user->middlename;
             $details['socialize'] = $socialize;

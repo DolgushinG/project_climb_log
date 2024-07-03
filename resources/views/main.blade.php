@@ -80,7 +80,7 @@
                                 <img src="storage/{{$event->image}}" class="img-fluid" alt="">
                             </a>
                             <div class="portfolio-info">
-                                <h4>{{$event->city}}</h4>
+                                <h4>{{$event->city}} {{date("d/m/Y", strtotime($event->start_date))}}</h4>
                                 <a href="storage/{{$event->image}}" data-gallery="portfolioGallery"
                                    class="portfolio-lightbox preview-link"><i class="bx bx-plus"></i></a>
                                 <a href="{{$event->link}}" class="details-link" title="More Details"><i

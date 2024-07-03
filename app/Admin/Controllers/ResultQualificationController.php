@@ -320,8 +320,8 @@ class ResultQualificationController extends Controller
                 });
             }
         }
-
-        if ($event->is_auto_categories) {
+        $result = ResultRouteQualificationClassic::where('event_id', $event->id)->first();
+        if ($event->is_auto_categories && $result) {
             $grid->column('is_recheck', 'Результат с вопросом')->using([0 => 'ОК', 1 => 'Внимание'])->display(function ($title, $column) {
                 if ($this->is_recheck == 1) {
                     return $column->label('warning');
