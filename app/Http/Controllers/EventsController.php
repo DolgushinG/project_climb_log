@@ -618,8 +618,11 @@ class EventsController extends Controller
     {
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
         $user = User::find($request->user_id);
-        if (!$event || !$event->is_registration_state || !Helpers::valid_email($user->email)) {
+        if (!$event || !$event->is_registration_state) {
             return response()->json(['success' => false, 'message' => 'Ошибка внесения в лист ожидания'], 422);
+        }
+        if (!Helpers::valid_email($user->email)) {
+            return response()->json(['success' => false, 'message' => 'Нужен существующий email, так как мы не сможем отправить вам письмо об участии'], 422);
         }
         if (!$request->number_sets) {
             return response()->json(['success' => false, 'message' => 'Вы не выбрали сет'], 422);
