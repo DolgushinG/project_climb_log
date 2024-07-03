@@ -356,8 +356,11 @@ class EventsController extends Controller
     public function store(StoreRequest $request) {
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
         $user = User::find($request->user_id);
-        if(!$event || !$event->is_registration_state || !Helpers::valid_email($user->email)){
-            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+        if(!$event || !$event->is_registration_state){
+            return response()->json(['success' => false, 'message' => 'Ошибка регистрации'], 422);
+        }
+        if(!Helpers::valid_email($user->email)){
+            return response()->json(['success' => false, 'message' => 'Ошибка регистрации, укажите существующий email в профиле'], 422);
         }
         $participant_categories = ParticipantCategory::where('event_id', '=', $request->event_id)->where('category', '=', $request->category)->first();
         if($event->is_france_system_qualification){
@@ -369,7 +372,7 @@ class EventsController extends Controller
         } else {
             $participant = ResultQualificationClassic::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
             if($participant){
-                return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+                return response()->json(['success' => false, 'message' => 'Ошибка регистрации'], 422);
             }
             $participant = new ResultQualificationClassic;
         }
