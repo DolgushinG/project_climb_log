@@ -129,4 +129,36 @@ class Helpers
         ];
         return response()->json($response);
     }
+
+    public static function is_categories_events_same($events)
+    {
+        $list_for_compare = [];
+        foreach ($events as $event_id){
+            if($event_id){
+                $event = Event::find($event_id);
+                $list_for_compare[] = array('event_id' => $event_id, 'count' => count($event->categories), 'categories' => $event->categories);
+            }
+        }
+        $equal = true;
+        foreach ($list_for_compare as &$innerArray1) {
+            foreach ($list_for_compare as &$innerArray2) {
+                if ($innerArray1['count'] !== $innerArray2['count']) {
+                    $equal = false;
+                    break;
+                }
+                $categoriesDiff = array_diff($innerArray1['categories'], $innerArray2['categories']);
+                if (!empty($categoriesDiff)) {
+                    $equal = false;
+                    break;
+                }
+            }
+        }
+
+        if ($equal) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 }
