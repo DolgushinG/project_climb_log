@@ -61,7 +61,6 @@ class Helpers
         return 'storage'.$output_file;
     }
 
-
     /**
      * @throws \Exception
      */
