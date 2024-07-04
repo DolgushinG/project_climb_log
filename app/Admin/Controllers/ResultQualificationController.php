@@ -621,7 +621,7 @@ class ResultQualificationController extends Controller
                     Cache::forget('result_female_cache_' . $category->category);
                 }
 
-                UpdateResultParticipants::dispatch($event);
+                UpdateResultParticipants::dispatch($event_id);
                 # Выяснить почему перерасчет стал таким долгим или он был таким?
 //                Event::refresh_final_points_all_participant($event);
             }

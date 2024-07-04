@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helpers;
 use App\Http\Requests\StoreRequest;
+use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
@@ -561,7 +562,7 @@ class EventsController extends Controller
         foreach ($participants as $participant) {
             Event::update_participant_place($event, $participant->id, $participant->gender);
         }
-        Event::refresh_final_points_all_participant($event);
+        UpdateResultParticipants::dispatch($request->event_id);
         $categories = ParticipantCategory::where('event_id', $request->event_id)->get();
         foreach ($categories as $category) {
             Cache::forget('result_male_cache_'.$category->category.'_event_id_'.$request->event_id);
