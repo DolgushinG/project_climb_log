@@ -19,11 +19,14 @@ use Illuminate\Support\Facades\Log;
 
 class BatchResultFranceSystemQualification extends Action
 {
+    public $category;
     public $name = 'Внести результат квалификации';
 
-    public function __construct()
+    public function __construct(ParticipantCategory $category)
     {
         $this->initInteractor();
+        $this->category = $category;
+        $this->name = $this->name.' - '.$category->category;
     }
     protected $selector = '.send-add';
     public function handle(Request $request)
@@ -96,8 +99,8 @@ class BatchResultFranceSystemQualification extends Action
         $this->modalLarge();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $grades = Grades::where('event_id', $event->id)->first();
-        $participant_users_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->pluck('user_id')->toArray();
+
+        $participant_users_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('category_id', $this->category->id)->pluck('user_id')->toArray();
         $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
         $result_france_system_qualification = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $index => $res){
@@ -117,6 +120,7 @@ class BatchResultFranceSystemQualification extends Action
         $this->hidden('event_id', '')->value($event->id);
         $this->hidden('event_for_style', '')->value($event->id);
         $this->select('user_id', 'Участник')->options($result)->required(true);
+        $grades = Grades::where('event_id', $event->id)->first();
         if($grades){
             for($i = 1; $i <= $grades->count_routes; $i++){
                 $this->integer('route_id_'.$i, 'Трасса')->value($i)->readOnly();
@@ -125,7 +129,53 @@ class BatchResultFranceSystemQualification extends Action
 
             }
         }
+        Admin::script("// Получаем все элементы с атрибутом modal
+        const elementsWithModalAttribute = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefrancesystemqualificationstage-batchresultfrancesystemqualification\"]');
+        const elementsWithIdAttribute = document.querySelectorAll('[id=\"app-admin-actions-resultroutefrancesystemqualificationstage-batchresultfrancesystemqualification\"]');
 
+        // Создаем объект для отслеживания счетчика для каждого modal
+        const modalCounters = {};
+        const idCounters = {};
+
+        // Перебираем найденные элементы
+        elementsWithModalAttribute.forEach(element => {
+            const modalValue = element.getAttribute('modal');
+
+            // Проверяем, существует ли уже счетчик для данного modal
+            if (modalValue in modalCounters) {
+                // Если счетчик уже существует, инкрементируем его значение
+                modalCounters[modalValue]++;
+            } else {
+                // Если счетчика еще нет, создаем его и устанавливаем значение 1
+                modalCounters[modalValue] = 1;
+            }
+
+            // Получаем номер элемента для данного modal
+            const elementNumber = modalCounters[modalValue];
+
+            // Устанавливаем новое значение modal
+            element.setAttribute('modal', `\${modalValue}-\${elementNumber}`);
+        });
+        elementsWithIdAttribute.forEach(element => {
+            const idValue = element.getAttribute('id');
+
+            // Проверяем, существует ли уже счетчик для данного modal
+            if (idValue in idCounters) {
+                // Если счетчик уже существует, инкрементируем его значение
+                idCounters[idValue]++;
+            } else {
+                // Если счетчика еще нет, создаем его и устанавливаем значение 1
+                idCounters[idValue] = 1;
+            }
+
+            // Получаем номер элемента для данного modal
+            const elementNumber = idCounters[idValue];
+
+            // Устанавливаем новое значение modal
+            element.setAttribute('id', `\${idValue}-\${elementNumber}`);
+        });
+
+        ");
 
     }
 
@@ -135,7 +185,7 @@ class BatchResultFranceSystemQualification extends Action
             ->where('active', '=', 1)->first();
         $grades = Grades::where('event_id', $event->id)->first();
         if($grades){
-            return "<a class='send-add btn btn-sm btn-success'><i class='fa fa-arrow-down'></i> Внести результат</a>
+            return "<a class='send-add btn btn-sm btn-success'><i class='fa fa-arrow-down'></i> Внести результат {$this->category->category}</a>
                 <style>
                     .send-add {margin-top:8px;}
                  @media screen and (max-width: 767px) {
