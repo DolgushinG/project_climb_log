@@ -494,6 +494,7 @@ $("#crop").click(function () {
         reader.onloadend = function () {
             var base64data = reader.result;
             var block_attach_bill = document.getElementById('attachBill')
+            var btn_cancel_take_part = document.getElementById('btn_cancel_take_part')
             var event_id = document.getElementById('attachBill').getAttribute('data-event-id')
             var block_checking_bill = document.getElementById('checkingBill')
             let button_pay = $('#btn-payment')
@@ -510,6 +511,7 @@ $("#crop").click(function () {
                     getInfoPaymentBll(event_id, '#paymentTab')
                     button_pay.text('Чек отправлен (На проверке..)')
                     button_pay.attr('disabled', 'disabled')
+                    btn_cancel_take_part.style.display = 'none';
                     block_attach_bill.style.display = 'none';
                     document.querySelector('#bill').style.display = 'None'
                     setTimeout(function () {

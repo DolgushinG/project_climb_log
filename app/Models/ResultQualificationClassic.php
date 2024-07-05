@@ -148,6 +148,22 @@ class ResultQualificationClassic extends Model
             $participant_result->save();
         }
     }
+    public static function has_bill($event, $user_id)
+    {
+        $has_bill = false;
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('user_id', $user_id)->first();
+            if($participant){
+                $has_bill = boolval($participant->bill);
+            }
+        } else {
+            $participant = ResultQualificationClassic::where('event_id','=',$event->id)->where('user_id', $user_id)->first();
+            if($participant){
+                $has_bill = boolval($participant->bill);
+            }
+        }
+        return $has_bill;
+    }
 
     public static function update_global_places_in_qualification_classic($event_id, $participants)
     {

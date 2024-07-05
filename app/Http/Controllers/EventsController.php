@@ -93,6 +93,7 @@ class EventsController extends Controller
             } else {
                 $count_participants = ResultQualificationClassic::where('event_id','=',$event->id)->count();
             }
+
             return view('welcome', compact(['event','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('404');

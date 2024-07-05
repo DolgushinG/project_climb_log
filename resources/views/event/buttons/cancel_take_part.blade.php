@@ -1,5 +1,5 @@
-@if($event->is_access_user_cancel_take_part)
-<button type="button" class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#btn_modal_cancel_take_part_participant">
+@if($event->is_access_user_cancel_take_part && !\App\Models\ResultQualificationClassic::has_bill($event, Auth()->user()->id))
+<button id="btn_cancel_take_part" type="button" class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#btn_modal_cancel_take_part_participant">
     Отменить регистрацию
 </button>
 <div class="modal fade" id="btn_modal_cancel_take_part_participant" tabindex="-1" data-bs-backdrop="false">
