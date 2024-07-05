@@ -509,7 +509,6 @@ class ResultQualificationController extends Controller
      */
     protected function form($type, $id = null)
     {
-
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if ($event->is_france_system_qualification) {
             $form = new Form(new ResultFranceSystemQualification);
@@ -650,6 +649,13 @@ class ResultQualificationController extends Controller
                         $names = [];
                         $count = 1;
                         foreach($event->options_amount_price as $amount)  {
+                            if(!$amount['Сумма'] || $amount['Сумма'] < 0){
+                                $response = [
+                                    'status'  => false,
+                                    'message' => "Сумма для оплаты не может быть 0 или меньше 0",
+                                ];
+                                return response()->json($response);
+                            }
                             $amounts[$count] = $amount['Сумма'];
                             $names[$count] = $amount['Название'];
                             $count++;
@@ -664,6 +670,14 @@ class ResultQualificationController extends Controller
                         $amount_start_price = $event->amount_start_price;
                         $amount_name = 'Стартовый взнос';
                     }
+                    if(!$amount_start_price || $amount_start_price < 0){
+                        $response = [
+                            'status'  => false,
+                            'message' => "Сумма для оплаты не может быть 0 или меньше 0",
+                        ];
+                        return response()->json($response);
+                    }
+
                     OwnerPaymentOperations::execute_payment_operations($participant, $admin, $amount_start_price, $amount_name);
                     # Пересчитываем оплату за соревы
                     OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);

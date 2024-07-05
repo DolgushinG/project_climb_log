@@ -51,15 +51,20 @@
                                                         @endif
                                                     @else
                                                         @if($event->is_registration_state)
+                                                            @include('event.buttons.cancel_take_part')
                                                             @include('event.buttons.pay')
                                                         @endif
                                                     @endif
                                                 @else
                                                     {{-- Француская система в ней результаты вносят судьи--}}
                                                     @if($event->is_france_system_qualification)
+                                                        @include('event.buttons.cancel_take_part')
                                                         @include('event.buttons.participant_already')
                                                     @else
                                                         {{--                                                 Регистрация открыта/закрыта--}}
+                                                        @if($event->is_registration_state)
+                                                            @include('event.buttons.cancel_take_part')
+                                                        @endif
                                                         @if($event->is_send_result_state)
                                                             {{-- Фестивальная система вносят результаты сами участники--}}
                                                             @include('event.buttons.send_result')

@@ -306,7 +306,47 @@ $(document).on('click','#add-to-list-pending', function(e) {
 
     });
 });
+$(document).on('click','#btn_cancel_take_part_participant', function(e) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    let btn_cancel_take_part_participant =  document.getElementById('btn_cancel_take_part_participant')
+    let qbtn_cancel_take_part_participant = $('#btn_cancel_take_part_participant')
+    let event_id = btn_cancel_take_part_participant.getAttribute('data-event-id')
+    let user_id = btn_cancel_take_part_participant.getAttribute('data-user-id')
+    e.preventDefault()
+    $.ajax({
+        type: 'POST',
+        url: '/cancelTakePartParticipant',
+        data: {
+            'event_id': event_id,
+            'user_id': user_id
+        },
+        success: function(xhr, status, error) {
+            qbtn_cancel_take_part_participant.text('').append('<i id="spinner" class="fa fa-spinner fa-spin ml-2"></i> Обработка...')
+            setTimeout(function () {
+                qbtn_cancel_take_part_participant.text(xhr.message)
+            }, 2000);
+            setTimeout(function () {
+                qbtn_cancel_take_part_participant.attr("disabled", false);
+                window.location.reload();
+            }, 3000);
+        },
+        error: function(xhr, status, error) {
+            qbtn_cancel_take_part_participant.text('').append('<i id="spinner" class="fa fa-spinner fa-spin"></i> Обработка...')
+            setTimeout(function () {
+                qbtn_cancel_take_part_participant.text(xhr.responseJSON.message)
+            }, 3000);
+            setTimeout(function () {
+                qbtn_cancel_take_part_participant.text('Отменить регистрацию')
+            }, 6000);
 
+        },
+
+    });
+});
 $(document).on('click','#add-to-list-pending-remove', function(e) {
     $.ajaxSetup({
         headers: {
@@ -454,6 +494,7 @@ $("#crop").click(function () {
         reader.onloadend = function () {
             var base64data = reader.result;
             var block_attach_bill = document.getElementById('attachBill')
+            var btn_cancel_take_part = document.getElementById('btn_cancel_take_part')
             var event_id = document.getElementById('attachBill').getAttribute('data-event-id')
             var block_checking_bill = document.getElementById('checkingBill')
             let button_pay = $('#btn-payment')
@@ -470,6 +511,7 @@ $("#crop").click(function () {
                     getInfoPaymentBll(event_id, '#paymentTab')
                     button_pay.text('Чек отправлен (На проверке..)')
                     button_pay.attr('disabled', 'disabled')
+                    btn_cancel_take_part.style.display = 'none';
                     block_attach_bill.style.display = 'none';
                     document.querySelector('#bill').style.display = 'None'
                     setTimeout(function () {
