@@ -88,7 +88,12 @@ class EventsController extends Controller
             $list_pending = ListOfPendingParticipant::where('event_id', $event->id)->where('user_id', $user_id)->first();
             $is_show_button_semifinal = boolval(ResultSemiFinalStage::where('event_id', $event->id)->first());
             $sport_categories = User::sport_categories;
-            return view('welcome', compact(['event','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
+            if($event->is_france_system_qualification){
+                $count_participants = ResultFranceSystemQualification::where('event_id','=',$event->id)->count();
+            } else {
+                $count_participants = ResultQualificationClassic::where('event_id','=',$event->id)->count();
+            }
+            return view('welcome', compact(['event','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('404');
         }

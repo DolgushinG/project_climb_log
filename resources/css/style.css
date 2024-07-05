@@ -809,6 +809,9 @@ section {
 }
 
 @media (max-width: 768px) {
+    .welcome-counts {
+        padding: 40px 0 15px;
+    }
   .breadcrumbs .d-flex {
     display: block !important;
   }
@@ -1034,6 +1037,50 @@ section {
   margin: 0;
   font-family: "Roboto", sans-serif;
   font-size: 14px;
+}
+
+.welcome-counts {
+    padding: 40px 0 15px;
+}
+
+.welcome-counts .count-box {
+    padding: 30px 30px 25px 30px;
+    width: 100%;
+    position: relative;
+    text-align: center;
+    background: #f1f6fe;
+}
+
+.welcome-counts .count-box i {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    background: #106eea;
+    color: #fff;
+    width: 56px;
+    height: 56px;
+    line-height: 0;
+    border-radius: 50px;
+    border: 5px solid #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.welcome-counts .count-box span {
+    font-size: 36px;
+    display: block;
+    font-weight: 600;
+    color: #062b5b;
+}
+
+.welcome-counts .count-box p {
+    padding: 0;
+    margin: 0;
+    font-family: "Roboto", sans-serif;
+    font-size: 14px;
 }
 
 /*--------------------------------------------------------------
