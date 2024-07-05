@@ -679,4 +679,19 @@ class EventsController extends Controller
             return response()->json(['success' => true, 'message' => 'Успешное удалено']);
         }
     }
+    public function cancelTakePartParticipant(Request $request)
+    {
+        if($request->event_id){
+            $event = Event::find($request->event_id);
+            if($event->is_france_system_qualification){
+                $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+            } else {
+                $participant = ResultQualificationClassic::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+            }
+            if ($participant->delete()) {
+                return response()->json(['success' => true, 'message' => 'Регистрация успешно отменена']);
+            }
+        }
+
+    }
 }

@@ -63,6 +63,7 @@ class CreateEventsTable extends Migration
             $table->boolean('is_registration_state')->default(1);
             $table->boolean('is_need_pay_for_reg')->default(1);
             $table->boolean('is_access_user_edit_result')->default(0);
+            $table->boolean('is_access_user_cancel_take_part')->default(0);
             $table->boolean('registration_time_expired')->default(0);
             $table->datetime('datetime_registration_state')->nullable();
             $table->boolean('is_send_result_state')->default(0);

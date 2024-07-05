@@ -509,7 +509,6 @@ class ResultQualificationController extends Controller
      */
     protected function form($type, $id = null)
     {
-
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if ($event->is_france_system_qualification) {
             $form = new Form(new ResultFranceSystemQualification);

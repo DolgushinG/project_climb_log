@@ -306,7 +306,47 @@ $(document).on('click','#add-to-list-pending', function(e) {
 
     });
 });
+$(document).on('click','#btn_cancel_take_part_participant', function(e) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    let btn_cancel_take_part_participant =  document.getElementById('btn_cancel_take_part_participant')
+    let qbtn_cancel_take_part_participant = $('#btn_cancel_take_part_participant')
+    let event_id = btn_cancel_take_part_participant.getAttribute('data-event-id')
+    let user_id = btn_cancel_take_part_participant.getAttribute('data-user-id')
+    e.preventDefault()
+    $.ajax({
+        type: 'POST',
+        url: '/cancelTakePartParticipant',
+        data: {
+            'event_id': event_id,
+            'user_id': user_id
+        },
+        success: function(xhr, status, error) {
+            qbtn_cancel_take_part_participant.text('').append('<i id="spinner" class="fa fa-spinner fa-spin ml-2"></i> Обработка...')
+            setTimeout(function () {
+                qbtn_cancel_take_part_participant.text(xhr.message)
+            }, 2000);
+            setTimeout(function () {
+                qbtn_cancel_take_part_participant.attr("disabled", false);
+                window.location.reload();
+            }, 3000);
+        },
+        error: function(xhr, status, error) {
+            qbtn_cancel_take_part_participant.text('').append('<i id="spinner" class="fa fa-spinner fa-spin"></i> Обработка...')
+            setTimeout(function () {
+                qbtn_cancel_take_part_participant.text(xhr.responseJSON.message)
+            }, 3000);
+            setTimeout(function () {
+                qbtn_cancel_take_part_participant.text('Отменить регистрацию')
+            }, 6000);
 
+        },
+
+    });
+});
 $(document).on('click','#add-to-list-pending-remove', function(e) {
     $.ajaxSetup({
         headers: {

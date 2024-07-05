@@ -10,7 +10,7 @@
                         @isset($set->date[$set->day_of_week])
                             {{$set->date[$set->day_of_week]}}
                         @endisset
-                        {{$set->time}}(еще
+                        {{$set->time}} (еще
                         мест {{$set->free}})
                     </option>
                 @else
@@ -19,7 +19,7 @@
                         @isset($set->date[$set->day_of_week])
                             {{$set->date[$set->day_of_week]}}
                         @endisset
-                        {{$set->time}}(мест нет)
+                        {{$set->time}} (мест нет)
                     </option>
                 @endif
             @endforeach
