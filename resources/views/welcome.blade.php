@@ -1,10 +1,10 @@
 @extends('layouts.main_page.app')
 @section('content')
     <section class="section contact d-flex align-items-center">
-        <div class="row w-100 mt-4">
+        <div class="row w-100 m-1 mt-5">
                 <div class="col-md-1"></div>
                 <div class="col-md-4">
-                    <div class="card p-4">
+                    <div class="card p-4 z-depth-3">
                         <div class="container">
                             <h4 class="text-center">{{$event->title}}</h4>
                             <img class="img img-responsive" src="{{asset('storage/'.$event->image)}}" alt="">
@@ -133,12 +133,25 @@
                                 @endif
                             </div>
                         </div>
+                        @if($count_participants)
+                            <div class="welcome-counts" data-aos="fade-up">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="count-box">
+                                            <i class="bi bi-people-fill"></i>
+                                            <span data-purecounter-start="0" data-purecounter-end="{{$count_participants}}" data-purecounter-duration="1" class="purecounter"></span>
+                                            <p>Количество участников</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 mt-2">
 
 
-                    <div class="card">
+                    <div class="card z-depth-3">
                         <div class="card-body">
                             <!-- Bordered Tabs Justified -->
                             <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
