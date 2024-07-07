@@ -29,7 +29,6 @@
                                             <div class="col-12">
                                                 <label for="email" class="form-label">Email</label>
                                                 <div class="input-group has-validation">
-                                                    <span class="input-group-text" id="inputGroupPrepend">@</span>
                                                     <input type="email" id="email" name="email" class="form-control"
                                                            value="{{old('email')}}" required autofocus>
                                                     <div class="invalid-feedback">Пожалуйста введите email</div>

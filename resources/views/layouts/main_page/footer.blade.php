@@ -8,7 +8,7 @@
                 <div class="col-lg-3 col-md-6 footer-contact">
                     <h1 class="logo"><a href="{{route('main')}}">Climbing Events<span>.</span></a></h1>
                     <p>
-                        <strong>Contact: Phone:</strong> <a href="https://t.me/gdolgushin"> Telegram </a><br>
+                        <strong>Контакты </strong> <a href="https://t.me/gdolgushin"><i class="fa fa-telegram" aria-hidden="true"></i>Telegram </a><br>
                     </p>
                 </div>
 

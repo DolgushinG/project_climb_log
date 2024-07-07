@@ -17,10 +17,12 @@ use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
 use App\Models\Set;
 use App\Models\User;
+use Encore\Admin\Admin;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use stdClass;
@@ -81,7 +83,8 @@ class EventsController extends Controller
                 $set->procent = intval($percent);
                 $set->date = Helpers::getDatesByDayOfWeek($event_exist->start_date, $event_exist->end_date);
             }
-
+            $owner = DB::table('admin_users')->find($event->owner_id);
+            $event['climbing_gym_name_image'] = $owner->avatar;
             $is_show_button_final = boolval(ResultFinalStage::where('event_id', $event->id)->first());
 
             $is_add_to_list_pending = boolval(ListOfPendingParticipant::where('event_id', $event->id)->where('user_id', $user_id)->first());
@@ -94,7 +97,8 @@ class EventsController extends Controller
                 $count_participants = ResultQualificationClassic::where('event_id','=',$event->id)->count();
             }
 
-            return view('welcome', compact(['event','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
+            $google_iframe = $this->google_maps_iframe($event->address.','.$event->city);
+            return view('welcome', compact(['event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('404');
         }
@@ -694,5 +698,39 @@ class EventsController extends Controller
             }
         }
 
+    }
+
+
+    public function google_maps_iframe($address){
+        $zoom = 5000;
+        $lng = 'ru';
+        $src = 'https://www.google.ru/maps/embed?pb='.
+            '!1m18'.
+            '!1m12'.
+            '!1m3'.
+            '!1d'.$zoom.
+            '!2d0'.
+            '!3d0'.
+            '!2m3'.
+            '!1f0'.
+            '!2f0'.
+            '!3f0'.
+            '!3m2'.
+            '!1i1024'.
+            '!2i768'.
+            '!4f13.1'.
+            '!3m3'.
+            '!1m2'.
+            '!1s0'.
+            '!2s'.rawurlencode($address).
+            '!5e0'.
+            '!3m2'.
+            '!1s'.$lng.
+            '!2s'.$lng.
+            '!4v'.time().'000'.
+            '!5m2'.
+            '!1s'.$lng.
+            '!2s'.$lng;
+        return $src;
     }
 }
