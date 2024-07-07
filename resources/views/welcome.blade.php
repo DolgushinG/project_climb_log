@@ -153,7 +153,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="col-md-6 mt-2">
+                <div class="col-md-6">
 
 
                     <div class="card z-depth-3">
@@ -186,25 +186,67 @@
                                      aria-labelledby="info-tab">
                                     <section id="services" class="services">
                                         <div class="container" data-aos="fade-up">
-
-                                            <div class="section-title">
-                                                <h2>Адрес</h2>
-                                                <p>{{$event->city}}</p>
-                                                <p>{{$event->address}}</p>
-                                                <p>{{$event->climbing_gym_name}}</p>
-                                            </div>
-                                            <div class="section-title">
-                                                <h2>Контакты</h2>
-                                                <p>{{$event->contact}}</p>
-                                            </div>
                                             @if($event->contact_link)
                                                 <div class="section-title">
-                                                    <h2>Соц-сеть</h2>
-                                                    <p><a href="{{$event->contact_link}}">Ссылка на соц-сеть</a>
-                                                    <p/>
+                                                    <h2>Скалодром</h2>
+                                                    <p>
+                                                        <img src="{{asset('storage/'.$event->climbing_gym_name_image)}}" alt="climbing_gym_name_image" class="profile-user-img-header">
+                                                        <span class="d-md-block ps-2 align-items-center ">{{$event->climbing_gym_name}}</span>
+                                                    </p>
                                                 </div>
                                             @endif
+                                            <div class="row">
+                                                <div class="col-lg-4">
+                                                    <div class="section-title">
+                                                        <h2>Адрес</h2>
+                                                        <p>{{$event->city}}, {{$event->address}}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <div class="section-title">
+                                                        <h2>Контакты</h2>
+                                                        <p>{{$event->contact}}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <div class="section-title">
+                                                        @if($event->contact_link)
+                                                            <div class="section-title">
+                                                                <h2>Соц-сеть</h2>
+                                                                @if(str_contains($event->contact_link, 'vk'))
+                                                                    <p> <a href="{{$event->contact_link}}" class="btn btn-primary" type="button">
+                                                                        <i class="fa fa-vk" aria-hidden="true"></i>
+                                                                    </a>
+                                                                    </p>
+                                                                @elseif(str_contains($event->contact_link, 'telegram'))
+                                                                    <p> <a href="{{$event->contact_link}}" class="btn btn-primary" type="button">
+                                                                            <i class="fa fa-telegram" aria-hidden="true"></i>
+                                                                        </a>
+                                                                    </p>
+                                                                @else
+                                                                    <p><a href="{{$event->contact_link}}">Ссылка на соц-сеть</a></p>
+                                                                @endif
+                                                            </div>
+                                                        @else
+                                                            <div class="section-title">
+                                                                <h2>Скалодром</h2>
+                                                                <p>
+                                                                    <img src="{{asset('storage/'.$event->climbing_gym_name_image)}}" alt="climbing_gym_name_image" class="climbing-gym-img-title">
+                                                                    <span class="d-md-block ps-2 align-items-center ">{{$event->climbing_gym_name}}</span>
+                                                                </p>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
+                                        @if(env('GOOGLE_MAPS_ADDRESS'))
+                                            <div class="row">
+                                                <div class="col">
+                                                    <iframe src="{{$google_iframe}}" frameborder="0" style="border:0; width: 100%; height: 270px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </section>
                                 </div>
                                 <div class="tab-pane fade" id="bordered-justified-profile" role="tabpanel"
