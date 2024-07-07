@@ -186,13 +186,15 @@
                                      aria-labelledby="info-tab">
                                     <section id="services" class="services">
                                         <div class="container" data-aos="fade-up">
-                                            <div class="section-title">
-                                                <h2>Скалодром</h2>
-                                                <p>
-                                                    <img src="{{asset('storage/'.$event->climbing_gym_name_image)}}" alt="climbing_gym_name_image" class="profile-user-img-header">
-                                                    <span class="d-md-block ps-2 align-items-center ">{{$event->climbing_gym_name}}</span>
-                                                </p>
-                                            </div>
+                                            @if($event->contact_link)
+                                                <div class="section-title">
+                                                    <h2>Скалодром</h2>
+                                                    <p>
+                                                        <img src="{{asset('storage/'.$event->climbing_gym_name_image)}}" alt="climbing_gym_name_image" class="profile-user-img-header">
+                                                        <span class="d-md-block ps-2 align-items-center ">{{$event->climbing_gym_name}}</span>
+                                                    </p>
+                                                </div>
+                                            @endif
                                             <div class="row">
                                                 <div class="col-lg-4">
                                                     <div class="section-title">
@@ -224,6 +226,14 @@
                                                                 @else
                                                                     <p><a href="{{$event->contact_link}}">Ссылка на соц-сеть</a></p>
                                                                 @endif
+                                                            </div>
+                                                        @else
+                                                            <div class="section-title">
+                                                                <h2>Скалодром</h2>
+                                                                <p>
+                                                                    <img src="{{asset('storage/'.$event->climbing_gym_name_image)}}" alt="climbing_gym_name_image" class="climbing-gym-img-title">
+                                                                    <span class="d-md-block ps-2 align-items-center ">{{$event->climbing_gym_name}}</span>
+                                                                </p>
                                                             </div>
                                                         @endif
                                                     </div>

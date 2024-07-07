@@ -531,7 +531,10 @@ h6 {
   display: block;
 }
 
-
+.climbing-gym-img-title{
+    max-height: 100px;
+    height: 35px;
+}
 .profile-user-img-header{
     max-height: 100px;
     height: 35px;
