@@ -214,7 +214,14 @@ class EventsController extends Controller
 //                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
                 $user_male_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('active','=', 1)->pluck('user_id')->toArray();
                 $user_female_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('active','=', 1)->pluck('user_id')->toArray();
+
                 $stats = new stdClass();
+                if($event->is_open_team_result){
+                    $user_team_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('active','=', 1)->pluck('user_id')->toArray();
+                    $teams = User::whereIn('id', $user_team_ids)->where('team','!=', null)->distinct()->pluck('team')->toArray();
+                    $stats->team = count($teams);
+                    $result_team = array();
+                }
                 $female_categories = array();
                 $male_categories = array();
                 $stats->male = User::whereIn('id', $user_male_ids)->get()->count();
@@ -234,7 +241,6 @@ class EventsController extends Controller
                         $result_male_cache = ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
                         $result_female_cache =  ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     }
-//
                     $result_male[] = $result_male_cache;
                     $result_female[] = $result_female_cache;
 //                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
@@ -256,7 +262,16 @@ class EventsController extends Controller
                         $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
                         $columns = ['column_place' => 'user_place', 'column_points' => 'points', 'column_category_id' => 'category_id'];
                     }
-
+                }
+                if($event->is_open_team_result){
+                    foreach ($teams as $team){
+                        $result_team_cache = ResultQualificationClassic::get_list_team_and_points_participant($event->id, $team);
+                        $result_team[$team] = $result_team_cache;
+                    }
+                    $result_team = ResultQualificationClassic::sorted_team_points($result_team);
+                } else {
+                    $result_team = null;
+                    $teams = null;
                 }
                 $result_male_final = Helpers::arrayValuesRecursive($result_male);
                 $result_female_final = Helpers::arrayValuesRecursive($result_female);
@@ -264,15 +279,11 @@ class EventsController extends Controller
                 $stats->female_categories = $female_categories;
                 $stats->male_categories = $male_categories;
                 $categories = $categories->toArray();
-//                dd($result);
-
-
             }
-//            dd($columns, $result, $categories);
         } else {
             return view('404');
         }
-        return view('event.qualification_classic_results', compact(['event', 'result',  'categories', 'stats', 'columns']));
+        return view('event.qualification_classic_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats', 'columns']));
     }
 
 

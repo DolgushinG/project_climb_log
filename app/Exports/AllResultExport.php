@@ -67,6 +67,9 @@ class AllResultExport implements WithMultipleSheets
                 $sheets[] = new Results($this->event_id, 'Final', $gender);
             }
         }
+        if($event->is_open_team_result){
+            $sheets[] = new Results($this->event_id, 'Team');
+        }
         return $sheets;
     }
 

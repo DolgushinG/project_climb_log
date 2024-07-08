@@ -31,7 +31,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
     public $gender;
     public $category;
 
-    function __construct($event_id, $type, $gender, $category = '') {
+    function __construct($event_id, $type, $gender = '', $category = '') {
         $this->event_id = $event_id;
         $this->type = $type;
         $this->gender = $gender;
@@ -223,6 +223,12 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     'Участник(Фамилия Имя)',
                     'Суммарные Баллы',
                 ];
+            case 'Team':
+                return [
+                    'Место',
+                    'Команда',
+                    'Суммарные Баллы',
+                ];
             default:
                 return [];
         }
@@ -250,6 +256,9 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         if($this->type == 'MergeQualification'){
             return self::get_merge_qualification();
         }
+        if($this->type == 'Team'){
+            return self::get_team_qualification();
+        }
         return collect([]);
     }
 
@@ -262,6 +271,9 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             $category = $this->category->category;
         } else {
             $category = '';
+        }
+        if($this->category == '' && $this->gender == ''){
+            return trans_choice('somewords.'.$this->type, 10);
         }
         return trans_choice('somewords.'.$this->type, 10).
             ' [ '.$category.' ][ '.trans_choice('somewords.'.$this->gender, 10).']';
@@ -419,6 +431,17 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             }
         });
         return collect($users_need_sorted);
+    }
+    public function get_team_qualification(){
+        $event = Event::find($this->event_id);
+        $user_team_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('active','=', 1)->pluck('user_id')->toArray();
+        $teams = User::whereIn('id', $user_team_ids)->where('team','!=', null)->distinct()->pluck('team')->toArray();
+        foreach ($teams as $team){
+            $result_team_cache = ResultQualificationClassic::get_list_team_and_points_participant($event->id, $team);
+            $result_team[$team] = $result_team_cache;
+        }
+        $result_team = ResultQualificationClassic::sorted_team_points($result_team);
+        return collect($result_team);
     }
 
     public function get_final($table){
