@@ -89,7 +89,7 @@ class ResultRouteQualificationClassic extends Model
 //                return $route->value + self::POINT_VALUES[$attempt];
             # Все трассы
             case 2:
-                self::get_flash_value_for_mode_all_route($attempt, $event_id);
+                return self::get_flash_value_for_mode_all_route($attempt, $event_id);
 //                return $this->values[$attempt];
         }
     }

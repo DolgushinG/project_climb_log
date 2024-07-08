@@ -61,15 +61,15 @@
                                                         @include('event.buttons.cancel_take_part')
                                                         @include('event.buttons.participant_already')
                                                     @else
-                                                        {{--                                                 Регистрация открыта/закрыта--}}
-                                                        @if($event->is_registration_state)
-                                                            @include('event.buttons.cancel_take_part')
-                                                        @endif
                                                         @if($event->is_send_result_state)
                                                             {{-- Фестивальная система вносят результаты сами участники--}}
                                                             @include('event.buttons.send_result')
                                                         @else
                                                             @include('event.buttons.send_result_is_close')
+                                                        @endif
+                                                        {{--                                                 Регистрация открыта/закрыта--}}
+                                                        @if($event->is_registration_state)
+                                                            @include('event.buttons.cancel_take_part')
                                                         @endif
                                                     @endif
                                                 @endif
