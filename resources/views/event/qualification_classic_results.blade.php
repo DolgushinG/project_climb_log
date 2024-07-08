@@ -63,7 +63,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-12">
+                <div class="col-xl-12 mb-3">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Женщины <span
@@ -122,9 +122,43 @@
                                 @endforeach
                             </div><!-- End Bordered Tabs Justified -->
                         </div>
+                    </div>
+                </div>
+                @if($result_team && $event->is_open_team_result)
+                    <div class="col-xl-12 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Командный зачет <span
+                                    class="badge bg-dark text-white">{{$stats->team}}</span></h5>
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">
+                                            <b>Место
+                                        </th>
+                                        <th scope="col">
+                                            <b>Команда
+                                        </th>
+                                        <th scope="col">Суммарные баллы</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @foreach($result_team as $index => $res)
+                                        <tr>
+                                            <td>{{$res['place']}}</td>
+                                            <td>{{$res['team']}}</td>
+                                            <td>{{$res['points']}}</td>
+                                        </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
+                                @if($stats->team == 0)
+                                    <p>Результатов пока нет</p>
+                                @endif
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
         </section>
 @endsection

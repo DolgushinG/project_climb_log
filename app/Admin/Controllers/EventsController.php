@@ -447,6 +447,7 @@ class EventsController extends Controller
             $form->switch('is_access_user_edit_result', 'Дать доступ к редактированию результата')->help('Участник может сам редактировать свой результат')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->switch('is_access_user_cancel_take_part', 'Дать доступ к отмене регистрации')->help('Участник может сам отменить регистрацию, кнопка будет показана до закрытия регистрации, и до оплаты, и внесение результата')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->switch('is_open_send_result_state', 'Открыть полные результаты')->help('Даже если включить, кнопка появиться только после закрытия внесения результатов')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            $form->switch('is_open_team_result', 'Показать командные результаты')->help('В предварительных результатах отобразиться таблица с результатами по командам')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->datetime('datetime_send_result_state', 'Дата закрытия отправки результатов [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
             if(!$event){

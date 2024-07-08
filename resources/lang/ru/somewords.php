@@ -27,5 +27,7 @@ $some = [
     'FranceSystemQualification' => 'Квалификация',
     'Final' => 'Финал',
     'final' => 'Финал',
+    'Team' => 'Командные рез-ты',
+    'team' => 'Командные рез-ты',
 ];
 return $some;
