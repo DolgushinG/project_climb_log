@@ -448,26 +448,28 @@ class Event extends Model
 
     }
 
-    public function insert_final_participant_result($event_id, $points, $user_id, $gender)
+    public function insert_final_participant_result($event_id, $points, $user_id)
     {
         $final_participant_result = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first();
-        $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->pluck('user_id')->toArray();
         $final_participant_result->points = $final_participant_result->points + $points;
         $final_participant_result->active = 1;
-        $final_participant_result->user_place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter, $user_id, $gender, $final_participant_result->category_id, true);
         $final_participant_result->save();
     }
 
     public static function update_participant_place($event, $user_id, $gender)
     {
         $final_participant_result = ResultQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
-        if (!$event->is_auto_categories && $final_participant_result->category_id == null) {
+        $result_qualification = ResultRouteQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+        if ($event->is_auto_categories && $final_participant_result->category_id == 0 && $result_qualification) {
             $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $user_id), 3);
             $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
             $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+            $final_participant_result->category_id = $category_id;
+            $final_participant_result->save();
         } else {
             $category_id = $final_participant_result->category_id;
         }
+
         $users_for_filter = ResultQualificationClassic::where('event_id', $event->id)->pluck('user_id')->toArray();
         $final_participant_result->user_place = ResultQualificationClassic::get_places_participant_in_qualification($event->id, $users_for_filter, $user_id, $gender, $category_id, true);
         $final_participant_result->save();

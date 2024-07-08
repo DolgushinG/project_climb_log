@@ -324,13 +324,19 @@ class ResultQualificationController extends Controller
         }
         $result = ResultRouteQualificationClassic::where('event_id', $event->id)->first();
         if ($event->is_auto_categories && $result) {
-            $grid->column('is_recheck', 'Результат с вопросом')->using([0 => 'ОК', 1 => 'Внимание'])->display(function ($title, $column) {
-                if ($this->is_recheck == 1) {
-                    return $column->label('warning');
-                } else {
-                    return $column->label('success');
-                }
-            });
+//            $grid->column('is_recheck', 'Результат с вопросом')->using([0 => 'ОК', 1 => 'Внимание'])->display(function ($title, $column) {
+//                if ($this->is_recheck == 1) {
+//                    return $column->label('warning');
+//                } else {
+//                    return $column->label('success');
+//                }
+//            });
+            $states = [
+                'on' => ['value' => 1, 'text' => 'Внимание', 'color' => 'warning'],
+                'off' => ['value' => 0, 'text' => 'OK', 'color' => 'success'],
+            ];
+
+            $grid->column('is_recheck', 'Результат с вопросом')->switch($states);
         }
         if ($event->is_open_main_rating) {
             $grid->column('is_other_event', 'Перенесен из других сорев')->display(function ($state) {
@@ -629,6 +635,7 @@ class ResultQualificationController extends Controller
                 $result->amount_start_price = $form->input('amount_start_price');
                 $result->save();
             }
+
             if ($form->input('is_paid') == "0" || $form->input('is_paid') == "1") {
                 $participant = $form->model()->find($id);
                 $event = Event::find($participant->event_id);
@@ -711,6 +718,11 @@ class ResultQualificationController extends Controller
 
                 }
 
+            }
+            if ($form->input('is_recheck') == "0" || $form->input('is_recheck') == "1") {
+                $participant = $form->model()->find($id);
+                $participant->is_recheck = $form->input('is_recheck');
+                $participant->save();
             }
         });
         return $form;

@@ -474,6 +474,8 @@ class EventsController extends Controller
             if (!$participant_active){
                 return response()->json(['success' => false, 'message' => 'Результаты уже были добавлены или отсутствует регистрация'], 422);
             }
+        } else {
+            $this->if_exist_result_update_point($request->event_id, $user_id);
         }
         $count_routes = Grades::where('event_id', $request->event_id)->first();
         if (!$count_routes){
@@ -517,7 +519,7 @@ class EventsController extends Controller
                 (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
                 $coefficient = ResultRouteQualificationClassic::get_coefficient($route['event_id'], $route['route_id'], $gender);
                 $route['points'] = $coefficient * $value_route;
-                (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id'], $gender);
+                (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id']);
             } else if($format == 1) {
                 $route['points'] = $value_route;
             }
@@ -542,7 +544,6 @@ class EventsController extends Controller
             $participant->active = 1;
             $participant->save();
         }
-//        dd($points);
         foreach ($final_data as $index => $data){
             $final_data[$index] = collect($data)->except('points')->toArray();
         }
@@ -732,5 +733,18 @@ class EventsController extends Controller
             '!1s'.$lng.
             '!2s'.$lng;
         return $src;
+    }
+
+    public function if_exist_result_update_point($event_id, $user_id)
+    {
+        $result = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $event_id)->first();
+        if($result){
+            if(intval($result->points) > 0){
+                $result->points = 0;
+                $result->save();
+            }
+        }
+
+
     }
 }

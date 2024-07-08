@@ -202,7 +202,7 @@ class ResultQualificationClassic extends Model
             if(isset($user_places[$user_id])){
                 return $user_places[$user_id];
             } else {
-                return '-';
+                return null;
             }
         }
 
