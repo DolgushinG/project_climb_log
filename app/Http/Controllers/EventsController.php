@@ -495,7 +495,14 @@ class EventsController extends Controller
         # Проверяем что есть результат был отмечен, умножение происходит на 2 потому что из 3 результатов failed passed и flash два из них false
         # Не должно быть меньше этого, то есть если не отмечена хотя бы одна трасса она будет больше чем $count_routes * 2
         $amount_false = Event::validate_result($request->result);
-        if($amount_false > $count_routes->count_routes * 2){
+        if($event->is_zone_show){
+            # 3 - это flash 30 или redpoint 30 или zone 30
+            $amount_state_passed_for_validate = 3;
+        } else {
+            # 2 - это flash 30 или redpoint 30
+            $amount_state_passed_for_validate = 2;
+        }
+        if($amount_false > $count_routes->count_routes * $amount_state_passed_for_validate){
             return response()->json(['success' => false, 'message' => 'Необходимо отметить все трассы'], 422);
         }
         $gender = User::find($user_id)->gender;
@@ -513,17 +520,22 @@ class EventsController extends Controller
                 $attempt = 2;
                 $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
+            if (str_contains($result[0], 'zone') && $result[1] == "true") {
+                $route_id = str_replace("zone-","", $result[0]);
+                $attempt = 3;
+                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+            }
             if (str_contains($result[0], 'failed') && $result[1] == "true") {
                 $route_id = str_replace("failed-","", $result[0]);
                 $attempt = 0;
                 $data[] = array('grade' => $category, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
-        };
+        }
         $final_data = array();
         $final_data_only_passed_route = array();
         foreach ($data as $route){
             # Варианты форматов подсчета баллов
-            $owner_route = Route::where('grade','=',$route['grade'])->where('owner_id','=', $request->owner_id)->first();
+            $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $request->event_id)->first();
             $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $request->event_id);
             # Формат все трассы считаем сразу
             if($format == 2) {
@@ -533,6 +545,7 @@ class EventsController extends Controller
                 (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id']);
             } else if($format == 1) {
                 $route['points'] = $value_route;
+                $route['value'] = $value_route;
             }
             $final_data[] = $route;
             if ($route['attempt'] != 0){
@@ -584,7 +597,8 @@ class EventsController extends Controller
         foreach ($participants as $participant) {
             Event::update_participant_place($event, $participant->id, $participant->gender);
         }
-        UpdateResultParticipants::dispatch($request->event_id);
+        Event::refresh_final_points_all_participant($event);
+//        UpdateResultParticipants::dispatch($request->event_id);
         $categories = ParticipantCategory::where('event_id', $request->event_id)->get();
         foreach ($categories as $category) {
             Cache::forget('result_male_cache_'.$category->category.'_event_id_'.$request->event_id);
@@ -608,6 +622,7 @@ class EventsController extends Controller
         foreach ($grades as $route){
             $route_class = new stdClass();
             $route_class->grade = $route->grade;
+            $route_class->zone = $route->zone;
             $route_class->count = $route->route_id;
             $routes[$route->route_id] = $route_class;
         }

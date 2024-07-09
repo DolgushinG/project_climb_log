@@ -12,9 +12,10 @@ class ResultRouteQualificationClassic extends Model
 
 //    const FLASH = 1;
 
-    const STATUS_PASSED_FLASH = "1";
-    const STATUS_PASSED_REDPOINT = "2";
-    const STATUS_NOT_PASSED = "0";
+    const STATUS_PASSED_FLASH = 1;
+    const STATUS_PASSED_REDPOINT = 2;
+    const STATUS_NOT_PASSED = 0;
+    const STATUS_ZONE = 3;
 
 //    const REDPOINT = 0.9;
 //    const FAIL = 0;
@@ -31,16 +32,17 @@ class ResultRouteQualificationClassic extends Model
     public function category(){
         return $this->belongsTo(ParticipantCategory::class);
     }
-    public static function get_flash_value_for_mode_ten_better_route($attempt, $event_id, $route)
+    public static function get_flash_value_for_mode_ten_better_route($attempt, $route)
     {
-        $event_route =  Route::where('event_id', $event_id)->where('grade', $route->grade)->first();
         switch ($attempt){
             case self::STATUS_NOT_PASSED:
                 return 0;
             case self::STATUS_PASSED_FLASH:
-                return $route->value + $event_route->flash_value;
+                return $route->value + $route->flash_value;
             case self::STATUS_PASSED_REDPOINT:
                 return $route->value;
+            case self::STATUS_ZONE:
+                return $route->zone;
         }
     }
     public static function get_flash_value_for_mode_all_route($attempt, $event_id)
@@ -85,7 +87,7 @@ class ResultRouteQualificationClassic extends Model
         switch ($format) {
             # 10 лучших
             case 1:
-                return self::get_flash_value_for_mode_ten_better_route($attempt, $event_id, $route);
+                return self::get_flash_value_for_mode_ten_better_route($attempt, $route);
 //                return $route->value + self::POINT_VALUES[$attempt];
             # Все трассы
             case 2:

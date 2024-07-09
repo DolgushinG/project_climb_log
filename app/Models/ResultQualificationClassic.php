@@ -444,12 +444,12 @@ class ResultQualificationClassic extends Model
 
     public static function get_list_passed_route($event_id, $user_id)
     {
-        return ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $user_id)->whereIn('attempt', [1,2])->pluck('grade');
+        return ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $user_id)->whereIn('attempt', [1,2,3])->pluck('grade');
     }
 
     public static function get_global_list_passed_route($event_id, $user_id)
     {
-        return ResultRouteQualificationClassic::whereIn('event_id', $event_id)->where('user_id', $user_id)->whereIn('attempt', [1,2])->pluck('grade');
+        return ResultRouteQualificationClassic::whereIn('event_id', $event_id)->where('user_id', $user_id)->whereIn('attempt', [1,2,3])->pluck('grade');
     }
     public static function find_grade($list_grades, $grade)
     {

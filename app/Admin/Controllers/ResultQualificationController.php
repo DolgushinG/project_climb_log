@@ -577,7 +577,7 @@ class ResultQualificationController extends Controller
             $form->table('result_for_edit', 'Таблица результата', function ($table) {
                 $table->text('route_id', 'Номер маршрут')->readonly();
                 $table->text('grade', 'Категория')->readonly();
-                $table->select('attempt', 'Результат')->attribute('inputmode', 'none')->options([1 => 'FLASH', 2 => 'REDPOINT', 0 => 'Не пролез'])->width('50px');
+                $table->select('attempt', 'Результат')->attribute('inputmode', 'none')->options([1 => 'FLASH', 2 => 'REDPOINT', 3 => 'ZONE', 0 => 'Не пролез'])->width('50px');
             });
         }
         $form->saving(function (Form $form) use ($type, $id) {

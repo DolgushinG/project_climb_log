@@ -58,6 +58,7 @@ class CreateEventsTable extends Migration
             $table->json('transfer_to_next_category')->nullable();
             $table->integer('mode')->nullable();
             $table->integer('mode_amount_routes')->nullable();
+            $table->boolean('is_zone_show')->nullable();
             $table->boolean('active')->default(0);
             $table->boolean('is_input_set')->default(0);
             $table->boolean('is_registration_state')->default(1);

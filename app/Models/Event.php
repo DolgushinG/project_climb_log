@@ -215,7 +215,14 @@ class Event extends Model
         } else {
             $finish_flash_result = 0;
         }
-        return $finish_flash_result + $finish_red_point_result;
+        $routes_id_passed_with_zone = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultRouteQualificationClassic::STATUS_ZONE)->pluck('route_id');
+        if ($routes_id_passed_with_zone->isNotEmpty()) {
+            $finish_zone_result = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultRouteQualificationClassic::STATUS_ZONE)->sum('value');
+        } else {
+            $finish_zone_result = 0;
+        }
+
+        return $finish_flash_result + $finish_red_point_result + $finish_zone_result;
     }
 
     public static function refresh_final_points_all_participant($event)
@@ -631,6 +638,9 @@ class Event extends Model
                 $amount_false++;
             }
             if (str_contains($res[0], 'failed') && $res[1] == "false") {
+                $amount_false++;
+            }
+            if (str_contains($res[0], 'zone') && $res[1] == "false") {
                 $amount_false++;
             }
         }

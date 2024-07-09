@@ -235,7 +235,11 @@ class GradesController extends Controller
         $grid->column('grade', 'Категория трассы')->editable();
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if($event->mode == 1){
-            $grid->column('value', 'Ценность трассы')->editable();
+            $grid->column('value', 'Ценность трассы');
+            if($event->is_zone_show){
+                $grid->column('zone', 'Ценность зоны');
+            }
+
         }
         return $grid;
     }
@@ -254,6 +258,9 @@ class GradesController extends Controller
         $form->number('route_id');
         $form->text('grade');
         if($event->mode == 1){
+            if($event->is_zone_show){
+                $form->number('zone');
+            }
             $form->number('value');
         }
         $form->disableCreatingCheck();
@@ -271,8 +278,14 @@ class GradesController extends Controller
     protected function form($type=null)
     {
         $form = new Form(new Grades);
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
 
-        $routes = Grades::getRoutes();
+
+        if($event->is_zone_show){
+            $routes = Grades::getRoutesWithZone();
+        } else {
+            $routes = Grades::getRoutes();
+        }
         $form->disableViewCheck();
         $form->disableEditingCheck();
         $form->disableCreatingCheck();
@@ -282,7 +295,7 @@ class GradesController extends Controller
             $tools->disableDelete();
             $tools->disableView();
         });
-        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+
         $form->hidden('owner_id', '')->value(Admin::user()->id);
         $form->hidden('event_id', '')->value($event->id);
 
@@ -301,6 +314,9 @@ class GradesController extends Controller
                 $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
                 if($event->mode == 1){
                     $table->text('Ценность')->width('60px');
+                    if($event->is_zone_show){
+                        $table->text('Ценность зоны')->width('60px');
+                    }
                 }
                 $table->disableButton();
             })->value($routes);

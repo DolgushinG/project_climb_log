@@ -203,15 +203,30 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 }
                 return $france_system_qualification;
             case 'Qualification':
-                $qualification = [
-                    'Место',
-                    'Участник(Фамилия Имя)',
-                    'Баллы',
-                    'Сет',
-                    'Кол-во пройденных трасс',
-                    'Кол-во FLASH',
-                    'Кол-во REDPOINT'
-                ];
+                $event = Event::find($this->event_id);
+                if($event->is_zone_show){
+                    $qualification = [
+                        'Место',
+                        'Участник(Фамилия Имя)',
+                        'Баллы',
+                        'Сет',
+                        'Кол-во пройденных трасс',
+                        'Кол-во FLASH',
+                        'Кол-во ZONE',
+                        'Кол-во REDPOINT'
+                    ];
+                } else {
+                    $qualification = [
+                        'Место',
+                        'Участник(Фамилия Имя)',
+                        'Баллы',
+                        'Сет',
+                        'Кол-во пройденных трасс',
+                        'Кол-во FLASH',
+                        'Кол-во REDPOINT'
+                    ];
+                }
+
                 $count = Grades::where('event_id', $this->event_id)->first()->count_routes;
                 for($i = 1; $i <= $count; $i++){
                     $qualification[] = 'Трасса '.$i;
@@ -314,6 +329,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $users[$index]['number_set_id'] = '';
                 $users[$index]['amount_passed_routes'] = '';
                 $users[$index]['amount_passed_flash'] = '';
+                $users[$index]['amount_passed_zone'] = '';
                 if ($event->mode == 2) {
                     $users[$index]['amount_passed_redpoint'] = 'Коэффициент трасс';
                     $coefficient = EventAndCoefficientRoute::where('event_id', $this->event_id)->select('route_id', 'coefficient_' . $this->gender)->pluck('coefficient_' . $this->gender, 'route_id');
@@ -321,25 +337,34 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                         $users[$index]['route_result_' . $i] = $coefficient[$i];
                     }
                 } else {
-                    $users[$index]['amount_passed_redpoint'] = 'Баллы за трассу [за флеш]';
+                    $users[$index]['amount_passed_redpoint'] = 'Баллы за трассу [за флеш][за зону]';
                     $routes_event = Route::where('event_id', $this->event_id)->get();
                     foreach ($routes_event as $index2 => $route) {
-                        $users[$index]['route_result_' . $index2] = $route->value.' ['.$route->flash_value.']';
+                        $users[$index]['route_result_' . $index2] = $route->value.' ['.$route->flash_value.']['.$route->zone.']';
                     }
                 }
             } else {
                 $qualification_result = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
                 $amount_passed_flash = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 1)->get()->count();
+                if($event->is_zone_show){
+                    $amount_passed_zone = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 3)->get()->count();
+                }
                 $amount_passed_redpoint = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 2)->get()->count();
-                $amount_passed_routes = $amount_passed_flash+$amount_passed_redpoint;
+                $amount_passed_routes = $amount_passed_flash + $amount_passed_redpoint + $amount_passed_zone ?? 0;
                 $place = ResultQualificationClassic::get_places_participant_in_qualification($this->event_id, $users_for_filter, $user['id'], $this->gender, $this->category->id, true);
                 $set = Set::find($user['number_set_id']);
                 $users[$index]['user_place'] = $place;
                 $users[$index]['number_set_id'] = $set->number_set ?? '';
                 $users[$index]['amount_passed_routes'] = $amount_passed_routes;
                 $users[$index]['amount_passed_flash'] = $amount_passed_flash;
+                if($event->is_zone_show){
+                    $users[$index]['amount_passed_zone'] = $amount_passed_zone;
+                }
                 $users[$index]['amount_passed_redpoint'] = $amount_passed_redpoint;
                 $routes_event_value = Route::where('event_id', $this->event_id)->pluck('value', 'route_id')->toArray();
+                if($event->is_zone_show){
+                    $routes_event_zone = Route::where('event_id', $this->event_id)->pluck('zone', 'route_id')->toArray();
+                }
                 $routes_event_flash_value = Route::where('event_id', $this->event_id)->pluck('flash_value', 'route_id')->toArray();
                 foreach ($qualification_result as $result){
                     switch ($result->attempt){
@@ -355,6 +380,11 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                                 $attempt = $routes_event_value[$result->route_id];
                             } else {
                                 $attempt = 'R';
+                            }
+                            break;
+                        case 3:
+                            if($event->mode == 1 && $event->is_zone_show){
+                                $attempt = $routes_event_zone[$result->route_id];
                             }
                             break;
                         case 0:
