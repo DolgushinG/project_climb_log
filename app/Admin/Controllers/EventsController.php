@@ -370,6 +370,7 @@ class EventsController extends Controller
                     $form->radio('mode','Настройка формата')
                         ->options($formats)->when(1, function (Form $form) {
                             $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->attribute('inputmode', 'none')->value(10);
+                            $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN_OPEN_AND_CLOSE);
                         })->when(2, function (Form $form) {
                             $form->currency('amount_point_flash','Балл за флэш')->default(1)->symbol('');
                             $form->currency('amount_point_redpoint','Балл за редпоинт')->default(0.9)->symbol('');

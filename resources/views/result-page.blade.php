@@ -31,8 +31,15 @@
                                     <tr>
                                         <th scope="col">№</th>
                                         <th id="grade" style="font-size: 11px" scope="col">Категория</th>
-                                        <th scope="col">Не пролез</th>
+                                        @if($event->is_zone_show)
+                                            <th scope="col">Нет</th>
+                                        @else
+                                            <th scope="col">Не пролез</th>
+                                        @endif
                                         <th scope="col">Флэш</th>
+                                        @if($event->is_zone_show)
+                                            <th scope="col">Зона</th>
+                                        @endif
                                         <th scope="col">Редпоинт</th>
                                     </tr>
                                     </thead>
@@ -58,8 +65,13 @@
                                                            name="{{$route->count}}" id="failed-{{$route->count}}"
                                                            autocomplete="off">
                                                 @endif
-                                                <label class="btn btn-outline-danger btn-failed"
-                                                       for="failed-{{$route->count}}">Не пролез</label>
+                                                    @if($event->is_zone_show)
+                                                        <label class="btn btn-outline-danger btn-failed"
+                                                               for="failed-{{$route->count}}">Нет</label>
+                                                    @else
+                                                        <label class="btn btn-outline-danger btn-failed"
+                                                               for="failed-{{$route->count}}">Не пролез</label>
+                                                    @endif
                                             </td>
                                             <td>
                                                 @if($result_participant)
@@ -85,6 +97,29 @@
                                                 <label class="btn btn-outline-success  btn-flash"
                                                        for="flash-{{$route->count}}">FLASH</label>
                                             </td>
+                                            @if($event->is_zone_show)
+                                                <td>
+                                                    @if($result_participant)
+                                                        @if($result_participant[$index]['attempt'] == '3')
+                                                            <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                                   name="{{$route->count}}" id="zone-{{$route->count}}"
+                                                                   autocomplete="off" checked>
+                                                        @else
+                                                            <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                                   name="{{$route->count}}" id="zone-{{$route->count}}"
+                                                                   autocomplete="off">
+                                                        @endif
+
+                                                    @else
+                                                        <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                               name="{{$route->count}}" id="zone-{{$route->count}}"
+                                                               autocomplete="off">
+                                                    @endif
+                                                    <label class="btn btn-outline-secondary btn-failed"
+                                                           for="zone-{{$route->count}}">Зона</label>
+                                                </td>
+                                            @endif
+
                                             <td>
                                                 @if($result_participant)
                                                     @if($result_participant[$index]['attempt'] == '2')
