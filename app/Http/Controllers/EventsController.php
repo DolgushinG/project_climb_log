@@ -622,7 +622,6 @@ class EventsController extends Controller
         foreach ($grades as $route){
             $route_class = new stdClass();
             $route_class->grade = $route->grade;
-            $route_class->zone = $route->zone;
             $route_class->count = $route->route_id;
             $routes[$route->route_id] = $route_class;
         }

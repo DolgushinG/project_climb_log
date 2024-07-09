@@ -340,7 +340,12 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $users[$index]['amount_passed_redpoint'] = 'Баллы за трассу [за флеш][за зону]';
                     $routes_event = Route::where('event_id', $this->event_id)->get();
                     foreach ($routes_event as $index2 => $route) {
-                        $users[$index]['route_result_' . $index2] = $route->value.' ['.$route->flash_value.']['.$route->zone.']';
+                        if($event->is_zone_show){
+                            $users[$index]['route_result_' . $index2] = $route->value.' ['.$route->flash_value.']['.$route->zone.']';
+                        } else {
+                            $users[$index]['route_result_' . $index2] = $route->value.' ['.$route->flash_value.']';
+                        }
+
                     }
                 }
             } else {
