@@ -307,12 +307,6 @@ class AdminTablesSeeder extends Seeder
                     "slug" => "owner.payments",
                     "http_method" => "",
                     "http_path" => "/owner-payments*"
-                ],
-                [
-                    "name" => "Backup",
-                    "slug" => "ext.backup",
-                    "http_method" => "",
-                    "http_path" => "/backup*"
                 ]
             ]
         );
