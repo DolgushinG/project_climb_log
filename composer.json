@@ -29,7 +29,8 @@
         "socialiteproviders/telegram": "^4.1",
         "socialiteproviders/vkontakte": "^5.0",
         "socialiteproviders/yandex": "^4.1",
-        "spatie/laravel-activitylog": "^4.7"
+        "spatie/laravel-activitylog": "^4.7",
+        "spatie/laravel-backup": "7.0"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

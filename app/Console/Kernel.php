@@ -18,6 +18,9 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('queue:work --stop-when-empty')->everyMinute()->withoutOverlapping();
         // $schedule->command('queue:work')->everyMinute()->withoutOverlapping();
+        $schedule->command('backup:clean')->daily()->at('01:00');
+        $schedule->command('backup:run --only-db')->daily()->at('02:00');
+        $schedule->command('backup:monitor')->daily()->at('03:00');
         $schedule->command('events:update-status')->hourly();
         $schedule->command('participant:update-reg-status')->hourly();
         $schedule->command('sets:update-sets-participant')->everyTenMinutes();

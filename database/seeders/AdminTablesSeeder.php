@@ -185,6 +185,14 @@ class AdminTablesSeeder extends Seeder
                     "icon" => "fa-money",
                     "uri" => "owner-payments",
                     "permission" => "owner.payments"
+                ],
+                [
+                    "parent_id" => 0,
+                    "order" => 22,
+                    "title" => "Backup",
+                    "icon" => "fa-copy",
+                    "uri" => "backup",
+                    "permission" => NULL
                 ]
             ]
         );
@@ -352,10 +360,6 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 1,
                     "menu_id" => 19
-                ],
-                [
-                    "role_id" => 1,
-                    "menu_id" => 22
                 ],
                 [
                     "role_id" => 2,

@@ -26,6 +26,7 @@ jobs:
             git checkout production
             git reset --hard
             git pull
+            /usr/local/bin/composer install
             /usr/bin/php artisan down
             /usr/bin/php artisan migrate
             /usr/bin/php artisan optimize
