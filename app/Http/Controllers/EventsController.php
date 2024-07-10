@@ -601,11 +601,12 @@ class EventsController extends Controller
                 ->where('result_qualification_classic.active', '=', 1)
                 ->select(
                     'users.id',
-                    'users.gender',
-                )->get();
-            foreach ($participants as $participant) {
-                Event::update_participant_place($event, $participant->id, $participant->gender);
-            }
+                )->get()->pluck('id');
+
+//            foreach ($participants as $participant) {
+//                Event::update_participant_place($event, $participant->id, $participant->gender);
+//            }
+            ResultQualificationClassic::update_places_participant_in_qualification($event_id, $participants, $gender);
         }
 //        Event::refresh_final_points_all_participant($event);
         UpdateResultParticipants::dispatch($event_id);

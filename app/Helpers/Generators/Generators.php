@@ -2,6 +2,7 @@
 
 namespace App\Helpers\Generators;
 
+use App\Jobs\UpdateRouteCoefficientParticipants;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ResultQualificationClassic;
@@ -109,15 +110,11 @@ class Generators
             $event = Event::find($event_id);
 
             $type_group_routes = ['beginner', 'middle', 'pro'];
-
             foreach ($active_participants as $active_participant){
                 $result_route_qualification_classic = array();
                 $info_routes = Route::where('event_id', $event_id)->get();
                 $group = $type_group_routes[rand(0,2)];
                 foreach ($info_routes as $route){
-                    if($event->mode == 2){
-                        (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($event_id, $route->route_id, $owner_id, $active_participant->gender);
-                    }
                     $attempt = Grades::getAttemptFromGrades($route->grade, $group);
                     $result_route_qualification_classic[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route->route_id,'attempt' => $attempt,'grade' => $route->grade, 'created_at' => Carbon::now());
                 }
@@ -125,6 +122,10 @@ class Generators
                 $participant->result_for_edit = $result_route_qualification_classic;
                 $participant->save();
                 DB::table('result_route_qualification_classic')->insert($result_route_qualification_classic);
+            }
+            if($event->mode == 2){
+                UpdateRouteCoefficientParticipants::dispatch($event_id, 'male');
+                UpdateRouteCoefficientParticipants::dispatch($event_id, 'female');
             }
         }
 
