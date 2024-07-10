@@ -479,17 +479,20 @@ class EventsController extends Controller
         if(!$event || !$event->is_send_result_state){
             return response()->json(['success' => false, 'message' => 'Регистрация была закрыта'], 422);
         }
+        $event_id = $event->id;
         $user_id = $request->user_id;
+        $format = $event->mode;
+        $amount = $event->mode_amount_routes;
         # Если не дан доступ из админки к редактированию то запрещать повторную отправку
         if(!$event->is_access_user_edit_result){
-            $participant_active = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
+            $participant_active = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $event_id)->first();
             if (!$participant_active){
                 return response()->json(['success' => false, 'message' => 'Результаты уже были добавлены или отсутствует регистрация'], 422);
             }
         } else {
-            $this->if_exist_result_update_point($request->event_id, $user_id);
+            $this->if_exist_result_update_point($event_id, $user_id);
         }
-        $count_routes = Grades::where('event_id', $request->event_id)->first();
+        $count_routes = Grades::where('event_id', $event_id)->first();
         if (!$count_routes){
             return response()->json(['success' => false, 'message' => 'По данном соревнование не найдены трассы'], 422);
         }
@@ -507,44 +510,44 @@ class EventsController extends Controller
             return response()->json(['success' => false, 'message' => 'Необходимо отметить все трассы'], 422);
         }
         $gender = User::find($user_id)->gender;
-        $format = Event::find($request->event_id)->mode;
+
         $data = array();
         foreach ($request->result as $result) {
             $category = $result[2];
             if (str_contains($result[0], 'flash') && $result[1] == "true") {
                 $route_id = str_replace("flash-","", $result[0]);
                 $attempt = 1;
-                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $request->owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'redpoint') && $result[1] == "true") {
                 $route_id = str_replace("redpoint-","", $result[0]);
                 $attempt = 2;
-                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'zone') && $result[1] == "true") {
                 $route_id = str_replace("zone-","", $result[0]);
                 $attempt = 3;
-                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'failed') && $result[1] == "true") {
                 $route_id = str_replace("failed-","", $result[0]);
                 $attempt = 0;
-                $data[] = array('grade' => $category, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $request->event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
         }
         $final_data = array();
         if($format == 2){
-            UpdateRouteCoefficientParticipants::dispatch($request->event_id, $gender);
-            $active_participant = ResultQualificationClassic::participant_with_result($request->event_id, $gender);
+            UpdateRouteCoefficientParticipants::dispatch($event_id, $gender);
+            $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
         }
         $final_data_only_passed_route = array();
         foreach ($data as $route){
             # Варианты форматов подсчета баллов
-            $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $request->event_id)->first();
-            $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $request->event_id);
+            $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
+            $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event_id);
             # Формат все трассы считаем сразу
             if($format == 2) {
-                $count_route_passed = ResultRouteQualificationClassic::counting_result($request->event_id, $route['route_id'], $gender);
+                $count_route_passed = ResultRouteQualificationClassic::counting_result($event_id, $route['route_id'], $gender);
 //                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
                 $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
                 $route['points'] = $coefficient * $value_route;
@@ -564,12 +567,11 @@ class EventsController extends Controller
                 return $a['points'] <=> $b['points'];
             });
             $points = 0;
-            $amount = Event::find($request->event_id)->mode_amount_routes;
             $lastElems = array_slice($final_data_only_passed_route, -$amount, $amount);
             foreach ($lastElems as $lastElem) {
                 $points += $lastElem['points'];
             }
-            $participant = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $request->event_id)->first();
+            $participant = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $event_id)->first();
             $participant->points = $points;
             $participant->active = 1;
             $participant->save();
@@ -579,21 +581,21 @@ class EventsController extends Controller
         }
 
         # Добавление json результатов для редактирование в админке
-        $participant = ResultQualificationClassic::where('event_id', $request->event_id)->where('user_id', $request->user_id)->first();
+        $participant = ResultQualificationClassic::where('event_id', $event_id)->where('user_id', $request->user_id)->first();
         $participant->result_for_edit = $final_data;
         $participant->save();
-        $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $request->user_id)->first();
+        $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $request->user_id)->first();
         if($event->is_access_user_edit_result && $result_classic_for_edit){
             foreach ($final_data as $data){
-                $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $data['user_id'])->where('route_id', $data['route_id'])->first();
-                $result_classic_for_edit->attempt = $data['attempt'];
-                $result_classic_for_edit->save();
+                $result = ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $data['user_id'])->where('route_id', $data['route_id'])->first();
+                $result->attempt = $data['attempt'];
+                $result->save();
             }
         } else {
             $result = ResultRouteQualificationClassic::insert($final_data);
             $participants = User::query()
                 ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
-                ->where('result_qualification_classic.event_id', '=', $request->event_id)
+                ->where('result_qualification_classic.event_id', '=', $event_id)
                 ->select(
                     'users.id',
                     'users.gender',
@@ -603,14 +605,13 @@ class EventsController extends Controller
             }
         }
 //        Event::refresh_final_points_all_participant($event);
-        UpdateResultParticipants::dispatch($request->event_id);
-        $categories = ParticipantCategory::where('event_id', $request->event_id)->get();
+        UpdateResultParticipants::dispatch($event_id);
+        $categories = ParticipantCategory::where('event_id', $event_id)->get();
         foreach ($categories as $category) {
-            Cache::forget('result_male_cache_'.$category->category.'_event_id_'.$request->event_id);
-            Cache::forget('result_female_cache_'.$category->category.'_event_id_'.$request->event_id);
+            Cache::forget('result_male_cache_'.$category->category.'_event_id_'.$event_id);
+            Cache::forget('result_female_cache_'.$category->category.'_event_id_'.$event_id);
         }
         if ($result) {
-            $event = Event::find($request->event_id);
             return response()->json(['success' => true, 'message' => 'Успешная внесение результатов', 'link' => $event->link], 201);
         } else {
             return response()->json(['success' => false, 'message' => 'ошибка внесение результатов'], 422);
