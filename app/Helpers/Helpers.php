@@ -22,6 +22,15 @@ class Helpers
         return true;
     }
 
+    public static function remove_key($array, $key)
+    {
+        foreach (array_keys($array) as $index)
+        {
+            unset($array[$index][$key]);
+        }
+        return $array;
+    }
+
     public static function formating_string($string)
     {
         return preg_replace('/[^ \w-]/', '', $string);

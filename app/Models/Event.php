@@ -461,7 +461,14 @@ class Event extends Model
         }
 
     }
-
+    public static function update_attempt_for_participant($event_id, $final_data)
+    {
+        foreach ($final_data as $data){
+            $result = ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $data['user_id'])->where('route_id', $data['route_id'])->first();
+            $result->attempt = $data['attempt'];
+            $result->save();
+        }
+    }
     public function insert_final_participant_result($event_id, $points, $user_id)
     {
         $final_participant_result = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first();

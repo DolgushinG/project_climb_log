@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helpers;
 use App\Http\Requests\StoreRequest;
+use App\Jobs\UpdateAttemptInRoutesParticipants;
 use App\Jobs\UpdateResultParticipants;
 use App\Jobs\UpdateRouteCoefficientParticipants;
 use App\Models\Event;
@@ -483,6 +484,7 @@ class EventsController extends Controller
         $user_id = $request->user_id;
         $format = $event->mode;
         $amount = $event->mode_amount_routes;
+        $owner_id = $request->owner_id;
         # Если не дан доступ из админки к редактированию то запрещать повторную отправку
         if(!$event->is_access_user_edit_result){
             $participant_active = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $event_id)->first();
@@ -517,22 +519,22 @@ class EventsController extends Controller
             if (str_contains($result[0], 'flash') && $result[1] == "true") {
                 $route_id = str_replace("flash-","", $result[0]);
                 $attempt = 1;
-                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $request->owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'redpoint') && $result[1] == "true") {
                 $route_id = str_replace("redpoint-","", $result[0]);
                 $attempt = 2;
-                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'zone') && $result[1] == "true") {
                 $route_id = str_replace("zone-","", $result[0]);
                 $attempt = 3;
-                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'failed') && $result[1] == "true") {
                 $route_id = str_replace("failed-","", $result[0]);
                 $attempt = 0;
-                $data[] = array('grade' => $category, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $request->owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $category, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
         }
         $final_data = array();
@@ -576,21 +578,15 @@ class EventsController extends Controller
             $participant->active = 1;
             $participant->save();
         }
-        foreach ($final_data as $index => $data){
-            $final_data[$index] = collect($data)->except('points')->toArray();
-        }
-
-        # Добавление json результатов для редактирование в админке
+        $final_data = Helpers::remove_key($final_data, 'points');
+        # Добавление json результатов для редактирования в админке
         $participant = ResultQualificationClassic::where('event_id', $event_id)->where('user_id', $request->user_id)->first();
         $participant->result_for_edit = $final_data;
         $participant->save();
+
         $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $request->user_id)->first();
         if($event->is_access_user_edit_result && $result_classic_for_edit){
-            foreach ($final_data as $data){
-                $result = ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $data['user_id'])->where('route_id', $data['route_id'])->first();
-                $result->attempt = $data['attempt'];
-                $result->save();
-            }
+            UpdateAttemptInRoutesParticipants::dispatch($event_id, $final_data);
         } else {
             $result = ResultRouteQualificationClassic::insert($final_data);
             $participants = User::query()
