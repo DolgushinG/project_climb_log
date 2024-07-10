@@ -533,7 +533,9 @@ class EventsController extends Controller
             }
         }
         $final_data = array();
-        UpdateRouteCoefficientParticipants::dispatch($request->event_id, $gender);
+        if($format == 2){
+            UpdateRouteCoefficientParticipants::dispatch($request->event_id, $gender);
+        }
         $final_data_only_passed_route = array();
         foreach ($data as $route){
             # Варианты форматов подсчета баллов
@@ -647,7 +649,10 @@ class EventsController extends Controller
             $details['event_start_date'] = $event->start_date;
             $details['event_url'] = env('APP_URL').$event->link;
             $details['event_id'] = $event->id;
-            Mail::to($request->email)->queue(new \App\Mail\AllResultExcelFIle($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($request->email)->queue(new \App\Mail\AllResultExcelFIle($details));
+            }
+
             return response()->json(['success' => true, 'message' => 'Успешная отправка'], 200);
         } catch (Exception $e) {
             Log::error($e->getMessage());

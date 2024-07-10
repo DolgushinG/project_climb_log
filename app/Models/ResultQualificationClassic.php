@@ -572,7 +572,9 @@ class ResultQualificationClassic extends Model
                 $details['info_payment'] = $event->info_payment;
             }
             $details['image'] = $event->image;
-            Mail::to($user->email)->queue(new \App\Mail\TakePart($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user->email)->queue(new \App\Mail\TakePart($details));
+            }
         }
 
     }
@@ -585,7 +587,10 @@ class ResultQualificationClassic extends Model
             $details['number_sets'] = $job->number_sets;
             $details['event_start_date'] = $event->start_date;
             $details['event_url'] = env('APP_URL').$event->link;
-            Mail::to($user->email)->queue(new \App\Mail\ListPending($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user->email)->queue(new \App\Mail\ListPending($details));
+            }
+
         }
 
     }
@@ -598,7 +603,9 @@ class ResultQualificationClassic extends Model
             $details['event_start_date'] = $event->start_date;
             $details['event_url'] = env('APP_URL').$event->link;
 //            $details['image'] = $event->image;
-            Mail::to($user->email)->queue(new \App\Mail\ConfirmBill($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user->email)->queue(new \App\Mail\ConfirmBill($details));
+            }
         }
 
     }
@@ -611,7 +618,10 @@ class ResultQualificationClassic extends Model
             $details['message'] = $message;
             $details['middlename'] = $user['middlename'];
             $details['climbing_gym_name'] = $climbing_gym_name;
-            Mail::to($user['email'])->queue(new \App\Mail\MessageParticipants($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user['email'])->queue(new \App\Mail\MessageParticipants($details));
+            }
+
         }
 
     }
