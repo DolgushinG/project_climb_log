@@ -585,17 +585,16 @@ class EventsController extends Controller
             }
         } else {
             $result = ResultRouteQualificationClassic::insert($final_data);
-        }
-
-        $participants = User::query()
-            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
-            ->where('result_qualification_classic.event_id', '=', $request->event_id)
-            ->select(
-                'users.id',
-                'users.gender',
-            )->get();
-        foreach ($participants as $participant) {
-            Event::update_participant_place($event, $participant->id, $participant->gender);
+            $participants = User::query()
+                ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+                ->where('result_qualification_classic.event_id', '=', $request->event_id)
+                ->select(
+                    'users.id',
+                    'users.gender',
+                )->get();
+            foreach ($participants as $participant) {
+                Event::update_participant_place($event, $participant->id, $participant->gender);
+            }
         }
 //        Event::refresh_final_points_all_participant($event);
         UpdateResultParticipants::dispatch($request->event_id);
