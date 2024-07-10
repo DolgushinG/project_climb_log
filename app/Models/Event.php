@@ -174,7 +174,7 @@ class Event extends Model
         if ($routes_id_passed_with_red_point->isNotEmpty()) {
             $sum_all_coefficients_rp = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_' . $participant->gender);
             if($sum_all_coefficients_rp == 0){
-                (new \App\Models\EventAndCoefficientRoute)->update_coefficient_for_all_route($event->id, $participant->gender);
+                Event::update_coefficient_for_all_route($event->id, $participant->gender);
                 $sum_all_coefficients_rp = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_' . $participant->gender);
             }
             $result_red_point = $counting_routes_with_red_point_passed * $custom_red_point;
@@ -185,7 +185,7 @@ class Event extends Model
         if ($routes_id_passed_with_flash->isNotEmpty()) {
             $sum_all_coefficients_flash = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_flash)->get()->sum('coefficient_' . $participant->gender);
             if($sum_all_coefficients_flash == 0){
-                (new \App\Models\EventAndCoefficientRoute)->update_coefficient_for_all_route($event->id, $participant->gender);
+                Event::update_coefficient_for_all_route($event->id, $participant->gender);
                 $sum_all_coefficients_flash = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_' . $participant->gender);
             }
             $result_flash = $counting_routes_with_flash_passed * $custom_flash;
@@ -811,5 +811,31 @@ class Event extends Model
                 ResultQualificationClassic::update_global_places_in_qualification_classic($event->id, $participants_for_update);
             }
         }
+
+
+    }
+    public static function update_coefficient_for_all_route($event_id, $gender)
+    {
+        $result_with_routes = Route::where('event_id', $event_id)->get();
+        foreach ($result_with_routes as $routes){
+            $record = EventAndCoefficientRoute::where('event_id', '=', $event_id)->where('route_id', '=', $routes->route_id)->first();
+            if ($record === null) {
+                $event_and_coefficient_route = new EventAndCoefficientRoute;
+            } else {
+                $event_and_coefficient_route = $record;
+            }
+            $coefficient = ResultRouteQualificationClassic::get_coefficient(intval($event_id),  $routes->route_id, $gender);
+            $event_and_coefficient_route->event_id = $event_id;
+            $event_and_coefficient_route->route_id = $routes->route_id;
+            $event_and_coefficient_route->owner_id = $routes->owner_id;
+            if($gender === 'male') {
+                $event_and_coefficient_route->coefficient_male = $coefficient;
+            } else {
+                $event_and_coefficient_route->coefficient_female = $coefficient;
+            }
+            $event_and_coefficient_route->save();
+        }
+
+
     }
 }

@@ -33,28 +33,4 @@ class EventAndCoefficientRoute extends Model
         $event_and_coefficient_route->save();
     }
 
-    public function update_coefficient_for_all_route($event_id, $gender)
-    {
-        $result_with_routes = Route::where('event_id', $event_id)->get();
-        foreach ($result_with_routes as $routes){
-            $record = EventAndCoefficientRoute::where('event_id', '=', $event_id)->where('route_id', '=', $routes->route_id)->first();
-            if ($record === null) {
-                $event_and_coefficient_route = new EventAndCoefficientRoute;
-            } else {
-                $event_and_coefficient_route = $record;
-            }
-            $coefficient = ResultRouteQualificationClassic::get_coefficient(intval($event_id),  $routes->route_id, $gender);
-            $event_and_coefficient_route->event_id = $event_id;
-            $event_and_coefficient_route->route_id = $routes->route_id;
-            $event_and_coefficient_route->owner_id = $routes->owner_id;
-            if($gender === 'male') {
-                $event_and_coefficient_route->coefficient_male = $coefficient;
-            } else {
-                $event_and_coefficient_route->coefficient_female = $coefficient;
-            }
-            $event_and_coefficient_route->save();
-        }
-
-
-    }
 }

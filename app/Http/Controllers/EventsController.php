@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Helpers;
 use App\Http\Requests\StoreRequest;
 use App\Jobs\UpdateResultParticipants;
+use App\Jobs\UpdateRouteCoefficientParticipants;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
@@ -532,6 +533,7 @@ class EventsController extends Controller
             }
         }
         $final_data = array();
+        UpdateRouteCoefficientParticipants::dispatch($request->event_id, $gender);
         $final_data_only_passed_route = array();
         foreach ($data as $route){
             # Варианты форматов подсчета баллов
@@ -539,7 +541,7 @@ class EventsController extends Controller
             $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $request->event_id);
             # Формат все трассы считаем сразу
             if($format == 2) {
-                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
+//                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
                 $coefficient = ResultRouteQualificationClassic::get_coefficient($route['event_id'], $route['route_id'], $gender);
                 $route['points'] = $coefficient * $value_route;
                 (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id']);
