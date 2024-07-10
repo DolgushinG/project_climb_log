@@ -817,6 +817,7 @@ class Event extends Model
     public static function update_coefficient_for_all_route($event_id, $gender)
     {
         $result_with_routes = Route::where('event_id', $event_id)->get();
+        $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
         foreach ($result_with_routes as $routes){
             $record = EventAndCoefficientRoute::where('event_id', '=', $event_id)->where('route_id', '=', $routes->route_id)->first();
             if ($record === null) {
@@ -824,7 +825,8 @@ class Event extends Model
             } else {
                 $event_and_coefficient_route = $record;
             }
-            $coefficient = ResultRouteQualificationClassic::get_coefficient(intval($event_id),  $routes->route_id, $gender);
+            $count_route_passed = ResultRouteQualificationClassic::counting_result($event_id, $routes->route_id, $gender);
+            $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
             $event_and_coefficient_route->event_id = $event_id;
             $event_and_coefficient_route->route_id = $routes->route_id;
             $event_and_coefficient_route->owner_id = $routes->owner_id;

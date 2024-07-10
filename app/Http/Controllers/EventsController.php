@@ -535,6 +535,7 @@ class EventsController extends Controller
         $final_data = array();
         if($format == 2){
             UpdateRouteCoefficientParticipants::dispatch($request->event_id, $gender);
+            $active_participant = ResultQualificationClassic::participant_with_result($request->event_id, $gender);
         }
         $final_data_only_passed_route = array();
         foreach ($data as $route){
@@ -543,8 +544,9 @@ class EventsController extends Controller
             $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $request->event_id);
             # Формат все трассы считаем сразу
             if($format == 2) {
+                $count_route_passed = ResultRouteQualificationClassic::counting_result($request->event_id, $route['route_id'], $gender);
 //                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
-                $coefficient = ResultRouteQualificationClassic::get_coefficient($route['event_id'], $route['route_id'], $gender);
+                $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
                 $route['points'] = $coefficient * $value_route;
                 (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id']);
             } else if($format == 1) {
