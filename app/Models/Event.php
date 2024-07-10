@@ -173,6 +173,10 @@ class Event extends Model
         $counting_routes_with_flash_passed = count($routes_id_passed_with_flash);
         if ($routes_id_passed_with_red_point->isNotEmpty()) {
             $sum_all_coefficients_rp = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_' . $participant->gender);
+            if($sum_all_coefficients_rp == 0){
+                (new \App\Models\EventAndCoefficientRoute)->update_coefficient_for_all_route($event->id, $participant->gender);
+                $sum_all_coefficients_rp = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_' . $participant->gender);
+            }
             $result_red_point = $counting_routes_with_red_point_passed * $custom_red_point;
             $finish_red_point_result = ($sum_all_coefficients_rp * $result_red_point) / $counting_routes_with_red_point_passed;
         } else {
@@ -180,6 +184,10 @@ class Event extends Model
         }
         if ($routes_id_passed_with_flash->isNotEmpty()) {
             $sum_all_coefficients_flash = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_flash)->get()->sum('coefficient_' . $participant->gender);
+            if($sum_all_coefficients_flash == 0){
+                (new \App\Models\EventAndCoefficientRoute)->update_coefficient_for_all_route($event->id, $participant->gender);
+                $sum_all_coefficients_flash = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_' . $participant->gender);
+            }
             $result_flash = $counting_routes_with_flash_passed * $custom_flash;
             $finish_flash_result = ($sum_all_coefficients_flash * $result_flash) / $counting_routes_with_flash_passed;
         } else {
@@ -221,7 +229,6 @@ class Event extends Model
         } else {
             $finish_zone_result = 0;
         }
-
         return $finish_flash_result + $finish_red_point_result + $finish_zone_result;
     }
 

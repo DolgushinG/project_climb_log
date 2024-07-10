@@ -324,19 +324,21 @@ class ResultQualificationController extends Controller
         }
         $result = ResultRouteQualificationClassic::where('event_id', $event->id)->first();
         if ($event->is_auto_categories && $result) {
-//            $grid->column('is_recheck', 'Результат с вопросом')->using([0 => 'ОК', 1 => 'Внимание'])->display(function ($title, $column) {
-//                if ($this->is_recheck == 1) {
-//                    return $column->label('warning');
-//                } else {
-//                    return $column->label('success');
-//                }
-//            });
             $states = [
                 'on' => ['value' => 1, 'text' => 'Внимание', 'color' => 'warning'],
                 'off' => ['value' => 0, 'text' => 'OK', 'color' => 'success'],
             ];
 
-            $grid->column('is_recheck', 'Результат с вопросом')->switch($states);
+            $grid->column('is_recheck', 'Результат с вопросом')->switch($states)->display(function ($state) {
+                $result = ResultQualificationClassic::find($this->id);
+                if($result){
+                    $result = ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+                }
+                if (!$result) {
+                    return 'Нет результата';
+                }
+                return $state;
+            });;
         }
         if ($event->is_open_main_rating) {
             $grid->column('is_other_event', 'Перенесен из других сорев')->display(function ($state) {
