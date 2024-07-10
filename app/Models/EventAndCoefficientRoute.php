@@ -16,12 +16,14 @@ class EventAndCoefficientRoute extends Model
 
     public function update_coefficitient($event_id, $route_id, $owner_id, $gender){
         $record = EventAndCoefficientRoute::where('event_id', '=', $event_id)->where('route_id', '=', $route_id)->first();
+        $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
         if ($record === null) {
             $event_and_coefficient_route = new EventAndCoefficientRoute;
         } else {
             $event_and_coefficient_route = $record;
         }
-        $coefficient = ResultRouteQualificationClassic::get_coefficient(intval($event_id), intval($route_id), $gender);
+        $count_route_passed = ResultRouteQualificationClassic::counting_result($event_id, $route_id, $gender);
+        $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
         $event_and_coefficient_route->event_id = $event_id;
         $event_and_coefficient_route->route_id = $route_id;
         $event_and_coefficient_route->owner_id = $owner_id;
@@ -32,4 +34,5 @@ class EventAndCoefficientRoute extends Model
         }
         $event_and_coefficient_route->save();
     }
+
 }

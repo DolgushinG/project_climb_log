@@ -185,14 +185,6 @@ class AdminTablesSeeder extends Seeder
                     "icon" => "fa-money",
                     "uri" => "owner-payments",
                     "permission" => "owner.payments"
-                ],
-                [
-                    "parent_id" => 0,
-                    "order" => 22,
-                    "title" => "Backup",
-                    "icon" => "fa-copy",
-                    "uri" => "backup",
-                    "permission" => NULL
                 ]
             ]
         );

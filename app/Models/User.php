@@ -147,7 +147,10 @@ class User extends Authenticatable
             $details['device'] = $device;
             $details['ip'] = $ip;
             $details['time'] = $user->updated_at;
-            Mail::to($user->email)->queue(new \App\Mail\AuthNewDevice($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user->email)->queue(new \App\Mail\AuthNewDevice($details));
+            }
+
         }
     }
     public static function send_auth_socialize($user, $socialize)
@@ -157,7 +160,10 @@ class User extends Authenticatable
             $details['middlename'] = $user->middlename;
             $details['socialize'] = $socialize;
             $details['time'] = $user->updated_at;
-            Mail::to($user->email)->queue(new \App\Mail\AuthSocialize($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user->email)->queue(new \App\Mail\AuthSocialize($details));
+            }
+
         }
 
     }

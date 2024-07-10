@@ -209,30 +209,6 @@ class ResultQualificationClassic extends Model
         return $user_places;
     }
 
-
-    public static function get_places_team_participant_in_qualification($event_id, $filter_users, $user_id, $team, $get_place_user = false, $global = false){
-
-        if($global){
-            $column_points = 'global_points';
-        } else {
-            $column_points = 'points';
-        }
-        $users_id = User::whereIn('id', $filter_users)->where('team', $team)->pluck('id');
-        $all_participant_event = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->orderBy($column_points, 'DESC')->get();
-        $user_places = array();
-        foreach ($all_participant_event as $index => $user){
-            $user_places[$user->user_id] = $index+1;
-        }
-        if ($get_place_user){
-            if(isset($user_places[$user_id])){
-                return $user_places[$user_id];
-            } else {
-                return null;
-            }
-        }
-
-        return $user_places;
-    }
     public static function participant_with_result($event_id, $gender, $category_id=null)
     {
 
@@ -572,7 +548,9 @@ class ResultQualificationClassic extends Model
                 $details['info_payment'] = $event->info_payment;
             }
             $details['image'] = $event->image;
-            Mail::to($user->email)->queue(new \App\Mail\TakePart($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user->email)->queue(new \App\Mail\TakePart($details));
+            }
         }
 
     }
@@ -585,7 +563,10 @@ class ResultQualificationClassic extends Model
             $details['number_sets'] = $job->number_sets;
             $details['event_start_date'] = $event->start_date;
             $details['event_url'] = env('APP_URL').$event->link;
-            Mail::to($user->email)->queue(new \App\Mail\ListPending($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user->email)->queue(new \App\Mail\ListPending($details));
+            }
+
         }
 
     }
@@ -598,7 +579,9 @@ class ResultQualificationClassic extends Model
             $details['event_start_date'] = $event->start_date;
             $details['event_url'] = env('APP_URL').$event->link;
 //            $details['image'] = $event->image;
-            Mail::to($user->email)->queue(new \App\Mail\ConfirmBill($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user->email)->queue(new \App\Mail\ConfirmBill($details));
+            }
         }
 
     }
@@ -611,7 +594,10 @@ class ResultQualificationClassic extends Model
             $details['message'] = $message;
             $details['middlename'] = $user['middlename'];
             $details['climbing_gym_name'] = $climbing_gym_name;
-            Mail::to($user['email'])->queue(new \App\Mail\MessageParticipants($details));
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user['email'])->queue(new \App\Mail\MessageParticipants($details));
+            }
+
         }
 
     }

@@ -57,7 +57,7 @@ class ResultRouteQualificationClassic extends Model
                 return $event->amount_point_redpoint;
         }
     }
-    private static function counting_result($event_id, $route_id, $gender)
+    public static function counting_result($event_id, $route_id, $gender)
     {
         $users = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
@@ -75,9 +75,8 @@ class ResultRouteQualificationClassic extends Model
             ->toArray());
     }
 
-    public static function get_coefficient($event_id, $route_id, $gender){
-        $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
-        $count_route_passed = self::counting_result($event_id, $route_id, $gender);
+    public static function get_coefficient($active_participant, $count_route_passed){
+
         if ($count_route_passed == 0) {
             $count_route_passed = 1;
         }

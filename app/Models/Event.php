@@ -173,6 +173,10 @@ class Event extends Model
         $counting_routes_with_flash_passed = count($routes_id_passed_with_flash);
         if ($routes_id_passed_with_red_point->isNotEmpty()) {
             $sum_all_coefficients_rp = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_' . $participant->gender);
+            if($sum_all_coefficients_rp == 0){
+                Event::update_coefficient_for_all_route($event->id, $participant->gender);
+                $sum_all_coefficients_rp = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_' . $participant->gender);
+            }
             $result_red_point = $counting_routes_with_red_point_passed * $custom_red_point;
             $finish_red_point_result = ($sum_all_coefficients_rp * $result_red_point) / $counting_routes_with_red_point_passed;
         } else {
@@ -180,6 +184,10 @@ class Event extends Model
         }
         if ($routes_id_passed_with_flash->isNotEmpty()) {
             $sum_all_coefficients_flash = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_flash)->get()->sum('coefficient_' . $participant->gender);
+            if($sum_all_coefficients_flash == 0){
+                Event::update_coefficient_for_all_route($event->id, $participant->gender);
+                $sum_all_coefficients_flash = EventAndCoefficientRoute::where('event_id', '=', $event->id)->whereIn('route_id', $routes_id_passed_with_red_point)->get()->sum('coefficient_' . $participant->gender);
+            }
             $result_flash = $counting_routes_with_flash_passed * $custom_flash;
             $finish_flash_result = ($sum_all_coefficients_flash * $result_flash) / $counting_routes_with_flash_passed;
         } else {
@@ -221,7 +229,6 @@ class Event extends Model
         } else {
             $finish_zone_result = 0;
         }
-
         return $finish_flash_result + $finish_red_point_result + $finish_zone_result;
     }
 
@@ -454,7 +461,14 @@ class Event extends Model
         }
 
     }
-
+    public static function update_attempt_for_participant($event_id, $final_data)
+    {
+        foreach ($final_data as $data){
+            $result = ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $data['user_id'])->where('route_id', $data['route_id'])->first();
+            $result->attempt = $data['attempt'];
+            $result->save();
+        }
+    }
     public function insert_final_participant_result($event_id, $points, $user_id)
     {
         $final_participant_result = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $user_id)->first();
@@ -477,7 +491,7 @@ class Event extends Model
             $category_id = $final_participant_result->category_id;
         }
 
-        $users_for_filter = ResultQualificationClassic::where('event_id', $event->id)->pluck('user_id')->toArray();
+        $users_for_filter = ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->pluck('user_id')->toArray();
         $final_participant_result->user_place = ResultQualificationClassic::get_places_participant_in_qualification($event->id, $users_for_filter, $user_id, $gender, $category_id, true);
         $final_participant_result->save();
     }
@@ -804,5 +818,33 @@ class Event extends Model
                 ResultQualificationClassic::update_global_places_in_qualification_classic($event->id, $participants_for_update);
             }
         }
+
+
+    }
+    public static function update_coefficient_for_all_route($event_id, $gender)
+    {
+        $result_with_routes = Route::where('event_id', $event_id)->get();
+        $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
+        foreach ($result_with_routes as $routes){
+            $record = EventAndCoefficientRoute::where('event_id', '=', $event_id)->where('route_id', '=', $routes->route_id)->first();
+            if ($record === null) {
+                $event_and_coefficient_route = new EventAndCoefficientRoute;
+            } else {
+                $event_and_coefficient_route = $record;
+            }
+            $count_route_passed = ResultRouteQualificationClassic::counting_result($event_id, $routes->route_id, $gender);
+            $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
+            $event_and_coefficient_route->event_id = $event_id;
+            $event_and_coefficient_route->route_id = $routes->route_id;
+            $event_and_coefficient_route->owner_id = $routes->owner_id;
+            if($gender === 'male') {
+                $event_and_coefficient_route->coefficient_male = $coefficient;
+            } else {
+                $event_and_coefficient_route->coefficient_female = $coefficient;
+            }
+            $event_and_coefficient_route->save();
+        }
+
+
     }
 }
