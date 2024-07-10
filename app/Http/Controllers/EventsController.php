@@ -602,11 +602,29 @@ class EventsController extends Controller
                 ->select(
                     'users.id',
                 )->get()->pluck('id');
-
+            $categories = ParticipantCategory::where('event_id', '=', $event_id)->get();
+            if ($event->is_sort_group_final) {
+                foreach (['female', 'male'] as $gender) {
+                    foreach ($categories as $category) {
+                        $participants_for_update = ResultQualificationClassic::whereIn('user_id', $participants)
+                            ->where('category_id', $category->id)
+                            ->where('event_id', $event_id)
+                            ->where('gender', $gender)
+                            ->orderBy('points', 'DESC')
+                            ->get();
+                        ResultQualificationClassic::update_places_in_qualification_classic($event_id, $participants_for_update);
+                    }
+                }
+            } else {
+                foreach (['female', 'male'] as $gender){
+                    $participants_for_update = ResultQualificationClassic::whereIn('user_id', $participants)->where('event_id', '=', $event_id)->where('gender', $gender)->orderBy('points', 'DESC')->get();
+                    ResultQualificationClassic::update_places_in_qualification_classic($event_id, $participants_for_update);
+                }
+            }
 //            foreach ($participants as $participant) {
 //                Event::update_participant_place($event, $participant->id, $participant->gender);
 //            }
-            ResultQualificationClassic::update_places_participant_in_qualification($event_id, $participants, $gender);
+//            ResultQualificationClassic::update_places_participant_in_qualification($event_id, $participants, $gender);
         }
 //        Event::refresh_final_points_all_participant($event);
         UpdateResultParticipants::dispatch($event_id);

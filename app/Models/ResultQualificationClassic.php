@@ -209,58 +209,6 @@ class ResultQualificationClassic extends Model
         return $user_places;
     }
 
-    public static function update_places_participant_in_qualification($event_id, $filter_users, $gender, $category_id=null, $get_place_user = false, $global = false){
-
-        if($global){
-            $column_points = 'global_points';
-            $event = Event::find($event_id);
-            if($event->is_auto_categoies){
-                $column_category_id = 'global_category_id';
-            } else {
-                $column_category_id = 'category_id';
-            }
-
-        } else {
-            $column_points = 'points';
-            $column_category_id = 'category_id';
-        }
-        if($category_id){
-            $all_participant_event = ResultQualificationClassic::whereIn('user_id', $filter_users)->where('gender', '=', $gender)->where($column_category_id, '=', $category_id)->where('event_id', '=', $event_id)->orderBy($column_points, 'DESC')->get();
-        } else {
-            $all_participant_event = ResultQualificationClassic::whereIn('user_id', $filter_users)->where('gender', '=', $gender)->where('event_id', '=', $event_id)->orderBy($column_points, 'DESC')->get();
-        }
-        $user_places = array();
-        foreach ($all_participant_event as $index => $user){
-            $user_places[$user->user_id] = $index+1;
-            $user->user_place = $index+1;
-            $user->save();
-        }
-
-    }
-
-    public static function get_places_team_participant_in_qualification($event_id, $filter_users, $user_id, $team, $get_place_user = false, $global = false){
-
-        if($global){
-            $column_points = 'global_points';
-        } else {
-            $column_points = 'points';
-        }
-        $users_id = User::whereIn('id', $filter_users)->where('team', $team)->pluck('id');
-        $all_participant_event = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->orderBy($column_points, 'DESC')->get();
-        $user_places = array();
-        foreach ($all_participant_event as $index => $user){
-            $user_places[$user->user_id] = $index+1;
-        }
-        if ($get_place_user){
-            if(isset($user_places[$user_id])){
-                return $user_places[$user_id];
-            } else {
-                return null;
-            }
-        }
-
-        return $user_places;
-    }
     public static function participant_with_result($event_id, $gender, $category_id=null)
     {
 
