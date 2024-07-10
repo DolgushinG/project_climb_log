@@ -542,7 +542,9 @@ class EventsController extends Controller
             UpdateRouteCoefficientParticipants::dispatch($event_id, $gender);
             $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
         }
+
         $final_data_only_passed_route = array();
+        $points_for_mode_2 = 0;
         foreach ($data as $route){
             # Варианты форматов подсчета баллов
             $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
@@ -553,7 +555,7 @@ class EventsController extends Controller
 //                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
                 $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
                 $route['points'] = $coefficient * $value_route;
-                (new \App\Models\Event)->insert_final_participant_result($route['event_id'], $route['points'], $route['user_id']);
+                $points_for_mode_2 += $coefficient * $value_route;
             } else if($format == 1) {
                 $route['points'] = $value_route;
                 $route['value'] = $value_route;
@@ -563,6 +565,10 @@ class EventsController extends Controller
                 $final_data_only_passed_route[] = $route;
             }
         }
+        if($format == 2){
+            (new \App\Models\Event)->insert_final_participant_result($event_id, $points_for_mode_2, $user_id);
+        }
+
         # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
         if($format == 1){
             usort($final_data_only_passed_route, function($a, $b) {
@@ -580,11 +586,11 @@ class EventsController extends Controller
         }
         $final_data = Helpers::remove_key($final_data, 'points');
         # Добавление json результатов для редактирования в админке
-        $participant = ResultQualificationClassic::where('event_id', $event_id)->where('user_id', $request->user_id)->first();
+        $participant = ResultQualificationClassic::where('event_id', $event_id)->where('user_id', $user_id)->first();
         $participant->result_for_edit = $final_data;
         $participant->save();
 
-        $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $request->user_id)->first();
+        $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $user_id)->first();
         if($event->is_access_user_edit_result && $result_classic_for_edit){
             UpdateAttemptInRoutesParticipants::dispatch($event_id, $final_data);
         } else {
@@ -592,6 +598,7 @@ class EventsController extends Controller
             $participants = User::query()
                 ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
                 ->where('result_qualification_classic.event_id', '=', $event_id)
+                ->where('result_qualification_classic.active', '=', 1)
                 ->select(
                     'users.id',
                     'users.gender',

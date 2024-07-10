@@ -491,7 +491,7 @@ class Event extends Model
             $category_id = $final_participant_result->category_id;
         }
 
-        $users_for_filter = ResultQualificationClassic::where('event_id', $event->id)->pluck('user_id')->toArray();
+        $users_for_filter = ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->pluck('user_id')->toArray();
         $final_participant_result->user_place = ResultQualificationClassic::get_places_participant_in_qualification($event->id, $users_for_filter, $user_id, $gender, $category_id, true);
         $final_participant_result->save();
     }
