@@ -69,11 +69,14 @@ class SocialiteController extends Controller
         if($user){
             User::where('email', $email)->update([$socialite.'_id' => $socialite_user->getId()]);
         } else {
-            if(strlen($socialite_user->getAvatar()) > 266){
-                $avatar = null;
-            } else {
-                $avatar = $socialite_user->getAvatar();
+            if($socialite_user->getAvatar()){
+                if(strlen($socialite_user->getAvatar()) > 266){
+                    $avatar = null;
+                } else {
+                    $avatar = $socialite_user->getAvatar();
+                }
             }
+
             $user = \App\Models\User::updateOrCreate([
                 $socialite.'_id' => $socialite_user->getId()
             ], [
