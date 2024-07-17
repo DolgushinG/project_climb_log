@@ -595,6 +595,11 @@ class EventsController extends Controller
             UpdateAttemptInRoutesParticipants::dispatch($event_id, $final_data);
         } else {
             $result = ResultRouteQualificationClassic::insert($final_data);
+
+            # Обновить категорию если у него ее нет, к этому моменту у него есть результат, он full участник
+            Event::update_category_id($event, $user_id);
+
+            # Обновить места
             $participants = User::query()
                 ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
                 ->where('result_qualification_classic.event_id', '=', $event_id)
@@ -612,13 +617,13 @@ class EventsController extends Controller
                             ->where('gender', $gender)
                             ->orderBy('points', 'DESC')
                             ->get();
-                        ResultQualificationClassic::update_places_in_qualification_classic($event_id, $participants_for_update);
+                        ResultQualificationClassic::update_places_in_qualification_classic($event, $participants_for_update);
                     }
                 }
             } else {
                 foreach (['female', 'male'] as $gender){
                     $participants_for_update = ResultQualificationClassic::whereIn('user_id', $participants)->where('event_id', '=', $event_id)->where('gender', $gender)->orderBy('points', 'DESC')->get();
-                    ResultQualificationClassic::update_places_in_qualification_classic($event_id, $participants_for_update);
+                    ResultQualificationClassic::update_places_in_qualification_classic($event, $participants_for_update);
                 }
             }
 //            foreach ($participants as $participant) {
