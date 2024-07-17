@@ -140,8 +140,9 @@ class ResultQualificationClassic extends Model
         return ResultFranceSystemQualification::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
     }
 
-    public static function update_places_in_qualification_classic($event_id, $participants)
+    public static function update_places_in_qualification_classic($event, $participants)
     {
+        $event_id = $event->id;
         foreach ($participants as $index => $participant){
             $participant_result = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $participant->user_id)->first();
             $participant_result->user_place = $index+1;
