@@ -8,7 +8,9 @@
         <nav id="navbar" class="navbar">
             <ul>
                 <li><a class="nav-link scrollto active" href="{{route('main')}}">Главная</a></li>
-{{--                <li><a class="nav-link scrollto" href="#about">About</a></li>--}}
+                @if(!env('BLOG'))
+                    <li><a class="nav-link scrollto" href="{{route('posts')}}">Статьи</a></li>
+                @endif
 {{--                <li><a class="nav-link scrollto" href="#services">Services</a></li>--}}
 {{--                <li><a class="nav-link scrollto " href="#portfolio">Portfolio</a></li>--}}
 {{--                <li><a class="nav-link scrollto" href="#team">Team</a></li>--}}

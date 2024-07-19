@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Posts;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -21,7 +22,8 @@ class Controller extends BaseController
             $cities[] = array('name' => $city, 'count_event' => $count);
         }
         $events = Event::where('is_public', '=', 1)->get();
-        return view('main', compact(['events', 'cities']));
+        $recentlyPost = Posts::latest('created_at')->where('status', '=', 'PUBLISHED')->paginate(3);
+        return view('main', compact(['events','recentlyPost', 'cities']));
     }
 
     public function indexPrivacy()
@@ -32,5 +34,10 @@ class Controller extends BaseController
     public function indexPrivacyData()
     {
         return view('privacy.privatedata');
+    }
+
+    public function indexBlog()
+    {
+        return view('blog.index');
     }
 }

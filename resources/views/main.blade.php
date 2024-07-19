@@ -91,4 +91,7 @@
                 </div>
             </div>
         </section><!-- End Portfolio Section -->
+        @if(env('BLOG'))
+            @include('blog.homePosts')
+        @endif
 @endsection('content')

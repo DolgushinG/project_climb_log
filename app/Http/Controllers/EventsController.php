@@ -102,7 +102,7 @@ class EventsController extends Controller
             $google_iframe = $this->google_maps_iframe($event->address.','.$event->city);
             return view('welcome', compact(['event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
-            return view('404');
+            return view('errors.404');
         }
     }
 
@@ -201,7 +201,7 @@ class EventsController extends Controller
                 $index++;
             }
         } else {
-            return view('404');
+            return view('errors.404');
         }
 //        dd($days, $participants, $sets);
         return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
@@ -283,7 +283,7 @@ class EventsController extends Controller
                 $categories = $categories->toArray();
             }
         } else {
-            return view('404');
+            return view('errors.404');
         }
         return view('event.qualification_classic_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats', 'columns']));
     }
@@ -310,7 +310,7 @@ class EventsController extends Controller
                 }
             }
         } else {
-            return view('404');
+            return view('errors.404');
         }
         return view('event.france_system_qualification_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
@@ -340,7 +340,7 @@ class EventsController extends Controller
                 $result_each_routes['female'] = $users_female2;
             }
         } else {
-            return view('404');
+            return view('errors.404');
         }
         return view('event.france_system_semifinal_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
@@ -370,7 +370,7 @@ class EventsController extends Controller
                 $result_each_routes['female'] = $users_female2;
             }
         } else {
-            return view('404');
+            return view('errors.404');
         }
 //        dd($result_each_routes, $routes);
         return view('event.france_system_final_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
@@ -648,7 +648,7 @@ class EventsController extends Controller
     public function listRoutesEvent(Request $request, $start_date, $climbing_gym, $title) {
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if(!$event){
-            return view('404');
+            return view('errors.404');
         }
         $grades = Route::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
         $routes = [];

@@ -28,4 +28,5 @@ mix.js('resources/bootstrap/js/bootstrap.bundle.js', 'public/vendor/bootstrap/js
 mix.js('resources/js/welcome.js', 'public/js')
 mix.js('resources/js/profile.js', 'public/js')
 mix.js('resources/js/ddata.js', 'public/js')
+mix.js('resources/js/like.js', 'public/js')
 mix.js('resources/js/datepicker.js', 'public/js')
