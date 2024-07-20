@@ -355,7 +355,10 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $amount_passed_zone = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 3)->get()->count();
                 }
                 $amount_passed_redpoint = ResultRouteQualificationClassic::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->where('attempt', 2)->get()->count();
-                $amount_passed_routes = $amount_passed_flash + $amount_passed_redpoint + $amount_passed_zone ?? 0;
+                if(!$amount_passed_zone){
+                    $amount_passed_zone = 0;
+                } 
+                $amount_passed_routes = $amount_passed_flash + $amount_passed_redpoint + $amount_passed_zone;
                 $place = ResultQualificationClassic::get_places_participant_in_qualification($this->event_id, $users_for_filter, $user['id'], $this->gender, $this->category->id, true);
                 $set = Set::find($user['number_set_id']);
                 $users[$index]['user_place'] = $place;
