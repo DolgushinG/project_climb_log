@@ -365,7 +365,9 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 }
                 $users[$index]['amount_passed_routes'] = '';
                 $users[$index]['amount_passed_flash'] = '';
-                $users[$index]['amount_passed_zone'] = '';
+                if($event->is_zone_show){
+                    $users[$index]['amount_passed_zone'] = '';
+                }
                 if ($event->mode == 2) {
                     $users[$index]['amount_passed_redpoint'] = 'Коэффициент трасс';
                     $coefficient = EventAndCoefficientRoute::where('event_id', $this->event_id)->select('route_id', 'coefficient_' . $this->gender)->pluck('coefficient_' . $this->gender, 'route_id');
