@@ -29,10 +29,8 @@
                                 <table class="table">
                                     <thead>
                                     <tr>
-                                        <th scope="col">Трасса</th>
-                                        @if(!$event->is_hide_grades)
-                                            <th id="grade" style="font-size: 11px" scope="col">Категория</th>
-                                        @endif
+                                        <th scope="col">№</th>
+                                        <th id="grade" style="font-size: 11px" scope="col">Категория</th>
                                         @if($event->is_zone_show)
                                             <th scope="col">Нет</th>
                                         @else
@@ -49,24 +47,21 @@
                                     @foreach($routes as $index => $route)
                                         <tr>
                                             <th>{{$route->count}}</th>
-                                            @if(!$event->is_hide_grades)
-                                                <th>{{$route->grade}}</th>
-                                            @endif
-
+                                            <th>{{$route->grade}}</th>
                                             <td>
                                                 @if($result_participant)
                                                     @if($result_participant[$index]['attempt'] == '0')
-                                                        <input type="radio" class="btn-check" data-grade="{{$route->count}}"
+                                                        <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                                name="{{$route->count}}" id="failed-{{$route->count}}"
                                                                autocomplete="off" checked>
                                                     @else
-                                                        <input type="radio" class="btn-check" data-grade="{{$route->count}}"
+                                                        <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                                name="{{$route->count}}" id="failed-{{$route->count}}"
                                                                autocomplete="off">
                                                     @endif
 
                                                 @else
-                                                    <input type="radio" class="btn-check" data-grade="{{$route->count}}"
+                                                    <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                            name="{{$route->count}}" id="failed-{{$route->count}}"
                                                            autocomplete="off">
                                                 @endif
@@ -81,19 +76,19 @@
                                             <td>
                                                 @if($result_participant)
                                                     @if($result_participant[$index]['attempt'] == '1')
-                                                        <input type="radio" data-id="all-flash" data-grade="{{$route->count}}"
+                                                        <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
                                                                class="btn-check"
                                                                name="{{$route->count}}" id="flash-{{$route->count}}"
                                                                autocomplete="off" checked>
                                                     @else
-                                                        <input type="radio" data-id="all-flash" data-grade="{{$route->count}}"
+                                                        <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
                                                                class="btn-check"
                                                                name="{{$route->count}}" id="flash-{{$route->count}}"
                                                                autocomplete="off">
                                                     @endif
 
                                                 @else
-                                                    <input type="radio" data-id="all-flash" data-grade="{{$route->count}}"
+                                                    <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
                                                            class="btn-check"
                                                            name="{{$route->count}}" id="flash-{{$route->count}}"
                                                            autocomplete="off">
@@ -106,17 +101,17 @@
                                                 <td>
                                                     @if($result_participant)
                                                         @if($result_participant[$index]['attempt'] == '3')
-                                                            <input type="radio" class="btn-check" data-grade="{{$route->count}}"
+                                                            <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                                    name="{{$route->count}}" id="zone-{{$route->count}}"
                                                                    autocomplete="off" checked>
                                                         @else
-                                                            <input type="radio" class="btn-check" data-grade="{{$route->count}}"
+                                                            <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                                    name="{{$route->count}}" id="zone-{{$route->count}}"
                                                                    autocomplete="off">
                                                         @endif
 
                                                     @else
-                                                        <input type="radio" class="btn-check" data-grade="{{$route->count}}"
+                                                        <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                                name="{{$route->count}}" id="zone-{{$route->count}}"
                                                                autocomplete="off">
                                                     @endif
@@ -129,16 +124,16 @@
                                                 @if($result_participant)
                                                     @if($result_participant[$index]['attempt'] == '2')
                                                         <input type="radio" data-id="all-redpoint" class="btn-check"
-                                                               data-grade="{{$route->count}}" name="{{$route->count}}"
+                                                               data-grade="{{$route->grade}}" name="{{$route->count}}"
                                                                id="redpoint-{{$route->count}}" autocomplete="off" checked>
                                                     @else
                                                         <input type="radio" data-id="all-redpoint" class="btn-check"
-                                                               data-grade="{{$route->count}}" name="{{$route->count}}"
+                                                               data-grade="{{$route->grade}}" name="{{$route->count}}"
                                                                id="redpoint-{{$route->count}}" autocomplete="off">
                                                    @endif
                                                 @else
                                                     <input type="radio" data-id="all-redpoint" class="btn-check"
-                                                           data-grade="{{$route->count}}" name="{{$route->count}}"
+                                                           data-grade="{{$route->grade}}" name="{{$route->count}}"
                                                            id="redpoint-{{$route->count}}" autocomplete="off">
                                                 @endif
 
