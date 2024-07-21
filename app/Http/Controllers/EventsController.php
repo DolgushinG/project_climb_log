@@ -512,6 +512,7 @@ class EventsController extends Controller
             return response()->json(['success' => false, 'message' => 'Необходимо отметить все трассы'], 422);
         }
         $gender = User::find($user_id)->gender;
+
         $data = array();
         foreach ($request->result as $result) {
             $category = $result[2];
@@ -666,7 +667,7 @@ class EventsController extends Controller
             $result_participant = null;
         }
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
-        return view('result-page', compact(['routes','event', 'result_participant']));
+        return view('result-page', compact('routes', 'event', 'result_participant'));
     }
 
     public function sendAllResult(Request $request)
