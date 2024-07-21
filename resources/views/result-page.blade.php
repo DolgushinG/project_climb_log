@@ -116,7 +116,7 @@
                                                         @endif
 
                                                     @else
-                                                        <input type="radio" class="btn-check" data-grade="{{$route->count}}"
+                                                        <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                                name="{{$route->count}}" id="zone-{{$route->count}}"
                                                                autocomplete="off">
                                                     @endif
