@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchHideGrades;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Http\Controllers\Controller;
@@ -230,7 +231,9 @@ class GradesController extends Controller
         $grid->disableColumnSelector();
         $grid->disableExport();
         $grid->disablePagination();
-
+        $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new BatchHideGrades);
+        });
         $grid->column('route_id', 'Номер трассы')->editable();
         $grid->column('grade', 'Категория трассы')->editable();
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();

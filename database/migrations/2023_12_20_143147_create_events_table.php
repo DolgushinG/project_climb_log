@@ -61,6 +61,7 @@ class CreateEventsTable extends Migration
             $table->boolean('is_zone_show')->nullable();
             $table->boolean('active')->default(0);
             $table->boolean('is_input_set')->default(0);
+            $table->boolean('is_hide_grades')->default(0);
             $table->boolean('is_registration_state')->default(1);
             $table->boolean('is_need_pay_for_reg')->default(1);
             $table->boolean('is_access_user_edit_result')->default(0);
