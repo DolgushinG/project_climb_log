@@ -490,8 +490,23 @@ class Event extends Model
                 $participant_result->save();
             }
         }
-
     }
+
+    public static function force_update_category_id($event, $user_id)
+    {
+        $participant_result = ResultQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+        if ($event->is_auto_categories) {
+            $result_qualification = ResultRouteQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+            if($result_qualification){
+                $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $user_id), 3);
+                $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
+                $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                $participant_result->category_id = $category_id;
+                $participant_result->save();
+            }
+        }
+    }
+
 
     public static function get_france_system_result($table, $event_id, $gender, $category = null)
     {
