@@ -293,7 +293,14 @@ class EventsController extends Controller
             $form->text('title', 'Название соревнования')->placeholder('Допускается ввода букв и цифр из символов можно только ковычки')->required();
 //            $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название');
             $form->hidden('title_eng')->default('1');
-            $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name ?? '')->placeholder('Допускается ввода букв и цифр из символов можно только ковычки')->required();
+            $form->radio('type_event','Тип(место) соревнования')->options([
+                1 =>'Скалы',
+                0 =>'Скалодром',
+            ])->when(1, function (Form $form) {
+                $form->text('climbing_gym_name', 'Район')->value(Admin::user()->climbing_gym_name ?? '')->placeholder('Допускается ввода букв и цифр из символов можно только ковычки')->required();
+            })->when(0, function (Form $form) {
+                $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name ?? '')->placeholder('Допускается ввода букв и цифр из символов можно только ковычки')->required();
+            })->default(0);
             $form->hidden('climbing_gym_name_eng')->default('1');
             $form->text('city', 'Город')->value(Admin::user()->city ?? '')->placeholder('Город')->required();
             $form->text('address', 'Адрес')->value(Admin::user()->address ?? '')->placeholder('Адрес')->required();

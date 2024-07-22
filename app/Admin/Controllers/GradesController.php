@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchCreateOutdoorRoutes;
 use App\Admin\Actions\BatchHideGrades;
 use App\Models\Event;
 use App\Models\Grades;
@@ -157,9 +158,16 @@ class GradesController extends Controller
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         $grades = Grades::where('event_id', $event->id)->first();
         if(!$grades){
-            $grid->tools(function ($tools) {
-                $tools->append("<a href='/admin/grades/create' class='btn btn-success'>Сгенерировать трассы</a>");
-            });
+            if($event->type_event){
+                $grid->tools(function (Grid\Tools $tools) use ($event) {
+                    $tools->append(new BatchCreateOutdoorRoutes);
+                });
+            } else {
+                $grid->tools(function ($tools) {
+                    $tools->append("<a href='/admin/grades/create' class='btn btn-success'>Сгенерировать скалодромные трассы</a>");
+                });
+            }
+
         }
         $grid->disableFilter();
         $grid->disableBatchActions();
