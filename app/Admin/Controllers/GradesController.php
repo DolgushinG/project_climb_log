@@ -361,6 +361,7 @@ class GradesController extends Controller
                 });
 
         EOT;
+
             \Encore\Admin\Facades\Admin::script($script);
             Admin::style('
                         .remove {
@@ -398,6 +399,7 @@ class GradesController extends Controller
                 $table->disableButton();
             })->value($routes);
             $form->saving(function (Form $form) {
+                dd($form);
                 if($form->grade_and_amount){
                     $main_count = 0;
                     foreach ($form->grade_and_amount as $route){
