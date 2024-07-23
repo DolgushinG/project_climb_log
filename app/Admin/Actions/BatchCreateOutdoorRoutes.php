@@ -7,6 +7,7 @@ use App\Models\Area;
 use App\Models\Country;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
+use App\Models\RoutesOutdoor;
 use App\Models\User;
 use Encore\Admin\Actions\Action;
 use Encore\Admin\Admin;
@@ -21,7 +22,21 @@ class BatchCreateOutdoorRoutes extends Action
 
     public function handle(Request $request)
     {
+//        "place" => "13"
+//      "area" => "32"
+//      "place_routes" => "206"
+//      "rock" => array:8 [
+//        0 => "2138"
+//        1 => "2139"
+//        2 => "2140"
+//        3 => "2141"
+//        4 => "2142"
+//        5 => "2143"
+//        6 => "2144"
+//        7 => "2145"
+//      ]
             dd($request);
+            $model_route_outdoors = new RoutesOutdoor;
 //        $guides = Service::ge('Россия');
 //        foreach ($guides as $guide){
 //
@@ -46,7 +61,7 @@ class BatchCreateOutdoorRoutes extends Action
 
     public function form()
     {
-        $this->modalSmall();
+        $this->modalLarge();
         $guides = Country::all()->pluck('name', 'id');
         $this->select('place', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
         $this->select('area', 'Место')->attribute('id', 'area-outdoor');

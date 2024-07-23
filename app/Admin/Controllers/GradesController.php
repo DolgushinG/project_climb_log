@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchCreateOutdoorRoutes;
 use App\Admin\Actions\BatchHideGrades;
 use App\Admin\Actions\BatchUpdateOutdoorRoutes;
+use App\Models\Country;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Http\Controllers\Controller;
@@ -159,17 +160,14 @@ class GradesController extends Controller
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         $grades = Grades::where('event_id', $event->id)->first();
         if(!$grades){
+            $grid->tools(function ($tools) {
+                $tools->append("<a href='/admin/grades/create' class='btn btn-success'>Сгенерировать трассы</a>");
+            });
             if($event->type_event){
                 $grid->tools(function (Grid\Tools $tools) use ($event) {
-                    $tools->append(new BatchCreateOutdoorRoutes);
                     $tools->append(new BatchUpdateOutdoorRoutes);
                 });
-            } else {
-                $grid->tools(function ($tools) {
-                    $tools->append("<a href='/admin/grades/create' class='btn btn-success'>Сгенерировать скалодромные трассы</a>");
-                });
             }
-
         }
         $grid->disableFilter();
         $grid->disableBatchActions();
@@ -299,6 +297,9 @@ class GradesController extends Controller
         } else {
             $routes = Grades::getRoutes();
         }
+        if($event->type_event){
+            $routes = Grades::getRoutesOutdoorWithValue();
+        }
         $form->disableViewCheck();
         $form->disableEditingCheck();
         $form->disableCreatingCheck();
@@ -311,25 +312,88 @@ class GradesController extends Controller
 
         $form->hidden('owner_id', '')->value(Admin::user()->id);
         $form->hidden('event_id', '')->value($event->id);
+        if($event->type_event){
+            $guides = Country::all()->pluck('name', 'id');
+            $form->select('place', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
+            $form->select('area', 'Место')->attribute('id', 'area-outdoor');
+            $form->select('place_routes', 'Район')->attribute('id', 'local-outdoor');
+            $form->multipleSelect('rock', 'Камни(Cкалы)')->attribute('id', 'rock-outdoor');
+            $script = <<<EOT
+        $(document).on("change", '[id=place-outdoor]', function () {
+                    $.get("api/get_places",
+                            {option: $(this).val()},
+                            function (data) {
+                                var model = $('[id=area-outdoor]');
+                                model.empty();
+                                model.append("<option>Select a state</option>");
+                                $.each(data, function (index, element) {
+                                    model.append("<option value='" + element.id + "'>" + element.text + "</option>");
+                                });
+                            }
+                    );
+                });
+
+        $(document).on("change", '[id=area-outdoor]', function () {
+                    $.get("api/get_place_routes",
+                            {option: $(this).val()},
+                            function (data) {
+                                var model = $('[id=local-outdoor]');
+                                model.empty();
+                                model.append("<option>Select a state</option>");
+                                $.each(data, function (index, element) {
+                                    model.append("<option value='" + element.id + "'>" + element.text + "</option>");
+                                });
+                            }
+                    );
+                });
+        $(document).on("change", '[id=local-outdoor]', function () {
+                    $.get("api/get_rocks",
+                            {option: $(this).val()},
+                            function (data) {
+                                var model = $('[id=rock-outdoor]');
+                                model.empty();
+                                model.append("<option>Select a state</option>");
+                                $.each(data, function (index, element) {
+                                    model.append("<option value='" + element.id + "'>" + element.text + "</option>");
+                                });
+                            }
+                    );
+                });
+
+        EOT;
+            \Encore\Admin\Facades\Admin::script($script);
+            Admin::style('
+                        .remove {
+                          display: none;
+                        }
+                        .add-amount{
+                            display: none;
+                        }');
+        }
 
         if(!$event->is_france_system_qualification){
             $form->hidden('count_routes', 'Кол-во трасс');
             Admin::style(".select2-selection__arrow {
                 display: None;
             }");
+
             if($type == 'edit'){
                 $form->html('<h4 id="warning-category" style="color: red" >Внимение!! Если вы редактировали категории или номера трасс,
                                     то это сбросится так как генерация трасс происходит с нуля</h4>');
             }
-            $form->tablecustom('grade_and_amount', '', function ($table) use ($event){
+            $form->tableamount('grade_and_amount', '', function ($table) use ($event){
                 $grades = Grades::getGrades();
                 $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
-                $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
-                if($event->mode == 1){
-                    $table->text('Ценность')->width('60px');
-                    if($event->is_zone_show){
-                        $table->text('Ценность зоны')->width('60px');
+                if(!$event->type_event) {
+                    $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
+                    if ($event->mode == 1) {
+                        $table->text('Ценность')->width('60px');
+                        if ($event->is_zone_show) {
+                            $table->text('Ценность зоны')->width('60px');
+                        }
                     }
+                } else {
+                    $table->text('Ценность')->width('80px');
                 }
                 $table->disableButton();
             })->value($routes);
