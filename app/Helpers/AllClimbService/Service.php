@@ -2,6 +2,10 @@
 
 namespace App\Helpers\AllClimbService;
 
+use App\Models\Area;
+use App\Models\Country;
+use App\Models\Place;
+use App\Models\PlaceRoute;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Http;
@@ -13,8 +17,12 @@ class Service
     public static function curl_start($url)
     {
         $curl = curl_init();
+
+
+
+        $link = str_replace ( ' ', '%20', $url);
         curl_setopt_array($curl, array(
-            CURLOPT_URL => self::all_climb_url.$url,
+            CURLOPT_URL => self::all_climb_url.$link,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -76,7 +84,18 @@ class Service
         }
         return array_values(array_unique($list_guides));
     }
-    public static function get_list_guides_country($country): array
+
+    public static function get_countries(): array
+    {
+        $response = self::curl_start('/ru/guides/');
+        $post = json_decode($response);
+        $list_country = [];
+        foreach ($post->result as $guid){
+            $list_country[] = $guid->country;
+        }
+        return array_values(array_unique($list_country));
+    }
+    public static function get_places($country): array
     {
         $response = self::curl_start('/ru/guides/');
         $post = json_decode($response);
@@ -88,13 +107,26 @@ class Service
         }
         return array_values(array_unique($list_country));
     }
-    public static function get_guides_in_country($guide): array
+    public static function get_areas($place): array
     {
-        $response = self::curl_start('/ru/guides/'.$guide.'/');
+        $response = self::curl_start('/ru/guides/'.$place.'/');
         $post = json_decode($response);
         $list_guides = [];
         foreach ($post->result as $guid){
             $list_guides[] = $guid->name;
+        }
+        return array_values(array_unique($list_guides));
+    }
+
+    public static function get_place_routes($place, $area): array
+    {
+        $response = self::curl_start('/ru/guides/'.$place.'/'.$area.'/');
+        $post = json_decode($response);
+        $list_guides = [];
+        foreach ($post->result as $guid){
+            if($guid->web_guide_link != ''){
+                $list_guides[] = $guid->name;
+            }
         }
         return array_values(array_unique($list_guides));
     }
@@ -108,5 +140,77 @@ class Service
             }
         }
         return null;
+    }
+
+    public static function update_countries()
+    {
+        $countries = Service::get_countries();
+        foreach ($countries as $country_name){
+            $country = Country::where('name', $country_name)->first();
+            if(!$country){
+                $country = new Country;
+                $country->name = $country_name;
+                $country->save();
+            }
+        }
+    }
+    public static function update_places()
+    {
+        $countries = Country::all();
+        foreach ($countries as $country){
+            $places = Service::get_places($country->name);
+            foreach ($places as $place_name){
+                $place = Place::where('name', $place_name)->first();
+                if(!$place){
+                    $place = new Place;
+                    $place->name = $place_name;
+                    $place->country_id = $country->id;
+                    $place->save();
+                }
+            }
+        }
+    }
+
+    public static function update_areas()
+    {
+        $countries = Country::all();
+        foreach ($countries as $country){
+            $places = Place::where('country_id', $country->id)->get();
+            foreach ($places as $place){
+                $areas = Service::get_areas($place->name);
+                foreach ($areas as $area_name){
+                    $area = Area::where('name', $area_name)->first();
+                    if(!$area){
+                        $area = new Area;
+                        $area->name = $area_name;
+                        $area->place_id = $place->id;
+                        $area->save();
+                    }
+                }
+            }
+        }
+    }
+    public static function update_place_routes()
+    {
+        $countries = Country::all();
+        foreach ($countries as $country){
+            $places = Place::where('country_id', $country->id)->get();
+            foreach ($places as $place){
+                $areas = Area::where('place_id', $place->id)->get();
+                foreach ($areas as $area){
+                    $response_place_route_name = Service::get_place_routes($place->name, $area->name);
+                    foreach ($response_place_route_name as $place_routes_name){
+                        $place_routes_model = PlaceRoute::where('name', $place_routes_name)->first();
+                        if(!$place_routes_model){
+                            $place_routes_model = new PlaceRoute;
+                            $place_routes_model->area_id = $area->id;
+                            $place_routes_model->name = $place_routes_name;
+                            $place_routes_model->save();
+                        }
+
+                    }
+                }
+            }
+        }
     }
 }

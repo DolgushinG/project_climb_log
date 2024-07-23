@@ -1,7 +1,9 @@
 <?php
 
 use Encore\Admin\Facades\Admin;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Response;
 
 
 Admin::routes();
@@ -13,7 +15,21 @@ Route::group([
     'as'            => config('admin.route.prefix') . '.',
 ], function (Router $router) {
     $router->resource('/auth/users', UserController::class);
-
+    $router->get('/api/get_places', function(Request $request) {
+        $country_id = $request->get('option');
+        $country = \App\Models\Country::find($country_id);
+        return \App\Models\Place::where('country_id', $country->id)->get(['id', DB::raw('name as text')]);
+    });
+    $router->get('/api/get_place_routes', function(Request $request) {
+        $place_id = $request->get('option');
+        $place = \App\Models\Place::find($place_id);
+        return \App\Models\Area::where('place_id', $place->id)->get(['id', DB::raw('name as text')]);
+    });
+    $router->get('/api/get_rocks', function(Request $request) {
+        $area_id = $request->get('option');
+        $area = \App\Models\Area::find($area_id);
+        return \App\Models\PlaceRoute::where('area_id', $area->id)->get(['id', DB::raw('name as text')]);
+    });
     $router->get('/', 'HomeController@index')->name('home');
     Route::middleware(['owner'])->group(function ($router) {
         $router->resource('events', EventsController::class);

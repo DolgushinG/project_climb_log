@@ -3,10 +3,13 @@
 namespace App\Admin\Actions;
 
 use App\Helpers\AllClimbService\Service;
+use App\Models\Area;
+use App\Models\Country;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
 use App\Models\User;
 use Encore\Admin\Actions\Action;
+use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -18,31 +21,24 @@ class BatchCreateOutdoorRoutes extends Action
 
     public function handle(Request $request)
     {
-        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        if($event->is_france_system_qualification){
-            $table = 'result_france_system_qualification';
-        } else {
-            $table = 'participant';
-        }
-        $users = User::query()
-            ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-            ->where($table.'.event_id', '=', $event->id)
-            ->select(
-                'users.middlename',
-                'users.email',
-            )->get()->toArray();
-        if($request->message && $request->subject){
-            if(count($users) > 0){
-                foreach ($users as $user){
-                    ResultQualificationClassic::send_message_from_climbing_gym($request->subject, $request->message, $user, $event->climbing_gym_name);
-                }
-                return $this->response()->success('Отправлено')->refresh();
-            }
-
-        } else {
-            Log::error('Не найдено сообщение - $request->'.$request->message);
-            return $this->response()->error('Ошибка отправки')->refresh();
-        }
+            dd($request);
+//        $guides = Service::ge('Россия');
+//        foreach ($guides as $guide){
+//
+//        }
+        return $this->response()->success('Отправлено')->refresh();
+//        if($request->message && $request->subject){
+//            if(count($users) > 0){
+//                foreach ($users as $user){
+//                    ResultQualificationClassic::send_message_from_climbing_gym($request->subject, $request->message, $user, $event->climbing_gym_name);
+//                }
+//                return $this->response()->success('Отправлено')->refresh();
+//            }
+//
+//        } else {
+//            Log::error('Не найдено сообщение - $request->'.$request->message);
+//            return $this->response()->error('Ошибка отправки')->refresh();
+//        }
 
 
 
@@ -51,8 +47,55 @@ class BatchCreateOutdoorRoutes extends Action
     public function form()
     {
         $this->modalSmall();
-        $guides = Service::get_list_guides_country('Россия');
-        $this->select('city', 'Район')->options($guides);
+        $guides = Country::all()->pluck('name', 'id');
+        $this->select('place', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
+        $this->select('area', 'Место')->attribute('id', 'area-outdoor');
+        $this->select('place_routes', 'Район')->attribute('id', 'local-outdoor');
+        $this->multipleSelect('rock', 'Камни(Cкалы)')->attribute('id', 'rock-outdoor');
+        $script = <<<EOT
+        $(document).on("change", '[id=place-outdoor]', function () {
+                    $.get("api/get_places",
+                            {option: $(this).val()},
+                            function (data) {
+                                var model = $('[id=area-outdoor]');
+                                model.empty();
+                                model.append("<option>Select a state</option>");
+                                $.each(data, function (index, element) {
+                                    model.append("<option value='" + element.id + "'>" + element.text + "</option>");
+                                });
+                            }
+                    );
+                });
+
+        $(document).on("change", '[id=area-outdoor]', function () {
+                    $.get("api/get_place_routes",
+                            {option: $(this).val()},
+                            function (data) {
+                                var model = $('[id=local-outdoor]');
+                                model.empty();
+                                model.append("<option>Select a state</option>");
+                                $.each(data, function (index, element) {
+                                    model.append("<option value='" + element.id + "'>" + element.text + "</option>");
+                                });
+                            }
+                    );
+                });
+        $(document).on("change", '[id=local-outdoor]', function () {
+                    $.get("api/get_rocks",
+                            {option: $(this).val()},
+                            function (data) {
+                                var model = $('[id=rock-outdoor]');
+                                model.empty();
+                                model.append("<option>Select a state</option>");
+                                $.each(data, function (index, element) {
+                                    model.append("<option value='" + element.id + "'>" + element.text + "</option>");
+                                });
+                            }
+                    );
+                });
+
+        EOT;
+        \Encore\Admin\Facades\Admin::script($script);
     }
     public function html()
     {

@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Admin\Actions\BatchCreateOutdoorRoutes;
 use App\Admin\Actions\BatchHideGrades;
+use App\Admin\Actions\BatchUpdateOutdoorRoutes;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Http\Controllers\Controller;
@@ -161,6 +162,7 @@ class GradesController extends Controller
             if($event->type_event){
                 $grid->tools(function (Grid\Tools $tools) use ($event) {
                     $tools->append(new BatchCreateOutdoorRoutes);
+                    $tools->append(new BatchUpdateOutdoorRoutes);
                 });
             } else {
                 $grid->tools(function ($tools) {
