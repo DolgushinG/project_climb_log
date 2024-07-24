@@ -141,6 +141,20 @@ class Service
         }
         return null;
     }
+    public static function get_amount_all_routes($guide, $area)
+    {
+        $response = self::curl_start('/ru/guides/'.$guide.'/'.$area.'/');
+        $post = json_decode($response);
+        $amount = 0;
+        foreach ($post->result as $guid){
+            if(isset($guid->numroutes)){
+                preg_match('/\d+/', $guid->numroutes, $matches);
+                var_dump($matches[0]);
+                $amount += intval($matches[0]);
+            }
+        }
+        return $amount;
+    }
 
     public static function update_countries()
     {

@@ -398,9 +398,9 @@ class GradesController extends Controller
                 }
                 $table->disableButton();
             })->value($routes);
-            $form->saving(function (Form $form) {
-                dd($form);
-                if($form->grade_and_amount){
+            $form->saving(function (Form $form) use ($event) {
+
+                if($form->grade_and_amount && !$event->type_event){
                     $main_count = 0;
                     foreach ($form->grade_and_amount as $route){
                         for ($count = 1; $count <= $route['Кол-во']; $count++){
@@ -408,6 +408,13 @@ class GradesController extends Controller
                         }
                     }
                     $form->count_routes = $main_count;
+                }
+                if($event->type_event){
+                    if($form->rock) {
+                        foreach ($form->rock as $rock) {
+
+                        }
+                    }
                 }
             });
             $form->saved(function (Form $form) use ($type) {
