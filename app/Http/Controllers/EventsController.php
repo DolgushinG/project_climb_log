@@ -7,9 +7,12 @@ use App\Http\Requests\StoreRequest;
 use App\Jobs\UpdateAttemptInRoutesParticipants;
 use App\Jobs\UpdateResultParticipants;
 use App\Jobs\UpdateRouteCoefficientParticipants;
+use App\Models\Area;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
+use App\Models\Place;
+use App\Models\PlaceRoute;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
@@ -17,6 +20,7 @@ use App\Models\ResultRouteQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
+use App\Models\RoutesOutdoor;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Admin;
@@ -649,11 +653,23 @@ class EventsController extends Controller
         if(!$event){
             return view('404');
         }
-        $grades = Route::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
+        if($event->type_event){
+            $grades = RoutesOutdoor::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
+        } else {
+            $grades = Route::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
+        }
+
         $routes = [];
         foreach ($grades as $route){
             $route_class = new stdClass();
             $route_class->grade = $route->grade;
+            $route_class->route_name = $route->route_name;
+            $place = Place::find($route->place_id);
+            $area = Area::find($route->area_id);
+            $rock = PlaceRoute::find($route->place_route_id);
+            $route_class->place = $place->name;
+            $route_class->area = $area->name;
+            $route_class->rock = $rock->name;
             $route_class->count = $route->route_id;
             $routes[$route->route_id] = $route_class;
         }
@@ -665,6 +681,7 @@ class EventsController extends Controller
         } else {
             $result_participant = null;
         }
+        dd($routes);
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
         return view('result-page', compact(['routes','event', 'result_participant']));
     }

@@ -48,11 +48,14 @@
                                     <tbody>
                                     @foreach($routes as $index => $route)
                                         <tr>
-                                            <th>{{$route->count}}</th>
+                                            @if($event->type_event)
+                                                <th>{{$route->route_name}}</th>
+                                            @else
+                                                <th>{{$route->count}}</th>
+                                            @endif
                                             @if(!$event->is_hide_grades)
                                                 <th>{{$route->grade}}</th>
                                             @endif
-
                                             <td>
                                                 @if($result_participant)
                                                     @if($result_participant[$index]['attempt'] == '0')
