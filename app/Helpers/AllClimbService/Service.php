@@ -53,7 +53,7 @@ class Service
     {
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => self::all_climb_url.'/ru/guides/',
+            CURLOPT_URL => self::all_climb_url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -124,11 +124,40 @@ class Service
         $post = json_decode($response);
         $list_guides = [];
         foreach ($post->result as $guid){
-            if($guid->web_guide_link != ''){
-                $list_guides[] = $guid->name;
-            }
+            $list_guides[] = $guid->name;
         }
         return array_values(array_unique($list_guides));
+    }
+
+    public static function get_routes($place, $area, $rock): array
+    {
+        $response = self::curl_start('/ru/guides/'.$place.'/'.$area.'/'.$rock.'/');
+        $post = json_decode($response);
+        $list_guides = [];
+        foreach ($post->images as $guid){
+            if(isset($guid->Routes)){
+                foreach ($guid->Routes as $route){
+                    if(str_contains($route->grade , 'project') || str_contains($route->grade , 'проект')){
+                        $list_guides[] = array('name' => $route->name, 'grade' => 'project');
+                    } else {
+                        preg_match('/\d+[a-zA-Z]+/', $route->grade, $matches);
+                        if(!isset($matches[0])){
+                            dd($route);
+                        }
+                        if(preg_match('/["\']|([^\d\.,])/', $route->name)){
+                            if(strlen($route->name) < 2 && str_contains($route->name, "'")){
+                                $list_guides[] = array('name' => 'Без названия', 'grade' => $matches[0]);
+                            } else {
+                                $list_guides[] = array('name' => $route->name, 'grade' => $matches[0]);
+                            }
+                        } else {
+                            $list_guides[] = array('name' => 'Без названия', 'grade' => $matches[0]);
+                        }
+                    }
+                }
+            }
+        }
+        return $list_guides;
     }
     public static function get_info_area_in_guide($guide, $area)
     {
@@ -141,16 +170,18 @@ class Service
         }
         return null;
     }
-    public static function get_amount_all_routes($guide, $area)
+    public static function get_amount_all_routes($guide, $area, $rock)
     {
         $response = self::curl_start('/ru/guides/'.$guide.'/'.$area.'/');
         $post = json_decode($response);
         $amount = 0;
         foreach ($post->result as $guid){
             if(isset($guid->numroutes)){
-                preg_match('/\d+/', $guid->numroutes, $matches);
-                var_dump($matches[0]);
-                $amount += intval($matches[0]);
+                if($guid->name == $rock){
+                    preg_match('/\d+/', $guid->numroutes, $matches);
+                    $amount += intval($matches[0]);
+                }
+
             }
         }
         return $amount;
@@ -174,7 +205,7 @@ class Service
         foreach ($countries as $country){
             $places = Service::get_places($country->name);
             foreach ($places as $place_name){
-                $place = Place::where('name', $place_name)->first();
+                $place = Place::where('name', $place_name)->where('country_id', $country->id)->first();
                 if(!$place){
                     $place = new Place;
                     $place->name = $place_name;
@@ -193,7 +224,7 @@ class Service
             foreach ($places as $place){
                 $areas = Service::get_areas($place->name);
                 foreach ($areas as $area_name){
-                    $area = Area::where('name', $area_name)->first();
+                    $area = Area::where('name', $area_name)->where('place_id', $place->id)->first();
                     if(!$area){
                         $area = new Area;
                         $area->name = $area_name;
@@ -214,7 +245,7 @@ class Service
                 foreach ($areas as $area){
                     $response_place_route_name = Service::get_place_routes($place->name, $area->name);
                     foreach ($response_place_route_name as $place_routes_name){
-                        $place_routes_model = PlaceRoute::where('name', $place_routes_name)->first();
+                        $place_routes_model = PlaceRoute::where('name', $place_routes_name)->where('area_id', $area->id)->first();
                         if(!$place_routes_model){
                             $place_routes_model = new PlaceRoute;
                             $place_routes_model->area_id = $area->id;

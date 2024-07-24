@@ -5,11 +5,16 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchCreateOutdoorRoutes;
 use App\Admin\Actions\BatchHideGrades;
 use App\Admin\Actions\BatchUpdateOutdoorRoutes;
+use App\Helpers\AllClimbService\Service;
+use App\Models\Area;
 use App\Models\Country;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Http\Controllers\Controller;
+use App\Models\Place;
+use App\Models\PlaceRoute;
 use App\Models\Route;
+use App\Models\RoutesOutdoor;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -40,9 +45,14 @@ class GradesController extends Controller
                             $column->row($this->france_system_routes());
                         });
                     } else {
-                        $row->column(4, function (Column $column) {
+                        $row->column(4, function (Column $column) use ($event) {
                             $column->row($this->event_routes());
-                            $column->row($this->ready_routes());
+                            if($event->type_event){
+                                $column->row($this->ready_outdoor_routes());
+                            } else {
+                                $column->row($this->ready_routes());
+                            }
+
                         });
                     }
 
@@ -242,15 +252,60 @@ class GradesController extends Controller
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchHideGrades);
         });
-        $grid->column('route_id', 'Номер трассы')->editable();
-        $grid->column('grade', 'Категория трассы')->editable();
+
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-        if($event->mode == 1){
+        if($event->type_event){
+            $grid->column('route_name', 'Трасса');
+            $grid->column('grade', 'Категория трассы');
+            $grid->column('value', 'Ценность трассы');
+        } else {
+            $grid->column('route_id', 'Номер трассы')->editable();
+            $grid->column('grade', 'Категория трассы')->editable();
+            if($event->mode == 1){
+                $grid->column('value', 'Ценность трассы');
+                if($event->is_zone_show){
+                    $grid->column('zone', 'Ценность зоны');
+                }
+
+            }
+        }
+
+        return $grid;
+    }
+
+    /**
+     * Make a grid builder.
+     *
+     * @return Grid
+     */
+    protected function ready_outdoor_routes()
+    {
+        $grid = new Grid(new RoutesOutdoor);
+        if (!Admin::user()->isAdministrator()){
+            $grid->model()->where('owner_id', '=', Admin::user()->id);
+        }
+        $grid->model()->where(function ($query) {
+            $query->has('event.routes');
+        });
+        $grid->disableFilter();
+        $grid->disableActions();
+        $grid->disableBatchActions();
+        $grid->disableCreateButton();
+        $grid->disableColumnSelector();
+        $grid->disableExport();
+        $grid->disablePagination();
+        $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new BatchHideGrades);
+        });
+
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        if($event->type_event){
+            $grid->column('route_name', 'Трасса');
+            $grid->column('grade', 'Категория трассы');
             $grid->column('value', 'Ценность трассы');
             if($event->is_zone_show){
                 $grid->column('zone', 'Ценность зоны');
             }
-
         }
         return $grid;
     }
@@ -314,10 +369,10 @@ class GradesController extends Controller
         $form->hidden('event_id', '')->value($event->id);
         if($event->type_event){
             $guides = Country::all()->pluck('name', 'id');
-            $form->select('place', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
-            $form->select('area', 'Место')->attribute('id', 'area-outdoor');
-            $form->select('place_routes', 'Район')->attribute('id', 'local-outdoor');
-            $form->multipleSelect('rock', 'Камни(Cкалы)')->attribute('id', 'rock-outdoor');
+            $form->select('country_id', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
+            $form->select('place_id', 'Место')->attribute('id', 'area-outdoor');
+            $form->select('area_id', 'Район')->attribute('id', 'local-outdoor');
+            $form->multipleSelect('rocks_id', 'Камни(Cкалы)')->attribute('id', 'rock-outdoor');
             $script = <<<EOT
         $(document).on("change", '[id=place-outdoor]', function () {
                     $.get("api/get_places",
@@ -399,7 +454,6 @@ class GradesController extends Controller
                 $table->disableButton();
             })->value($routes);
             $form->saving(function (Form $form) use ($event) {
-
                 if($form->grade_and_amount && !$event->type_event){
                     $main_count = 0;
                     foreach ($form->grade_and_amount as $route){
@@ -410,10 +464,17 @@ class GradesController extends Controller
                     $form->count_routes = $main_count;
                 }
                 if($event->type_event){
-                    if($form->rock) {
-                        foreach ($form->rock as $rock) {
-
+                    if($form->rocks_id) {
+                        $amount = 0;
+                        foreach ($form->rocks_id as $rock) {
+                            if($rock){
+                                $place = Place::find($form->place_id);
+                                $area = Area::find($form->area_id);
+                                $model_rock = PlaceRoute::find($rock);
+                                $amount += Service::get_amount_all_routes($place->name, $area->name, $model_rock->name);
+                            }
                         }
+                        $form->count_routes = $amount;
                     }
                 }
             });
@@ -421,14 +482,23 @@ class GradesController extends Controller
                 if($type !== 'update') {
                     $owner_id = Admin::user()->id;
                     $event = Event::where('owner_id', '=', $owner_id)->where('active', '=', 1)->first();
-                    $exist_routes_list = Route::where('owner_id', '=', $owner_id)
-                        ->where('event_id', '=', $event->id)->first();
+                    $exist_routes_list = Route::where('event_id', '=', $event->id)->first();
+
                     if (!$exist_routes_list) {
                         if ($form->count_routes) {
-                            Route::generation_route($owner_id, $event->id, $form->count_routes, $form->grade_and_amount);
+                            if($event->type_event){
+                                Route::generation_outdoor_route($event->id, $form->place_id, $form->area_id, $form->rocks_id, $form->grade_and_amount);
+                            } else {
+                                Route::generation_route($owner_id, $event->id, $form->count_routes, $form->grade_and_amount);
+                            }
+
                         }
                     } else {
-                        Route::generation_route($owner_id, $event->id, $form->count_routes, $form->grade_and_amount);
+                        if($event->type_event) {
+                            Route::generation_outdoor_route($event->id, $form->place_id, $form->area_id, $form->rocks_id, $form->grade_and_amount);
+                        } else {
+                            Route::generation_route($owner_id, $event->id, $form->count_routes, $form->grade_and_amount);
+                        }
                     }
                 }
             });

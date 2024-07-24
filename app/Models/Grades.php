@@ -15,6 +15,7 @@ class Grades extends Model
 
     protected $casts = [
         'grade_and_amount' =>'json',
+        'rocks_id' =>'json',
     ];
 
     const BEGINNER = 'beginner';
@@ -50,6 +51,9 @@ class Grades extends Model
         return [
             ['Категория' => '4', 'Ценность' => 50],
             ['Категория' => '5', 'Ценность' => 100],
+            ['Категория' => '5A', 'Ценность' => 100],
+            ['Категория' => '5B', 'Ценность' => 120],
+            ['Категория' => '5C', 'Ценность' => 150],
             ['Категория' => '5+', 'Ценность' => 150],
             ['Категория' => '6A', 'Ценность' => 200],
             ['Категория' => '6A+', 'Ценность' => 300],
@@ -145,7 +149,6 @@ class Grades extends Model
         DB::table('routes')->insert($res);
     }
 
-
     public static function find_number_for_divider($number)
     {
         $divider = 2; // Начинаем с делителя равного 2
@@ -165,7 +168,7 @@ class Grades extends Model
      */
     public static function getGrades(): array
     {
-        return ['4' => '4','5' => '5', '5+' => '5+','6A' => '6A','6A+' => '6A+', '6B' => '6B', '6B+' => '6B+','6C' => '6C',
+        return ['4' => '4','5' => '5','5A' => '5A','5B' => '5B', '5C' => '5C','5+' => '5+','6A' => '6A','6A+' => '6A+', '6B' => '6B', '6B+' => '6B+','6C' => '6C',
             '6C+' => '6C+','7A' => '7A','7A+' => '7A+','7B' => '7B','7B+' => '7B+','7C' => '7C','7C+' => '7C+','8A' => '8A',
             '8A+' => '8A+','8B' => '8B', '8B+' => '8B+', '8C' => '8C','8C+' => '8C+','9A' => '9A','9A+' => '9A+','9B' => '9B','9B+' => '9B+'];
     }
@@ -176,6 +179,39 @@ class Grades extends Model
     public static function grades(): array
     {
         return ['4', '5', '5+', '6A','6A+', '6B', '6B+', '6C', '6C+', '7A', '7A+', '7B', '7B+', '7C', '7C+', '8A'];
+    }
+
+    /**
+     * @return array[]
+     */
+    public static function outdoor_grades(): array
+    {
+        return ['4', '5', '5A','5B','5C','5+', '6A','6A+', '6B', '6B+', '6C', '6C+', '7A', '7A+', '7B', '7B+', '7C', '7C+',  '8A', '8A+','8B','8B+','8C','8C+','9A','9A+','9B','9B+','9C'];
+    }
+
+    /**
+     * @return array[]
+     */
+    public static function outdoor_grades_with_value_flash($start_low_grade): array
+    {
+
+        $step = 10;
+        $main_digit = $start_low_grade;
+        $res = [];
+        $count = 1;
+        $len = count(self::outdoor_grades());
+        for ($i = 0; $i < $len; $i++) {
+            $res[] = $main_digit;
+            $main_digit += $step;
+            $count++;
+
+            if ($count == 3) {
+                $step *= 2;
+                $count = 1;
+            }
+        }
+
+        return $res;
     }
 
     /**

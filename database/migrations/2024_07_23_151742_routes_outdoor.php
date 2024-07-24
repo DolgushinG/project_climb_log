@@ -16,6 +16,7 @@ class RoutesOutdoor extends Migration
         Schema::create('routes_outdoors', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('event_id');
+            $table->integer('owner_id');
             $table->integer('route_id');
             $table->integer('route_name');
             $table->integer('place_id');
