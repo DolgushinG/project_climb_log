@@ -655,23 +655,40 @@ class EventsController extends Controller
         }
         if($event->type_event){
             $grades = RoutesOutdoor::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
+            $view = 'outdoor-result-page';
         } else {
             $grades = Route::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
+            $view = 'result-page';
         }
-
+        $areas = [];
+        $places = [];
+        $rocks = [];
         $routes = [];
         foreach ($grades as $route){
             $route_class = new stdClass();
+            if($event->type_event){
+                $route_class->route_name = $route->route_name;
+                $place = Place::find($route->place_id);
+                $area = Area::find($route->area_id);
+                $rock = PlaceRoute::find($route->place_route_id);
+                $route_class->place = $place->name;
+                $route_class->area = $area->name;
+                $route_class->rock = $rock->name;
+
+                if(!in_array($place->name, $places)){
+                    $places[] = $place->name;
+                }
+                if(!in_array($area->name, $areas)){
+                    $areas[] = $area->name;
+                }
+                if(!in_array($rock->name, $rocks)){
+                    $rocks[] = $rock->name;
+                }
+            }
             $route_class->grade = $route->grade;
-            $route_class->route_name = $route->route_name;
-            $place = Place::find($route->place_id);
-            $area = Area::find($route->area_id);
-            $rock = PlaceRoute::find($route->place_route_id);
-            $route_class->place = $place->name;
-            $route_class->area = $area->name;
-            $route_class->rock = $rock->name;
             $route_class->count = $route->route_id;
             $routes[$route->route_id] = $route_class;
+
         }
         $user_id = Auth::user()->id;
         $result_route_qualification_classic_participant = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
@@ -681,9 +698,9 @@ class EventsController extends Controller
         } else {
             $result_participant = null;
         }
-        dd($routes);
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
-        return view('result-page', compact(['routes','event', 'result_participant']));
+//        dd($rocks, $routes);
+        return view($view, compact(['routes','places','areas', 'rocks' ,'event', 'result_participant']));
     }
 
     public function sendAllResult(Request $request)

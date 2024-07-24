@@ -518,6 +518,9 @@ class EventsController extends Controller
                 $form->link = '/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$title_eng;
                 $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$title_eng;
             }
+            if($form->type_event){
+                $form->is_access_user_edit_result = 1;
+            }
         });
         $form->saved(function (Form $form)  use ($type, $id){
             if($type != 'active') {
