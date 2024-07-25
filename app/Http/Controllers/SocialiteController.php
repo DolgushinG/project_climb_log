@@ -75,6 +75,7 @@ class SocialiteController extends Controller
                 } else {
                     $avatar = $socialite_user->getAvatar();
                 }
+            } else {
                 $avatar = null;
             }
 
