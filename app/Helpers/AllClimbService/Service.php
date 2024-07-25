@@ -141,9 +141,6 @@ class Service
                         $list_guides[] = array('name' => $route->name, 'grade' => 'project');
                     } else {
                         preg_match('/\d+[a-zA-Z]+/', $route->grade, $matches);
-                        if(!isset($matches[0])){
-                            dd($route);
-                        }
                         if(preg_match('/["\']|([^\d\.,])/', $route->name)){
                             if(strlen($route->name) < 2 && str_contains($route->name, "'")){
                                 $list_guides[] = array('name' => 'Без названия', 'grade' => $matches[0]);
@@ -252,7 +249,6 @@ class Service
                             $place_routes_model->name = $place_routes_name;
                             $place_routes_model->save();
                         }
-
                     }
                 }
             }

@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchCreateOutdoorRoutes;
 use App\Admin\Actions\BatchHideGrades;
 use App\Admin\Actions\BatchUpdateOutdoorRoutes;
+use App\Admin\Extensions\CustomButtonDeleteRoute;
 use App\Helpers\AllClimbService\Service;
 use App\Models\Area;
 use App\Models\Country;
@@ -99,19 +100,28 @@ class GradesController extends Controller
      */
     public function update($id, Request $request)
     {
-        $route = Route::find($id);
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if($event->type_event){
+            $route = RoutesOutdoor::find($id);
+            $route_pk = RoutesOutdoor::find($request->pk);
+        } else {
+            $route = Route::find($id);
+            $route_pk = Route::find($request->pk);
+        }
         if($route){
             $grade = Grades::where('event_id', $route->event_id)->first();
         }
         if($request->name == 'route_id'){
-            $route = Route::find($request->pk);
-            $route->route_id = $request->value;
-            $route->save();
+            $route_pk->route_id = $request->value;
+            $route_pk->save();
+        }
+        if($request->name == 'value'){
+            $route_pk->value = $request->value;
+            $route_pk->save();
         }
         if($request->name == 'grade'){
-            $route = Route::find($request->pk);
-            $route->grade = $request->value;
-            $route->save();
+            $route_pk->grade = $request->value;
+            $route_pk->save();
         }
         if($request->count_routes){
             $grade = Grades::where('event_id', $request->event_id)->first();
@@ -141,14 +151,37 @@ class GradesController extends Controller
      *
      * @param int $id
      *
-     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
-        $event_id = Grades::find($id)->event_id;
-        $route = Route::where('event_id', $event_id)->first();
-        if($route){
-            Route::where('event_id', $event_id)->delete();
+
+        $grades = Grades::find($id);
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if($grades){
+            if($event->type_event){
+                $route = RoutesOutdoor::where('event_id', $grades->event_id)->first();
+            } else {
+                $route = Route::where('event_id', $grades->event_id)->first();
+            }
+            if($route){
+                $route->delete();
+            }
+        }
+        $model = explode('-', $id);
+        if(isset($model[0]) && isset($model[1])){
+            if($model[0] == 'route'){
+                if($event->type_event){
+                    $route = RoutesOutdoor::find($model[1]);
+                } else {
+                    $route = Route::find($model[1]);
+                }
+                $route->delete();
+                $response = [
+                    'status'  => true,
+                    'message' => "Успешно удалено",
+                ];
+                return response()->json($response);
+            }
         }
         return $this->form()->destroy($id);
     }
@@ -171,7 +204,13 @@ class GradesController extends Controller
         $grades = Grades::where('event_id', $event->id)->first();
         if(!$grades){
             $grid->tools(function ($tools) {
-                $tools->append("<a href='/admin/grades/create' class='btn btn-success'>Сгенерировать трассы</a>");
+                Admin::style('
+                    .create-date-outdoor {margin-top:8px;}
+                     @media screen and (max-width: 767px) {
+                            .create-date-outdoor {margin-top:8px;}
+                        }
+                ');
+                $tools->append("<a href='/admin/grades/create' class='create-date-outdoor btn btn-sm btn-success'>Сгенерировать трассы</a>");
             });
             if($event->type_event){
                 $grid->tools(function (Grid\Tools $tools) use ($event) {
@@ -179,6 +218,10 @@ class GradesController extends Controller
                 });
             }
         }
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+            $actions->disableEdit();
+        });
         $grid->disableFilter();
         $grid->disableBatchActions();
         $grid->disableColumnSelector();
@@ -288,7 +331,17 @@ class GradesController extends Controller
             $query->has('event.routes');
         });
         $grid->disableFilter();
-        $grid->disableActions();
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+            $actions->disableEdit();
+            $actions->disableDelete();
+            $actions->append(<<<EOT
+<a href="javascript:void(0);" data-id="route-{$actions->getKey()}" class="grid-row-delete btn btn-xs btn-danger">
+    <i class="fa fa-trash"></i> Удалить
+</a>
+EOT
+            );
+        });
         $grid->disableBatchActions();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
@@ -301,8 +354,8 @@ class GradesController extends Controller
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if($event->type_event){
             $grid->column('route_name', 'Трасса');
-            $grid->column('grade', 'Категория трассы');
-            $grid->column('value', 'Ценность трассы');
+            $grid->column('grade', 'Категория трассы')->editable();
+            $grid->column('value', 'Ценность трассы')->editable();
             if($event->is_zone_show){
                 $grid->column('zone', 'Ценность зоны');
             }
@@ -352,9 +405,7 @@ class GradesController extends Controller
         } else {
             $routes = Grades::getRoutes();
         }
-        if($event->type_event){
-            $routes = Grades::getRoutesOutdoorWithValue();
-        }
+
         $form->disableViewCheck();
         $form->disableEditingCheck();
         $form->disableCreatingCheck();
@@ -437,22 +488,68 @@ class GradesController extends Controller
                 $form->html('<h4 id="warning-category" style="color: red" >Внимение!! Если вы редактировали категории или номера трасс,
                                     то это сбросится так как генерация трасс происходит с нуля</h4>');
             }
-            $form->tableamount('grade_and_amount', '', function ($table) use ($event){
-                $grades = Grades::getGrades();
-                $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
-                if(!$event->type_event) {
-                    $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
-                    if ($event->mode == 1) {
-                        $table->text('Ценность')->width('60px');
-                        if ($event->is_zone_show) {
-                            $table->text('Ценность зоны')->width('60px');
+            if($event->type_event) {
+                $form->radio('choose_type', 'Выбрать вид скалолазания')->options([
+                    1 => 'Боулдеринг',
+                    0 => 'Трудность',
+                ])->when(1, function (Form $form) use ($event) {
+                    $routes = Grades::getRoutesOutdoorWithValueBouldering();
+                    $form->tableamount('grade_and_amount', '', function ($table) use ($event) {
+                        $grades = Grades::getGrades();
+                        $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
+                        if (!$event->type_event) {
+                            $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
+                            if ($event->mode == 1) {
+                                $table->text('Ценность')->width('60px');
+                                if ($event->is_zone_show) {
+                                    $table->text('Ценность зоны')->width('60px');
+                                }
+                            }
+                        } else {
+                            $table->text('Ценность')->width('80px');
                         }
+                        $table->disableButton();
+                    })->value($routes);
+                })->when(0, function (Form $form) use ($event) {
+                    $routes = Grades::getRoutesOutdoorWithValueLead();
+                    $form->tableamount('grade_and_amount', '', function ($table) use ($event) {
+                        $grades = Grades::getGrades();
+                        $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
+                        if (!$event->type_event) {
+                            $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
+                            if ($event->mode == 1) {
+                                $table->text('Ценность')->width('60px');
+                                if ($event->is_zone_show) {
+                                    $table->text('Ценность зоны')->width('60px');
+                                }
+                            }
+                        } else {
+                            $table->text('Ценность')->width('80px');
+                        }
+                        $table->disableButton();
+                    })->value($routes);
+                })->default(0);
+            } else {
+                $form->tableamount('grade_and_amount', '', function ($table) use ($event) {
+                    $grades = Grades::getGrades();
+                    $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
+                    if (!$event->type_event) {
+                        $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
+                        if ($event->mode == 1) {
+                            $table->text('Ценность')->width('60px');
+                            if ($event->is_zone_show) {
+                                $table->text('Ценность зоны')->width('60px');
+                            }
+                        }
+                    } else {
+                        $table->text('Ценность')->width('80px');
                     }
-                } else {
-                    $table->text('Ценность')->width('80px');
-                }
-                $table->disableButton();
-            })->value($routes);
+                    $table->disableButton();
+                })->value($routes);
+            }
+            $form->submitted(function (Form $form) {
+                $form->ignore('choose_type');
+            });
             $form->saving(function (Form $form) use ($event) {
                 if($form->grade_and_amount && !$event->type_event){
                     $main_count = 0;

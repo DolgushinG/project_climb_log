@@ -33,6 +33,13 @@ class Route extends Model
 
         Grades::settings_routes($amount_routes, $grades);
     }
+    public static function is_exist_name($routes, $name, $area_id)
+    {
+        foreach ($routes as $route){
+            return in_array($name, $route) && in_array($area_id, $route);
+        }
+        return false;
+    }
     public static function generation_outdoor_route($event_id, $place_id, $area_id, $rock_id, $routes){
         $route_id = 1;
         $event = Event::find($event_id);
@@ -55,21 +62,24 @@ class Route extends Model
                             $flash_value = $grades_with_value_flash[$index];
                             $value = self::get_current_value_for_grade($routes , $route['grade']);
                         }
-                        $record_outdoor_routes[] = array(
-                            'owner_id' => $event->owner_id,
-                            'event_id' => $event_id,
-                            'route_id' => $route_id,
-                            'country_id' => $place->country_id,
-                            'place_id' => $place_id,
-                            'area_id' => $area_id,
-                            'place_route_id' => $id,
-                            'route_name' => $route['name'],
-                            'grade' => $route['grade'],
+                        if(!self::is_exist_name($record_outdoor_routes, $route['name'], $area_id)){
+                            $record_outdoor_routes[] = array(
+                                'owner_id' => $event->owner_id,
+                                'event_id' => $event_id,
+                                'route_id' => $route_id,
+                                'country_id' => $place->country_id,
+                                'place_id' => $place_id,
+                                'area_id' => $area_id,
+                                'place_route_id' => $id,
+                                'route_name' => $route['name'],
+                                'grade' => $route['grade'],
 //                            'zone' => $route['Ценность зоны'],
-                            'value' => $value,
-                            'flash_value' => $flash_value,
-                        );
-                        $route_id++;
+                                'value' => $value,
+                                'flash_value' => $flash_value,
+                            );
+                            $route_id++;
+                        }
+
                     }
                 }
             }
