@@ -75,6 +75,7 @@ class SocialiteController extends Controller
                 } else {
                     $avatar = $socialite_user->getAvatar();
                 }
+                $avatar = null;
             }
 
             $user = \App\Models\User::updateOrCreate([
