@@ -592,6 +592,8 @@ class EventsController extends Controller
         $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $user_id)->first();
         if($event->is_access_user_edit_result && $result_classic_for_edit){
             UpdateAttemptInRoutesParticipants::dispatch($event_id, $final_data);
+            # Обновить категорию после изменение нового результата
+            Event::force_update_category_id($event, $user_id);
         } else {
             $result = ResultRouteQualificationClassic::insert($final_data);
 

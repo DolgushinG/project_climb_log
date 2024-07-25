@@ -599,6 +599,13 @@ class ResultQualificationController extends Controller
                         $result->attempt = $route['attempt'];
                         $result->save();
                     }
+                    $amount_users = ResultQualificationClassic::where('event_id', '=', $event_id)->where('active','=', 1)->count();
+                    Event::force_update_category_id($event, $user_id);
+                    if($amount_users > 100){
+                        UpdateResultParticipants::dispatch($event_id);
+                    } else {
+                        Event::refresh_final_points_all_participant($event);
+                    }
                 }
                 if($form->result_for_edit_france_system_qualification){
                     $routes = $form->result_for_edit_france_system_qualification;
