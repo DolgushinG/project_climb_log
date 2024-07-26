@@ -33,10 +33,12 @@ class Route extends Model
 
         Grades::settings_routes($amount_routes, $grades);
     }
-    public static function is_exist_name($routes, $name, $area_id)
+    public static function is_exist_name($routes, $name, $grade)
     {
-        foreach ($routes as $route){
-            return in_array($name, $route) && in_array($area_id, $route);
+        foreach ($routes as $route) {
+            if(in_array($name, $route) && in_array($grade, $route)){
+                return true;
+            };
         }
         return false;
     }
@@ -62,7 +64,7 @@ class Route extends Model
                             $flash_value = $grades_with_value_flash[$index];
                             $value = self::get_current_value_for_grade($routes , $route['grade']);
                         }
-                        if(!self::is_exist_name($record_outdoor_routes, $route['name'], $area_id)){
+                        if(!self::is_exist_name($record_outdoor_routes, $route['name'], $route['grade'])){
                             $record_outdoor_routes[] = array(
                                 'owner_id' => $event->owner_id,
                                 'event_id' => $event_id,
