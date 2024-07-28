@@ -484,8 +484,12 @@ class Event extends Model
             $result_qualification = ResultRouteQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
             if($result_qualification){
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $user_id), 3);
-                $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
-                $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                if(count($the_best_route_passed) === 0){
+                    $category_id = 0;
+                } else {
+                    $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
+                    $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                }
                 $participant_result->category_id = $category_id;
                 $participant_result->save();
             }
@@ -499,8 +503,12 @@ class Event extends Model
             $result_qualification = ResultRouteQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
             if($result_qualification){
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $user_id), 3);
-                $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
-                $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                if(count($the_best_route_passed) === 0){
+                    $category_id = 0;
+                } else {
+                    $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
+                    $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                }
                 $participant_result->category_id = $category_id;
                 $participant_result->save();
             }
