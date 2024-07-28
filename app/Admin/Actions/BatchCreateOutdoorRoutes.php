@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 
 class BatchCreateOutdoorRoutes extends Action
 {
-    public $name = 'Сгенерировать скальные трассы';
+    public $name = 'Добавить скальные трассы';
 
     protected $selector = '.notify';
 
@@ -110,7 +110,7 @@ class BatchCreateOutdoorRoutes extends Action
                 });
 
         EOT;
-        \Encore\Admin\Facades\Admin::script($script);
+//        \Encore\Admin\Facades\Admin::script($script);
     }
     public function html()
     {

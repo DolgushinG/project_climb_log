@@ -2,9 +2,14 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchAddArea;
+use App\Admin\Actions\BatchAddPlace;
+use App\Admin\Actions\BatchAddPlaceRoutes;
+use App\Admin\Actions\BatchAddRoute;
 use App\Admin\Actions\BatchCreateOutdoorRoutes;
 use App\Admin\Actions\BatchHideGrades;
 use App\Admin\Actions\BatchUpdateOutdoorRoutes;
+use App\Admin\CustomAction\ActionCustomDelete;
 use App\Admin\Extensions\CustomButtonDeleteRoute;
 use App\Helpers\AllClimbService\Service;
 use App\Models\Area;
@@ -44,11 +49,11 @@ class GradesController extends Controller
                 $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
                 if($event){
                     if($event->is_france_system_qualification){
-                        $row->column(4, function (Column $column) {
+                        $row->column(10, function (Column $column) {
                             $column->row($this->france_system_routes());
                         });
                     } else {
-                        $row->column(4, function (Column $column) use ($event) {
+                        $row->column(10, function (Column $column) use ($event) {
                             $column->row($this->event_routes());
                             if($event->type_event){
                                 $column->row($this->ready_outdoor_routes());
@@ -143,7 +148,7 @@ class GradesController extends Controller
      *
      * @return mixed
      */
-    public function store()
+    public function store(Request $request)
     {
         return $this->form()->store();
     }
@@ -156,19 +161,7 @@ class GradesController extends Controller
      */
     public function destroy($id, Request $request)
     {
-
-        $grades = Grades::find($id);
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-        if($grades){
-            if($event->type_event){
-                $route = RoutesOutdoor::where('event_id', $grades->event_id)->first();
-            } else {
-                $route = Route::where('event_id', $grades->event_id)->first();
-            }
-            if($route){
-                $route->delete();
-            }
-        }
         $model = explode('-', $id);
         if(isset($model[0]) && isset($model[1])){
             if($model[0] == 'route'){
@@ -178,11 +171,28 @@ class GradesController extends Controller
                     $route = Route::find($model[1]);
                 }
                 $route->delete();
+                $grades = Grades::where('event_id', $event->id)->first();
+                $get_count = RoutesOutdoor::where('event_id', $event->id)->get()->count();
+                if($grades){
+                    $grades->count_routes = $get_count;
+                    $grades->save();
+                }
                 $response = [
                     'status'  => true,
                     'message' => "Успешно удалено",
                 ];
                 return response()->json($response);
+            }
+        }
+        $grades = Grades::find($id);
+        if($grades){
+            if($event->type_event){
+                $route = RoutesOutdoor::where('event_id', $grades->event_id)->get();
+            } else {
+                $route = Route::where('event_id', $grades->event_id)->get();
+            }
+            if($route){
+                $route->each->delete();
             }
         }
         return $this->form()->destroy($id);
@@ -205,7 +215,28 @@ class GradesController extends Controller
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         $grades = Grades::where('event_id', $event->id)->first();
         if(!$grades){
-            $grid->tools(function ($tools) {
+
+            $grid->tools(function ($tools) use ($event) {
+                if($event->type_event){
+
+                    Admin::script(<<<SCRIPT
+            $('body').on('shown.bs.modal', '.modal', function() {
+            $(this).find('select').each(function() {
+                var dropdownParent = $(document.body);
+                if ($(this).parents('.modal.in:first').length !== 0)
+                    dropdownParent = $(this).parents('.modal.in:first');
+                    $(this).select2({
+                        dropdownParent: dropdownParent
+                    });
+                });
+            });
+SCRIPT);
+                    $tools->append(new BatchAddPlace);
+                    $tools->append(new BatchAddArea);
+                    $tools->append(new BatchAddPlaceRoutes);
+                    $tools->append(new BatchUpdateOutdoorRoutes);
+                }
+
                 Admin::style('
                     .create-date-outdoor {margin-top:8px;}
                      @media screen and (max-width: 767px) {
@@ -214,11 +245,7 @@ class GradesController extends Controller
                 ');
                 $tools->append("<a href='/admin/grades/create' class='create-date-outdoor btn btn-sm btn-success'>Сгенерировать трассы</a>");
             });
-            if($event->type_event){
-                $grid->tools(function (Grid\Tools $tools) use ($event) {
-                    $tools->append(new BatchUpdateOutdoorRoutes);
-                });
-            }
+
         }
         $grid->actions(function ($actions) {
             $actions->disableView();
@@ -332,6 +359,7 @@ class GradesController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.routes');
         });
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         $grid->disableFilter();
         $grid->actions(function ($actions) {
             $actions->disableView();
@@ -344,16 +372,27 @@ class GradesController extends Controller
 EOT
             );
         });
+        Admin::script(<<<SCRIPT
+            $('body').on('shown.bs.modal', '.modal', function() {
+            $(this).find('select').each(function() {
+                var dropdownParent = $(document.body);
+                if ($(this).parents('.modal.in:first').length !== 0)
+                    dropdownParent = $(this).parents('.modal.in:first');
+                    $(this).select2({
+                        dropdownParent: dropdownParent
+                    });
+                });
+            });
+SCRIPT);
         $grid->disableBatchActions();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->disableExport();
         $grid->disablePagination();
-        $grid->tools(function (Grid\Tools $tools) {
+        $grid->tools(function (Grid\Tools $tools) use ($event)  {
+            $tools->append(new BatchAddRoute);
             $tools->append(new BatchHideGrades);
         });
-
-        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if($event->type_event){
             $grid->column('route_name', 'Трасса');
             $grid->column('grade', 'Категория трассы')->editable();
@@ -363,32 +402,6 @@ EOT
             }
         }
         return $grid;
-    }
-
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
-    protected function form_routes()
-    {
-        $form = new Form(new Route);
-        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
-        $form->hidden('owner_id')->value($event->owner_id);
-        $form->hidden('event_id')->value($event->id);
-        $form->number('route_id');
-        $form->text('grade');
-        if($event->mode == 1){
-            if($event->is_zone_show){
-                $form->number('zone');
-            }
-            $form->number('value');
-        }
-        $form->disableCreatingCheck();
-        $form->disableEditingCheck();
-
-
-        return $form;
     }
 
     /**
@@ -422,21 +435,11 @@ EOT
         $form->hidden('event_id', '')->value($event->id);
         if($event->type_event){
             $guides = Country::all()->pluck('name', 'id');
-            $form->radio('choose_type_import', 'Добавление трасс')->options([
-                1 => 'Добавить самому',
-                0 => 'Подгрузить из Allclimb.com',
-            ])->when(1, function (Form $form) use ($guides) {
-                $form->select('country_id', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
-                $form->select('place_id', 'Место');
-                $form->text('area_id', 'Район');
-                $form->text('route_name', 'Название трассы');
-                $form->select('grade', 'Категория трассы')->options(Grades::outdoor_grades());
-            })->when(0, function (Form $form) use ($guides) {
-                $form->select('country_id', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
-                $form->select('place_id', 'Место')->attribute('id', 'area-outdoor');
-                $form->select('area_id', 'Район')->attribute('id', 'local-outdoor');
-                $form->multipleSelect('rocks_id', 'Камни(Cкалы)')->attribute('id', 'rock-outdoor');
-                $script = <<<EOT
+            $form->select('country_id', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
+            $form->select('place_id', 'Место')->attribute('id', 'area-outdoor');
+            $form->select('area_id', 'Район')->attribute('id', 'local-outdoor');
+            $form->multipleSelect('rocks_id', 'Камни(Cкалы)')->attribute('id', 'rock-outdoor');
+            $script = <<<EOT
         $(document).on("change", '[id=place-outdoor]', function () {
                     $.get("api/get_places",
                             {option: $(this).val()},
@@ -480,15 +483,14 @@ EOT
 
         EOT;
 
-                \Encore\Admin\Facades\Admin::script($script);
-                Admin::style('
+            \Encore\Admin\Facades\Admin::script($script);
+            Admin::style('
                         .remove {
                           display: none;
                         }
                         .add-amount{
                             display: none;
                         }');
-            })->default(0);
 
         }
 
@@ -584,12 +586,7 @@ EOT
                                 $model_rock = PlaceRoute::find($rock);
                                 $get_amount_all_route = Service::get_amount_all_routes($place->name, $area->name, $model_rock->name);
                                 if(!$get_amount_all_route){
-                                    $error = new MessageBag([
-                                        'title'  => 'Ошибка',
-                                        'message' => "Проверьте интернет соединение",
-                                    ]);
-
-                                    return back()->with(compact('error'));
+                                    $get_amount_all_route = 0;
                                 }
                                 $amount += $get_amount_all_route;
                             }
@@ -628,5 +625,4 @@ EOT
 
         return $form;
     }
-
 }
