@@ -263,8 +263,12 @@ class Event extends Model
             $category_id = $participant->category_id;
             if ($event->is_auto_categories && $category_id == null) {
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $participant->id), 3);
-                $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $participant->id);
-                $category_id = ParticipantCategory::where('event_id', '=', $event_id)->where('category', $category)->first()->id;
+                if(count($the_best_route_passed) === 0){
+                    $category_id = 0;
+                } else {
+                    $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $participant->id);
+                    $category_id = ParticipantCategory::where('event_id', '=', $event_id)->where('category', $category)->first()->id;
+                }
                 $final_participant_result->category_id = $category_id;
             }
             $final_participant_result->points = $points;
@@ -484,14 +488,37 @@ class Event extends Model
             $result_qualification = ResultRouteQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
             if($result_qualification){
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $user_id), 3);
-                $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
-                $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                if(count($the_best_route_passed) === 0){
+                    $category_id = 0;
+                } else {
+                    $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
+                    $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                }
                 $participant_result->category_id = $category_id;
                 $participant_result->save();
             }
         }
-
     }
+
+    public static function force_update_category_id($event, $user_id)
+    {
+        $participant_result = ResultQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+        if ($event->is_auto_categories) {
+            $result_qualification = ResultRouteQualificationClassic::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first();
+            if($result_qualification){
+                $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $user_id), 3);
+                if(count($the_best_route_passed) === 0){
+                    $category_id = 0;
+                } else {
+                    $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
+                    $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                }
+                $participant_result->category_id = $category_id;
+                $participant_result->save();
+            }
+        }
+    }
+
 
     public static function get_france_system_result($table, $event_id, $gender, $category = null)
     {

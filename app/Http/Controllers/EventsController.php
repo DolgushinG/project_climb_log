@@ -218,9 +218,8 @@ class EventsController extends Controller
         if($event){
             if(!$event->is_france_system_qualification){
 //                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
-                $user_male_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('active','=', 1)->pluck('user_id')->toArray();
-                $user_female_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('active','=', 1)->pluck('user_id')->toArray();
-
+                $user_male_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('gender', '=', 'male')->where('active','=', 1)->where('category_id','!=', 0)->pluck('user_id')->toArray();
+                $user_female_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('gender', '=', 'female')->where('active','=', 1)->where('category_id','!=', 0)->pluck('user_id')->toArray();
                 $stats = new stdClass();
                 if($event->is_open_team_result){
                     $user_team_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('active','=', 1)->pluck('user_id')->toArray();
@@ -596,6 +595,8 @@ class EventsController extends Controller
         $result_classic_for_edit = ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $user_id)->first();
         if($event->is_access_user_edit_result && $result_classic_for_edit){
             UpdateAttemptInRoutesParticipants::dispatch($event_id, $final_data);
+            # Обновить категорию после изменение нового результата
+            Event::force_update_category_id($event, $user_id);
         } else {
             $result = ResultRouteQualificationClassic::insert($final_data);
 
