@@ -9,6 +9,7 @@ use App\Models\PlaceRoute;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Http;
+use function Symfony\Component\String\s;
 
 class Service
 {
@@ -169,19 +170,23 @@ class Service
     }
     public static function get_amount_all_routes($guide, $area, $rock)
     {
-        $response = self::curl_start('/ru/guides/'.$guide.'/'.$area.'/');
+        $response = self::curl_start('/ru/guides/' . $guide . '/' . $area . '/');
         $post = json_decode($response);
         $amount = 0;
-        foreach ($post->result as $guid){
-            if(isset($guid->numroutes)){
-                if($guid->name == $rock){
-                    preg_match('/\d+/', $guid->numroutes, $matches);
-                    $amount += intval($matches[0]);
-                }
+        if (isset($post->result)) {
+            foreach ($post->result as $guid) {
+                if (isset($guid->numroutes)) {
+                    if ($guid->name == $rock) {
+                        preg_match('/\d+/', $guid->numroutes, $matches);
+                        $amount += intval($matches[0]);
+                    }
 
+                }
             }
+            return $amount;
+        } else {
+            return null;
         }
-        return $amount;
     }
 
     public static function update_countries()

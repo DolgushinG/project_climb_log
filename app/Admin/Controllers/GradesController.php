@@ -24,6 +24,8 @@ use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\MessageBag;
 
 class GradesController extends Controller
 {
@@ -420,11 +422,21 @@ EOT
         $form->hidden('event_id', '')->value($event->id);
         if($event->type_event){
             $guides = Country::all()->pluck('name', 'id');
-            $form->select('country_id', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
-            $form->select('place_id', 'Место')->attribute('id', 'area-outdoor');
-            $form->select('area_id', 'Район')->attribute('id', 'local-outdoor');
-            $form->multipleSelect('rocks_id', 'Камни(Cкалы)')->attribute('id', 'rock-outdoor');
-            $script = <<<EOT
+            $form->radio('choose_type_import', 'Добавление трасс')->options([
+                1 => 'Добавить самому',
+                0 => 'Подгрузить из Allclimb.com',
+            ])->when(1, function (Form $form) use ($guides) {
+                $form->select('country_id', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
+                $form->select('place_id', 'Место');
+                $form->text('area_id', 'Район');
+                $form->text('route_name', 'Название трассы');
+                $form->select('grade', 'Категория трассы')->options(Grades::outdoor_grades());
+            })->when(0, function (Form $form) use ($guides) {
+                $form->select('country_id', 'Страна')->attribute('id', 'place-outdoor')->options($guides);
+                $form->select('place_id', 'Место')->attribute('id', 'area-outdoor');
+                $form->select('area_id', 'Район')->attribute('id', 'local-outdoor');
+                $form->multipleSelect('rocks_id', 'Камни(Cкалы)')->attribute('id', 'rock-outdoor');
+                $script = <<<EOT
         $(document).on("change", '[id=place-outdoor]', function () {
                     $.get("api/get_places",
                             {option: $(this).val()},
@@ -468,14 +480,16 @@ EOT
 
         EOT;
 
-            \Encore\Admin\Facades\Admin::script($script);
-            Admin::style('
+                \Encore\Admin\Facades\Admin::script($script);
+                Admin::style('
                         .remove {
                           display: none;
                         }
                         .add-amount{
                             display: none;
                         }');
+            })->default(0);
+
         }
 
         if(!$event->is_france_system_qualification){
@@ -568,7 +582,16 @@ EOT
                                 $place = Place::find($form->place_id);
                                 $area = Area::find($form->area_id);
                                 $model_rock = PlaceRoute::find($rock);
-                                $amount += Service::get_amount_all_routes($place->name, $area->name, $model_rock->name);
+                                $get_amount_all_route = Service::get_amount_all_routes($place->name, $area->name, $model_rock->name);
+                                if(!$get_amount_all_route){
+                                    $error = new MessageBag([
+                                        'title'  => 'Ошибка',
+                                        'message' => "Проверьте интернет соединение",
+                                    ]);
+
+                                    return back()->with(compact('error'));
+                                }
+                                $amount += $get_amount_all_route;
                             }
                         }
                         $form->count_routes = $amount;
