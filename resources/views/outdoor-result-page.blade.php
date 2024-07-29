@@ -37,13 +37,18 @@
                                                                             data-bs-target="#collapseOne{{str_replace(' ', '-', $area)}}2"
                                                                             aria-expanded="true"
                                                                             aria-controls="collapseOne{{str_replace(' ', '-', $area)}}2">
-                                                                        {{$area}}
+                                                                        <header class="section-header mr-2">
+                                                                            <img class="img-fluid" style="width: 100px;height: 100px;" src="{{asset('storage/'.\App\Models\Area::get_image($area))}}" alt="image">
+                                                                        </header>
+                                                                        <div class="container">
+                                                                            {{$area}}</div>
+
                                                                     </button>
                                                                 </h2>
                                                                 <div id="collapseOne{{str_replace(' ', '-', $area)}}2"
                                                                      class="accordion-collapse collapse"
                                                                      aria-labelledby="headingOne{{str_replace(' ', '-', $area)}}2"
-                                                                     data-bs-parent="#accordionExample{{$area}}2">
+                                                                     data-bs-parent="#accordionExample{{str_replace(' ', '-', $area)}}2">
                                                                     <div class="accordion-body">
                                                                         @foreach($rocks as $rock)
                                                                             <div class="accordion"

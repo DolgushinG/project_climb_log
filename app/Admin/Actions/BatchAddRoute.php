@@ -28,6 +28,9 @@ class BatchAddRoute extends Action
             $place = Place::find($area->place_id);
             $country = Country::find($place->country_id);
             $route_name = $request->input('route_name');
+            $imageName = time().'.'.request()->image->getClientOriginalExtension();
+            $path = '/images/areas/'.$id.'/'.$imageName;
+            request()->image->move(public_path('storage/images/areas/'.$id), $imageName);
             $grade = $request->input('grade');
             $owner_id = \Encore\Admin\Facades\Admin::user()->id;
             $event = Event::where('owner_id', '=', $owner_id)->where('active', 1)->first();
@@ -44,6 +47,7 @@ class BatchAddRoute extends Action
                 $model->grade = $grade;
                 $model->place_route_id = $id;
                 $model->route_name = $route_name;
+                $model->image = $path;
                 $model->route_id = $route_id;
                 $grades_with_value_flash = Grades::outdoor_grades_with_value_flash(20);
                 $grades = Grades::outdoor_grades();

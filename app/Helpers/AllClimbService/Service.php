@@ -129,21 +129,23 @@ class Service
         $response = self::curl_start('/ru/guides/'.$place.'/'.$area.'/'.$rock.'/');
         $post = json_decode($response);
         $list_guides = [];
-        foreach ($post->images as $guid){
-            if(isset($guid->Routes)){
-                foreach ($guid->Routes as $route) {
-                    if(str_contains($route->grade , 'project') || str_contains($route->grade , 'проект')){
-                        $list_guides[] = array('name' => $route->name, 'grade' => 'project');
-                    } else {
-                        preg_match('/\d+[a-zA-Z]+/', $route->grade, $matches);
-                        if(preg_match('/["\']|([^\d\.,])/', $route->name)){
-                            if(strlen($route->name) < 2 && str_contains($route->name, "'")){
-                                $list_guides[] = array('name' => 'Без названия', 'grade' => $matches[0]);
-                            } else {
-                                $list_guides[] = array('name' => $route->name, 'grade' => $matches[0]);
-                            }
+        if(isset($post->images)){
+            foreach ($post->images as $guid){
+                if(isset($guid->Routes)){
+                    foreach ($guid->Routes as $route) {
+                        if(str_contains($route->grade , 'project') || str_contains($route->grade , 'проект')){
+                            $list_guides[] = array('name' => $route->name, 'grade' => 'project');
                         } else {
-                            $list_guides[] = array('name' => 'Без названия', 'grade' => $matches[0]);
+                            preg_match('/\d+[a-zA-Z]+/', $route->grade, $matches);
+                            if(preg_match('/["\']|([^\d\.,])/', $route->name)){
+                                if(strlen($route->name) < 2 && str_contains($route->name, "'")){
+                                    $list_guides[] = array('name' => 'Без названия', 'grade' => $matches[0]);
+                                } else {
+                                    $list_guides[] = array('name' => $route->name, 'grade' => $matches[0]);
+                                }
+                            } else {
+                                $list_guides[] = array('name' => 'Без названия', 'grade' => $matches[0]);
+                            }
                         }
                     }
                 }

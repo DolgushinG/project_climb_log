@@ -700,7 +700,7 @@ class EventsController extends Controller
             $result_participant = null;
         }
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
-//        dd($rocks, $routes);
+//        dd($areas);
         return view($view, compact(['routes','places','areas', 'rocks' ,'event', 'result_participant']));
     }
 

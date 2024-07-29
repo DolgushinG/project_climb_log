@@ -75,7 +75,7 @@ class GradesController extends Controller
      * @param Content $content
      * @return Content
      */
-    public function edit($id, Content $content)
+    public function edit($id, Content $content, Request $request)
     {
         return $content
             ->header(trans('admin.edit'))
@@ -371,6 +371,7 @@ SCRIPT);
 </a>
 EOT
             );
+
         });
         Admin::script(<<<SCRIPT
             $('body').on('shown.bs.modal', '.modal', function() {
@@ -398,7 +399,8 @@ SCRIPT);
         });
         if($event->type_event){
             $grid->column('route_name', 'Трасса');
-            $grid->column('grade', 'Категория трассы')->editable();
+            $grid->column('image', 'Картинка')->image('', 200, 200);
+            $grid->column('grade', 'Категория трассы')->editable('select', Grades::getGrades());
             $grid->column('value', 'Ценность трассы')->editable();
             if($event->is_zone_show){
                 $grid->column('zone', 'Ценность зоны');
