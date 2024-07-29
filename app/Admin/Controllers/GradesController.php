@@ -390,7 +390,10 @@ SCRIPT);
         $grid->disableExport();
         $grid->disablePagination();
         $grid->tools(function (Grid\Tools $tools) use ($event)  {
-            $tools->append(new BatchAddRoute);
+            if($event->type_event && Grades::where('event_id', $event->id)->first()){
+                $tools->append(new BatchAddRoute);
+            }
+
             $tools->append(new BatchHideGrades);
         });
         if($event->type_event){

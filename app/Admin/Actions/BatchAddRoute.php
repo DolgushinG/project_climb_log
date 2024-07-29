@@ -77,6 +77,7 @@ class BatchAddRoute extends Action
         }
 
         $this->text('route_name', 'Название');
+        $this->image('image', 'Картинка маршрута')->move('images/route');
         $this->select('grade', 'Категория')->options(Grades::getGrades());
     }
 

@@ -17,14 +17,19 @@ class BatchAddArea extends Action
 
     public function handle(Request $request)
     {
+
         if($request->input('place')){
             $id = $request->input('place')['id'];
+            $imageName = time().'.'.request()->image->getClientOriginalExtension();
+            $path = '/images/areas/'.$id.'/'.$imageName;
+            request()->image->move(public_path('storage/images/areas/'.$id), $imageName);
             $name = $request->input('name');
             $model = Area::where('place_id', $id)->where('name', $name)->first();
             if(!$model){
                 $model = new Area;
                 $model->name = $name;
                 $model->place_id = $id;
+                $model->image = $path;
                 $model->save();
                 return $this->response()->success('Готово')->refresh();
             }
@@ -34,7 +39,8 @@ class BatchAddArea extends Action
     public function form()
     {
         $this->modalSmall();
-        $this->select('place_id', 'Место')->options(Place::all()->pluck('name', 'id'));
+        $this->select('place.id', 'Место')->options(Place::all()->pluck('name', 'id'));
+        $this->image('image', 'Картинка района')->move('images/area');
         $this->text('name', 'Район');
     }
 

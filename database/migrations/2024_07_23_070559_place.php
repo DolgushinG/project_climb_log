@@ -16,6 +16,7 @@ class Place extends Migration
         Schema::create('places', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('web_link')->nullable();
             $table->integer('country_id');
             $table->timestamps();
         });

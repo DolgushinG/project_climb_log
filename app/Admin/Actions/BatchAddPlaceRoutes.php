@@ -21,10 +21,12 @@ class BatchAddPlaceRoutes extends Action
         if($request->input('area')){
             $id = $request->input('area')['id'];
             $name = $request->input('name');
+            $image = $request->input('image');
             $model = PlaceRoute::where('area_id', $id)->where('name', $name)->first();
             if(!$model){
                 $model = new PlaceRoute;
                 $model->name = $name;
+                $model->image = $image;
                 $model->area_id = $id;
                 $model->save();
                 return $this->response()->success('Готово')->refresh();
@@ -36,6 +38,7 @@ class BatchAddPlaceRoutes extends Action
     {
         $this->modalSmall();
         $this->select('area.id', 'Район')->options(Area::all()->pluck('name', 'id'));
+        $this->image('image', 'Картинка Сектора')->move('images/place_route');
         $this->text('name', 'Сектор');
     }
 

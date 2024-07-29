@@ -6,10 +6,6 @@ use App\Models\Area;
 use App\Models\Country;
 use App\Models\Place;
 use App\Models\PlaceRoute;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
-use Illuminate\Support\Facades\Http;
-use function Symfony\Component\String\s;
 
 class Service
 {
@@ -18,8 +14,6 @@ class Service
     public static function curl_start($url)
     {
         $curl = curl_init();
-
-
 
         $link = str_replace ( ' ', '%20', $url);
         curl_setopt_array($curl, array(
@@ -100,34 +94,34 @@ class Service
     {
         $response = self::curl_start('/ru/guides/');
         $post = json_decode($response);
-        $list_country = [];
+        $list = [];
         foreach ($post->result as $guid){
             if($country == $guid->country){
-                $list_country[] = $guid->name;
+                $list[] = array('place_name' => $guid->name, 'web_guide_link' => $guid->web_guide_link);
             }
         }
-        return array_values(array_unique($list_country));
+        return $list;
     }
     public static function get_areas($place): array
     {
         $response = self::curl_start('/ru/guides/'.$place.'/');
         $post = json_decode($response);
-        $list_guides = [];
+        $list = [];
         foreach ($post->result as $guid){
-            $list_guides[] = $guid->name;
+            $list[] = array('area_name' => $guid->name, 'web_guide_link' => $guid->web_guide_link);
         }
-        return array_values(array_unique($list_guides));
+        return $list;
     }
 
     public static function get_place_routes($place, $area): array
     {
         $response = self::curl_start('/ru/guides/'.$place.'/'.$area.'/');
         $post = json_decode($response);
-        $list_guides = [];
+        $list = [];
         foreach ($post->result as $guid){
-            $list_guides[] = $guid->name;
+            $list[] = array('place_route_name' => $guid->name, 'web_guide_link' => $guid->web_guide_link);
         }
-        return array_values(array_unique($list_guides));
+        return $list;
     }
 
     public static function get_routes($place, $area, $rock): array
@@ -137,7 +131,7 @@ class Service
         $list_guides = [];
         foreach ($post->images as $guid){
             if(isset($guid->Routes)){
-                foreach ($guid->Routes as $route){
+                foreach ($guid->Routes as $route) {
                     if(str_contains($route->grade , 'project') || str_contains($route->grade , 'проект')){
                         $list_guides[] = array('name' => $route->name, 'grade' => 'project');
                     } else {
@@ -206,11 +200,12 @@ class Service
         $countries = Country::all();
         foreach ($countries as $country){
             $places = Service::get_places($country->name);
-            foreach ($places as $place_name){
-                $place = Place::where('name', $place_name)->where('country_id', $country->id)->first();
+            foreach ($places as $el){
+                $place = Place::where('name', $el['place_name'])->where('country_id', $country->id)->first();
                 if(!$place){
                     $place = new Place;
-                    $place->name = $place_name;
+                    $place->name = $el['place_name'];
+                    $place->web_link = $el['web_guide_link'];
                     $place->country_id = $country->id;
                     $place->save();
                 }
@@ -225,11 +220,12 @@ class Service
             $places = Place::where('country_id', $country->id)->get();
             foreach ($places as $place){
                 $areas = Service::get_areas($place->name);
-                foreach ($areas as $area_name){
-                    $area = Area::where('name', $area_name)->where('place_id', $place->id)->first();
+                foreach ($areas as $el){
+                    $area = Area::where('name', $el['area_name'])->where('place_id', $place->id)->first();
                     if(!$area){
                         $area = new Area;
-                        $area->name = $area_name;
+                        $area->name = $el['area_name'];
+                        $area->web_link = $el['web_guide_link'];
                         $area->place_id = $place->id;
                         $area->save();
                     }
@@ -246,12 +242,13 @@ class Service
                 $areas = Area::where('place_id', $place->id)->get();
                 foreach ($areas as $area){
                     $response_place_route_name = Service::get_place_routes($place->name, $area->name);
-                    foreach ($response_place_route_name as $place_routes_name){
-                        $place_routes_model = PlaceRoute::where('name', $place_routes_name)->where('area_id', $area->id)->first();
+                    foreach ($response_place_route_name as $el){
+                        $place_routes_model = PlaceRoute::where('name', $el['place_route_name'])->where('area_id', $area->id)->first();
                         if(!$place_routes_model){
                             $place_routes_model = new PlaceRoute;
                             $place_routes_model->area_id = $area->id;
-                            $place_routes_model->name = $place_routes_name;
+                            $place_routes_model->name = $el['place_route_name'];
+                            $place_routes_model->web_link = $el['web_guide_link'];
                             $place_routes_model->save();
                         }
                     }
