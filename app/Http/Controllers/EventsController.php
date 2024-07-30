@@ -662,9 +662,12 @@ class EventsController extends Controller
             $view = 'result-page';
         }
         $areas = [];
+        $area_images = [];
         $places = [];
         $rocks = [];
+        $rock_images = [];
         $routes = [];
+//        dd($grades);
         foreach ($grades as $route){
             $route_class = new stdClass();
             if($event->type_event){
@@ -681,10 +684,12 @@ class EventsController extends Controller
                 }
                 if(!in_array($area->name, $areas)){
                     $areas[] = $area->name;
+                    $area_images[$area->name] = $area->image;
                 }
                 if(!in_array($rock->name, $rocks)){
                     $rocks[] = $rock->name;
                 }
+                $rock_images[$rock->name] = $route->image;
             }
             $route_class->grade = $route->grade;
             $route_class->count = $route->route_id;
@@ -692,6 +697,7 @@ class EventsController extends Controller
 
         }
         $user_id = Auth::user()->id;
+//        dd($rock_images, $area_images);
         $result_route_qualification_classic_participant = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
         if($result_route_qualification_classic_participant){
             $result_qualification_classic_participant = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
@@ -701,7 +707,7 @@ class EventsController extends Controller
         }
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
 //        dd($areas);
-        return view($view, compact(['routes','places','areas', 'rocks' ,'event', 'result_participant']));
+        return view($view, compact(['routes','places','areas','area_images','rock_images','rocks' ,'event', 'result_participant']));
     }
 
     public function sendAllResult(Request $request)

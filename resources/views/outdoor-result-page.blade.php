@@ -37,9 +37,6 @@
                                                                             data-bs-target="#collapseOne{{str_replace(' ', '-', $area)}}2"
                                                                             aria-expanded="true"
                                                                             aria-controls="collapseOne{{str_replace(' ', '-', $area)}}2">
-                                                                        <header class="section-header mr-2">
-                                                                            <img class="img-fluid" style="width: 100px;height: 100px;" src="{{asset('storage/'.\App\Models\Area::get_image($area))}}" alt="image">
-                                                                        </header>
                                                                         <div class="container">
                                                                             {{$area}}</div>
 
@@ -50,6 +47,23 @@
                                                                      aria-labelledby="headingOne{{str_replace(' ', '-', $area)}}2"
                                                                      data-bs-parent="#accordionExample{{str_replace(' ', '-', $area)}}2">
                                                                     <div class="accordion-body">
+                                                                        <div class="container m-3">
+                                                                            <div class="row">
+                                                                                <div class="col-lg">
+                                                                                    @if(isset($area_images[$area]))
+                                                                                        <img class="img-fluid" style="width: 500px;height: 300px;" src="{{asset('storage/'.$area_images[$area])}}" alt="image">
+                                                                                    @else
+                                                                                        <img class="img-fluid" style="width: 500px;height: 300px;" src="" alt="image">
+                                                                                    @endif
+
+                                                                                </div>
+                                                                                <div class="col-sm">
+                                                                                    <p> Описание района </p>
+                                                                                    <p> Ссылка </p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
                                                                         @foreach($rocks as $rock)
                                                                             <div class="accordion"
                                                                                  id="accordionExample{{str_replace(' ', '-', $rock)}}3">
@@ -71,6 +85,22 @@
                                                                                         aria-labelledby="headingOne{{str_replace(' ', '-', $rock)}}3"
                                                                                         data-bs-parent="#accordionExample{{str_replace(' ', '-', $rock)}}3">
                                                                                         <div class="accordion-body">
+                                                                                            <div class="container m-3">
+                                                                                                <div class="row">
+                                                                                                    <div class="col-lg">
+                                                                                                        @if(isset($rock_images[$rock]))
+                                                                                                            <img class="img-fluid" style="width: 500px;height: 300px;" src="{{asset('storage'.$rock_images[$rock])}}" alt="image">
+                                                                                                        @else
+                                                                                                            <img class="img-fluid" style="width: 500px;height: 300px;" src="" alt="image">
+                                                                                                        @endif
+
+                                                                                                    </div>
+                                                                                                    <div class="col-sm">
+                                                                                                        <p> Описание Сектора </p>
+                                                                                                        <p> Ссылка </p>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
                                                                                             <div class="row mt-3 gy-4">
                                                                                                 <div class="col">
                                                                                                     <div
