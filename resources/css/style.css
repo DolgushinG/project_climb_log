@@ -819,13 +819,13 @@ section {
     display: block !important;
   }
     .btn-failed {
-        font-size: 13px;
+        font-size: 8px;
     }
     .btn-flash {
-        font-size: 13px;
+        font-size: 8px;
     }
     .btn-redpoint {
-        font-size: 13px;
+        font-size: 8px;
     }
     .cookie-policy__card {
         bottom:60px;
@@ -1917,13 +1917,13 @@ section {
     padding: 2px 0;
   }
     .btn-failed {
-        font-size: 13px;
+        font-size: 8px;
     }
     .btn-flash {
-        font-size: 13px;
+        font-size: 8px;
     }
     .btn-redpoint {
-        font-size: 13px;
+        font-size: 8px;
     }
 }
 

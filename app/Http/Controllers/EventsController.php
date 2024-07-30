@@ -656,7 +656,7 @@ class EventsController extends Controller
         }
         if($event->type_event){
             $grades = RoutesOutdoor::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
-            $view = 'outdoor-result-page';
+            $view = 'outdoor-result-page2';
         } else {
             $grades = Route::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
             $view = 'result-page';
