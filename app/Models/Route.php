@@ -42,6 +42,14 @@ class Route extends Model
         }
         return false;
     }
+
+    public static function merge_online_and_offline($old, $new)
+    {
+        foreach ($new as $n){
+            $old[] = array('name' => $n->route_name, 'grade' => $n->grade, 'image' => $n->image);
+        }
+        return $old;
+    }
     public static function generation_outdoor_route($event_id, $place_id, $area_id, $rock_id, $routes){
         $route_id = 1;
         $event = Event::find($event_id);
@@ -53,6 +61,10 @@ class Route extends Model
                     $area = Area::find($area_id);
                     $model_rock = PlaceRoute::find($id);
                     $response_routes = Service::get_routes($place->name, $area->name, $model_rock->name);
+                    $offline_outdoor_route = GuidRoutesOutdoor::where('place_id', $place_id)->where('area_id', $area_id)->where('place_route_id', $id)->get();
+                    if($offline_outdoor_route) {
+                        $response_routes = self::merge_online_and_offline($response_routes, $offline_outdoor_route);
+                    }
                     if($response_routes){
                         foreach ($response_routes as $route){
                             if($route == 'project'){
@@ -65,6 +77,11 @@ class Route extends Model
                                 $flash_value = $grades_with_value_flash[$index];
                                 $value = self::get_current_value_for_grade($routes , $route['grade']);
                             }
+                            if(!isset($route['image'])){
+                                $image = null;
+                            } else {
+                                $image = $route['image'];
+                            }
                             if(!self::is_exist_name($record_outdoor_routes, $route['name'], $route['grade'])){
                                 $record_outdoor_routes[] = array(
                                     'owner_id' => $event->owner_id,
@@ -74,8 +91,9 @@ class Route extends Model
                                     'place_id' => $place_id,
                                     'area_id' => $area_id,
                                     'place_route_id' => $id,
+                                    'image' => $image,
                                     'route_name' => $route['name'],
-                                    'grade' => $route['grade'],
+                                    'grade' => strtoupper($route['grade']),
 //                            'zone' => $route['Ценность зоны'],
                                     'value' => $value,
                                     'flash_value' => $flash_value,

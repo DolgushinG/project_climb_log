@@ -17,6 +17,7 @@ use App\Models\Country;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Http\Controllers\Controller;
+use App\Models\GuidRoutesOutdoor;
 use App\Models\Place;
 use App\Models\PlaceRoute;
 use App\Models\Route;
@@ -593,7 +594,12 @@ SCRIPT);
                                 if(!$get_amount_all_route){
                                     $get_amount_all_route = 0;
                                 }
-                                $amount += $get_amount_all_route;
+                                $get_amount_all_route_offline = GuidRoutesOutdoor::where('place_id', $form->place_id)->where('area_id', $form->area_id)->where('place_route_id', $rock)->get()->count();
+                                if(!$get_amount_all_route_offline){
+                                    $get_amount_all_route_offline = 0;
+                                }
+
+                                $amount += $get_amount_all_route + $get_amount_all_route_offline;
                             }
                         }
                         $form->count_routes = $amount;

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Areas extends Migration
+class GuidRoutesOutdoor extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,18 @@ class Areas extends Migration
      */
     public function up()
     {
-        Schema::create('areas', function (Blueprint $table) {
+        Schema::create('guid_routes_outdoors', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
+            $table->string('route_name');
             $table->integer('place_id');
-            $table->string('description')->nullable();
+            $table->integer('country_id');
+            $table->integer('area_id');
+            $table->string('author')->nullable();
+            $table->integer('amount_bolt')->nullable();
+            $table->integer('length')->nullable();
+            $table->integer('place_route_id');
             $table->string('image')->nullable();
+            $table->string('grade');
             $table->string('web_link')->nullable();
             $table->timestamps();
         });
@@ -31,6 +37,6 @@ class Areas extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('areas');
+        Schema::dropIfExists('guid_routes_outdoors');
     }
 }

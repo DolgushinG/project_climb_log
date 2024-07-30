@@ -49,7 +49,7 @@
                                             class="accordion-collapse collapse"
                                             aria-labelledby="headingOne{{str_replace(' ', '-', $rock)}}3"
                                             data-bs-parent="#accordionExample{{str_replace(' ', '-', $rock)}}3">
-                                            <div class="accordion-body" style="padding: 0px;">
+                                            <div class="accordion-body" style="padding-left: 5px;padding-right: 5px">
                                                 <div class="row">
                                                         <div class="col-lg">
                                                             @if(isset($rock_images[$rock]))
@@ -75,16 +75,17 @@
                                                     </div>
                                                 <div class="row mt-3">
                                                     <div class="col">
-                                                        <div
-                                                            class="container">
-                                                            <div
-                                                                class="row">
+                                                        <div class="container">
+                                                            <div class="row">
                                                                 <div>
                                                                 </div>
                                                                 <table
                                                                     class="table">
                                                                     <thead>
                                                                     <tr>
+                                                                        <th scope="col">
+                                                                            Номер
+                                                                        </th>
                                                                         <th scope="col">
                                                                             Трасса
                                                                         </th>
@@ -123,6 +124,7 @@
                                                                         @if($route->rock == $rock)
                                                                             <tr>
                                                                                 @if($event->type_event)
+                                                                                    <th>{{$route->count}}</th>
                                                                                     <th>{{$route->route_name}}</th>
                                                                                 @else
                                                                                     <th>{{$route->count}}</th>

@@ -16,8 +16,8 @@ class PlaceRoutes extends Migration
         Schema::create('place_routes', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->string('web_link')->nullable();;
-            $table->string('image')->nullable();;
+            $table->string('web_link')->nullable();
+            $table->string('image')->nullable();
             $table->integer('area_id');
             $table->timestamps();
         });

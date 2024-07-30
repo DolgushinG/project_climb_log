@@ -549,7 +549,11 @@ class EventsController extends Controller
         $points_for_mode_2 = 0;
         foreach ($data as $route){
             # Варианты форматов подсчета баллов
-            $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
+            if($event->type_event){
+                $owner_route = RoutesOutdoor::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
+            } else {
+                $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
+            }
             $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event_id);
             # Формат все трассы считаем сразу
             if($format == 2) {
@@ -706,7 +710,6 @@ class EventsController extends Controller
             $result_participant = null;
         }
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
-//        dd($areas);
         return view($view, compact(['routes','places','areas','area_images','rock_images','rocks' ,'event', 'result_participant']));
     }
 
