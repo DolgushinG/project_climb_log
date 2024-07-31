@@ -267,7 +267,13 @@ class Event extends Model
                     $category_id = 0;
                 } else {
                     $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $participant->id);
-                    $category_id = ParticipantCategory::where('event_id', '=', $event_id)->where('category', $category)->first()->id;
+                    $category_id = ParticipantCategory::where('event_id', '=', $event_id)->where('category', $category)->first();
+                    if(!$category_id){
+                         Log::error('Не удалось определить категорию - у юзера'.$participant->id);
+                        $category_id = 0;
+                    } else {
+                        $category_id = $category_id->id;
+                    }
                 }
                 $final_participant_result->category_id = $category_id;
             }
@@ -278,7 +284,6 @@ class Event extends Model
         }
 
         $categories = ParticipantCategory::where('event_id', '=', $event_id)->get();
-
         if ($event->is_sort_group_final) {
             foreach (['female', 'male'] as $gender) {
                 foreach ($categories as $category) {
@@ -492,7 +497,14 @@ class Event extends Model
                     $category_id = 0;
                 } else {
                     $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
-                    $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                    $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first();
+                    if(!$category_id){
+                        Log::error('Не удалось определить категорию - у юзера'.$user_id);
+                        $category_id = 0;
+                    } else {
+                        $category_id = $category_id->id;
+                    }
+
                 }
                 $participant_result->category_id = $category_id;
                 $participant_result->save();
@@ -511,7 +523,13 @@ class Event extends Model
                     $category_id = 0;
                 } else {
                     $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
-                    $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                    $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first();
+                    if(!$category_id){
+                        Log::error('Не удалось определить категорию - у юзера'.$user_id);
+                        $category_id = 0;
+                    } else {
+                        $category_id = $category_id->id;
+                    }
                 }
                 $participant_result->category_id = $category_id;
                 $participant_result->save();
@@ -773,7 +791,13 @@ class Event extends Model
             if(isset($users_result)){
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_global_list_passed_route($event_ids, $user_id), 3);
                 $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
-                $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first()->id;
+                $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first();
+                if(!$category_id){
+                    Log::error('Не удалось определить категорию - у юзера'.$user_id);
+                    $category_id = 0;
+                } else {
+                    $category_id = $category_id->id;
+                }
                 $users_result->global_category_id = $category_id;
                 $users_result->save();
             }

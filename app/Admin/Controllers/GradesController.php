@@ -256,9 +256,11 @@ SCRIPT);
             });
 
         }
-        $grid->actions(function ($actions) {
+        $grid->actions(function ($actions) use ($event) {
             $actions->disableView();
-            $actions->disableEdit();
+            if($event->type_event){
+                $actions->disableEdit();
+            }
         });
         $grid->disableFilter();
         $grid->disableBatchActions();
