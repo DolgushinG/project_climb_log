@@ -17,7 +17,7 @@ class Areas extends Migration
             $table->increments('id');
             $table->string('name');
             $table->integer('place_id');
-            $table->string('description')->nullable();
+            $table->longText('description')->nullable();
             $table->string('image')->nullable();
             $table->string('web_link')->nullable();
             $table->timestamps();
