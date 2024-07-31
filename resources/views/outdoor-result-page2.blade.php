@@ -7,56 +7,57 @@
                 <div class="container">
                     <div class="row">
                         @foreach($areas as $area)
-                            <div class="container">
-                                <div class="row m-1">
-                                    <div class="col-lg">
-                                        @if(isset($area_images[$area]))
-                                            <img class="img-fluid"
-                                                 style="width: 500px;height: 300px;"
-                                                 src="{{asset('storage'.$area_images[$area])}}"
-                                                 alt="image">
-                                        @else
-                                            <img class="img-fluid"
-                                                 style="width: 500px;height: 300px;"
-                                                 src="" alt="image">
-                                        @endif
+{{--                            <div class="container">--}}
+{{--                                <div class="row m-1">--}}
+{{--                                    <div class="col-lg">--}}
+{{--                                        @if(isset($area_images[$area]))--}}
+{{--                                            <img class="img-fluid"--}}
+{{--                                                 style="width: 500px;height: 300px;"--}}
+{{--                                                 src="{{asset('storage'.$area_images[$area])}}"--}}
+{{--                                                 alt="image">--}}
+{{--                                        @else--}}
+{{--                                            <img class="img-fluid"--}}
+{{--                                                 style="width: 500px;height: 300px;"--}}
+{{--                                                 src="" alt="image">--}}
+{{--                                        @endif--}}
 
-                                    </div>
-                                    <div class="col-sm">
-                                        <p> Описание района </p>
-                                        <p> Ссылка </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <p> Секторы </p>
-                            @foreach($rocks as $rock)
+{{--                                    </div>--}}
+{{--                                    <div class="col-sm">--}}
+{{--                                        <p> Описание района </p>--}}
+{{--                                        <p> Ссылка </p>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+                            <div class="section-title"> <h2> Секторы </h2></div>
+
+                            @foreach($sectors as $sector)
                                 <div class="accordion"
-                                     id="accordionExample{{str_replace(' ', '-', $rock)}}3">
+                                     id="accordionExample{{str_replace(' ', '-', $sector)}}3">
                                     <div class="accordion-item">
                                         <h2 class="accordion-header"
-                                            id="headingOne{{str_replace(' ', '-', $rock)}}3">
+                                            id="headingOne{{str_replace(' ', '-', $sector)}}3">
                                             <button class="accordion-button"
                                                     type="button"
                                                     data-bs-toggle="collapse"
-                                                    data-bs-target="#collapseOne{{str_replace(' ', '-', $rock)}}3"
+                                                    data-bs-target="#collapseOne{{str_replace(' ', '-', $sector)}}3"
                                                     aria-expanded="true"
-                                                    aria-controls="collapseOne{{str_replace(' ', '-', $rock)}}3">
-                                                {{$rock}}
+                                                    aria-controls="collapseOne{{str_replace(' ', '-', $sector)}}3">
+                                                {{$sector}}
                                             </button>
                                         </h2>
                                         <div
-                                            id="collapseOne{{str_replace(' ', '-', $rock)}}3"
+                                            id="collapseOne{{str_replace(' ', '-', $sector)}}3"
                                             class="accordion-collapse collapse"
-                                            aria-labelledby="headingOne{{str_replace(' ', '-', $rock)}}3"
-                                            data-bs-parent="#accordionExample{{str_replace(' ', '-', $rock)}}3">
+                                            aria-labelledby="headingOne{{str_replace(' ', '-', $sector)}}3"
+                                            data-bs-parent="#accordionExample{{str_replace(' ', '-', $sector)}}3">
                                             <div class="accordion-body" style="padding-left: 5px;padding-right: 5px">
                                                 <div class="row">
                                                         <div class="col-lg">
-                                                            @if(isset($rock_images[$rock]))
+                                                            @if(isset($sector_fields[$sector]['image']))
                                                                 <img
                                                                     class="img-fluid"
                                                                     style="width: 500px;height: 300px;"
-                                                                    src="{{asset('storage'.$rock_images[$rock])}}"
+                                                                    src="{{asset('storage/'.$sector_fields[$sector]['image'])}}"
                                                                     alt="image">
                                                             @else
                                                                 <img
@@ -70,7 +71,7 @@
                                                         <div class="col-sm">
                                                             <p> Описание
                                                                 Сектора </p>
-                                                            <p> Ссылка </p>
+                                                            <p><a href="https://allclimb.com{{$sector_fields[$sector]['web_link']}}">Ссылка на allclimb.com</a></p>
                                                         </div>
                                                     </div>
                                                 <div class="row mt-3">
@@ -121,11 +122,13 @@
                                                                     </thead>
                                                                     <tbody>
                                                                     @foreach($routes as $index => $route)
-                                                                        @if($route->rock == $rock)
+                                                                        @if($route->sector == $sector)
                                                                             <tr>
                                                                                 @if($event->type_event)
                                                                                     <th>{{$route->count}}</th>
-                                                                                    <th>{{$route->route_name}}</th>
+                                                                                    <th><a href="{{asset('storage/'.$route->image)}}" data-gallery="portfolioGallery"
+                                                                                           class="portfolio-lightbox preview-link">{{$route->route_name}}</a>
+                                                                                        </th>
                                                                                 @else
                                                                                     <th>{{$route->count}}</th>
                                                                                 @endif
@@ -160,7 +163,7 @@
                                                                                             data-grade="{{$route->grade}}"
                                                                                             name="{{$route->count}}"
                                                                                             id="failed-{{$route->count}}"
-                                                                                            autocomplete="off">
+                                                                                            autocomplete="off" checked>
                                                                                     @endif
                                                                                     @if($event->is_zone_show)
                                                                                         <label

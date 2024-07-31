@@ -39,16 +39,17 @@ class BatchAddRoute extends Action
             $grades_event = Grades::where('event_id', $event->id)->first();
             $model = RoutesOutdoor::where('event_id', $event->id)->where('place_route_id', $id)->where('grade', $grade)->where('route_name', $route_name)->first();
             $model_for_guid = GuidRoutesOutdoor::where('place_id', $area->place_id)->where('area_id', $place_route->area_id)->where('place_route_id', $id)->where('grade', $grade)->where('route_name', $route_name)->first();
+
             if(!$model_for_guid){
-                $model = new GuidRoutesOutdoor;
-                $model->country_id = $country->id;
-                $model->place_id = $place->id;
-                $model->area_id = $area->id;
-                $model->grade = $grade;
-                $model->place_route_id = $id;
-                $model->route_name = $route_name;
-                $model->image = $path;
-                $model->save();
+                $model_for_guid = new GuidRoutesOutdoor;
+                $model_for_guid->country_id = $country->id;
+                $model_for_guid->place_id = $place->id;
+                $model_for_guid->area_id = $area->id;
+                $model_for_guid->grade = $grade;
+                $model_for_guid->place_route_id = $id;
+                $model_for_guid->route_name = $route_name;
+                $model_for_guid->image = $path;
+                $model_for_guid->save();
             }
             if(!$model){
                 $model = new RoutesOutdoor;

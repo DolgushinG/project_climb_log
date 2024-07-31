@@ -668,8 +668,8 @@ class EventsController extends Controller
         $areas = [];
         $area_images = [];
         $places = [];
-        $rocks = [];
-        $rock_images = [];
+        $sectors = [];
+        $sector_fields = [];
         $routes = [];
 //        dd($grades);
         foreach ($grades as $route){
@@ -678,10 +678,10 @@ class EventsController extends Controller
                 $route_class->route_name = $route->route_name;
                 $place = Place::find($route->place_id);
                 $area = Area::find($route->area_id);
-                $rock = PlaceRoute::find($route->place_route_id);
+                $sector = PlaceRoute::find($route->place_route_id);
                 $route_class->place = $place->name;
                 $route_class->area = $area->name;
-                $route_class->rock = $rock->name;
+                $route_class->sector = $sector->name;
 
                 if(!in_array($place->name, $places)){
                     $places[] = $place->name;
@@ -690,13 +690,14 @@ class EventsController extends Controller
                     $areas[] = $area->name;
                     $area_images[$area->name] = $area->image;
                 }
-                if(!in_array($rock->name, $rocks)){
-                    $rocks[] = $rock->name;
+                if(!in_array($sector->name, $sectors)){
+                    $sectors[] = $sector->name;
                 }
-                $rock_images[$rock->name] = $route->image;
+                $sector_fields[$sector->name] = array('name' => $sector->name,'image' => $sector->image, 'web_link' => $sector->web_link);
             }
             $route_class->grade = $route->grade;
             $route_class->count = $route->route_id;
+            $route_class->image = $route->image;
             $routes[$route->route_id] = $route_class;
 
         }
@@ -709,8 +710,9 @@ class EventsController extends Controller
         } else {
             $result_participant = null;
         }
+//        dd($sector_fields);
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
-        return view($view, compact(['routes','places','areas','area_images','rock_images','rocks' ,'event', 'result_participant']));
+        return view($view, compact(['routes','places','areas','area_images','sectors','sector_fields','event', 'result_participant']));
     }
 
     public function sendAllResult(Request $request)

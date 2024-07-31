@@ -399,6 +399,7 @@ SCRIPT);
             $tools->append(new BatchHideGrades);
         });
         if($event->type_event){
+            $grid->column('route_id', 'Номер')->editable();
             $grid->column('route_name', 'Трасса');
             $grid->column('image', 'Картинка')->image('', 200, 200);
             $grid->column('grade', 'Категория трассы')->editable('select', Grades::getGrades());
