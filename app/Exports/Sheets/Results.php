@@ -11,6 +11,7 @@ use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Models\Route;
+use App\Models\RoutesOutdoor;
 use App\Models\Set;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -330,7 +331,12 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     }
                 } else {
                     $users[$index]['amount_passed_redpoint'] = 'Баллы за трассу [за флеш][за зону]';
-                    $routes_event = Route::where('event_id', $this->event_id)->get();
+                    if($event->type_event){
+                        $routes_event = RoutesOutdoor::where('event_id', $this->event_id)->get();
+                    } else {
+                        $routes_event = Route::where('event_id', $this->event_id)->get();
+                    }
+
                     foreach ($routes_event as $index2 => $route) {
                         if($event->is_zone_show){
                             $users[$index]['route_result_' . $index2] = $route->value.' ['.$route->flash_value.']['.$route->zone.']';

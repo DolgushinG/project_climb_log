@@ -133,10 +133,18 @@ class GradesController extends Controller
         }
         if($request->count_routes){
             $grade = Grades::where('event_id', $request->event_id)->first();
-            $route = Route::where('event_id', $request->event_id)->first();
-            if($route){
-                Route::generation_route($request->owner_id, $request->event_id, $request->count_routes, $request->grade_and_amount);
+            if($event->type_event){
+                $route = RoutesOutdoor::where('event_id', $request->event_id)->first();
+                if($route){
+                    Route::generation_outdoor_route($request->event_id, $request->place_id, $request->area_id, $request->rock_id, $request->grade_and_amount);
+                }
+            } else {
+                $route = Route::where('event_id', $request->event_id)->first();
+                if($route){
+                    Route::generation_route($request->owner_id, $request->event_id, $request->count_routes, $request->grade_and_amount);
+                }
             }
+
 
         }
 
@@ -404,6 +412,7 @@ SCRIPT);
             $grid->column('image', 'Картинка')->image('', 200, 200);
             $grid->column('grade', 'Категория трассы')->editable('select', Grades::getGrades());
             $grid->column('value', 'Ценность трассы')->editable();
+            $grid->column('flash_value', 'Ценность трассы за флэш')->editable();
             if($event->is_zone_show){
                 $grid->column('zone', 'Ценность зоны');
             }
@@ -612,15 +621,15 @@ SCRIPT);
                     $owner_id = Admin::user()->id;
                     $event = Event::where('owner_id', '=', $owner_id)->where('active', '=', 1)->first();
                     $exist_routes_list = Route::where('event_id', '=', $event->id)->first();
+                    $exist_routes_outdoor_list = RoutesOutdoor::where('event_id', '=', $event->id)->first();
 
-                    if (!$exist_routes_list) {
+                    if (!$exist_routes_list || !$exist_routes_outdoor_list) {
                         if ($form->count_routes) {
                             if($event->type_event){
                                 Route::generation_outdoor_route($event->id, $form->place_id, $form->area_id, $form->rocks_id, $form->grade_and_amount);
                             } else {
                                 Route::generation_route($owner_id, $event->id, $form->count_routes, $form->grade_and_amount);
                             }
-
                         }
                     } else {
                         if($event->type_event) {

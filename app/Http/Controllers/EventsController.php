@@ -660,7 +660,7 @@ class EventsController extends Controller
         }
         if($event->type_event){
             $grades = RoutesOutdoor::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
-            $view = 'outdoor-result-page2';
+            $view = 'outdoor-result-page';
         } else {
             $grades = Route::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
             $view = 'result-page';
@@ -693,7 +693,7 @@ class EventsController extends Controller
                 if(!in_array($sector->name, $sectors)){
                     $sectors[] = $sector->name;
                 }
-                $sector_fields[$sector->name] = array('name' => $sector->name,'image' => $sector->image, 'web_link' => $sector->web_link);
+                $sector_fields[$sector->name] = array('description' => $sector->description,'name' => $sector->name,'image' => $sector->image, 'web_link' => $sector->web_link);
             }
             $route_class->grade = $route->grade;
             $route_class->count = $route->route_id;
