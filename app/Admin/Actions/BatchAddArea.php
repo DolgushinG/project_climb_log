@@ -20,9 +20,14 @@ class BatchAddArea extends Action
 
         if($request->input('place')){
             $id = $request->input('place')['id'];
-            $imageName = time().'.'.request()->image->getClientOriginalExtension();
-            $path = '/images/areas/'.$id.'/'.$imageName;
-            request()->image->move(public_path('storage/images/areas/'.$id), $imageName);
+            if(request()->image){
+                $imageName = time().'.'.request()->image->getClientOriginalExtension();
+                $path = '/images/areas/'.$id.'/'.$imageName;
+                request()->image->move(public_path('storage/images/areas/'.$id), $imageName);
+            } else {
+                $path = null;
+            }
+
             $name = $request->input('name');
             $model = Area::where('place_id', $id)->where('name', $name)->first();
             if(!$model){
@@ -39,9 +44,9 @@ class BatchAddArea extends Action
     public function form()
     {
         $this->modalSmall();
-        $this->select('place.id', 'Место')->options(Place::all()->pluck('name', 'id'));
-        $this->image('image', 'Картинка района')->move('images/area');
-        $this->text('name', 'Район');
+        $this->select('place.id', 'Место')->options(Place::all()->pluck('name', 'id'))->required();
+        $this->image('image', 'Картинка района')->move('images/area')->required();
+        $this->text('name', 'Район')->required();
     }
 
     public function html()

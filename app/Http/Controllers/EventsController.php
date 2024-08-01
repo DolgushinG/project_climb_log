@@ -519,22 +519,22 @@ class EventsController extends Controller
         foreach ($request->result as $result) {
             $category = $result[2];
             if (str_contains($result[0], 'flash') && $result[1] == "true") {
-                $route_id = str_replace("flash-","", $result[0]);
+                $route_id = explode('-', $result[0])[1];
                 $attempt = 1;
                 $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'redpoint') && $result[1] == "true") {
-                $route_id = str_replace("redpoint-","", $result[0]);
+                $route_id = explode('-', $result[0])[1];
                 $attempt = 2;
                 $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'zone') && $result[1] == "true") {
-                $route_id = str_replace("zone-","", $result[0]);
+                $route_id = explode('-', $result[0])[1];
                 $attempt = 3;
                 $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
             if (str_contains($result[0], 'failed') && $result[1] == "true") {
-                $route_id = str_replace("failed-","", $result[0]);
+                $route_id = explode('-', $result[0])[1];
                 $attempt = 0;
                 $data[] = array('grade' => $category, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }

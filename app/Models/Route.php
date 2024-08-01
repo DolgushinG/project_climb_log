@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Helpers\AllClimbService\Service;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Route extends Model
 {
@@ -118,6 +119,7 @@ class Route extends Model
                 return $route['Ценность '.$type];
             }
         }
+        Log::error('Этой категории нет в списке - '.$grade);
         return null;
     }
 }

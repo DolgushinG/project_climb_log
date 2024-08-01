@@ -34,8 +34,8 @@ class BatchAddPlace extends Action
     public function form()
     {
         $this->modalSmall();
-        $this->select('country.id', 'Страна')->options(Country::all()->pluck('name', 'id'));
-        $this->text('name', 'Место');
+        $this->select('country.id', 'Страна')->options(Country::all()->pluck('name', 'id'))->required();
+        $this->text('name', 'Место')->required();
     }
 
     public function html()

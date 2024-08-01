@@ -21,9 +21,14 @@ class BatchAddPlaceRoutes extends Action
         if($request->input('area')){
             $id = $request->input('area')['id'];
             $name = $request->input('name');
-            $imageName = time().'.'.request()->image->getClientOriginalExtension();
-            $path = '/images/areas/'.$id.'/'.$imageName;
-            request()->image->move(public_path('storage/images/areas/'.$id), $imageName);
+            if(request()->image){
+                $imageName = time().'.'.request()->image->getClientOriginalExtension();
+                $path = '/images/sector/'.$id.'/'.$imageName;
+                request()->image->move(public_path('storage/images/sector/'.$id), $imageName);
+            } else {
+                $path = null;
+            }
+
             $description = $request->input('description');
             $model = PlaceRoute::where('area_id', $id)->where('name', $name)->first();
             if(!$model){
@@ -41,10 +46,10 @@ class BatchAddPlaceRoutes extends Action
     public function form()
     {
         $this->modalSmall();
-        $this->select('area.id', 'Район')->options(Area::all()->pluck('name', 'id'));
-        $this->textarea('description', 'Описание');
-        $this->image('image', 'Картинка Сектора')->move('images/place_route');
-        $this->text('name', 'Сектор');
+        $this->select('area.id', 'Район')->options(Area::all()->pluck('name', 'id'))->required();
+        $this->textarea('description', 'Описание')->required();
+        $this->image('image', 'Картинка Сектора')->move('images/place_route')->required();
+        $this->text('name', 'Сектор')->required();
     }
 
     public function html()

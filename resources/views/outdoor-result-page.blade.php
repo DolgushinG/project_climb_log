@@ -35,7 +35,7 @@
                                                                 <img
                                                                     class="img-fluid"
                                                                     style="width: 500px;height: 300px;"
-                                                                    src="{{asset('storage/'.$sector_fields[$sector]['image'])}}"
+                                                                    src="{{asset('storage'.$sector_fields[$sector]['image'])}}"
                                                                     alt="image">
                                                             @else
                                                                 <div class="climbing-sectors">
@@ -107,7 +107,7 @@
                                                                             <tr>
                                                                                 <th>{{$route->count}}</th>
                                                                                 @if($route->image)
-                                                                                    <th><a href="{{asset('storage/'.$route->image)}}" data-gallery="portfolioGallery"
+                                                                                    <th><a href="{{asset('storage'.$route->image)}}" data-gallery="portfolioGallery"
                                                                                            class="portfolio-lightbox preview-link">{{$route->route_name}}</a>
                                                                                     </th>
                                                                                 @else

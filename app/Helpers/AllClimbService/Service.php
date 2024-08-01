@@ -154,8 +154,8 @@ class Service
                         if(str_contains($route->type , 'Спорт')){
                             $type = 'трудность';
                         }
-                        if(str_contains($route->grade , 'project') || str_contains($route->grade , 'проект')){
-                            $list_guides[] = array('name' => $route->name, 'grade' => 'project');
+                        if(str_contains($route->grade , 'PROJECT') || str_contains($route->grade , 'project') || str_contains($route->grade , 'проект') || str_contains($route->grade , 'ПРОЕКТ')){
+                            $list_guides[] = array('name' => $route->name, 'grade' => 'project', 'route_id' => $route_id, 'type' => $type, 'web_link' => $route->web_guide_link);
                         } else {
                             preg_match('/\d+[a-zA-Z]+/', $route->grade, $matches);
                             if(preg_match('/["\']|([^\d\.,])/', $route->name)){
@@ -164,7 +164,7 @@ class Service
                                         'route_id' => $route_id,
                                         'name' => 'Без названия',
                                         'type' => $type,
-                                        'grade' => $matches[0],
+                                        'grade' => $matches[0] ?? null,
                                         'web_link' => $route->web_guide_link,
                                     );
                                 } else {
@@ -172,7 +172,7 @@ class Service
                                         'route_id' => $route_id,
                                         'name' => $route->name,
                                         'type' => $type,
-                                        'grade' => $matches[0],
+                                        'grade' => $matches[0] ?? null,
                                         'web_link' => $route->web_guide_link,
                                     );
                                 }
@@ -181,7 +181,7 @@ class Service
                                     'route_id' => $route_id,
                                     'name' => 'Без названия',
                                     'type' => $type,
-                                    'grade' => $matches[0],
+                                    'grade' => $matches[0] ?? null,
                                     'web_link' => $route->web_guide_link,
                                 );
                             }
