@@ -411,6 +411,7 @@ SCRIPT);
         if($event->type_event){
             $grid->column('route_id', 'Номер')->editable();
             $grid->column('route_name', 'Трасса');
+            $grid->column('type', 'Тип');
             $grid->column('image', 'Картинка')->image('', 200, 200);
             $grid->column('grade', 'Категория трассы')->editable('select', Grades::getGrades());
             $grid->column('value', 'Ценность трассы')->editable();
@@ -523,46 +524,30 @@ SCRIPT);
                                     то это сбросится так как генерация трасс происходит с нуля</h4>');
             }
             if($event->type_event) {
-                $form->radio('choose_type', 'Выбрать вид скалолазания')->options([
-                    1 => 'Боулдеринг',
-                    0 => 'Трудность',
-                ])->when(1, function (Form $form) use ($event) {
-                    $routes = Grades::getRoutesOutdoorWithValueBouldering();
-                    $form->tableamount('grade_and_amount', '', function ($table) use ($event) {
-                        $grades = Grades::getGrades();
-                        $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
-                        if (!$event->type_event) {
-                            $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
-                            if ($event->mode == 1) {
-                                $table->text('Ценность')->width('60px');
-                                if ($event->is_zone_show) {
-                                    $table->text('Ценность зоны')->width('60px');
-                                }
-                            }
-                        } else {
-                            $table->text('Ценность')->width('80px');
+                $routes_lead_boulder = Grades::getRoutesOutdoorWithValue();
+                Admin::style('
+                    select[readonly] {
+                      pointer-events: none;
+                    }
+                ');
+                $form->tableroutes('grade_and_amount', '', function ($table) use ($event) {
+                    $grades = Grades::getGrades();
+                    $table->select('Категория трудность')->attribute('readonly', 'readonly')->options($grades)->readonly();
+                    $table->text('Ценность трудность')->attribute('inputmode', 'none')->width('60px');
+                    if ($event->mode == 1) {
+                        if ($event->is_zone_show) {
+                            $table->text('Ценность трудность зоны')->width('60px');
                         }
-                        $table->disableButton();
-                    })->value($routes);
-                })->when(0, function (Form $form) use ($event) {
-                    $routes = Grades::getRoutesOutdoorWithValueLead();
-                    $form->tableamount('grade_and_amount', '', function ($table) use ($event) {
-                        $grades = Grades::getGrades();
-                        $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
-                        if (!$event->type_event) {
-                            $table->number('Кол-во')->attribute('inputmode', 'none')->width('50px');
-                            if ($event->mode == 1) {
-                                $table->text('Ценность')->width('60px');
-                                if ($event->is_zone_show) {
-                                    $table->text('Ценность зоны')->width('60px');
-                                }
-                            }
-                        } else {
-                            $table->text('Ценность')->width('80px');
+                    }
+                    $table->select('Категория боулдеринг')->attribute('readonly', 'readonly')->options($grades)->readonly();
+                    $table->text('Ценность боулдеринг')->attribute('inputmode', 'none')->width('60px');
+                    if ($event->mode == 1) {
+                        if ($event->is_zone_show) {
+                            $table->text('Ценность боулдеринг зоны')->width('60px');
                         }
-                        $table->disableButton();
-                    })->value($routes);
-                })->default(0);
+                    }
+                    $table->disableButton();
+                })->value($routes_lead_boulder);
             } else {
                 $form->tableamount('grade_and_amount', '', function ($table) use ($event) {
                     $grades = Grades::getGrades();
@@ -581,9 +566,9 @@ SCRIPT);
                     $table->disableButton();
                 })->value($routes);
             }
-            $form->submitted(function (Form $form) {
-                $form->ignore('choose_type');
-            });
+//            $form->submitted(function (Form $form) {
+//                $form->ignore('choose_type');
+//            });
             $form->saving(function (Form $form) use ($event) {
                 if($form->grade_and_amount && !$event->type_event){
                     $main_count = 0;
@@ -624,7 +609,6 @@ SCRIPT);
                     $event = Event::where('owner_id', '=', $owner_id)->where('active', '=', 1)->first();
                     $exist_routes_list = Route::where('event_id', '=', $event->id)->first();
                     $exist_routes_outdoor_list = RoutesOutdoor::where('event_id', '=', $event->id)->first();
-
                     if (!$exist_routes_list || !$exist_routes_outdoor_list) {
                         if ($form->count_routes) {
                             if($event->type_event){

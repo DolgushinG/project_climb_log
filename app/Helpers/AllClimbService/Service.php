@@ -118,37 +118,79 @@ class Service
         $response = self::curl_start('/ru/guides/'.$place.'/'.$area.'/');
         $post = json_decode($response);
         $list = [];
-        foreach ($post->result as $guid){
-            $list[] = array('place_route_name' => $guid->name, 'web_guide_link' => $guid->web_guide_link);
+        if(isset($post->result)){
+            foreach ($post->result as $guid){
+                if(isset($guid->numroutes)){
+                    $num = 'Всего - '.preg_replace('/<b>(.*?)<\/b>/', '$1', $guid->numroutes);
+                } else {
+                    $num = '';
+                }
+                $list[] = array(
+                    'place_route_name' => $guid->name,
+                    'web_guide_link' => $guid->web_guide_link,
+                    'description' => $num,
+                );
+            }
         }
+
         return $list;
     }
 
     public static function get_routes($place, $area, $rock): array
     {
+        $route_id = 1;
         $response = self::curl_start('/ru/guides/'.$place.'/'.$area.'/'.$rock.'/');
         $post = json_decode($response);
         $list_guides = [];
         if(isset($post->images)){
             foreach ($post->images as $guid){
+
                 if(isset($guid->Routes)){
                     foreach ($guid->Routes as $route) {
+                        $type = null;
+                        if(str_contains($route->type , 'Боулдер')){
+                            $type = 'боулдеринг';
+                        }
+                        if(str_contains($route->type , 'Спорт')){
+                            $type = 'трудность';
+                        }
                         if(str_contains($route->grade , 'project') || str_contains($route->grade , 'проект')){
                             $list_guides[] = array('name' => $route->name, 'grade' => 'project');
                         } else {
                             preg_match('/\d+[a-zA-Z]+/', $route->grade, $matches);
                             if(preg_match('/["\']|([^\d\.,])/', $route->name)){
                                 if(strlen($route->name) < 2 && str_contains($route->name, "'")){
-                                    $list_guides[] = array('name' => 'Без названия', 'grade' => $matches[0]);
+                                    $list_guides[] = array(
+                                        'route_id' => $route_id,
+                                        'name' => 'Без названия',
+                                        'type' => $type,
+                                        'grade' => $matches[0],
+                                        'web_link' => $route->web_guide_link,
+                                    );
                                 } else {
-                                    $list_guides[] = array('name' => $route->name, 'grade' => $matches[0]);
+                                    $list_guides[] = array(
+                                        'route_id' => $route_id,
+                                        'name' => $route->name,
+                                        'type' => $type,
+                                        'grade' => $matches[0],
+                                        'web_link' => $route->web_guide_link,
+                                    );
                                 }
                             } else {
-                                $list_guides[] = array('name' => 'Без названия', 'grade' => $matches[0]);
+                                $list_guides[] = array(
+                                    'route_id' => $route_id,
+                                    'name' => 'Без названия',
+                                    'type' => $type,
+                                    'grade' => $matches[0],
+                                    'web_link' => $route->web_guide_link,
+                                );
                             }
                         }
+                        $route_id++;
                     }
+
                 }
+
             }
         }
         return $list_guides;
@@ -251,6 +293,7 @@ class Service
                             $place_routes_model->area_id = $area->id;
                             $place_routes_model->name = $el['place_route_name'];
                             $place_routes_model->web_link = $el['web_guide_link'];
+                            $place_routes_model->description = $el['description'];
                             $place_routes_model->save();
                         }
                     }

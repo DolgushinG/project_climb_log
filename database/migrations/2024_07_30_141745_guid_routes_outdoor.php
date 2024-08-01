@@ -18,6 +18,7 @@ class GuidRoutesOutdoor extends Migration
             $table->string('route_name');
             $table->integer('place_id');
             $table->integer('country_id');
+            $table->string('type')->nullable();
             $table->integer('area_id');
             $table->string('author')->nullable();
             $table->integer('amount_bolt')->nullable();

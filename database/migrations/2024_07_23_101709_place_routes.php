@@ -18,6 +18,7 @@ class PlaceRoutes extends Migration
             $table->string('name');
             $table->string('web_link')->nullable();
             $table->string('image')->nullable();
+            $table->longText('description')->nullable();
             $table->integer('area_id');
             $table->timestamps();
         });

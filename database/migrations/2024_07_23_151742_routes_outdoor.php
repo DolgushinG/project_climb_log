@@ -20,6 +20,7 @@ class RoutesOutdoor extends Migration
             $table->integer('route_id');
             $table->string('route_name');
             $table->integer('place_id');
+            $table->string('type')->nullable();
             $table->integer('country_id');
             $table->integer('area_id');
             $table->integer('place_route_id');

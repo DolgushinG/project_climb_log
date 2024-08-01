@@ -31,26 +31,24 @@
                                             <div class="accordion-body" style="padding-left: 5px;padding-right: 5px">
                                                 <div class="row">
                                                         <div class="col-lg">
-                                                            @if(isset($sector_fields[$sector]['image']))
+                                                            @if($sector_fields[$sector]['image'])
                                                                 <img
                                                                     class="img-fluid"
                                                                     style="width: 500px;height: 300px;"
                                                                     src="{{asset('storage/'.$sector_fields[$sector]['image'])}}"
                                                                     alt="image">
                                                             @else
-                                                                <img
-                                                                    class="img-fluid"
-                                                                    style="width: 500px;height: 300px;"
-                                                                    src=""
-                                                                    alt="image">
+                                                                <div class="climbing-sectors">
+                                                                    <p> Описание
+                                                                        Сектора: </p>
+                                                                    {{$sector_fields[$sector]['description']}}
+                                                                </div>
                                                             @endif
-
                                                         </div>
                                                         <div class="col-sm">
-                                                            <p> Описание
-                                                                Сектора </p>
                                                             <p>
-                                                                {{$sector_fields[$sector]['description']}}
+                                                                <h4 class="title">{{$sector_fields[$sector]['place_name']}}</h4>
+                                                                <h4 class="title">{{$sector_fields[$sector]['area_name']}}</h4>
                                                             </p>
                                                             @if($sector_fields[$sector]['web_link'])
                                                                 <p><a href="https://allclimb.com{{$sector_fields[$sector]['web_link']}}">Ссылка на allclimb.com</a></p>
@@ -107,14 +105,17 @@
                                                                     @foreach($routes as $index => $route)
                                                                         @if($route->sector == $sector)
                                                                             <tr>
-                                                                                @if($event->type_event)
-                                                                                    <th>{{$route->count}}</th>
+                                                                                <th>{{$route->count}}</th>
+                                                                                @if($route->image)
                                                                                     <th><a href="{{asset('storage/'.$route->image)}}" data-gallery="portfolioGallery"
                                                                                            class="portfolio-lightbox preview-link">{{$route->route_name}}</a>
-                                                                                        </th>
+                                                                                    </th>
                                                                                 @else
-                                                                                    <th>{{$route->count}}</th>
+                                                                                    <th><a href="{{$route->web_link}}" data-gallery="portfolioGallery"
+                                                                                           class="portfolio-lightbox preview-link">{{$route->route_name}}</a>
+                                                                                    </th>
                                                                                 @endif
+
                                                                                 @if(!$event->is_hide_grades)
                                                                                     <th>{{$route->grade}}</th>
                                                                                 @endif
@@ -125,8 +126,8 @@
                                                                                                 type="radio"
                                                                                                 class="btn-check"
                                                                                                 data-grade="{{$route->grade}}"
-                                                                                                name="{{$route->count}}"
-                                                                                                id="failed-{{$route->count}}"
+                                                                                                name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                                id="failed-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                                 autocomplete="off"
                                                                                                 checked>
                                                                                         @else
@@ -134,8 +135,8 @@
                                                                                                 type="radio"
                                                                                                 class="btn-check"
                                                                                                 data-grade="{{$route->grade}}"
-                                                                                                name="{{$route->count}}"
-                                                                                                id="failed-{{$route->count}}"
+                                                                                                name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                                id="failed-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                                 autocomplete="off">
                                                                                         @endif
 
@@ -144,18 +145,18 @@
                                                                                             type="radio"
                                                                                             class="btn-check"
                                                                                             data-grade="{{$route->grade}}"
-                                                                                            name="{{$route->count}}"
-                                                                                            id="failed-{{$route->count}}"
+                                                                                            name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                            id="failed-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                             autocomplete="off" checked>
                                                                                     @endif
                                                                                     @if($event->is_zone_show)
                                                                                         <label
                                                                                             class="btn btn-outline-danger btn-failed"
-                                                                                            for="failed-{{$route->count}}">Нет</label>
+                                                                                            for="failed-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}">Нет</label>
                                                                                     @else
                                                                                         <label
                                                                                             class="btn btn-outline-danger btn-failed"
-                                                                                            for="failed-{{$route->count}}">Не
+                                                                                            for="failed-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}">Не
                                                                                             пролез</label>
                                                                                     @endif
                                                                                 </td>
@@ -167,8 +168,8 @@
                                                                                                 data-id="all-flash"
                                                                                                 data-grade="{{$route->grade}}"
                                                                                                 class="btn-check"
-                                                                                                name="{{$route->count}}"
-                                                                                                id="flash-{{$route->count}}"
+                                                                                                name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                                id="flash-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                                 autocomplete="off"
                                                                                                 checked>
                                                                                         @else
@@ -177,8 +178,8 @@
                                                                                                 data-id="all-flash"
                                                                                                 data-grade="{{$route->grade}}"
                                                                                                 class="btn-check"
-                                                                                                name="{{$route->count}}"
-                                                                                                id="flash-{{$route->count}}"
+                                                                                                name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                                id="flash-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                                 autocomplete="off">
                                                                                         @endif
 
@@ -188,14 +189,14 @@
                                                                                             data-id="all-flash"
                                                                                             data-grade="{{$route->grade}}"
                                                                                             class="btn-check"
-                                                                                            name="{{$route->count}}"
-                                                                                            id="flash-{{$route->count}}"
+                                                                                            name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                            id="flash-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                             autocomplete="off">
                                                                                     @endif
 
                                                                                     <label
                                                                                         class="btn btn-outline-success  btn-flash"
-                                                                                        for="flash-{{$route->count}}">FLASH</label>
+                                                                                        for="flash-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}">FLASH</label>
                                                                                 </td>
                                                                                 @if($event->is_zone_show)
                                                                                     <td>
@@ -205,8 +206,8 @@
                                                                                                     type="radio"
                                                                                                     class="btn-check"
                                                                                                     data-grade="{{$route->grade}}"
-                                                                                                    name="{{$route->count}}"
-                                                                                                    id="zone-{{$route->count}}"
+                                                                                                    name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                                    id="zone-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                                     autocomplete="off"
                                                                                                     checked>
                                                                                             @else
@@ -214,8 +215,8 @@
                                                                                                     type="radio"
                                                                                                     class="btn-check"
                                                                                                     data-grade="{{$route->grade}}"
-                                                                                                    name="{{$route->count}}"
-                                                                                                    id="zone-{{$route->count}}"
+                                                                                                    name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                                    id="zone-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                                     autocomplete="off">
                                                                                             @endif
 
@@ -224,13 +225,13 @@
                                                                                                 type="radio"
                                                                                                 class="btn-check"
                                                                                                 data-grade="{{$route->grade}}"
-                                                                                                name="{{$route->count}}"
-                                                                                                id="zone-{{$route->count}}"
+                                                                                                name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                                id="zone-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                                 autocomplete="off">
                                                                                         @endif
                                                                                         <label
                                                                                             class="btn btn-outline-secondary btn-failed"
-                                                                                            for="zone-{{$route->count}}">Зона</label>
+                                                                                            for="zone-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}">Зона</label>
                                                                                     </td>
                                                                                 @endif
 
@@ -242,8 +243,8 @@
                                                                                                 data-id="all-redpoint"
                                                                                                 class="btn-check"
                                                                                                 data-grade="{{$route->grade}}"
-                                                                                                name="{{$route->count}}"
-                                                                                                id="redpoint-{{$route->count}}"
+                                                                                                name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                                id="redpoint-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                                 autocomplete="off"
                                                                                                 checked>
                                                                                         @else
@@ -252,8 +253,8 @@
                                                                                                 data-id="all-redpoint"
                                                                                                 class="btn-check"
                                                                                                 data-grade="{{$route->grade}}"
-                                                                                                name="{{$route->count}}"
-                                                                                                id="redpoint-{{$route->count}}"
+                                                                                                name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                                id="redpoint-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                                 autocomplete="off">
                                                                                         @endif
                                                                                     @else
@@ -262,14 +263,14 @@
                                                                                             data-id="all-redpoint"
                                                                                             class="btn-check"
                                                                                             data-grade="{{$route->grade}}"
-                                                                                            name="{{$route->count}}"
-                                                                                            id="redpoint-{{$route->count}}"
+                                                                                            name="{{str_replace(' ', '-', $route->route_name)}}-{{$route->count}}"
+                                                                                            id="redpoint-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                             autocomplete="off">
                                                                                     @endif
 
                                                                                     <label
                                                                                         class="btn btn-outline-warning btn-redpoint"
-                                                                                        for="redpoint-{{$route->count}}">REDPOINT</label>
+                                                                                        for="redpoint-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}">REDPOINT</label>
                                                                                 </td>
 
                                                                             </tr>

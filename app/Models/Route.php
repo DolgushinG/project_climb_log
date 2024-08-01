@@ -46,12 +46,11 @@ class Route extends Model
     public static function merge_online_and_offline($old, $new)
     {
         foreach ($new as $n){
-            $old[] = array('name' => $n->route_name, 'grade' => $n->grade, 'image' => $n->image);
+            $old[] = array('name' => $n->route_name, 'grade' => $n->grade, 'image' => $n->image, 'web_link' => $n->web_link, 'type' => $n->type);
         }
         return $old;
     }
     public static function generation_outdoor_route($event_id, $place_id, $area_id, $rock_id, $routes){
-        $route_id = 1;
         $event = Event::find($event_id);
         $record_outdoor_routes = [];
         if($rock_id){
@@ -75,30 +74,29 @@ class Route extends Model
                                 $grades = Grades::outdoor_grades();
                                 $index = array_search(strtoupper($route['grade']), $grades);
                                 $flash_value = $grades_with_value_flash[$index];
-                                $value = self::get_current_value_for_grade($routes , $route['grade']);
-                            }
-                            if(!isset($route['image'])){
-                                $image = null;
-                            } else {
-                                $image = $route['image'];
+                                $value = self::get_current_value_for_grade($routes , $route['grade'], $route['type'] ?? null);
+                                if($event->is_zone_show){
+                                    $zone = intval(self::get_current_value_for_grade($routes , $route['grade'], $route['type'] ?? null) / 2);
+                                }
                             }
                             if(!self::is_exist_name($record_outdoor_routes, $route['name'], $route['grade'])){
                                 $record_outdoor_routes[] = array(
                                     'owner_id' => $event->owner_id,
                                     'event_id' => $event_id,
-                                    'route_id' => $route_id,
+                                    'route_id' => $route['route_id'],
                                     'country_id' => $place->country_id,
+                                    'type' => $route['type'],
                                     'place_id' => $place_id,
                                     'area_id' => $area_id,
                                     'place_route_id' => $id,
-                                    'image' => $image,
+                                    'image' => $route['image'] ?? null,
                                     'route_name' => $route['name'],
                                     'grade' => strtoupper($route['grade']),
-//                            'zone' => $route['Ценность зоны'],
+                                    'web_link' => $route['web_link'] ?? null,
+                                    'zone' => $zone ?? null,
                                     'value' => $value,
                                     'flash_value' => $flash_value,
                                 );
-                                $route_id++;
                             }
 
                         }
@@ -110,11 +108,14 @@ class Route extends Model
         }
     }
 
-    public static function get_current_value_for_grade($routes, $grade)
+    public static function get_current_value_for_grade($routes, $grade, $type)
     {
+        if(!$type){
+            $type = 'трудность';
+        }
         foreach ($routes as $route){
-            if($route['Категория'] == strtoupper($grade)){
-                return $route['Ценность'];
+            if($route['Категория '.$type] == strtoupper($grade)){
+                return $route['Ценность '.$type];
             }
         }
         return null;

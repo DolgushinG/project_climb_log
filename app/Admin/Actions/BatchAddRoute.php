@@ -93,6 +93,7 @@ class BatchAddRoute extends Action
         }
 
         $this->text('route_name', 'Название');
+        $this->select('type', 'Тип')->options(['lead' => 'Трудность', 'boulder' => 'Боулдер']);
         $this->image('image', 'Картинка маршрута')->move('images/route');
         $this->select('grade', 'Категория')->options(Grades::getGrades());
     }

@@ -693,12 +693,13 @@ class EventsController extends Controller
                 if(!in_array($sector->name, $sectors)){
                     $sectors[] = $sector->name;
                 }
-                $sector_fields[$sector->name] = array('description' => $sector->description,'name' => $sector->name,'image' => $sector->image, 'web_link' => $sector->web_link);
+                $sector_fields[$sector->name] = array('area_name' => ucfirst($area->name),'place_name' => ucfirst($place->name),'description' => $sector->description,'name' => $sector->name,'image' => $sector->image, 'web_link' => $sector->web_link);
             }
             $route_class->grade = $route->grade;
             $route_class->count = $route->route_id;
             $route_class->image = $route->image;
-            $routes[$route->route_id] = $route_class;
+            $route_class->web_link = $route->web_link;
+            $routes[] = $route_class;
 
         }
         $user_id = Auth::user()->id;
@@ -710,7 +711,6 @@ class EventsController extends Controller
         } else {
             $result_participant = null;
         }
-//        dd($sector_fields);
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
         return view($view, compact(['routes','places','areas','area_images','sectors','sector_fields','event', 'result_participant']));
     }
