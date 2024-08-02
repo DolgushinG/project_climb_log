@@ -25,6 +25,28 @@ input[type="date"]::before {
     color: #999999;
     content: attr(placeholder);
 }
+.climbing-sectors {
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    background: #cfe2ff;
+    box-shadow: 0 0 29px 0 rgba(68, 88, 144, 0.12);
+    transition: all 0.3s ease-in-out;
+    transition-property: all;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+    transition-delay: 0s;
+    border-radius: 8px;
+    z-index: 1;
+}
+.climbing-sectors .icon {
+    margin-bottom: 15px;
+}
+.climbing-sectors .title {
+    font-weight: 700;
+    margin-bottom: 15px;
+    font-size: 30px;
+}
 input[type="date"] {
     color: #ffffff;
 }
@@ -819,13 +841,13 @@ section {
     display: block !important;
   }
     .btn-failed {
-        font-size: 13px;
+        font-size: 8px;
     }
     .btn-flash {
-        font-size: 13px;
+        font-size: 8px;
     }
     .btn-redpoint {
-        font-size: 13px;
+        font-size: 8px;
     }
     .cookie-policy__card {
         bottom:60px;
@@ -1917,13 +1939,13 @@ section {
     padding: 2px 0;
   }
     .btn-failed {
-        font-size: 13px;
+        font-size: 8px;
     }
     .btn-flash {
-        font-size: 13px;
+        font-size: 8px;
     }
     .btn-redpoint {
-        font-size: 13px;
+        font-size: 8px;
     }
 }
 

@@ -29,8 +29,10 @@
                                 <table class="table">
                                     <thead>
                                     <tr>
-                                        <th scope="col">№</th>
-                                        <th id="grade" style="font-size: 11px" scope="col">Категория</th>
+                                        <th scope="col">Трасса</th>
+                                        @if(!$event->is_hide_grades)
+                                            <th id="grade" style="font-size: 11px" scope="col">Категория</th>
+                                        @endif
                                         @if($event->is_zone_show)
                                             <th scope="col">Нет</th>
                                         @else
@@ -46,8 +48,14 @@
                                     <tbody>
                                     @foreach($routes as $index => $route)
                                         <tr>
-                                            <th>{{$route->count}}</th>
-                                            <th>{{$route->grade}}</th>
+                                            @if($event->type_event)
+                                                <th>{{$route->route_name}}</th>
+                                            @else
+                                                <th>{{$route->count}}</th>
+                                            @endif
+                                            @if(!$event->is_hide_grades)
+                                                <th>{{$route->grade}}</th>
+                                            @endif
                                             <td>
                                                 @if($result_participant)
                                                     @if($result_participant[$index]['attempt'] == '0')

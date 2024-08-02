@@ -169,6 +169,7 @@ class ResultQualificationClassic extends Model
     public static function update_global_places_in_qualification_classic($event_id, $participants)
     {
         foreach ($participants as $index => $participant){
+
             $participant_result = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $participant->user_id)->first();
             $participant_result->user_global_place = $index+1;
             $participant_result->save();

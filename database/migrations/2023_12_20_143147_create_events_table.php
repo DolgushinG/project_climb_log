@@ -35,6 +35,7 @@ class CreateEventsTable extends Migration
             $table->string('admin_link')->nullable();
             $table->string('link_payment')->nullable();
             $table->string('img_payment')->nullable();
+            $table->boolean('type_event')->default(0);
             $table->longText('info_payment')->nullable();
             $table->integer('amount_start_price')->nullable();
             $table->boolean('setting_payment')->default(0);
@@ -61,6 +62,7 @@ class CreateEventsTable extends Migration
             $table->boolean('is_zone_show')->nullable();
             $table->boolean('active')->default(0);
             $table->boolean('is_input_set')->default(0);
+            $table->boolean('is_hide_grades')->default(0);
             $table->boolean('is_registration_state')->default(1);
             $table->boolean('is_need_pay_for_reg')->default(1);
             $table->boolean('is_access_user_edit_result')->default(0);

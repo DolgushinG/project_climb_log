@@ -299,6 +299,24 @@ class AdminTablesSeeder extends Seeder
                     "slug" => "owner.payments",
                     "http_method" => "",
                     "http_path" => "/owner-payments*"
+                ],
+                [
+                    "name" => "Get places",
+                    "slug" => "api_get_places",
+                    "http_method" => "",
+                    "http_path" => "/api/get_places"
+                ],
+                [
+                    "name" => "Get place route",
+                    "slug" => "api_get_place_routes",
+                    "http_method" => "",
+                    "http_path" => "/api/get_place_routes"
+                ],
+                [
+                    "name" => "Get rocks",
+                    "slug" => "get_rocks",
+                    "http_method" => "",
+                    "http_path" => "/api/get_rocks"
                 ]
             ]
         );
@@ -352,6 +370,10 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 1,
                     "menu_id" => 19
+                ],
+                [
+                    "role_id" => 1,
+                    "menu_id" => 22
                 ],
                 [
                     "role_id" => 2,
