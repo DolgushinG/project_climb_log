@@ -792,11 +792,11 @@ class Event extends Model
             for ($i = 0; $i < count($event_ids); $i++) {
                 $gender = null;
                 $users_result = ResultQualificationClassic::where('event_id', $event_ids[$i])->where('active', 1)->where('user_id', $user_id)->first();
-                $active_event_result = ResultQualificationClassic::where('event_id', $active_event->id)->where('active', 1)->where('user_id', $user_id)->first();
+                $active_event_result = ResultQualificationClassic::where('event_id', $active_event->id)->where('user_id', $user_id)->first();
                 if ($users_result) {
                     $gender = $users_result->gender;
                     if ($active_event_result) {
-                        $active_event_result->global_points = $users_result->points + $active_event_result->global_points;
+                        $active_event_result->global_points = $users_result->points + $active_event_result->points;
                         $active_event_result->save();
                     } else {
                         if($active_event->is_auto_categories){
@@ -820,7 +820,7 @@ class Event extends Model
                         $active_event_result->global_points = $global_points;
                         $active_event_result->category_id = $category_id;
                         $active_event_result->number_set_id = 0;
-                        $active_event_result->active = 1;
+                        $active_event_result->active = 0;
                         $active_event_result->is_other_event = 1;
                         $active_event_result->save();
                     }
@@ -830,10 +830,9 @@ class Event extends Model
     }
     public static function merge_auto_categories($event, $users_ids, $event_ids)
     {
-        $event_ids[] = $event->id;
         foreach ($users_ids as $user_id){
 
-            $users_result = ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->where('user_id', $user_id)->first();
+            $users_result = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
             if(isset($users_result)){
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_global_list_passed_route($event_ids, $user_id), 3);
                 $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
@@ -859,17 +858,17 @@ class Event extends Model
                 'users.id',
                 'result_qualification_classic.global_category_id',
                 'result_qualification_classic.gender',
-            )->where('active', 1);
+            );
         $users_id = $participants->pluck('id');
         $categories = ParticipantCategory::where('event_id', '=', $event->id)->get();
         if ($event->is_sort_group_final) {
-            foreach (['female', 'male'] as $gender) {
+            foreach (['male', 'female'] as $gender) {
                 foreach ($categories as $category) {
                     $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)
                         ->where('global_category_id', $category->id)
                         ->where('event_id', $event->id)
                         ->where('gender', $gender)
-                        ->orderBy('global_points', 'desc')
+                        ->orderBy('global_points', 'DESC')
                         ->get();
                     ResultQualificationClassic::update_global_places_in_qualification_classic($event->id, $participants_for_update);
                 }

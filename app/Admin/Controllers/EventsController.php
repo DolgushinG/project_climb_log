@@ -617,7 +617,9 @@ class EventsController extends Controller
             $event_clone->admin_link = $event_clone->admin_link.'-copy';
             $event_clone->active = 0;
             $event_clone->is_open_send_result_state = 0;
+            $event_clone->datetime_send_result_state = null;
             $event_clone->is_registration_state = 0;
+            $event_clone->datetime_registration_state = null;
             $event_clone->save();
 
             foreach ($event_clone->categories as $category) {

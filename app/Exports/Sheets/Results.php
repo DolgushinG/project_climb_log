@@ -452,9 +452,6 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         foreach ($users as $index => $user) {
             if ($index == 'empty_row') {
                 $users[$index]['user_global_place'] = '';
-            } else {
-                $global_place = ResultQualificationClassic::get_places_participant_in_qualification($this->event_id, $users_for_filter, $user['id'], $this->gender, $this->category->id, true, true);
-                $users[$index]['user_global_place'] = $global_place;
             }
             $users[$index] = collect($users[$index])->except('id', 'owner_id');
         }
