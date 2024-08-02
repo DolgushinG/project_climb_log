@@ -3,8 +3,6 @@
 namespace App\Admin\Actions;
 
 use App\Models\Area;
-use App\Models\Country;
-use App\Models\Event;
 use App\Models\Place;
 use Encore\Admin\Actions\Action;
 use Illuminate\Http\Request;

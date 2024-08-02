@@ -6,11 +6,8 @@ use App\Admin\Actions\BatchAddArea;
 use App\Admin\Actions\BatchAddPlace;
 use App\Admin\Actions\BatchAddPlaceRoutes;
 use App\Admin\Actions\BatchAddRoute;
-use App\Admin\Actions\BatchCreateOutdoorRoutes;
 use App\Admin\Actions\BatchHideGrades;
 use App\Admin\Actions\BatchUpdateOutdoorRoutes;
-use App\Admin\CustomAction\ActionCustomDelete;
-use App\Admin\Extensions\CustomButtonDeleteRoute;
 use App\Helpers\AllClimbService\Service;
 use App\Models\Area;
 use App\Models\Country;
@@ -30,8 +27,6 @@ use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\MessageBag;
 
 class GradesController extends Controller
 {
