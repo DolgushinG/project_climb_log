@@ -111,8 +111,7 @@
                                                                                            class="portfolio-lightbox preview-link">{{$route->route_name}}</a>
                                                                                     </th>
                                                                                 @else
-                                                                                    <th><a href="{{$route->web_link}}" data-gallery="portfolioGallery"
-                                                                                           class="portfolio-lightbox preview-link">{{$route->route_name}}</a>
+                                                                                    <th><a href="https://allclimb.com{{$route->web_link}}">{{$route->route_name}}</a>
                                                                                     </th>
                                                                                 @endif
 

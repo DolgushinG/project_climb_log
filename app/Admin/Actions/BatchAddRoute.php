@@ -99,7 +99,7 @@ class BatchAddRoute extends Action
         }
 
         $this->text('route_name', 'Название')->required();
-        $this->select('type', 'Тип')->options(['трудность' => 'Трудность', 'боулдеринг' => 'Боулдер'])->required();
+        $this->select('type', 'Тип')->options(['трудность' => 'Трудность', 'боулдеринг' => 'Боулдер', 'мультипитч' => 'Мультипитч'])->required();
         $this->image('image', 'Картинка маршрута')->move('images/route')->required();
         $this->select('grade', 'Категория')->options(Grades::getGrades())->required();
     }

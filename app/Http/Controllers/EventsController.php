@@ -542,13 +542,20 @@ class EventsController extends Controller
         $final_data = array();
 
         # нужен будет провести аккуратный рефактор после внедрения формата скального фестиваля
+        $final_data_only_passed_route = array();
         if($event->type_event){
-            $final_data_only_passed_route = array();
             $points_for_mode_2 = 0;
             foreach ($data as $route){
                 # Варианты форматов подсчета баллов
                 $owner_route = RoutesOutdoor::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
-                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event_id);
+                # ставим принудительно 3 формат для скального феста если организатор выбрал 2
+                if($format == 2){
+                    $mode = 3;
+                } else {
+                    $mode = $format;
+                }
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $mode, $event_id);
+
                 # Формат все трассы считаем сразу
                 $route['points'] = $value_route;
                 $route['value'] = $value_route;
@@ -558,30 +565,12 @@ class EventsController extends Controller
                     $final_data_only_passed_route[] = $route;
                 }
             }
-            if($format == 2){
-                (new \App\Models\Event)->insert_final_participant_result($event_id, $points_for_mode_2, $user_id);
-            }
             # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
-            if($format == 1){
-                usort($final_data_only_passed_route, function($a, $b) {
-                    return $a['points'] <=> $b['points'];
-                });
-                $points = 0;
-                $lastElems = array_slice($final_data_only_passed_route, -$amount, $amount);
-                foreach ($lastElems as $lastElem) {
-                    $points += $lastElem['points'];
-                }
-                $participant = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $event_id)->first();
-                $participant->points = $points;
-                $participant->active = 1;
-                $participant->save();
-            }
         } else {
             if($format == 2){
                 UpdateRouteCoefficientParticipants::dispatch($event_id, $gender);
                 $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
             }
-            $final_data_only_passed_route = array();
             $points_for_mode_2 = 0;
             foreach ($data as $route){
                 # Варианты форматов подсчета баллов
@@ -603,24 +592,24 @@ class EventsController extends Controller
                     $final_data_only_passed_route[] = $route;
                 }
             }
-            if($format == 2){
-                (new \App\Models\Event)->insert_final_participant_result($event_id, $points_for_mode_2, $user_id);
-            }
             # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
-            if($format == 1){
-                usort($final_data_only_passed_route, function($a, $b) {
-                    return $a['points'] <=> $b['points'];
-                });
-                $points = 0;
-                $lastElems = array_slice($final_data_only_passed_route, -$amount, $amount);
-                foreach ($lastElems as $lastElem) {
-                    $points += $lastElem['points'];
-                }
-                $participant = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $event_id)->first();
-                $participant->points = $points;
-                $participant->active = 1;
-                $participant->save();
+        }
+        if($format == 2){
+            (new \App\Models\Event)->insert_final_participant_result($event_id, $points_for_mode_2, $user_id);
+        }
+        if($format == 1){
+            usort($final_data_only_passed_route, function($a, $b) {
+                return $a['points'] <=> $b['points'];
+            });
+            $points = 0;
+            $lastElems = array_slice($final_data_only_passed_route, -$amount, $amount);
+            foreach ($lastElems as $lastElem) {
+                $points += $lastElem['points'];
             }
+            $participant = ResultQualificationClassic::where('user_id', '=', $user_id)->where('event_id', '=', $event_id)->first();
+            $participant->points = $points;
+            $participant->active = 1;
+            $participant->save();
         }
         $final_data = Helpers::remove_key($final_data, 'points');
         # Добавление json результатов для редактирования в админке

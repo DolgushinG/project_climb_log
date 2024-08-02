@@ -154,6 +154,9 @@ class Service
                         if(str_contains($route->type , 'Спорт')){
                             $type = 'трудность';
                         }
+                        if(str_contains($route->type , 'Мультипитч')){
+                            $type = 'мультипитч';
+                        }
                         if(str_contains($route->grade , 'PROJECT') || str_contains($route->grade , 'project') || str_contains($route->grade , 'проект') || str_contains($route->grade , 'ПРОЕКТ')){
                             $list_guides[] = array('name' => $route->name, 'grade' => 'project', 'route_id' => $route_id, 'type' => $type, 'web_link' => $route->web_guide_link);
                         } else {
