@@ -58,6 +58,7 @@ class BatchHideGrades extends Action
         }
         return "<a class='{$btn}'><i class='{$icon}'></i> {$text}</a>
             <style>
+            .hide-grades {margin-top:8px;}
                 @media screen and (max-width: 767px) {
                     .hide-grades {margin-top:8px;}
                     }

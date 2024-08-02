@@ -293,7 +293,14 @@ class EventsController extends Controller
             $form->text('title', 'Название соревнования')->placeholder('Допускается ввода букв и цифр из символов можно только ковычки')->required();
 //            $form->text('subtitle', 'Надпись под названием')->placeholder('Введи название');
             $form->hidden('title_eng')->default('1');
-            $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name ?? '')->placeholder('Допускается ввода букв и цифр из символов можно только ковычки')->required();
+            $form->radio('type_event','Тип(место) соревнования')->options([
+                1 =>'Скалы',
+                0 =>'Скалодром',
+            ])->when(1, function (Form $form) {
+                $form->text('climbing_gym_name', 'Район')->value(Admin::user()->climbing_gym_name ?? '')->placeholder('Допускается ввода букв и цифр из символов можно только ковычки')->required();
+            })->when(0, function (Form $form) {
+                $form->text('climbing_gym_name', 'Название скалодрома')->value(Admin::user()->climbing_gym_name ?? '')->placeholder('Допускается ввода букв и цифр из символов можно только ковычки')->required();
+            })->default(0);
             $form->hidden('climbing_gym_name_eng')->default('1');
             $form->text('city', 'Город')->value(Admin::user()->city ?? '')->placeholder('Город')->required();
             $form->text('address', 'Адрес')->value(Admin::user()->address ?? '')->placeholder('Адрес')->required();
@@ -511,6 +518,9 @@ class EventsController extends Controller
                 $form->link = '/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$title_eng;
                 $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$title_eng;
             }
+            if($form->type_event){
+                $form->is_access_user_edit_result = 1;
+            }
         });
         $form->saved(function (Form $form)  use ($type, $id){
             if($type != 'active') {
@@ -606,7 +616,10 @@ class EventsController extends Controller
             $event_clone->link = $event_clone->link.'-copy';
             $event_clone->admin_link = $event_clone->admin_link.'-copy';
             $event_clone->active = 0;
+            $event_clone->is_open_send_result_state = 0;
+            $event_clone->datetime_send_result_state = null;
             $event_clone->is_registration_state = 0;
+            $event_clone->datetime_registration_state = null;
             $event_clone->save();
 
             foreach ($event_clone->categories as $category) {

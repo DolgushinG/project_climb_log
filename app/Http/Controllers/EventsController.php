@@ -7,9 +7,12 @@ use App\Http\Requests\StoreRequest;
 use App\Jobs\UpdateAttemptInRoutesParticipants;
 use App\Jobs\UpdateResultParticipants;
 use App\Jobs\UpdateRouteCoefficientParticipants;
+use App\Models\Area;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
+use App\Models\Place;
+use App\Models\PlaceRoute;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
@@ -17,6 +20,7 @@ use App\Models\ResultRouteQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
+use App\Models\RoutesOutdoor;
 use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Admin;
@@ -513,61 +517,86 @@ class EventsController extends Controller
         $gender = User::find($user_id)->gender;
         $data = array();
         foreach ($request->result as $result) {
-            $category = $result[2];
-            if (str_contains($result[0], 'flash') && $result[1] == "true") {
-                $route_id = str_replace("flash-","", $result[0]);
+            $status = $result[0]; # "failed-17-Боулдер"
+            $bool = $result[1]; # "false"
+            $grade = $result[2];  # "6C"
+            $status_route_id_route_name = explode('-', $status); # ["failed", "17","Боулдер"]
+            $route_id = $status_route_id_route_name[1];
+            if (str_contains($status, 'flash') && $bool == "true") {
                 $attempt = 1;
-                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
             }
-            if (str_contains($result[0], 'redpoint') && $result[1] == "true") {
-                $route_id = str_replace("redpoint-","", $result[0]);
+            if (str_contains($status, 'redpoint') && $bool == "true") {
                 $attempt = 2;
-                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
-            if (str_contains($result[0], 'zone') && $result[1] == "true") {
-                $route_id = str_replace("zone-","", $result[0]);
+            if (str_contains($status, 'zone') && $bool == "true") {
                 $attempt = 3;
-                $data[] = array('grade' => $category, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
-            if (str_contains($result[0], 'failed') && $result[1] == "true") {
-                $route_id = str_replace("failed-","", $result[0]);
+            if (str_contains($status, 'failed') && $bool == "true") {
                 $attempt = 0;
-                $data[] = array('grade' => $category, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $data[] = array('grade' => $grade, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
             }
         }
         $final_data = array();
-        if($format == 2){
-            UpdateRouteCoefficientParticipants::dispatch($event_id, $gender);
-            $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
-        }
 
+        # нужен будет провести аккуратный рефактор после внедрения формата скального фестиваля
         $final_data_only_passed_route = array();
-        $points_for_mode_2 = 0;
-        foreach ($data as $route){
-            # Варианты форматов подсчета баллов
-            $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
-            $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event_id);
-            # Формат все трассы считаем сразу
-            if($format == 2) {
-                $count_route_passed = ResultRouteQualificationClassic::counting_result($event_id, $route['route_id'], $gender);
-//                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
-                $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
-                $route['points'] = $coefficient * $value_route;
-                $points_for_mode_2 += $coefficient * $value_route;
-            } else if($format == 1) {
+        if($event->type_event){
+            $points_for_mode_2 = 0;
+            foreach ($data as $route){
+                # Варианты форматов подсчета баллов
+                $owner_route = RoutesOutdoor::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
+                # ставим принудительно 3 формат для скального феста если организатор выбрал 2
+                if($format == 2){
+                    $mode = 3;
+                } else {
+                    $mode = $format;
+                }
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $mode, $event_id);
+
+                # Формат все трассы считаем сразу
                 $route['points'] = $value_route;
                 $route['value'] = $value_route;
+                $final_data[] = $route;
+                $points_for_mode_2 += $value_route;
+                if ($route['attempt'] != 0){
+                    $final_data_only_passed_route[] = $route;
+                }
             }
-            $final_data[] = $route;
-            if ($route['attempt'] != 0){
-                $final_data_only_passed_route[] = $route;
+            # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
+        } else {
+            if($format == 2){
+                UpdateRouteCoefficientParticipants::dispatch($event_id, $gender);
+                $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
             }
+            $points_for_mode_2 = 0;
+            foreach ($data as $route){
+                # Варианты форматов подсчета баллов
+                $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event_id);
+                # Формат все трассы считаем сразу
+                if($format == 2) {
+                    $count_route_passed = ResultRouteQualificationClassic::counting_result($event_id, $route['route_id'], $gender);
+//                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
+                    $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
+                    $route['points'] = $coefficient * $value_route;
+                    $points_for_mode_2 += $coefficient * $value_route;
+                } else if($format == 1) {
+                    $route['points'] = $value_route;
+                    $route['value'] = $value_route;
+                }
+                $final_data[] = $route;
+                if ($route['attempt'] != 0){
+                    $final_data_only_passed_route[] = $route;
+                }
+            }
+            # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
         }
         if($format == 2){
             (new \App\Models\Event)->insert_final_participant_result($event_id, $points_for_mode_2, $user_id);
         }
-
-        # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
         if($format == 1){
             usort($final_data_only_passed_route, function($a, $b) {
                 return $a['points'] <=> $b['points'];
@@ -650,15 +679,52 @@ class EventsController extends Controller
         if(!$event){
             return view('404');
         }
-        $grades = Route::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
+        if($event->type_event){
+            $grades = RoutesOutdoor::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
+            $view = 'outdoor-result-page';
+        } else {
+            $grades = Route::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
+            $view = 'result-page';
+        }
+        $areas = [];
+        $area_images = [];
+        $places = [];
+        $sectors = [];
+        $sector_fields = [];
         $routes = [];
+//        dd($grades);
         foreach ($grades as $route){
             $route_class = new stdClass();
+            if($event->type_event){
+                $route_class->route_name = $route->route_name;
+                $place = Place::find($route->place_id);
+                $area = Area::find($route->area_id);
+                $sector = PlaceRoute::find($route->place_route_id);
+                $route_class->place = $place->name;
+                $route_class->area = $area->name;
+                $route_class->sector = $sector->name;
+
+                if(!in_array($place->name, $places)){
+                    $places[] = $place->name;
+                }
+                if(!in_array($area->name, $areas)){
+                    $areas[] = $area->name;
+                    $area_images[$area->name] = $area->image;
+                }
+                if(!in_array($sector->name, $sectors)){
+                    $sectors[] = $sector->name;
+                }
+                $sector_fields[$sector->name] = array('area_name' => ucfirst($area->name),'place_name' => ucfirst($place->name),'description' => $sector->description,'name' => $sector->name,'image' => $sector->image, 'web_link' => $sector->web_link);
+            }
             $route_class->grade = $route->grade;
             $route_class->count = $route->route_id;
-            $routes[$route->route_id] = $route_class;
+            $route_class->image = $route->image;
+            $route_class->web_link = $route->web_link;
+            $routes[] = $route_class;
+
         }
         $user_id = Auth::user()->id;
+//        dd($rock_images, $area_images);
         $result_route_qualification_classic_participant = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
         if($result_route_qualification_classic_participant){
             $result_qualification_classic_participant = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
@@ -667,7 +733,7 @@ class EventsController extends Controller
             $result_participant = null;
         }
         array_multisort(array_column($routes, 'count'), SORT_ASC, $routes);
-        return view('result-page', compact(['routes','event', 'result_participant']));
+        return view($view, compact(['routes','places','areas','area_images','sectors','sector_fields','event', 'result_participant']));
     }
 
     public function sendAllResult(Request $request)

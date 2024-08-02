@@ -631,10 +631,9 @@ class ResultQualificationController extends Controller
                 }
                 $categories = ParticipantCategory::where('event_id', $event_id)->get();
                 foreach ($categories as $category) {
-                    Cache::forget('result_male_cache_' . $category->category);
-                    Cache::forget('result_female_cache_' . $category->category);
+                    Cache::forget('result_male_cache_'.$category->category.'_event_id_'.$event_id);
+                    Cache::forget('result_female_cache_'.$category->category.'_event_id_'.$event_id);
                 }
-
                 UpdateResultParticipants::dispatch($event_id);
                 # Выяснить почему перерасчет стал таким долгим или он был таким?
 //                Event::refresh_final_points_all_participant($event);

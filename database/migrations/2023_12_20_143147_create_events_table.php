@@ -35,6 +35,7 @@ class CreateEventsTable extends Migration
             $table->string('admin_link')->nullable();
             $table->string('link_payment')->nullable();
             $table->string('img_payment')->nullable();
+            $table->boolean('type_event')->default(0);
             $table->longText('info_payment')->nullable();
             $table->integer('amount_start_price')->nullable();
             $table->boolean('setting_payment')->default(0);
