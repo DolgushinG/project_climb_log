@@ -195,7 +195,6 @@ class Event extends Model
         }
         return $finish_flash_result + $finish_red_point_result;
     }
-
     public static function get_result_format_n_route($event, $participant)
     {
         $routes = ResultRouteQualificationClassic::where('event_id', $event->id)
@@ -231,6 +230,47 @@ class Event extends Model
         }
         return $finish_flash_result + $finish_red_point_result + $finish_zone_result;
     }
+    public static function get_result_format_n_outdoor_route($event, $participant)
+    {
+        $routes = ResultRouteQualificationClassic::where('event_id', $event->id)
+            ->where('user_id', $participant->id)
+            ->whereNotIn('attempt', [0])
+            ->get();
+        foreach ($routes as $route) {
+            $event_route = RoutesOutdoor::where('grade', '=', $route->grade)->where('event_id', '=', $event->id)->first();
+            if (!$event_route) {
+                Log::error('При создание соревнований было указано один формат все трасс или француская система, а были с
+                сгенерировано трассы, потом изменен формат и пытаемся сгенерироват результат
+                ');
+            }
+            if($event->mode == 2){
+                # ставим принудительно 3 формат для скального феста если организатор выбрал 2
+                $mode = 3;
+            } else {
+                $mode = $event->mode;
+            }
+            $route->value = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $event_route, $mode, $event->id);
+        }
+        $routes_id_passed_with_red_point = $routes->sortByDesc('value')->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)->pluck('route_id');
+        if ($routes_id_passed_with_red_point->isNotEmpty()) {
+            $finish_red_point_result = $routes->sortByDesc('value')->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)->sum('value');
+        } else {
+            $finish_red_point_result = 0;
+        }
+        $routes_id_passed_with_flash = $routes->sortByDesc('value')->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_FLASH)->pluck('route_id');
+        if ($routes_id_passed_with_flash->isNotEmpty()) {
+            $finish_flash_result = $routes->sortByDesc('value')->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_FLASH)->sum('value');
+        } else {
+            $finish_flash_result = 0;
+        }
+        $routes_id_passed_with_zone = $routes->sortByDesc('value')->where('attempt', ResultRouteQualificationClassic::STATUS_ZONE)->pluck('route_id');
+        if ($routes_id_passed_with_zone->isNotEmpty()) {
+            $finish_zone_result = $routes->sortByDesc('value')->where('attempt', ResultRouteQualificationClassic::STATUS_ZONE)->sum('value');
+        } else {
+            $finish_zone_result = 0;
+        }
+        return $finish_flash_result + $finish_red_point_result + $finish_zone_result;
+    }
 
     public static function refresh_final_points_all_participant($event)
     {
@@ -250,12 +290,17 @@ class Event extends Model
                 )->where('active', 1)->where('is_other_event', 0);
         $users_id = $participants->pluck('id');
         foreach ($participants->get() as $participant) {
-            if ($format == 1) {
-                $points = self::get_result_format_n_route($event, $participant);
+            if($event->type_event){
+                $points = self::get_result_format_n_outdoor_route($event, $participant);
+            } else {
+                if ($format == 1) {
+                    $points = self::get_result_format_n_route($event, $participant);
+                }
+                if ($format == 2) {
+                    $points = self::get_result_format_all_route($event, $participant);
+                }
             }
-            if ($format == 2) {
-                $points = self::get_result_format_all_route($event, $participant);
-            }
+
             $final_participant_result = ResultQualificationClassic::where('user_id', '=', $participant->id)->where('event_id', '=', $event_id)->first();
             if(!$participant){
                 Log::error('Category id not found -event_id - '.$participant->id.'user_id'.$event_id);
@@ -278,6 +323,7 @@ class Event extends Model
                 $final_participant_result->category_id = $category_id;
             }
             $final_participant_result->points = $points;
+            Log::info('user_id - '.$participant->id.' - '.$points);
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $participant->id;
             $final_participant_result->save();
