@@ -94,7 +94,7 @@
     <section id="portfolio" class="portfolio">
             <div class="container" data-aos="fade-up">
                 <div class="section-title">
-                    <h2>Открыта регистрация прямо сейчас</h2>
+                    <h2>Соревнования</h2>
                 </div>
                 <div class="row" data-aos="fade-up" data-aos-delay="100">
                     <div class="col-lg-12 d-flex justify-content-center">
