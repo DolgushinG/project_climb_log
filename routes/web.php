@@ -15,6 +15,7 @@ use Laravel\Socialite\Facades\Socialite;
 */
 
 Route::get('/', [App\Http\Controllers\Controller::class, 'main'])->name('main');
+Route::get('/list_events', [App\Http\Controllers\Controller::class, 'list_events'])->name('list_events');
 Route::get('/auth/telegram/callback', [App\Http\Controllers\SocialiteController::class, 'callback_telegram']);
 Route::get('/auth/vkontakte/callback', [App\Http\Controllers\SocialiteController::class, 'callback_vkontakte']);
 Route::get('/auth/yandex/callback', [App\Http\Controllers\SocialiteController::class, 'callback_yandex']);
