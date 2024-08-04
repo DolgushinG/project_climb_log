@@ -1,10 +1,6 @@
 @extends('layouts.main_page.app')
 @section('content')
     <section class="section contact">
-        <div class="row m-3">
-        </div>
-    </section>
-    <section class="section contact">
             <div class="row m-3">
                 @if(count($participants) != 0 )
                     @if($days)
