@@ -2695,10 +2695,15 @@ section {
 .js-ag-hide {
     display: none;
 }
-
+#message_for_participant{
+    width: 83%;
+}
 @media screen and (max-width: 768px) {
     .table{
         font-size: calc(8px + 1vw);
+    }
+    #message_for_participant{
+        width: 100%;
     }
 }
 .results tr[visible='false'],

@@ -11,6 +11,7 @@ use App\Models\Area;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
+use App\Models\MessageForParticipant;
 use App\Models\Place;
 use App\Models\PlaceRoute;
 use App\Models\ResultQualificationClassic;
@@ -102,9 +103,9 @@ class EventsController extends Controller
             } else {
                 $count_participants = ResultQualificationClassic::where('event_id','=',$event->id)->count();
             }
-
+            $message_for_participants = MessageForParticipant::where('event_id', $event->id)->first();
             $google_iframe = $this->google_maps_iframe($event->address.','.$event->city);
-            return view('welcome', compact(['event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
+            return view('welcome', compact(['message_for_participants','event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('404');
         }

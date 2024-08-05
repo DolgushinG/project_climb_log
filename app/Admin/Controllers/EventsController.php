@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchMessageForParticipant;
 use App\Admin\Actions\BatchNotificationOfParticipant;
 use App\Admin\CustomAction\ActionCloneEvent;
 use App\Admin\CustomAction\ActionExport;
@@ -229,6 +230,7 @@ class EventsController extends Controller
         if($event){
             $grid->tools(function (Grid\Tools $tools) use ($event) {
                 $tools->append(new BatchNotificationOfParticipant);
+                $tools->append(new BatchMessageForParticipant);
             });
         }
         $grid->disableFilter();
