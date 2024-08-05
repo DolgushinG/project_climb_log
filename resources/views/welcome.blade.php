@@ -250,7 +250,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        @if(env('GOOGLE_MAPS_ADDRESS') && env('APP_ENV') == "production")
+                                        @if(env('GOOGLE_MAPS_ADDRESS') && env('APP_ENV') == "prod")
                                             <div class="row">
                                                 <div class="col">
                                                     <iframe src="{{$google_iframe}}" frameborder="0" style="border:0; width: 100%; height: 270px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
