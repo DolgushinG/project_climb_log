@@ -28,7 +28,7 @@
                 @if(!$user->contact)
                         <div class="container d-flex align-items-center" data-aos="zoom-out" data-aos-delay="100">
                             <div class="alert alert-warning  alert-dismissible fade show w-100" role="alert">
-                                <p>Рекомендуется добавить номер телефона, телеграмм или другой способ</p>
+                                <p>Рекомендуется заполнить контакты для быстрой связи номером телефона, телеграмм или другой способом</p>
                                 <p>Чтобы организаторы в случае каких то вопросов могли быстро уведомить вас индивидуально</p>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
