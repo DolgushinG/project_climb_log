@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Admin\Controllers\ResultRouteSemiFinalStageController;
+use Carbon\Carbon;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -939,5 +940,26 @@ class Event extends Model
         }
 
 
+    }
+
+    /**
+     * Этап закрыт если
+     * Регистрация закрыта
+     * Закрыт доступ к редактированию
+     * Закрыт доступ к отправке результатов
+     * Даты конца соревнования прошли
+     *
+     * @return bool
+     * @var Event $event
+     */
+    public static function event_is_open(Event $event): bool
+    {
+        $now = Carbon::today();
+        $now->setTimezone('Europe/Moscow');
+        if(!$event->is_access_user_edit_result && !$event->is_send_result_state && !$event->is_registration_state && $event->end_date < $now){
+            return false;
+        } else {
+            return true;
+        }
     }
 }
