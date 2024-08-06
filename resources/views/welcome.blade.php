@@ -268,6 +268,7 @@
                                     <div class="container">
                                         <div class="row" id="paymentTab">
                                             @include('event.tab.payment')
+{{--                                            @include('event.tab.dinamic-payment')--}}
                                         </div>
                                     </div>
                                 </div>
