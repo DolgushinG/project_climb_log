@@ -1,106 +1,332 @@
-
-<div class="container mt-5">
-    <p id="price" data-main-price="{{$event->amount_start_price}}" class="h3">Цена: <span id="price-value"></span> руб.</p>
-
-    <div class="form-group">
-        <label for="products">Выберите продукты:</label>
-        <div id="products">
-            @foreach($event->products as $index => $product)
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="{{ $product['Цена'] }}{{ $index }}" data-price="{{ $product['Цена'] }}">
-                    <label class="form-check-label" for="{{ $product['Цена'] }}{{ $index }}">
-                        {{ $product['Название'] }} ({{ $product['Цена'] }} руб.)
-                    </label>
+<link href="{{asset('plugins/cropper/cropper.css')}}" rel="stylesheet">
+<script src="{{asset('plugins/cropper/cropper.js')}}"></script>
+<script src="{{asset('js/dinamic-payment.js')}}"></script>
+@if($event->is_need_pay_for_reg)
+    @auth
+        @if(\App\Models\User::user_participant($event->id))
+            @if(\App\Models\ResultRouteQualificationClassic::is_pay_participant(Auth()->user()->id, $event->id))
+                <div class="container text-center pt-2 pb-2">
+                    <span class="badge bg-success" style="font-size: 22px"> ОПЛАЧЕНО </span><br>
                 </div>
-            @endforeach
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="discounts">Выберите скидку:</label>
-        <div id="discounts">
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="discountGroup" id="Нет скидок" data-value="0">
-                <label class="form-check-label" for="Нет скидок">
-                    Нет скидок
-                </label>
+            @else
+                <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-footer">
+                                <h5 class="modal-title" id="modalLabel">Выберите область чек
+                                </h5>
+                                <div class="row">
+                                    <div class="col">
+                                        <button type="button" style="color: white!important;"
+                                                class="btn btn-primary showbuttonsave" id="crop">Отправить чек
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+                                <div class="img-container">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <img id="image" src="">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="preview"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" style="color: white!important;" class="btn btn-secondary"
+                                        id="modalclose" data-dismiss="modal">
+                                    Отмена
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Accordion without outline borders -->
+                    <div class="accordion accordion-flush" id="accordionFlushExample">
+                        @if($event->info_payment)
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="flush-headingOne">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#flush-collapseOne" aria-expanded="false"
+                                            aria-controls="flush-collapseOne">
+                                        Важная информация по оплате
+                                    </button>
+                                </h2>
+                                <div id="flush-collapseOne" class="accordion-collapse collapse"
+                                     aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
+                                        <p>{!! $event->info_payment !!}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#flush-collapseTwo" aria-expanded="false"
+                                        aria-controls="flush-collapseTwo">
+                                    Стартовые взнос и оплата
+                                </button>
+                            </h2>
+                            <div id="flush-collapseTwo" class="accordion-collapse collapse"
+                                 aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+                                <div class="accordion-body">
+                                    @if($event->amount_start_price)
+                                        <div class="container text-center pt-2 pb-2">
+                                            <label> Стартовый взнос: </label>
+                                            <span id="price" data-main-price="{{$event->amount_start_price}}" class="badge bg-success" style="font-size: 22px"> <span id="price-value">{{$event->amount_start_price}}</span> руб. </span><br>
+                                        </div>
+                                        <div class="container mt-5">
+                                            <div id="products">
+                                                <label for="products" class="mb-1">Выберите мерч:</label>
+                                                @foreach($event->products as $index => $product)
+                                                <div class="form-check form-switch">
+                                                    <input id="{{ $product['Цена'] }}{{ $index }}" data-price="{{ $product['Цена'] }}" class="form-check-input" type="checkbox">
+                                                    <label class="form-check-label" for="{{ $product['Цена'] }}{{ $index }}">{{ $product['Название'] }} ({{ $product['Цена'] }} руб.)</label>
+                                                </div>
+                                                @endforeach
+                                            </div>
+                                            <div class="form-floating mt-2">
+                                                <select class="form-select" id="discounts" aria-label="Выберите скидку">
+                                                    <option data-value="0" selected="">Нет скидок</option>
+                                                    @foreach($event->discounts as $index => $discount)
+                                                        <option data-value="{{ $discount['Проценты'] }}" value="{{ $discount['Проценты'] }}">{{ $discount['Название'] }} скидка ({{ $discount['Проценты'] }} %)</option>
+                                                    @endforeach
+                                                </select>
+                                                <label for="floatingSelect">Выберите скидку</label>
+                                            </div>
+                                        </div>
+                                        @if($event->registration_time_expired)
+                                            <div class="container text-center pt-2 pb-2">
+                                                <span style="font-size: 22px">Без оплаты регистрация сгорит через {{$event->registration_time_expired}} - {{\App\Helpers\Helpers::echo_days($event->registration_time_expired)}}</span><br>
+                                            </div>
+                                        @endif
+                                        @if($event->link_payment)
+                                            <div class="container text-center pt-2 pb-2">
+                                                <a class="btn btn-primary" style="font-size: 22px"
+                                                   href="{{$event->link_payment}}">Оплатить</a><br>
+                                            </div>
+                                        @endif
+                                        @if($event->img_payment)
+                                            <div class="container w-50 h-25 text-center pt-2 pb-2">
+                                                <img class="img img-responsive"
+                                                     src="{{asset('storage/'.$event->img_payment)}}" alt="qr">
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingThree">
+                                <button class="accordion-button collapsed" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#flush-collapseThree"
+                                        aria-expanded="false" aria-controls="flush-collapseThree">
+                                    Приложить чек
+                                </button>
+                            </h2>
+                            <div id="flush-collapseThree" class="accordion-collapse collapse"
+                                 aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
+                                <div class="accordion-body">
+                                    @if(\App\Models\ResultRouteQualificationClassic::is_sended_bill(Auth()->user()->id, $event->id))
+                                        <div class="container text-center pt-2 pb-2">
+                                            <div class="text-dark large mt-1" style="font-size: 22px"> Чек
+                                                отправлен (На проверке..)
+                                            </div>
+                                            <br>
+                                        </div>
+                                    @else
+                                        <div id="attachBill" class="container text-center pt-2 pb-2"
+                                             data-event-id="{{$event->id}}">
+                                            <label> Приложить чек после оплаты</label>
+                                            <input type="file" id="image" name="image" class="image">
+                                            <div class="text-dark small mt-1">Допустимые форматы JPG, JPEG, PNG.
+                                                Макс. размер 8 мб
+                                            </div>
+                                        </div>
+                                        <div id="checkingBill" class="container text-center pt-2 pb-2"
+                                             style="display: None">
+                                            <span class="badge bg-dark" style="font-size: 22px">  Чек отправлен (На проверке..)  </span><br>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @else
+            <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-footer">
+                            <h5 class="modal-title" id="modalLabel">Выберите область чек
+                            </h5>
+                            <div class="row">
+                                <div class="col">
+                                    <button type="button" style="color: white!important;"
+                                            class="btn btn-primary showbuttonsave" id="crop">Отправить чек
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <div class="img-container">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <img id="image" src="">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="preview"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" style="color: white!important;" class="btn btn-secondary"
+                                    id="modalclose" data-dismiss="modal">
+                                Отмена
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            @foreach($event->discounts as $index => $discount)
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="discountGroup" id="{{ $discount['Название'] }}{{ $index }}" data-value="{{ $discount['Проценты'] }}">
-                    <label class="form-check-label" for="{{ $discount['Название'] }}{{ $index }}">
-                        {{ $discount['Название'] }} скидка ({{ $discount['Проценты'] }} %)
-                    </label>
+            <div class="card-body">
+                <!-- Accordion without outline borders -->
+                <div class="accordion accordion-flush" id="accordionFlushExample">
+                    @if($event->info_payment)
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingOne">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#flush-collapseOne" aria-expanded="false"
+                                        aria-controls="flush-collapseOne">
+                                    Важная информация по оплате
+                                </button>
+                            </h2>
+                            <div id="flush-collapseOne" class="accordion-collapse collapse"
+                                 aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                <div class="accordion-body">
+                                    <p>{!! $event->info_payment !!}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="flush-headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#flush-collapseTwo" aria-expanded="false"
+                                    aria-controls="flush-collapseTwo">
+                                Стартовые взнос и оплата
+                            </button>
+                        </h2>
+                        <div id="flush-collapseTwo" class="accordion-collapse collapse"
+                             aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+                            <div class="accordion-body">
+                                @if($event->amount_start_price)
+                                    <div class="container text-center pt-2 pb-2">
+                                        <label style="font-size: 15px"> Оплата доступна только после регистрации</label> <br>
+                                        <label> Стартовый взнос: </label>
+                                        <span class="badge bg-success" style="font-size: 22px"> {{$event->amount_start_price}} руб </span><br>
+                                    </div>
+                                @endif
+                                @if($event->options_amount_price)
+                                    <section id="pricing" class="pricing">
+                                        <div class="container aos-init aos-animate"
+                                             data-aos="fade-up">
+                                            <div class="section-title">
+                                                <div class="row">
+                                                    @foreach($event->options_amount_price as $options)
+                                                        <div class="col-md-4 aos-init aos-animate"
+                                                             data-aos="fade-up"
+                                                             data-aos-delay="100">
+                                                            <div class="box">
+                                                                <h3>{{$options['Название']}}</h3>
+                                                                <h4>{{$options['Сумма']}}
+                                                                    <sub>руб</sub></h4>
+                                                                <ul>
+                                                                    <li>{!! $options['Описание'] !!}</li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            @endforeach
-        </div>
-    </div>
+            </div>
+        @endif
+    @endauth
+    @guest
+        @if(!$event->info_payment && !$event->options_amount_price)
+            <p>Информации нет</p>
+        @endif
+        @if($event->info_payment)
+            <p>{!! $event->info_payment !!}</p>
+        @endif
+        @if($event->options_amount_price)
+            <section id="pricing" class="pricing">
+                <div class="container aos-init aos-animate"
+                     data-aos="fade-up">
+                    <div class="section-title">
+                        <div class="row">
+                            @foreach($event->options_amount_price as $options)
+                                <div class="col-md-4 aos-init aos-animate"
+                                     data-aos="fade-up"
+                                     data-aos-delay="100">
+                                    <div class="box">
+                                        <h3>{{$options['Название']}}</h3>
+                                        <h4>{{$options['Сумма']}}
+                                            <sub>руб</sub></h4>
+                                        <ul>
+                                            <li>{!! $options['Описание'] !!}</li>
+                                        </ul>
+                                        @auth
+                                            {{--                                    @isset($options['QR код на оплату'])--}}
+                                            {{--                                        <img class="img-fluid img-responsive" src="{{asset('storage/'.$options['QR код на оплату'])}}" alt="qr">--}}
+                                            {{--                                    @endif--}}
+                                            @if(\App\Models\User::user_participant($event->id))
+                                                @isset($options['Ссылка на оплату'])
+                                                    <div class="btn-wrap">
+                                                        <a href="{{$options['Ссылка на оплату']}}"
+                                                           class="btn-buy">Оплатить</a>
+                                                    </div>
+                                                @endisset
+                                            @endif
+                                        @endauth
+                                    </div>
+                                </div>
+                            @endforeach
 
-</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endif
+    @endguest
+@else
+    @if(!$event->info_payment && !$event->options_amount_price)
+        <p>Информации нет</p>
+    @endif
+    @if($event->info_payment)
+        <p>{!! $event->info_payment !!}</p>
+    @endif
+@endif
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const priceElement = document.getElementById('price-value');
-        const productsContainer = document.getElementById('products');
-        const discountsContainer = document.getElementById('discounts');
-        const data_main_price = document.querySelector('#price').getAttribute('data-main-price');
 
-        let basePrice = calculateBasePrice();
-        let finalPrice = basePrice;
 
-        // Обработчики изменений
-        productsContainer.addEventListener('change', updateFinalPrice);
-        discountsContainer.addEventListener('change', updateFinalPrice);
 
-        // Отображаем стартовую цену
-        updatePrice(finalPrice);
 
-        function calculateBasePrice() {
-            const today = new Date();
-            const august31 = new Date(today.getFullYear(), 7, 31); // 31 августа
-            const september30 = new Date(today.getFullYear(), 8, 30); // 30 сентября
-
-            if (today <= august31) {
-                return parseInt(data_main_price); // Стартовая цена до 31 августа
-            } else if (today <= september30) {
-                return parseInt(data_main_price) + 500; // Цена до 30 сентября
-            } else {
-                return parseInt(data_main_price) + 1000; // Цена после 30 сентября
-            }
-        }
-
-        function updateFinalPrice() {
-            finalPrice = basePrice;
-            // Применяем выбранную скидку
-            const discountRadios = discountsContainer.querySelectorAll('input[type="radio"]');
-            let selectedDiscount = 0;
-            discountRadios.forEach(radio => {
-                if (radio.checked) {
-                    selectedDiscount = radio.getAttribute('data-value');
-                }
-            });
-
-            // Применяем скидку к цене
-            if (selectedDiscount > 0) {
-                finalPrice = finalPrice - (finalPrice * (parseInt(selectedDiscount)/100));
-            }
-            // Добавляем стоимость выбранных продуктов
-            const productCheckboxes = productsContainer.querySelectorAll('input[type="checkbox"]');
-            productCheckboxes.forEach(checkbox => {
-                if (checkbox.checked) {
-                    finalPrice += parseFloat(checkbox.getAttribute('data-price'));
-                }
-            });
-
-            updatePrice(finalPrice);
-        }
-
-        function updatePrice(price) {
-            priceElement.textContent = price.toFixed(2);
-        }
-    });
-</script>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{{--<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>--}}
+{{--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>--}}
 
