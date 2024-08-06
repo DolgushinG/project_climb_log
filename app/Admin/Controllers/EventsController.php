@@ -321,7 +321,7 @@ class EventsController extends Controller
 //            $form->disableSubmit();
         })->tab('Оплата', function ($form) use ($id) {
             $form->radio('setting_payment','Настройка оплаты')
-                ->options([0 => 'Простая', 1 => 'Сложная(разные пакеты и стоимости)'])
+                ->options([0 => 'Простая', 1 => 'Сложная(разные пакеты и стоимости)', 3 => 'Динамическая'])
                 ->when(0, function (Form $form) {
                     $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
                     $form->image('img_payment', 'QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
@@ -329,8 +329,7 @@ class EventsController extends Controller
                     $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
                 })->when(1, function (Form $form) use ($id) {
                     $payments = OwnerPayments::where('event_id', $id)->first();
-                    $form->html('Если вы приложили здесь QR код, то здесь он не будет отображаться, проверьте его отображение на странице с соревнованием');
-
+//                    $form->html('Если вы приложили здесь QR код, то здесь он не будет отображаться, проверьте его отображение на странице с соревнованием');
                     if($payments){
                         if($payments->amount_for_pay > 0){
                             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
@@ -368,6 +367,22 @@ class EventsController extends Controller
 //                            $table->image('QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
                         });
                     }
+                })->when(3, function (Form $form) {
+                    $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
+                    $form->number('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма');
+                    $form->tablediscounts('discounts', 'Скидки', function ($table) use ($form){
+                        $table->text('Название');
+                        $table->number('Проценты');
+                    });
+                    $form->tableproducts('products', 'Мерч', function ($table) use ($form){
+                        $table->text('Название');
+                        $table->number('Цена');
+                    });
+                    $form->tableupprice('up_price', 'Цена в зависимости от дат', function ($table) use ($form){
+                        $table->number('Цена');
+                        $table->datetime('До даты')->attribute('type','date');
+                    });
+                    $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
                 })->default(0);
         })->tab('Параметры соревнования', function ($form) use ($id) {
             $form->radio('is_france_system_qualification','Настройка подсчета квалификации')

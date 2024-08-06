@@ -42,6 +42,9 @@ Encore\Admin\Grid\Column::define('actions', app\Admin\CustomAction\CustomActions
 app('view')->prependNamespace('admin', resource_path('views/admin'));
 //Admin::js('/vendor/chart.js/chart.js');
 Form::extend('tablecustom', CustomTable::class);
+Form::extend('tablediscounts', \App\Admin\Extensions\DiscountTable::class);
+Form::extend('tableproducts', \App\Admin\Extensions\ProductsTable::class);
+Form::extend('tableupprice', \App\Admin\Extensions\UpPriceTable::class);
 Form::extend('tableamount', \App\Admin\Extensions\AmountTable::class);
 Form::extend('tableroutes', \App\Admin\Extensions\RoutesTable::class);
 Form::extend('customlist', \App\Admin\Extensions\CustomList::class);
