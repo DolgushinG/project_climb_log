@@ -58,8 +58,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/removeFromListPending', [App\Http\Controllers\EventsController::class, 'removeFromListPending'])->name('removeFromListPending');
     Route::post('/cancelTakePartParticipant', [App\Http\Controllers\EventsController::class, 'cancelTakePartParticipant'])->name('cancelTakePartParticipant');
     Route::post('/changeSet', [App\Http\Controllers\EventsController::class, 'changeSet'])->name('changeSet');
+    Route::post('/sendProductsAndDiscount', [App\Http\Controllers\EventsController::class, 'sendProductsAndDiscount'])->name('sendProductsAndDiscount');
     Route::post('/sendResultParticipant', [App\Http\Controllers\EventsController::class, 'sendResultParticipant'])->name('sendResultParticipant');
     Route::post('/cropimageupload', [App\Http\Controllers\CropImageController::class,'uploadCropImage'])->name('cropimageupload');
+    Route::post('/cropdocumentupload', [App\Http\Controllers\CropImageController::class,'uploadCropImageDocument'])->name('cropdocumentupload');
     Route::get('/event/{start_date}/{climbing_gym}/{title}/routes', [App\Http\Controllers\EventsController::class, 'listRoutesEvent'])->name('listRoutesEvent');
 });
 

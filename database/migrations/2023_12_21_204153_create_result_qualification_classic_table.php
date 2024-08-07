@@ -32,6 +32,8 @@ class CreateResultQualificationClassicTable extends Migration
             $table->boolean('is_paid')->default(0);
             $table->boolean('is_recheck')->default(0);
             $table->string('bill')->nullable();
+            $table->string('document')->nullable();
+            $table->json('products_and_discounts')->nullable();
             $table->json('result_for_edit')->nullable();
             $table->timestamps();
         });

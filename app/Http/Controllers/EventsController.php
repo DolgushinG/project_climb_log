@@ -100,12 +100,15 @@ class EventsController extends Controller
             $sport_categories = User::sport_categories;
             if($event->is_france_system_qualification){
                 $count_participants = ResultFranceSystemQualification::where('event_id','=',$event->id)->count();
+                $participant = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('user_id', $user_id)->first();
             } else {
                 $count_participants = ResultQualificationClassic::where('event_id','=',$event->id)->count();
+                $participant = ResultQualificationClassic::where('event_id','=',$event->id)->where('user_id', $user_id)->first();
             }
             $message_for_participants = MessageForParticipant::where('event_id', $event->id)->first();
             $google_iframe = $this->google_maps_iframe($event->address.','.$event->city);
-            return view('welcome', compact(['message_for_participants','event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
+            $participant_products_and_discounts = $participant->products_and_discounts;
+            return view('welcome', compact(['participant_products_and_discounts','message_for_participants','event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('404');
         }
@@ -470,6 +473,21 @@ class EventsController extends Controller
         $number_set = $request->number_set;
         $set = Set::where('number_set', $number_set)->where('owner_id', $event->owner_id)->first();
         $participant->number_set_id = $set->id;
+        $participant->save();
+        if ($participant->save()) {
+            return response()->json(['success' => true, 'message' => 'Успешно сохранено']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+        }
+    }
+    public function sendProductsAndDiscount(Request $request) {
+        $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        } else {
+            $participant = ResultQualificationClassic::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        }
+        $participant->products_and_discounts = ['discount' => $request->discount, 'products' => $request->products];
         $participant->save();
         if ($participant->save()) {
             return response()->json(['success' => true, 'message' => 'Успешно сохранено']);

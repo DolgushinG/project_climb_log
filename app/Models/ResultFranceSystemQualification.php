@@ -12,6 +12,7 @@ class ResultFranceSystemQualification extends Model
 
     protected $casts = [
         'result_for_edit_france_system_qualification' =>'json',
+        'products_and_discounts' =>'json',
     ];
 
     public function event()
