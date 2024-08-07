@@ -267,8 +267,7 @@
                                      aria-labelledby="contact-tab">
                                     <div class="container">
                                         <div class="row" id="paymentTab">
-{{--                                            @include('event.tab.payment')--}}
-                                            @include('event.tab.dinamic-payment')
+                                            @include('event.tab.payment')
                                         </div>
                                     </div>
                                 </div>

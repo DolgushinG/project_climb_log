@@ -168,6 +168,28 @@ class ResultRouteQualificationClassic extends Model
             Log::error('Не нашелся участник - user_id'.$user_id.'event_id'.$event_id.', причем эта кнопка должна появится только после того как он зарегистрировался');
         }
     }
+    public static function is_sended_document($user_id, $event_id)
+    {
+        $event = Event::find($event_id);
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('event_id', '=', $event_id)
+                ->where('user_id', '=', $user_id)
+                ->first();
+        } else {
+            $participant = ResultQualificationClassic::where('event_id', '=', $event_id)
+                ->where('user_id', '=', $user_id)
+                ->first();
+        }
+        if($participant){
+            if($participant->document){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            Log::error('Не нашелся участник - user_id'.$user_id.'event_id'.$event_id.', причем эта кнопка должна появится только после того как он зарегистрировался');
+        }
+    }
 
     public static function get_participant_qualification_group($event, $amount, $gender=null)
     {

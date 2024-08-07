@@ -37,7 +37,7 @@ Route::get('/privatedata', [App\Http\Controllers\Controller::class, 'indexPrivac
 Route::get('/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::post('event/{start_date}/{climbing_gym}/sendAllResult', [App\Http\Controllers\EventsController::class, 'sendAllResult'])->middleware('throttle:5,1');
 Route::get('event/{start_date}/{climbing_gym}/getInfoPayment/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_payment']);
-Route::get('event/{start_date}/{climbing_gym}/getInfoPaymentBill/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_payment_bill']);
+Route::get('event/{start_date}/{climbing_gym}/getInfoPay/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_pay']);
 Route::get('/admin/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::get('/event/{start_date}/{climbing_gym}/{title}/participants', [App\Http\Controllers\EventsController::class, 'get_participants'])->name('participants');
 Route::get('/event/{start_date}/{climbing_gym}/{title}/qualificationClassic/results', [App\Http\Controllers\EventsController::class, 'get_qualification_classic_results'])->name('get_qualification_classic_results');

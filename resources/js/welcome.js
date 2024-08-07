@@ -136,7 +136,7 @@ function getInfoPayment(event_id, id) {
         },
     });
 }
-function getInfoPaymentBll(event_id, id) {
+function getInfoPay(event_id, id) {
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -144,7 +144,21 @@ function getInfoPaymentBll(event_id, id) {
     });
     $.ajax({
         type: 'GET',
-        url: 'getInfoPaymentBill/' + event_id,
+        url: 'getInfoPay/' + event_id,
+        success: function (data) {
+            $(id).html(data);
+        },
+    });
+}
+function getInfoPaymentDocument(event_id, id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.ajax({
+        type: 'GET',
+        url: 'getInfoPaymentDocument/' + event_id,
         success: function (data) {
             $(id).html(data);
         },
@@ -205,7 +219,7 @@ $(document).on('click','#save_products_discount', function(e) {
     });
     let products = Array();
     let event_id = document.getElementById('save_products_discount').getAttribute('data-id')
-    let amount_start_price = document.getElementById('price-value')
+    let amount_start_price = document.getElementById('price-value').textContent
     let button = $('#save_products_discount')
     let user_id = document.getElementById('save_products_discount').getAttribute('data-user_id')
     const productsContainer = document.getElementById('products');
@@ -593,7 +607,6 @@ $("#crop").click(function () {
             var block_attach_bill = document.getElementById('attachBill')
             var btn_cancel_take_part = document.getElementById('btn_cancel_take_part')
             var event_id = document.getElementById('attachBill').getAttribute('data-event-id')
-            var block_checking_bill = document.getElementById('checkingBill')
             let button_pay = $('#btn-payment')
             $.ajax({
                 headers: {
@@ -605,16 +618,15 @@ $("#crop").click(function () {
                 data: {'image': base64data , 'event_id': event_id},
                 success: function (data) {
                     $modal.modal('hide');
-                    getInfoPaymentBll(event_id, '#paymentTab')
+                    getInfoPay(event_id, '#paymentTab')
                     button_pay.text('Чек отправлен (На проверке..)')
                     button_pay.attr('disabled', 'disabled')
-                    btn_cancel_take_part.style.display = 'none';
+                    if(btn_cancel_take_part){
+                        btn_cancel_take_part.style.display = 'none';
+                    }
                     block_attach_bill.style.display = 'none';
                     document.querySelector('#bill').style.display = 'None'
-                    setTimeout(function () {
-                        block_checking_bill.style.display = 'block';
-                    }, 1000);
-
+                    document.getElementById('checkingBillTab').style.display = 'block';
                 },
                 error: function (xhr, status, error) {
                     $modal.modal('hide');
@@ -637,7 +649,7 @@ $("#crop-document").click(function () {
             var base64data = reader.result;
             var block_attach_document = document.getElementById('attachDocument')
             var btn_cancel_take_part = document.getElementById('btn_cancel_take_part')
-            var event_id = document.getElementById('attachBill').getAttribute('data-event-id')
+            var event_id = document.getElementById('attachDocument').getAttribute('data-event-id')
             var block_checking_document = document.getElementById('checkingDocument')
             let button_pay = $('#btn-payment')
             $.ajax({
@@ -649,20 +661,22 @@ $("#crop-document").click(function () {
                 url: "/cropdocumentupload",
                 data: {'image': base64data , 'event_id': event_id},
                 success: function (data) {
-                    $modal.modal('hide');
-                    getInfoPaymentBll(event_id, '#paymentTab')
+                    $modal_document.modal('hide');
+                    getInfoPay(event_id, '#paymentTab')
                     button_pay.text('Документ отправлен (На проверке..)')
                     button_pay.attr('disabled', 'disabled')
-                    btn_cancel_take_part.style.display = 'none';
+                    if(btn_cancel_take_part){
+                        btn_cancel_take_part.style.display = 'none';
+                    }
                     block_attach_document.style.display = 'none';
-                    document.querySelector('#bill').style.display = 'None'
+                    document.querySelector('#document').style.display = 'None'
                     setTimeout(function () {
                         block_checking_document.style.display = 'block';
                     }, 1000);
 
                 },
                 error: function (xhr, status, error) {
-                    $modal.modal('hide');
+                    $modal_document.modal('hide');
                 }
             });
         }

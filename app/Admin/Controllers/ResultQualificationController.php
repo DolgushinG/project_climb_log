@@ -122,6 +122,7 @@ class ResultQualificationController extends Controller
         $show->field('user.team', __('Команда'));
         $show->field('user.sports_category', __('Разряд'));
         $show->field('bill', 'Чек')->image('', 600, 800);
+        $show->field('document', 'Документ')->image('', 600, 800);
 
         return $show;
     }
@@ -305,8 +306,9 @@ class ResultQualificationController extends Controller
 //            return $categories[$category] ?? 'не определена';
 //        });
         if (!$event->is_input_set) {
+            $sets = Set::getParticipantSets(Admin::user()->id);
             $grid->column('number_set_id', 'Номер сета')
-                ->select(Set::getParticipantSets(Admin::user()->id));
+                ->select($sets);
         }
         $grid->column('user_place', 'Место в квалификации')
             ->help('При некорректном раставлением мест, необходимо пересчитать результаты')
@@ -369,9 +371,18 @@ class ResultQualificationController extends Controller
                 $amounts[0] = '0 р';
                 $grid->column('amount_start_price', 'Сумма оплаты')->editable('select', $amounts);
             } else {
-                $grid->column('amount_start_price', 'Сумма оплаты')->display(function ($amount_start_price) use ($event){
-                    return $event->amount_start_price;
-                });
+                if($event->setting_payment == OwnerPaymentOperations::DINAMIC){
+                    $grid->column('amount_start_price', 'Сумма оплаты');
+                } else {
+                    $grid->column('amount_start_price', 'Сумма оплаты')->display(function ($amount_start_price) use ($event){
+                        if(!$event->amount_start_price){
+                            return '0 р';
+                        } else {
+                            return $event->amount_start_price;
+                        }
+                    });
+                }
+
             }
 
             $states = [
@@ -400,6 +411,7 @@ class ResultQualificationController extends Controller
 
             ');
             $grid->column('bill', 'Чек участника')->image('', 100, 100);
+            $grid->column('document', 'Документ участника')->image('', 100, 100);
         }
         return $grid;
     }
@@ -477,13 +489,18 @@ class ResultQualificationController extends Controller
                 $amounts[0] = '0 р';
                 $grid->column('amount_start_price', 'Сумма оплаты')->editable('select', $amounts);
             } else {
-                $grid->column('amount_start_price', 'Сумма оплаты')->display(function ($amount_start_price) use ($event){
-                    if(!$event->amount_start_price){
-                        return '0 р';
-                    } else {
-                        return $event->amount_start_price;
-                    }
-                });
+                if($event->setting_payment == OwnerPaymentOperations::DINAMIC){
+                    $grid->column('amount_start_price', 'Сумма оплаты');
+                } else {
+                    $grid->column('amount_start_price', 'Сумма оплаты')->display(function ($amount_start_price) use ($event){
+                        if(!$event->amount_start_price){
+                            return '0 р';
+                        } else {
+                            return $event->amount_start_price;
+                        }
+                    });
+                }
+
             }
             $grid->column('is_paid', 'Оплата')->switch($states);
             \Encore\Admin\Admin::style('
@@ -506,6 +523,7 @@ class ResultQualificationController extends Controller
 
             ');
             $grid->column('bill', 'Чек участника')->image('', 100, 100);
+            $grid->column('document', 'Документ участника')->image('', 100, 100);
         }
         return $grid;
     }

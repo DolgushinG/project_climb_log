@@ -20,11 +20,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const september30 = new Date(today.getFullYear(), 8, 30); // 30 сентября
 
         if (today <= august31) {
-            return parseInt(data_main_price); // Стартовая цена до 31 августа
+            return parseInt(priceElement.textContent); // Стартовая цена до 31 августа
         } else if (today <= september30) {
-            return parseInt(data_main_price) + 500; // Цена до 30 сентября
+            return parseInt(priceElement.textContent) + 500; // Цена до 30 сентября
         } else {
-            return parseInt(data_main_price) + 1000; // Цена после 30 сентября
+            return parseInt(priceElement.textContent) + 1000; // Цена после 30 сентября
         }
     }
 
@@ -44,10 +44,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 finalPrice += parseFloat(checkbox.getAttribute('data-price'));
             }
         });
-
         updatePrice(finalPrice);
     }
-
+    updateFinalPrice()
     function updatePrice(price) {
         priceElement.textContent = price.toFixed(2);
     }

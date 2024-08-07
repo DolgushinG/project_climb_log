@@ -12,6 +12,8 @@ use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
 use App\Models\MessageForParticipant;
+use App\Models\OwnerPaymentOperations;
+use App\Models\OwnerPayments;
 use App\Models\Place;
 use App\Models\PlaceRoute;
 use App\Models\ResultQualificationClassic;
@@ -107,7 +109,7 @@ class EventsController extends Controller
             }
             $message_for_participants = MessageForParticipant::where('event_id', $event->id)->first();
             $google_iframe = $this->google_maps_iframe($event->address.','.$event->city);
-            $participant_products_and_discounts = $participant->products_and_discounts;
+            $participant_products_and_discounts = $participant->products_and_discounts ?? null;
             return view('welcome', compact(['participant_products_and_discounts','message_for_participants','event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('404');
@@ -119,12 +121,12 @@ class EventsController extends Controller
         $event = Event::find($event_id);
         return view('event.tab.payment_without_bill', compact('event'));
     }
-    public function event_info_payment_bill(Request $request, $start_date, $climbing_gym, $event_id)
+    public function event_info_pay(Request $request, $start_date, $climbing_gym, $event_id)
     {
         $event = Event::find($event_id);
-        return view('event.tab.payment', compact('event'));
+        $participant_products_and_discounts = $participant->products_and_discounts ?? null;
+        return view('event.tab.payment', compact(['participant_products_and_discounts','event']));
     }
-
     public function get_participants(Request $request, $start_date, $climbing_gym, $title){
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if($event) {
@@ -488,6 +490,7 @@ class EventsController extends Controller
             $participant = ResultQualificationClassic::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
         }
         $participant->products_and_discounts = ['discount' => $request->discount, 'products' => $request->products];
+        $participant->amount_start_price = intval($request->amount_start_price);
         $participant->save();
         if ($participant->save()) {
             return response()->json(['success' => true, 'message' => 'Успешно сохранено']);

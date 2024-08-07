@@ -8,6 +8,12 @@ class OwnerPaymentOperations extends Model
 {
     protected $table = 'owner_payment_operations';
 
+
+    const EASY = 1;
+    const HARD = 2;
+    const DINAMIC = 3;
+
+
     public static function execute_payment($participant, $admin, $event, $amount_participant)
     {
         $payments = OwnerPayments::where('event_id', $participant->event_id)->first();
