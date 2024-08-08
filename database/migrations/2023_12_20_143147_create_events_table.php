@@ -43,6 +43,7 @@ class CreateEventsTable extends Migration
             $table->json('products')->nullable();
             $table->json('up_price')->nullable();
             $table->json('options_amount_price')->nullable();
+            $table->integer('is_flash_value')->default(1);
             $table->integer('is_semifinal')->default(0);
             $table->integer('is_sort_group_final')->default(0);
             $table->integer('is_sort_group_semifinal')->default(0);

@@ -21,28 +21,41 @@
                                 <div>
                                 </div>
                                 <div class="text-right">
+                                    @if($event->is_flash_value)
                                     <button type="button" class="btn btn-dark mb-2" id="all-flash">Отметить все FLASH
                                     </button>
-                                    <button type="button" class="btn btn-dark mb-2" id="all-redpoint">Отметить все REDPOINT
-                                    </button>
+                                    @endif
+                                    @if($event->is_flash_value)
+                                        <button type="button" class="btn btn-dark mb-2" id="all-redpoint">Отметить все REDPOINT
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-dark mb-2" id="all-redpoint">Отметить все ТОП
+                                        </button>
+                                    @endif
                                 </div>
                                 <table class="table">
                                     <thead>
                                     <tr>
                                         <th scope="col">Трасса</th>
                                         @if(!$event->is_hide_grades)
-                                            <th id="grade" style="font-size: 11px" scope="col">Категория</th>
+                                            <th id="grade" style="font-size: 15px" scope="col">Категория</th>
                                         @endif
                                         @if($event->is_zone_show)
                                             <th scope="col">Нет</th>
                                         @else
                                             <th scope="col">Не пролез</th>
                                         @endif
-                                        <th scope="col">Флэш</th>
+                                        @if($event->is_flash_value)
+                                            <th scope="col">Флэш</th>
+                                        @endif
                                         @if($event->is_zone_show)
                                             <th scope="col">Зона</th>
                                         @endif
-                                        <th scope="col">Редпоинт</th>
+                                        @if($event->is_flash_value)
+                                            <th scope="col">Редпоинт</th>
+                                        @else
+                                            <th scope="col">Пролез</th>
+                                        @endif
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -81,13 +94,21 @@
                                                                for="failed-{{$route->count}}">Не пролез</label>
                                                     @endif
                                             </td>
-                                            <td>
-                                                @if($result_participant)
-                                                    @if($result_participant[$index]['attempt'] == '1')
-                                                        <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
-                                                               class="btn-check"
-                                                               name="{{$route->count}}" id="flash-{{$route->count}}"
-                                                               autocomplete="off" checked>
+                                            @if($event->is_flash_value)
+                                                <td>
+                                                    @if($result_participant)
+                                                        @if($result_participant[$index]['attempt'] == '1')
+                                                            <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
+                                                                   class="btn-check"
+                                                                   name="{{$route->count}}" id="flash-{{$route->count}}"
+                                                                   autocomplete="off" checked>
+                                                        @else
+                                                            <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
+                                                                   class="btn-check"
+                                                                   name="{{$route->count}}" id="flash-{{$route->count}}"
+                                                                   autocomplete="off">
+                                                        @endif
+
                                                     @else
                                                         <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
                                                                class="btn-check"
@@ -95,16 +116,10 @@
                                                                autocomplete="off">
                                                     @endif
 
-                                                @else
-                                                    <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
-                                                           class="btn-check"
-                                                           name="{{$route->count}}" id="flash-{{$route->count}}"
-                                                           autocomplete="off">
-                                                @endif
-
-                                                <label class="btn btn-outline-success  btn-flash"
-                                                       for="flash-{{$route->count}}">FLASH</label>
-                                            </td>
+                                                    <label class="btn btn-outline-success  btn-flash"
+                                                           for="flash-{{$route->count}}">FLASH</label>
+                                                </td>
+                                            @endif
                                             @if($event->is_zone_show)
                                                 <td>
                                                     @if($result_participant)
@@ -144,9 +159,13 @@
                                                            data-grade="{{$route->grade}}" name="{{$route->count}}"
                                                            id="redpoint-{{$route->count}}" autocomplete="off">
                                                 @endif
-
-                                                <label class="btn btn-outline-warning btn-redpoint"
-                                                       for="redpoint-{{$route->count}}">REDPOINT</label>
+                                                @if($event->is_flash_value)
+                                                    <label class="btn btn-outline-warning btn-redpoint"
+                                                           for="redpoint-{{$route->count}}">REDPOINT</label>
+                                                @else
+                                                    <label class="btn btn-outline-warning btn-redpoint"
+                                                           for="redpoint-{{$route->count}}">ТОП</label>
+                                                @endif
                                             </td>
 
                                         </tr>
@@ -245,7 +264,23 @@
                     }
                 }//for
                 //If the second radio is checked
-            } else {
+            } else if(check.textContent.trim() === "Отметить все ТОП"){
+                reset_flash()
+                for (i = 0; i < radios.length; i++) {
+                    if (radios[i].checked === false) {
+                        radios[i].checked = true;
+                        check.textContent = "Сбросить все ТОП"
+                    }
+                }
+            } else if(check.textContent === "Сбросить все ТОП") {
+                for (i = 0; i < radios.length; i++) {
+                    //And the elements are radios
+                    if (radios[i].checked === true) {
+                        radios[i].checked = false;
+                        check.textContent = "Отметить все ТОП"
+                    }
+                }//if
+            } else if(check.textContent === "Сбросить все REDPOINT"){
                 for (i = 0; i < radios.length; i++) {
                     //And the elements are radios
                     if (radios[i].checked === true) {
@@ -253,7 +288,7 @@
                         check.textContent = "Отметить все REDPOINT"
                     }
                 }//if
-            }//for
+            }
             return null
         });
         $(document).on('click', '#btn-send-result', function (e) {

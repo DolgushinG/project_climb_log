@@ -45,6 +45,10 @@ class EventsController extends Controller
                 'on' => ['value' => 1, 'text' => 'Открыта', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => 'Закрыта', 'color' => 'default'],
             ];
+    const STATES_BTN_FLASH_OPEN_AND_CLOSE = [
+        'on' => ['value' => 1, 'text' => 'Учитываются', 'color' => 'success'],
+        'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+    ];
 
     /**
      * Store a newly created resource in storage.
@@ -394,10 +398,14 @@ class EventsController extends Controller
                     $form->radio('mode','Настройка формата')
                         ->options($formats)->when(1, function (Form $form) {
                             $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->attribute('inputmode', 'none')->value(10);
-                            $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+                            $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN);
+                            $form->switch('is_flash_value', 'Флеши учитываются')->help('По умолчанию флэши учитываются')->states(self::STATES_BTN_FLASH_OPEN_AND_CLOSE)->default(1);
                         })->when(2, function (Form $form) {
                             $form->currency('amount_point_flash','Балл за флэш')->default(1)->symbol('');
                             $form->currency('amount_point_redpoint','Балл за редпоинт')->default(0.9)->symbol('');
+                        })->when(3, function (Form $form) {
+                            $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN);
+                            $form->switch('is_flash_value', 'Флеши учитываются')->help('По умолчанию флэши учитываются')->states(self::STATES_BTN_FLASH_OPEN_AND_CLOSE)->default(1);
                         });
                     $form->radio('is_semifinal','Настройка кол-ва стадий соревнований')
                         ->options([

@@ -32,13 +32,17 @@ class ResultRouteQualificationClassic extends Model
     public function category(){
         return $this->belongsTo(ParticipantCategory::class);
     }
-    public static function get_flash_value_for_mode_ten_better_route($attempt, $route)
+    public static function get_flash_value_for_mode_ten_better_route($attempt, $route, $with_flash=true)
     {
         switch ($attempt){
             case self::STATUS_NOT_PASSED:
                 return 0;
             case self::STATUS_PASSED_FLASH:
-                return $route->value + $route->flash_value;
+                if($with_flash){
+                    return $route->value + $route->flash_value;
+                } else {
+                    return $route->value;
+                }
             case self::STATUS_PASSED_REDPOINT:
                 return $route->value;
             case self::STATUS_ZONE:
@@ -57,13 +61,17 @@ class ResultRouteQualificationClassic extends Model
                 return $event->amount_point_redpoint;
         }
     }
-    public static function get_flash_value_for_mode_all_outdoor_route($attempt, $route)
+    public static function get_flash_value_for_mode_all_outdoor_route($attempt, $route, $with_flash=true)
     {
         switch ($attempt){
             case self::STATUS_NOT_PASSED:
                 return 0;
             case self::STATUS_PASSED_FLASH:
-                return $route->value + $route->flash_value;
+                if($with_flash){
+                    return $route->value + $route->flash_value;
+                } else {
+                    return $route->value;
+                }
             case self::STATUS_PASSED_REDPOINT:
                 return $route->value;
             case self::STATUS_ZONE:
@@ -95,17 +103,17 @@ class ResultRouteQualificationClassic extends Model
         }
         return sqrt($active_participant / $count_route_passed);
     }
-    public function get_value_route($attempt, $route, $format, $event_id) {
+    public function get_value_route($attempt, $route, $format, $event) {
         switch ($format) {
             # 10 лучших
-            case 1:
-                return self::get_flash_value_for_mode_ten_better_route($attempt, $route);
+            case Format::N_ROUTE:
+                return self::get_flash_value_for_mode_ten_better_route($attempt, $route, $event->is_flash_value);
             # Все трассы
-            case 2:
-                return self::get_flash_value_for_mode_all_route($attempt, $event_id);
+            case Format::ALL_ROUTE:
+                return self::get_flash_value_for_mode_all_route($attempt, $event->id);
             # Все трассы только для феста на скалах type event = 1
-            case 3:
-                return self::get_flash_value_for_mode_all_outdoor_route($attempt, $route);
+            case Format::ALL_ROUTE_WITH_POINTS:
+                return self::get_flash_value_for_mode_all_outdoor_route($attempt, $route, $event->is_flash_value);
 
         }
     }

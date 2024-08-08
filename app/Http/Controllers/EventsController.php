@@ -9,6 +9,7 @@ use App\Jobs\UpdateResultParticipants;
 use App\Jobs\UpdateRouteCoefficientParticipants;
 use App\Models\Area;
 use App\Models\Event;
+use App\Models\Format;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
 use App\Models\MessageForParticipant;
@@ -570,13 +571,7 @@ class EventsController extends Controller
             foreach ($data as $route){
                 # Варианты форматов подсчета баллов
                 $owner_route = RoutesOutdoor::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
-                # ставим принудительно 3 формат для скального феста если организатор выбрал 2
-                if($format == 2){
-                    $mode = 3;
-                } else {
-                    $mode = $format;
-                }
-                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $mode, $event_id);
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event);
 
                 # Формат все трассы считаем сразу
                 $route['points'] = $value_route;
@@ -589,7 +584,7 @@ class EventsController extends Controller
             }
             # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
         } else {
-            if($format == 2){
+            if($format == Format::ALL_ROUTE){
                 UpdateRouteCoefficientParticipants::dispatch($event_id, $gender);
                 $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
             }
@@ -597,9 +592,9 @@ class EventsController extends Controller
             foreach ($data as $route){
                 # Варианты форматов подсчета баллов
                 $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
-                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event_id);
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event);
                 # Формат все трассы считаем сразу
-                if($format == 2) {
+                if($format == Format::ALL_ROUTE) {
                     $count_route_passed = ResultRouteQualificationClassic::counting_result($event_id, $route['route_id'], $gender);
 //                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
                     $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
@@ -614,12 +609,11 @@ class EventsController extends Controller
                     $final_data_only_passed_route[] = $route;
                 }
             }
-            # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
         }
-        if($format == 2){
+        if($format == Format::ALL_ROUTE){
             (new \App\Models\Event)->insert_final_participant_result($event_id, $points_for_mode_2, $user_id);
         }
-        if($format == 1){
+        if($format == Format::N_ROUTE){
             usort($final_data_only_passed_route, function($a, $b) {
                 return $a['points'] <=> $b['points'];
             });
