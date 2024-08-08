@@ -123,6 +123,18 @@ class ResultQualificationController extends Controller
         $show->field('user.sports_category', __('Разряд'));
         $show->field('bill', 'Чек')->image('', 600, 800);
         $show->field('document', 'Документ')->image('', 600, 800);
+        $show->field('products_and_discounts', 'Мерч и скидка')->as(function ($content) {
+            $str = '';
+            if($content['products']){
+                foreach ($content['products'] as $pr){
+                    $str .= $pr.' ,';
+                }
+            }
+            if($content['discount']){
+                $str .= PHP_EOL.'Скидка - '.PHP_EOL.$content['discount'];
+            }
+            return $str;
+        });;
 
         return $show;
     }
@@ -412,6 +424,29 @@ class ResultQualificationController extends Controller
             ');
             $grid->column('bill', 'Чек участника')->image('', 100, 100);
             $grid->column('document', 'Документ участника')->image('', 100, 100);
+            if($event->setting_payment == OwnerPaymentOperations::DINAMIC){
+                $grid->column('products_and_discounts', 'Мерч и скидка')->display(function ($title, $column) {
+                    $str = '';
+                    if($title['products']){
+                        foreach ($title['products'] as $pr){
+                            $str .= "<span style='color:blue'>$pr</span><br>";
+                        }
+                    }
+                    if($title['discount']){
+                        $str .= PHP_EOL.'Скидка - '.PHP_EOL.$title['discount'];
+                    }
+                    return $str;
+                });
+//                $grid->column('products_and_discounts', 'Скидка')->display(function ($title, $column) {
+//                    if($title['discount']){
+//                        $str = 'Скидка'.PHP_EOL;
+//                        foreach ($title['discount'] as $pr){
+//                            $str .= $pr.' '.PHP_EOL;
+//                        }
+//                        return $str;
+//                    }
+//                });
+            }
         }
         return $grid;
     }

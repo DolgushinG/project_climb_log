@@ -128,7 +128,8 @@ class EventsController extends Controller
     {
         $event = Event::find($event_id);
         $participant_products_and_discounts = $participant->products_and_discounts ?? null;
-        return view('event.tab.payment', compact(['participant_products_and_discounts','event']));
+        $current_amount_start_price = OwnerPaymentOperations::current_amount_start_price_before_date($event);
+        return view('event.tab.payment', compact(['current_amount_start_price','participant_products_and_discounts','event']));
     }
     public function get_participants(Request $request, $start_date, $climbing_gym, $title){
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();

@@ -622,15 +622,16 @@ $("#crop").click(function () {
                 data: {'image': base64data , 'event_id': event_id},
                 success: function (data) {
                     $modal.modal('hide');
-                    getInfoPay(event_id, '#paymentTab')
-                    button_pay.text('Чек отправлен (На проверке..)')
-                    button_pay.attr('disabled', 'disabled')
-                    if(btn_cancel_take_part){
-                        btn_cancel_take_part.style.display = 'none';
-                    }
-                    block_attach_bill.style.display = 'none';
-                    document.querySelector('#bill').style.display = 'None'
-                    document.getElementById('checkingBillTab').style.display = 'block';
+                    window.location.reload();
+                    // getInfoPay(event_id, '#paymentTab')
+                    // button_pay.text('Чек отправлен (На проверке..)')
+                    // button_pay.attr('disabled', 'disabled')
+                    // if(btn_cancel_take_part){
+                    //     btn_cancel_take_part.style.display = 'none';
+                    // }
+                    // block_attach_bill.style.display = 'none';
+                    // document.querySelector('#bill').style.display = 'None'
+                    // document.getElementById('checkingBillTab').style.display = 'block';
                 },
                 error: function (xhr, status, error) {
                     $modal.modal('hide');
@@ -666,17 +667,7 @@ $("#crop-document").click(function () {
                 data: {'image': base64data , 'event_id': event_id},
                 success: function (data) {
                     $modal_document.modal('hide');
-                    getInfoPay(event_id, '#paymentTab')
-                    button_pay.text('Документ отправлен (На проверке..)')
-                    button_pay.attr('disabled', 'disabled')
-                    if(btn_cancel_take_part){
-                        btn_cancel_take_part.style.display = 'none';
-                    }
-                    block_attach_document.style.display = 'none';
-                    document.querySelector('#document').style.display = 'None'
-                    setTimeout(function () {
-                        block_checking_document.style.display = 'block';
-                    }, 1000);
+                    window.location.reload();
 
                 },
                 error: function (xhr, status, error) {
