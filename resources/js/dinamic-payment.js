@@ -1,10 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
     const priceElement = document.getElementById('price-value');
+    const current_amount_start_price = document.getElementById('price-value').getAttribute('data-current-amount-start-price');
     const productsContainer = document.getElementById('products');
     const discountsContainer = document.getElementById('discounts');
     const data_main_price = document.querySelector('#price').getAttribute('data-main-price');
 
-    let basePrice = calculateBasePrice();
+    let basePrice = parseFloat(current_amount_start_price);
     let finalPrice = basePrice;
 
     // Обработчики изменений
@@ -13,20 +14,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Отображаем стартовую цену
     updatePrice(finalPrice);
-
-    function calculateBasePrice() {
-        const today = new Date();
-        const august31 = new Date(today.getFullYear(), 7, 31); // 31 августа
-        const september30 = new Date(today.getFullYear(), 8, 30); // 30 сентября
-
-        if (today <= august31) {
-            return parseInt(priceElement.textContent); // Стартовая цена до 31 августа
-        } else if (today <= september30) {
-            return parseInt(priceElement.textContent) + 500; // Цена до 30 сентября
-        } else {
-            return parseInt(priceElement.textContent) + 1000; // Цена после 30 сентября
-        }
-    }
 
     function updateFinalPrice() {
         finalPrice = basePrice;
@@ -48,6 +35,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     updateFinalPrice()
     function updatePrice(price) {
-        priceElement.textContent = price.toFixed(2);
+        priceElement.textContent = price;
     }
 });

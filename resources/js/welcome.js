@@ -242,15 +242,19 @@ $(document).on('click','#save_products_discount', function(e) {
             'products': products,
         },
         success: function(xhr, status, error) {
-            button.text('').append('<i id="spinner" style="margin-left: 10px;\n' +
-                '    margin-right: 8px;" class="fa fa-spinner fa-spin"> Обработка...</i>')
-
+            button.attr('disabled','disabled');
+            button.text('').append('<i id="spinner" class="fa fa-spinner fa-spin"></i> Обработка...')
             setTimeout(function () {
                 button.text(xhr.message)
+                button.attr('disabled','disabled');
             }, 1000);
             setTimeout(function () {
                 button.text('Сохранить выбранный мерч и скидку')
+            }, 2000);
+            setTimeout(function () {
+                button.removeAttr('disabled','disabled');
             }, 3000);
+
         },
         error: function(xhr, status, error) {
             button.text('').append('<i id="spinner" class="fa fa-spinner fa-spin"></i> Обработка...')

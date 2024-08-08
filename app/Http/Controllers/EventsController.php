@@ -27,6 +27,7 @@ use App\Models\Route;
 use App\Models\RoutesOutdoor;
 use App\Models\Set;
 use App\Models\User;
+use Carbon\Carbon;
 use Encore\Admin\Admin;
 use Exception;
 use Illuminate\Http\Request;
@@ -111,7 +112,8 @@ class EventsController extends Controller
             $message_for_participants = MessageForParticipant::where('event_id', $event->id)->first();
             $google_iframe = $this->google_maps_iframe($event->address.','.$event->city);
             $participant_products_and_discounts = $participant->products_and_discounts ?? null;
-            return view('welcome', compact(['participant_products_and_discounts','message_for_participants','event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
+            $current_amount_start_price = OwnerPaymentOperations::current_amount_start_price_before_date($event);
+            return view('welcome', compact(['current_amount_start_price','participant_products_and_discounts','message_for_participants','event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('404');
         }

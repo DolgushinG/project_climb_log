@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class OwnerPaymentOperations extends Model
@@ -13,6 +14,19 @@ class OwnerPaymentOperations extends Model
     const HARD = 2;
     const DINAMIC = 3;
 
+    public static function current_amount_start_price_before_date($event)
+    {
+        if($event->up_price){
+            $condition = $event->up_price;
+            $now = Carbon::today();
+            $now->setTimezone('Europe/Moscow');
+            foreach ($condition as $item){
+                if(Carbon::parse($item['До даты']) > $now){
+                    return $item['Цена'];
+                }
+            }
+        }
+    }
 
     public static function execute_payment($participant, $admin, $event, $amount_participant)
     {

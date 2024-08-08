@@ -72,7 +72,6 @@
         document_attach.addEventListener('click', function (){
             document.querySelector('#contact-tab').click()
             document.querySelector('[data-bs-target="#flush-collapseThreeDocument"]').click()
-
             if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
                 window.scrollTo({
                     top: document.querySelector("#btn-payment").offsetTop + 300,
