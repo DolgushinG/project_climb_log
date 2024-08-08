@@ -31,6 +31,8 @@ class CreateResultFranceSystemQualificationTable extends Migration
             $table->boolean('is_paid')->default(0);
             $table->integer('amount_start_price')->nullable();
             $table->string('bill')->nullable();
+            $table->string('document')->nullable();
+            $table->json('products_and_discounts')->nullable();
             $table->timestamps();
         });
     }

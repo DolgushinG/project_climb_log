@@ -26,6 +26,9 @@ class Event extends Model
         'options_categories' => 'json',
         'categories' => 'json',
         'options_amount_price' => 'json',
+        'up_price' => 'json',
+        'discounts' => 'json',
+        'products' => 'json',
     ];
     /**
      * The attributes that are mass assignable.
@@ -209,7 +212,7 @@ class Event extends Model
                 сгенерировано трассы, потом изменен формат и пытаемся сгенерироват результат
                 ');
             }
-            $route->value = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $event_route, $event->mode, $event->id);
+            $route->value = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $event_route, $event->mode, $event);
         }
         $routes_id_passed_with_red_point = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)->pluck('route_id');
         if ($routes_id_passed_with_red_point->isNotEmpty()) {
@@ -244,13 +247,7 @@ class Event extends Model
                 сгенерировано трассы, потом изменен формат и пытаемся сгенерироват результат
                 ');
             }
-            if($event->mode == 2){
-                # ставим принудительно 3 формат для скального феста если организатор выбрал 2
-                $mode = 3;
-            } else {
-                $mode = $event->mode;
-            }
-            $route->value = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $event_route, $mode, $event->id);
+            $route->value = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $event_route, $event->mode, $event);
         }
         $routes_id_passed_with_red_point = $routes->sortByDesc('value')->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)->pluck('route_id');
         if ($routes_id_passed_with_red_point->isNotEmpty()) {
@@ -294,10 +291,10 @@ class Event extends Model
             if($event->type_event){
                 $points = self::get_result_format_n_outdoor_route($event, $participant);
             } else {
-                if ($format == 1) {
+                if ($format == Format::N_ROUTE) {
                     $points = self::get_result_format_n_route($event, $participant);
                 }
-                if ($format == 2) {
+                if ($format == Format::ALL_ROUTE) {
                     $points = self::get_result_format_all_route($event, $participant);
                 }
             }

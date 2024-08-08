@@ -246,7 +246,7 @@
                                                             </div>
                                                         @else
                                                             <div class="section-title">
-                                                                <h2>Скалодром</h2>
+                                                                <h2>Организатор</h2>
                                                                 <p>
                                                                     <img src="{{asset('storage/'.$event->climbing_gym_name_image)}}" alt="climbing_gym_name_image" class="climbing-gym-img-title">
                                                                     <span class="d-md-block ps-2 align-items-center ">{{$event->climbing_gym_name}}</span>

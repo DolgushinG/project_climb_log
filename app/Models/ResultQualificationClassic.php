@@ -18,6 +18,7 @@ class ResultQualificationClassic extends Model
 
     protected $casts = [
         'result_for_edit' =>'json',
+        'products_and_discounts' =>'json',
     ];
 
 

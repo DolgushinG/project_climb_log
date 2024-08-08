@@ -37,7 +37,7 @@ Route::get('/privatedata', [App\Http\Controllers\Controller::class, 'indexPrivac
 Route::get('/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::post('event/{start_date}/{climbing_gym}/sendAllResult', [App\Http\Controllers\EventsController::class, 'sendAllResult'])->middleware('throttle:5,1');
 Route::get('event/{start_date}/{climbing_gym}/getInfoPayment/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_payment']);
-Route::get('event/{start_date}/{climbing_gym}/getInfoPaymentBill/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_payment_bill']);
+Route::get('event/{start_date}/{climbing_gym}/getInfoPay/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_pay']);
 Route::get('/admin/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::get('/event/{start_date}/{climbing_gym}/{title}/participants', [App\Http\Controllers\EventsController::class, 'get_participants'])->name('participants');
 Route::get('/event/{start_date}/{climbing_gym}/{title}/qualificationClassic/results', [App\Http\Controllers\EventsController::class, 'get_qualification_classic_results'])->name('get_qualification_classic_results');
@@ -58,8 +58,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/removeFromListPending', [App\Http\Controllers\EventsController::class, 'removeFromListPending'])->name('removeFromListPending');
     Route::post('/cancelTakePartParticipant', [App\Http\Controllers\EventsController::class, 'cancelTakePartParticipant'])->name('cancelTakePartParticipant');
     Route::post('/changeSet', [App\Http\Controllers\EventsController::class, 'changeSet'])->name('changeSet');
+    Route::post('/sendProductsAndDiscount', [App\Http\Controllers\EventsController::class, 'sendProductsAndDiscount'])->name('sendProductsAndDiscount');
     Route::post('/sendResultParticipant', [App\Http\Controllers\EventsController::class, 'sendResultParticipant'])->name('sendResultParticipant');
     Route::post('/cropimageupload', [App\Http\Controllers\CropImageController::class,'uploadCropImage'])->name('cropimageupload');
+    Route::post('/cropdocumentupload', [App\Http\Controllers\CropImageController::class,'uploadCropImageDocument'])->name('cropdocumentupload');
     Route::get('/event/{start_date}/{climbing_gym}/{title}/routes', [App\Http\Controllers\EventsController::class, 'listRoutesEvent'])->name('listRoutesEvent');
 });
 

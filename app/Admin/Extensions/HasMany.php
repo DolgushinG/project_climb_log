@@ -58,6 +58,9 @@ class HasMany extends Field
         'tab' => 'admin::form.hasmanytab',
         'table' => 'admin::form.hasmanytable',
         'tableCustom' => 'admin::form.hasmanytablecustom',
+        'tableDiscounts' => 'admin::form.hasmanytablediscounts',
+        'tableProducts' => 'admin::form.hasmanytableproducts',
+        'tableUpPrice' => 'admin::form.hasmanytableupprice',
         'tableAmount' => 'admin::form.hasmanytableamount',
         'tableRoutes' => 'admin::form.hasmanytableroutes',
         'customList' => 'admin::form.hasmanycustomlist',
@@ -622,7 +625,146 @@ EOT;
         Admin::script($script);
     }
 
+    /**
+     * Setup default template script.
+     *
+     * @param string $templateScript
+     *
+     * @return void
+     */
+    protected function setupScriptForTableUpPriceView($templateScript)
+    {
+        $removeClass = NestedForm::REMOVE_FLAG_CLASS;
+        $defaultKey = NestedForm::DEFAULT_KEY_NAME;
 
+        /**
+         * When add a new sub form, replace all element key in new sub form.
+         *
+         * @example comments[new___key__][title]  => comments[new_{index}][title]
+         *
+         * {count} is increment number of current sub form count.
+         */
+        $script = <<<EOT
+var indexUpPrice = 0;
+$('#has-many-{$this->column}').on('click', '.add-up-price', function () {
+    var tpl = $('template.{$this->column}-tpl');
+    var template = tpl.html().replace(/{$defaultKey}/g, indexUpPrice);
+    $('.has-many-{$this->column}-forms').append(template);
+    {$templateScript}
+    indexUpPrice++;
+    return false;
+});
+
+$('#has-many-{$this->column}').on('click', '.remove-up-price', function () {
+    var first_input_name = $(this).closest('.has-many-{$this->column}-form').find('input[name]:first').attr('name');
+    if (first_input_name.match('{$this->column}\\\[new_')) {
+        $(this).closest('.has-many-{$this->column}-form').remove();
+    } else {
+        $(this).closest('.has-many-{$this->column}-form').hide();
+        $(this).closest('.has-many-{$this->column}-form').find('.$removeClass').val(1);
+        $(this).closest('.has-many-{$this->column}-form').find('input').removeAttr('required');
+    }
+    return false;
+});
+
+EOT;
+
+        Admin::script($script);
+    }
+
+    /**
+     * Setup default template script.
+     *
+     * @param string $templateScript
+     *
+     * @return void
+     */
+    protected function setupScriptForTableProductsView($templateScript)
+    {
+        $removeClass = NestedForm::REMOVE_FLAG_CLASS;
+        $defaultKey = NestedForm::DEFAULT_KEY_NAME;
+
+        /**
+         * When add a new sub form, replace all element key in new sub form.
+         *
+         * @example comments[new___key__][title]  => comments[new_{index}][title]
+         *
+         * {count} is increment number of current sub form count.
+         */
+        $script = <<<EOT
+var indexProduct = 0;
+$('#has-many-{$this->column}').on('click', '.add-products', function () {
+    var tpl = $('template.{$this->column}-tpl');
+    var template = tpl.html().replace(/{$defaultKey}/g, indexProduct);
+    $('.has-many-{$this->column}-forms').append(template);
+    {$templateScript}
+    indexProduct++;
+    return false;
+});
+
+$('#has-many-{$this->column}').on('click', '.remove-product', function () {
+    var first_input_name = $(this).closest('.has-many-{$this->column}-form').find('input[name]:first').attr('name');
+    if (first_input_name.match('{$this->column}\\\[new_')) {
+        $(this).closest('.has-many-{$this->column}-form').remove();
+    } else {
+        $(this).closest('.has-many-{$this->column}-form').hide();
+        $(this).closest('.has-many-{$this->column}-form').find('.$removeClass').val(1);
+        $(this).closest('.has-many-{$this->column}-form').find('input').removeAttr('required');
+    }
+    return false;
+});
+
+EOT;
+
+        Admin::script($script);
+    }
+
+    /**
+     * Setup default template script.
+     *
+     * @param string $templateScript
+     *
+     * @return void
+     */
+    protected function setupScriptForTableDiscountsView($templateScript)
+    {
+        $removeClass = NestedForm::REMOVE_FLAG_CLASS;
+        $defaultKey = NestedForm::DEFAULT_KEY_NAME;
+
+        /**
+         * When add a new sub form, replace all element key in new sub form.
+         *
+         * @example comments[new___key__][title]  => comments[new_{index}][title]
+         *
+         * {count} is increment number of current sub form count.
+         */
+        $script = <<<EOT
+var indexDiscounts = 0;
+$('#has-many-{$this->column}').on('click', '.add-discounts', function () {
+    var tpl = $('template.{$this->column}-tpl');
+    var template = tpl.html().replace(/{$defaultKey}/g, indexDiscounts);
+    $('.has-many-{$this->column}-forms').append(template);
+    {$templateScript}
+    indexDiscounts++;
+    return false;
+});
+
+$('#has-many-{$this->column}').on('click', '.remove-discounts', function () {
+    var first_input_name = $(this).closest('.has-many-{$this->column}-form').find('input[name]:first').attr('name');
+    if (first_input_name.match('{$this->column}\\\[new_')) {
+        $(this).closest('.has-many-{$this->column}-form').remove();
+    } else {
+        $(this).closest('.has-many-{$this->column}-form').hide();
+        $(this).closest('.has-many-{$this->column}-form').find('.$removeClass').val(1);
+        $(this).closest('.has-many-{$this->column}-form').find('input').removeAttr('required');
+    }
+    return false;
+});
+
+EOT;
+
+        Admin::script($script);
+    }
     /**
      * Setup default template script.
      *

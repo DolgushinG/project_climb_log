@@ -45,6 +45,10 @@ class EventsController extends Controller
                 'on' => ['value' => 1, 'text' => 'Открыта', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => 'Закрыта', 'color' => 'default'],
             ];
+    const STATES_BTN_FLASH_OPEN_AND_CLOSE = [
+        'on' => ['value' => 1, 'text' => 'Учитываются', 'color' => 'success'],
+        'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+    ];
 
     /**
      * Store a newly created resource in storage.
@@ -321,7 +325,7 @@ class EventsController extends Controller
 //            $form->disableSubmit();
         })->tab('Оплата', function ($form) use ($id) {
             $form->radio('setting_payment','Настройка оплаты')
-                ->options([0 => 'Простая', 1 => 'Сложная(разные пакеты и стоимости)'])
+                ->options([0 => 'Простая', 1 => 'Сложная(разные пакеты и стоимости)', 3 => 'Динамическая'])
                 ->when(0, function (Form $form) {
                     $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
                     $form->image('img_payment', 'QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
@@ -329,8 +333,7 @@ class EventsController extends Controller
                     $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
                 })->when(1, function (Form $form) use ($id) {
                     $payments = OwnerPayments::where('event_id', $id)->first();
-                    $form->html('Если вы приложили здесь QR код, то здесь он не будет отображаться, проверьте его отображение на странице с соревнованием');
-
+//                    $form->html('Если вы приложили здесь QR код, то здесь он не будет отображаться, проверьте его отображение на странице с соревнованием');
                     if($payments){
                         if($payments->amount_for_pay > 0){
                             $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
@@ -368,6 +371,22 @@ class EventsController extends Controller
 //                            $table->image('QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
                         });
                     }
+                })->when(3, function (Form $form) {
+                    $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
+                    $form->number('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма');
+                    $form->tablediscounts('discounts', 'Скидки', function ($table) use ($form){
+                        $table->text('Название');
+                        $table->number('Проценты');
+                    });
+                    $form->tableproducts('products', 'Мерч', function ($table) use ($form){
+                        $table->text('Название');
+                        $table->number('Цена');
+                    });
+                    $form->tableupprice('up_price', 'Цена в зависимости от дат', function ($table) use ($form){
+                        $table->number('Цена');
+                        $table->datetime('До даты')->attribute('type','date');
+                    });
+                    $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
                 })->default(0);
         })->tab('Параметры соревнования', function ($form) use ($id) {
             $form->radio('is_france_system_qualification','Настройка подсчета квалификации')
@@ -379,10 +398,14 @@ class EventsController extends Controller
                     $form->radio('mode','Настройка формата')
                         ->options($formats)->when(1, function (Form $form) {
                             $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->attribute('inputmode', 'none')->value(10);
-                            $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+                            $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN);
+                            $form->switch('is_flash_value', 'Флеши учитываются')->help('По умолчанию флэши учитываются')->states(self::STATES_BTN_FLASH_OPEN_AND_CLOSE)->default(1);
                         })->when(2, function (Form $form) {
                             $form->currency('amount_point_flash','Балл за флэш')->default(1)->symbol('');
                             $form->currency('amount_point_redpoint','Балл за редпоинт')->default(0.9)->symbol('');
+                        })->when(3, function (Form $form) {
+                            $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN);
+                            $form->switch('is_flash_value', 'Флеши учитываются')->help('По умолчанию флэши учитываются')->states(self::STATES_BTN_FLASH_OPEN_AND_CLOSE)->default(1);
                         });
                     $form->radio('is_semifinal','Настройка кол-ва стадий соревнований')
                         ->options([

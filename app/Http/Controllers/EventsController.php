@@ -9,9 +9,12 @@ use App\Jobs\UpdateResultParticipants;
 use App\Jobs\UpdateRouteCoefficientParticipants;
 use App\Models\Area;
 use App\Models\Event;
+use App\Models\Format;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
 use App\Models\MessageForParticipant;
+use App\Models\OwnerPaymentOperations;
+use App\Models\OwnerPayments;
 use App\Models\Place;
 use App\Models\PlaceRoute;
 use App\Models\ResultQualificationClassic;
@@ -24,6 +27,7 @@ use App\Models\Route;
 use App\Models\RoutesOutdoor;
 use App\Models\Set;
 use App\Models\User;
+use Carbon\Carbon;
 use Encore\Admin\Admin;
 use Exception;
 use Illuminate\Http\Request;
@@ -100,12 +104,16 @@ class EventsController extends Controller
             $sport_categories = User::sport_categories;
             if($event->is_france_system_qualification){
                 $count_participants = ResultFranceSystemQualification::where('event_id','=',$event->id)->count();
+                $participant = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('user_id', $user_id)->first();
             } else {
                 $count_participants = ResultQualificationClassic::where('event_id','=',$event->id)->count();
+                $participant = ResultQualificationClassic::where('event_id','=',$event->id)->where('user_id', $user_id)->first();
             }
             $message_for_participants = MessageForParticipant::where('event_id', $event->id)->first();
             $google_iframe = $this->google_maps_iframe($event->address.','.$event->city);
-            return view('welcome', compact(['message_for_participants','event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
+            $participant_products_and_discounts = $participant->products_and_discounts ?? null;
+            $current_amount_start_price = OwnerPaymentOperations::current_amount_start_price_before_date($event);
+            return view('welcome', compact(['current_amount_start_price','participant_products_and_discounts','message_for_participants','event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('404');
         }
@@ -116,12 +124,13 @@ class EventsController extends Controller
         $event = Event::find($event_id);
         return view('event.tab.payment_without_bill', compact('event'));
     }
-    public function event_info_payment_bill(Request $request, $start_date, $climbing_gym, $event_id)
+    public function event_info_pay(Request $request, $start_date, $climbing_gym, $event_id)
     {
         $event = Event::find($event_id);
-        return view('event.tab.payment', compact('event'));
+        $participant_products_and_discounts = $participant->products_and_discounts ?? null;
+        $current_amount_start_price = OwnerPaymentOperations::current_amount_start_price_before_date($event);
+        return view('event.tab.payment', compact(['current_amount_start_price','participant_products_and_discounts','event']));
     }
-
     public function get_participants(Request $request, $start_date, $climbing_gym, $title){
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if($event) {
@@ -477,6 +486,22 @@ class EventsController extends Controller
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
     }
+    public function sendProductsAndDiscount(Request $request) {
+        $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        } else {
+            $participant = ResultQualificationClassic::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        }
+        $participant->products_and_discounts = ['discount' => $request->discount, 'products' => $request->products];
+        $participant->amount_start_price = intval($request->amount_start_price);
+        $participant->save();
+        if ($participant->save()) {
+            return response()->json(['success' => true, 'message' => 'Успешно сохранено']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+        }
+    }
 
     public function sendResultParticipant(Request $request) {
 
@@ -549,13 +574,7 @@ class EventsController extends Controller
             foreach ($data as $route){
                 # Варианты форматов подсчета баллов
                 $owner_route = RoutesOutdoor::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
-                # ставим принудительно 3 формат для скального феста если организатор выбрал 2
-                if($format == 2){
-                    $mode = 3;
-                } else {
-                    $mode = $format;
-                }
-                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $mode, $event_id);
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event);
 
                 # Формат все трассы считаем сразу
                 $route['points'] = $value_route;
@@ -568,7 +587,7 @@ class EventsController extends Controller
             }
             # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
         } else {
-            if($format == 2){
+            if($format == Format::ALL_ROUTE){
                 UpdateRouteCoefficientParticipants::dispatch($event_id, $gender);
                 $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
             }
@@ -576,9 +595,9 @@ class EventsController extends Controller
             foreach ($data as $route){
                 # Варианты форматов подсчета баллов
                 $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
-                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event_id);
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event);
                 # Формат все трассы считаем сразу
-                if($format == 2) {
+                if($format == Format::ALL_ROUTE) {
                     $count_route_passed = ResultRouteQualificationClassic::counting_result($event_id, $route['route_id'], $gender);
 //                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
                     $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
@@ -593,12 +612,11 @@ class EventsController extends Controller
                     $final_data_only_passed_route[] = $route;
                 }
             }
-            # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
         }
-        if($format == 2){
+        if($format == Format::ALL_ROUTE || $format == Format::ALL_ROUTE_WITH_POINTS){
             (new \App\Models\Event)->insert_final_participant_result($event_id, $points_for_mode_2, $user_id);
         }
-        if($format == 1){
+        if($format == Format::N_ROUTE){
             usort($final_data_only_passed_route, function($a, $b) {
                 return $a['points'] <=> $b['points'];
             });
