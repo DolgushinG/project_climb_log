@@ -613,7 +613,7 @@ class EventsController extends Controller
                 }
             }
         }
-        if($format == Format::ALL_ROUTE){
+        if($format == Format::ALL_ROUTE || $format == Format::ALL_ROUTE_WITH_POINTS){
             (new \App\Models\Event)->insert_final_participant_result($event_id, $points_for_mode_2, $user_id);
         }
         if($format == Format::N_ROUTE){

@@ -88,17 +88,25 @@
                                                                                 пролез
                                                                             </th>
                                                                         @endif
+                                                                        @if($event->is_flash_value)
                                                                         <th scope="col">
                                                                             Флэш
                                                                         </th>
+                                                                        @endif
                                                                         @if($event->is_zone_show)
                                                                             <th scope="col">
                                                                                 Зона
                                                                             </th>
                                                                         @endif
-                                                                        <th scope="col">
-                                                                            Редпоинт
-                                                                        </th>
+                                                                        @if($event->is_flash_value)
+                                                                            <th scope="col">
+                                                                                Редпоинт
+                                                                            </th>
+                                                                        @else
+                                                                            <th scope="col">
+                                                                                Пролез
+                                                                            </th>
+                                                                        @endif
                                                                     </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -159,6 +167,7 @@
                                                                                             пролез</label>
                                                                                     @endif
                                                                                 </td>
+                                                                                @if($event->is_flash_value)
                                                                                 <td>
                                                                                     @if($result_participant)
                                                                                         @if($result_participant[$index]['attempt'] == '1')
@@ -197,6 +206,7 @@
                                                                                         class="btn btn-outline-success  btn-flash"
                                                                                         for="flash-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}">FLASH</label>
                                                                                 </td>
+                                                                                @endif
                                                                                 @if($event->is_zone_show)
                                                                                     <td>
                                                                                         @if($result_participant)
@@ -266,10 +276,15 @@
                                                                                             id="redpoint-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}"
                                                                                             autocomplete="off">
                                                                                     @endif
-
-                                                                                    <label
-                                                                                        class="btn btn-outline-warning btn-redpoint"
-                                                                                        for="redpoint-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}">REDPOINT</label>
+                                                                                        @if($event->is_flash_value)
+                                                                                            <label
+                                                                                                class="btn btn-outline-warning btn-redpoint"
+                                                                                                for="redpoint-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}">REDPOINT</label>
+                                                                                        @else
+                                                                                            <label
+                                                                                                class="btn btn-outline-warning btn-redpoint"
+                                                                                                for="redpoint-{{$route->count}}-{{str_replace(' ', '-', $route->route_name)}}">ТОП</label>
+                                                                                        @endif
                                                                                 </td>
 
                                                                             </tr>
