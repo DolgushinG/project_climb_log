@@ -16,6 +16,7 @@ class CreateSetsTable extends Migration
         Schema::create('sets', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('owner_id');
+            $table->integer('event_id')->nullable();
             $table->string('time');
             $table->integer('max_participants');
             $table->string('day_of_week');
