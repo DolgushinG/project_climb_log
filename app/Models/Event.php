@@ -67,7 +67,10 @@ class Event extends Model
     {
         return $this->hasOne(ResultQualificationClassic::class);
     }
-
+    public function sets()
+    {
+        return $this->hasOne(Set::class);
+    }
 
 
     public function ownerPayments()
@@ -587,6 +590,10 @@ class Event extends Model
         $users = User::query()
             ->leftJoin($table, 'users.id', '=', $table . '.user_id')
             ->where($table . '.event_id', '=', $event_id)
+            ->where($table . '.amount_top', '!=', null)
+            ->where($table . '.amount_try_top', '!=', null)
+            ->where($table . '.amount_zone', '!=', null)
+            ->where($table . '.amount_try_zone', '!=', null)
             ->select(
                 $table . '.place',
                 'users.id',

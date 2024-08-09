@@ -103,6 +103,9 @@ class SetsController extends Controller
         } else {
             $grid->column('owner_id', 'Owner');
         }
+        $grid->model()->where(function ($query) {
+            $query->has('event.sets');
+        });
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
@@ -121,6 +124,8 @@ class SetsController extends Controller
 //        });
         $grid->quickCreate(function (Grid\Tools\QuickCreate $create) {
             $admin_id = \Encore\Admin\Facades\Admin::user()->id;
+            $event_id = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first()->id;
+            $create->integer('event_id', $admin_id)->default($event_id)->style('display', 'None');
             $create->integer('owner_id', $admin_id)->default($admin_id)->style('display', 'None');
             $create->text('time', 'Время слота')->placeholder('например 10:00 - 12:00');
             $create->integer('max_participants', 'Максимальное число участников')->placeholder('введите число');
@@ -167,6 +172,7 @@ class SetsController extends Controller
         $form = new Form(new Set);
 
         $form->display('ID');
+        $form->text('event_id', 'event_id');
         $form->text('owner_id', 'owner_id');
         $form->text('time', 'time');
         $form->text('max_participants', 'max_participants');

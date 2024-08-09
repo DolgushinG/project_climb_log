@@ -600,9 +600,9 @@ class EventsController extends Controller
                         }
 
                     }
-                    $exist_sets = Set::where('owner_id', '=', Admin::user()->id)->first();
+                    $exist_sets = Set::where('event_id', '=', $form->model()->id)->first();
                     if (!$exist_sets) {
-                        $this->install_set(Admin::user()->id);
+                        $this->install_set(Admin::user()->id, $form->model()->id);
                     }
                     return back()->isRedirect('events');
                 }
@@ -632,6 +632,7 @@ class EventsController extends Controller
 
     public function cloneEvent(Request $request)
     {
+        $owner_id = Admin::user()->id;
         if($request){
             $event_original = Event::find($request->id);
             $event_clone = $event_original->replicate();
@@ -647,9 +648,14 @@ class EventsController extends Controller
             $event_clone->datetime_registration_state = null;
             $event_clone->save();
 
+            $exist_sets = Set::where('event_id', '=', $event_clone->id)->first();
+            if (!$exist_sets) {
+                $this->install_set($owner_id, $event_clone->id);
+            }
+
             foreach ($event_clone->categories as $category) {
                 $participant_categories = new ParticipantCategory;
-                $participant_categories->owner_id = Admin::user()->id;
+                $participant_categories->owner_id = $owner_id;
                 $participant_categories->event_id = $event_clone->id;
                 $participant_categories->category = $category;
                 $participant_categories->save();
@@ -693,16 +699,16 @@ class EventsController extends Controller
         }
         return $result;
     }
-    public function install_set($owner_id){
+    public function install_set($owner_id, $event_id){
         $sets = array(
-            ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 1],
-            ['owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 2],
-            ['owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 6],
-            ['owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 3],
-            ['owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 7],
-            ['owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 4],
-            ['owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 8],
-            ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 5],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 1],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 2],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 6],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 3],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 7],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 4],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 8],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 5],
         );
         DB::table('sets')->insert($sets);
     }
