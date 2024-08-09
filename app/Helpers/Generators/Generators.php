@@ -89,13 +89,13 @@ class Generators
                 $user = User::find($i);
                 $user->category = $category_id;
                 $user->save();
-                $sets = Set::where('owner_id', $owner_id)->pluck('id','number_set')->toArray();
+                $sets = Set::where('event_id', $event_id)->pluck('id','number_set')->toArray();
                 $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'category_id' => $category_id,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         } else {
             for ($i = 1; $i <= $users; $i++) {
                 $user = User::find($i);
-                $sets = Set::where('owner_id', $owner_id)->pluck('id','number_set')->toArray();
+                $sets = Set::where('event_id', $event_id)->pluck('id','number_set')->toArray();
                 $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         }

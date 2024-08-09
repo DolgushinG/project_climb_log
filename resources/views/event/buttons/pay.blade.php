@@ -27,10 +27,12 @@
         Документ отправлен (На проверке..)
     </button>
 @else
-    <button id="document"
-            class="btn btn-warning rounded-pill">
-        Необходимо приложить документ
-    </button>
+    @if($event->setting_payment == \App\Models\OwnerPaymentOperations::DINAMIC)
+        <button id="document"
+                class="btn btn-warning rounded-pill">
+            Необходимо приложить документ
+        </button>
+    @endif
 @endif
 
 <script>

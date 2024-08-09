@@ -27,9 +27,9 @@ class ResultQualificationClassic extends Model
         return $this->belongsTo(User::class);
     }
 
-    public static function number_sets($owner_id)
+    public static function number_sets($event_id)
     {
-        return Set::where('owner_id', $owner_id)->pluck('number_set', 'id')->toArray();
+        return Set::where('event_id', $event_id)->pluck('number_set', 'id')->toArray();
     }
     public static function counting_final_place($event_id, $result_final, $type='final'){
 //        dd($result_final);

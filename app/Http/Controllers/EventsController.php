@@ -58,7 +58,7 @@ class EventsController extends Controller
         }
         $is_show_button_list_pending = false;
         if($event_public_exist || $pre_show){
-            $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('number_set')->get();
+            $sets = Set::where('event_id', '=', $event->id)->orderBy('number_set')->get();
             foreach ($sets as $set){
                 if($event->is_france_system_qualification){
                     $participants_event = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
@@ -165,9 +165,9 @@ class EventsController extends Controller
                     )->get()->toArray();
             }
             if($event->is_input_set != 1){
-                $days = Set::where('owner_id', '=', $event->owner_id)->select('day_of_week')->distinct()->get();
-                $sets = Set::where('owner_id', '=', $event->owner_id)->get();
-                $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('id');
+                $days = Set::where('event_id', '=', $event->id)->select('day_of_week')->distinct()->get();
+                $sets = Set::where('event_id', '=', $event->id)->get();
+                $number_sets = Set::where('event_id', '=', $event->id)->pluck('id');
                 foreach ($number_sets as $index => $set) {
                     if($event->is_france_system_qualification){
                         $sets[$index]->count_participant = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
@@ -416,7 +416,7 @@ class EventsController extends Controller
 
         if($event->is_input_set != 1){
             $number_set = $request->number_set;
-            $set = Set::where('number_set', $number_set)->where('owner_id', $event->owner_id)->first();
+            $set = Set::where('number_set', $number_set)->where('event_id', $event->id)->first();
             $participant->number_set_id = $set->id;
         }
         if($event->is_auto_categories){
@@ -463,7 +463,7 @@ class EventsController extends Controller
         if(!$event || !$event->is_registration_state){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
-        $set = Set::where('owner_id',$event->owner_id)->where('number_set', $request->number_set)->first();
+        $set = Set::where('event_id',$event->id)->where('number_set', $request->number_set)->first();
         if($event->is_france_system_qualification){
             $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
             $participants_event = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
@@ -477,7 +477,7 @@ class EventsController extends Controller
         }
         $event = Event::find($request->event_id);
         $number_set = $request->number_set;
-        $set = Set::where('number_set', $number_set)->where('owner_id', $event->owner_id)->first();
+        $set = Set::where('number_set', $number_set)->where('event_id', $event->id)->first();
         $participant->number_set_id = $set->id;
         $participant->save();
         if ($participant->save()) {

@@ -3,14 +3,15 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\BatchForceRecouting;
+use App\Admin\Actions\BatchForceRecoutingResultQualificationFranceGender;
+use App\Admin\Actions\BatchForceRecoutingResultQualificationFranceGroup;
 use App\Admin\Actions\BatchGenerateParticipant;
 use App\Admin\Actions\BatchMergeResult;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
-use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustom;
-use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustomFillOneRoute;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportProtocolRouteParticipantsQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportResultFranceSystemQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultFranceSystemQualification;
+use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRoute;
 use App\Exports\ExportCardParticipantFranceSystem;
 use App\Exports\ExportCardParticipantFestival;
 use App\Exports\ExportListParticipant;
@@ -22,7 +23,6 @@ use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\OwnerPaymentOperations;
-use App\Models\OwnerPayments;
 use App\Models\ResultQualificationClassic;
 use App\Http\Controllers\Controller;
 use App\Models\ParticipantCategory;
@@ -41,9 +41,6 @@ use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\MessageBag;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ResultQualificationController extends Controller
@@ -125,12 +122,12 @@ class ResultQualificationController extends Controller
         $show->field('document', 'Документ')->image('', 600, 800);
         $show->field('products_and_discounts', 'Мерч и скидка')->as(function ($content) {
             $str = '';
-            if($content['products']){
+            if(isset($content['products'])){
                 foreach ($content['products'] as $pr){
                     $str .= $pr.' ,';
                 }
             }
-            if($content['discount']){
+            if(isset($content['discount'])){
                 $str .= PHP_EOL.'Скидка - '.PHP_EOL.$content['discount'];
             }
             return $str;
@@ -285,11 +282,7 @@ class ResultQualificationController extends Controller
                 $tools->append(new BatchMergeResult);
             }
             $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-            if($event->is_france_system_qualification){
-                $is_enabled = Grades::where('event_id', $event->id)->first();
-            } else {
-                $is_enabled = Route::where('event_id', $event->id)->first();
-            }
+            $is_enabled = Route::where('event_id', $event->id)->first();
             if($is_enabled && Admin::user()->username == "Tester2"){
                 $tools->append(new BatchGenerateParticipant);
             }
@@ -318,7 +311,7 @@ class ResultQualificationController extends Controller
 //            return $categories[$category] ?? 'не определена';
 //        });
         if (!$event->is_input_set) {
-            $sets = Set::getParticipantSets(Admin::user()->id);
+            $sets = Set::getParticipantSets($event->id);
             $grid->column('number_set_id', 'Номер сета')
                 ->select($sets);
         }
@@ -477,15 +470,22 @@ class ResultQualificationController extends Controller
             $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
             foreach ($categories as $category){
                 $tools->append(new BatchResultFranceSystemQualification($category));
+                $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category));
             }
-            $tools->append(new BatchGenerateParticipant);
+            $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+            $is_enabled = Grades::where('event_id', $event->id)->first();
+            if($is_enabled && Admin::user()->username == "Tester2"){
+                $tools->append(new BatchGenerateParticipant);
+            }
+            $tools->append(new BatchForceRecoutingResultQualificationFranceGender);
+            $tools->append(new BatchForceRecoutingResultQualificationFranceGroup);
             $tools->append(new BatchExportProtocolRouteParticipantsQualification);
         });
-//        $grid->actions(function ($actions) {
-////            $actions->disableEdit();
-////            $actions->disableDelete();
-////            $actions->disableView();
-//        });
+        $grid->actions(function ($actions) {
+//            $actions->disableEdit();
+            $actions->disableDelete();
+//            $actions->disableView();
+        });
 
         $grid->disableExport();
         $grid->disableFilter();
@@ -497,7 +497,7 @@ class ResultQualificationController extends Controller
             ->help('Если случается перенос, из одного пола в другой, необходимо обязательно пересчитать результаты')
             ->select(['male' => 'Муж', 'female' => 'Жен']);
         $grid->column('number_set_id', 'Номер сета')
-            ->select(ResultQualificationClassic::number_sets(Admin::user()->id));
+            ->select(ResultQualificationClassic::number_sets($event->id));
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
@@ -770,6 +770,9 @@ class ResultQualificationController extends Controller
                             OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
                         }
                     } else {
+                        $participant = $form->model()->find($id);
+                        $participant->is_paid = 1;
+                        $participant->save();
                         $response = [
                             'status'  => false,
                             'message' => "Отмена оплаты после внесения результатов участника невозможна",

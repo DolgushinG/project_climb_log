@@ -74,7 +74,7 @@ class HomeController extends Controller
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->latest()->first();
         if($event){
-            $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('day_of_week')->orderBy('number_set')->get();
+            $sets = Set::where('event_id', '=', $event->id)->orderBy('day_of_week')->orderBy('number_set')->get();
             foreach ($sets as $set){
                 if($event->is_france_system_qualification){
                     $participants_event = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('number_set_id', '=', $set->id)->count();
