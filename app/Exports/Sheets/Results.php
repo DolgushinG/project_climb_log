@@ -306,6 +306,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 'result_qualification_classic.owner_id',
                 'result_qualification_classic.number_set_id',
             )
+            ->where('is_other_event', 0)
             ->where('result_qualification_classic.gender', '=', $this->gender)->get()->sortBy('user_place')->toArray();
         if(!$users){
             return collect([]);

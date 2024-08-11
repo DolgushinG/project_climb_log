@@ -16,9 +16,39 @@ class ResultQualificationClassic extends Model
 
     protected $table = 'result_qualification_classic';
 
+    protected $fillable = [
+        'id',
+        'owner_id',
+        'event_id',
+        'gender',
+        'number_set_id',
+        'user_id',
+        'is_other_event',
+        'category_id',
+        'global_category_id',
+        'last_category_after_merged',
+        'points',
+        'user_place',
+        'user_global_place',
+        'last_user_place_after_merged',
+        'global_points',
+        'last_points_after_merged',
+        'active',
+        'amount_start_price',
+        'is_paid',
+        'is_recheck',
+        'bill',
+        'document',
+        'products_and_discounts',
+        'result_for_edit',
+    ];
+
     protected $casts = [
         'result_for_edit' =>'json',
         'products_and_discounts' =>'json',
+        'last_category_after_merged' =>'json',
+        'last_user_place_after_merged' =>'json',
+        'last_points_after_merged' =>'json',
     ];
 
 
