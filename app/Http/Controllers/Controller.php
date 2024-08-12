@@ -46,9 +46,9 @@ class Controller extends BaseController
             ->paginate(10);
         foreach ($for_amount_events as $event){
             if($event->is_france_system_qualification){
-                $amount_participant[$event->id] = ResultFranceSystemQualification::where('event_id','=',$event->id)->count();
+                $amount_participant[$event->id] = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('is_other_event', 0)->count();
             } else {
-                $amount_participant[$event->id] = ResultQualificationClassic::where('event_id','=',$event->id)->count();
+                $amount_participant[$event->id] = ResultQualificationClassic::where('event_id','=',$event->id)->where('is_other_event', 0)->count();
             }
         }
         return view('event.list_events', compact(['events','amount_participant','cities']));

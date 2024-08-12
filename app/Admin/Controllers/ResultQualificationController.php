@@ -321,6 +321,39 @@ class ResultQualificationController extends Controller
         $grid->column('points', 'Баллы')->sortable();
         if($event->is_open_main_rating){
             $grid->column('global_points', 'Общие Баллы');
+            $grid->column('last_points_after_merged', 'Баллы со всех этапов')->display(function ($items){
+                $str = '';
+                if($items){
+                    foreach ($items as $item){
+                        if($item){
+                            $str .= '['.$item.']' ;
+                        }
+                    }
+                }
+                return $str;
+            });
+            $grid->column('last_user_place_after_merged', 'Места со всех этапов')->display(function ($items){
+                $str = '';
+                if($items){
+                    foreach ($items as $item){
+                        if($item){
+                            $str .= '['.$item.' место]' ;
+                        }
+                    }
+                }
+                return $str;
+            });
+            $grid->column('last_category_after_merged', 'Категории со всех этапов')->display(function ($items){
+                $str = '';
+                if($items){
+                    foreach ($items as $item){
+                        if($item){
+                            $str .= '['.$item.']' ;
+                        }
+                    }
+                }
+                return $str;
+            });
             $grid->column('user_global_place', 'Общее Место')->sortable();
             $categories = (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id);
             if($event->is_auto_categories){

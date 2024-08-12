@@ -50,7 +50,7 @@ class MergeResultsParticipants implements ShouldQueue
                 Event::merge_auto_categories($event, $this->users_ids, $this->event_ids);
                 break;
             case 'counting_global_place':
-                Event::counting_global_place($event);
+                Event::counting_global_category_place($event);
         }
     }
 }

@@ -54,7 +54,7 @@ class BatchResultSemiFinal extends Action
                 $participant = ResultQualificationClassic::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
             }
             if(!$participant){
-                Log::error('Category id not found -event_id - '.$results['event_id'].'user_id'.$results['user_id']);
+                Log::error('Category id not found -event_id - '.$results['event_id'].'user_id'.$results['user_id'], ['file' => __FILE__, 'line' => __LINE__]);
             }
             $gender = $participant->gender;
             if($event->is_open_main_rating && $event->is_auto_categories){

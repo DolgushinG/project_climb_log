@@ -57,6 +57,7 @@
 
             </div>
         </section><!-- End Featured Services Section -->
+        @if(count($events) > 0)
         <!-- ======= Portfolio Section ======= -->
         <section id="portfolio" class="portfolio">
             <div class="container" data-aos="fade-up">
@@ -91,5 +92,14 @@
                 </div>
             </div>
         </section><!-- End Portfolio Section -->
+        @else
+            <section id="portfolio" class="portfolio">
+                <div class="container" data-aos="fade-up">
+                    <div class="section-title">
+                        <h2>Прошедшие соревнования можно найти тут <a href="{{route('list_events')}}" class="btn btn-primary"> перейти </a></h2>
+                    </div>
+                </div>
+            </section>
+        @endif
 {{--        @include('event.carousel')--}}
 @endsection('content')

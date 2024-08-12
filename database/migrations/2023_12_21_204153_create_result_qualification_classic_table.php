@@ -23,10 +23,13 @@ class CreateResultQualificationClassicTable extends Migration
             $table->integer('is_other_event')->default(0);
             $table->integer('category_id')->nullable();
             $table->integer('global_category_id')->nullable();
+            $table->json('last_category_after_merged')->nullable();
             $table->float('points')->nullable();
             $table->integer('user_place')->nullable();
             $table->integer('user_global_place')->nullable();
+            $table->json('last_user_place_after_merged')->nullable();
             $table->float('global_points')->nullable();
+            $table->json('last_points_after_merged')->nullable();
             $table->boolean('active');
             $table->integer('amount_start_price')->nullable();
             $table->boolean('is_paid')->default(0);
