@@ -235,6 +235,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     'Место',
                     'Участник(Фамилия Имя)',
                     'Суммарные Баллы',
+                    'Баллы со всех этапов',
                 ];
             case 'Team':
                 return [
@@ -461,6 +462,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 'users.middlename',
                 'result_qualification_classic.global_points',
                 'result_qualification_classic.owner_id',
+                'result_qualification_classic.last_points_after_merged',
             )
             ->where('result_qualification_classic.gender', '=', $this->gender)->get()->sortBy('user_global_place')->toArray();
         if(!$users){
@@ -474,12 +476,15 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             "owner_id" => "",
             "number_set_id" => "",
         );
-        $users_for_filter = ResultQualificationClassic::where('event_id', $this->event_id)->pluck('user_id')->toArray();
         foreach ($users as $index => $user) {
             if ($index == 'empty_row') {
                 $users[$index]['user_global_place'] = '';
+            } else {
+                $new_last_points_after_merged = str_replace("null", 'Нет участвовал(а)', $users[$index]['last_points_after_merged']);
+                $users[$index]['last_points_after_merged'] = $new_last_points_after_merged;
+                $users[$index] = collect($users[$index])->except('id', 'owner_id');
             }
-            $users[$index] = collect($users[$index])->except('id', 'owner_id');
+
         }
         $users_need_sorted = collect($users)->toArray();
         usort($users_need_sorted, function ($a, $b) {
