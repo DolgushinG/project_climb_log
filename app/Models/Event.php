@@ -29,6 +29,7 @@ class Event extends Model
         'up_price' => 'json',
         'discounts' => 'json',
         'products' => 'json',
+        'helper_amount' => 'json',
     ];
     /**
      * The attributes that are mass assignable.

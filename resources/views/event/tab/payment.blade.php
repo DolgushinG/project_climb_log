@@ -133,14 +133,28 @@
                                         <div class="container text-center pt-2 pb-2">
                                             <label> Стартовый взнос: </label>
                                             <span id="price" data-main-price="{{$event->amount_start_price}}" class="badge bg-success" style="font-size: 22px"> <span data-current-amount-start-price="{{$current_amount_start_price ?? $event->amount_start_price}}" id="price-value">{{$event->amount_start_price}}</span> руб. </span><br>
-                                            @if($event->setting_payment == \App\Models\OwnerPaymentOperations::DINAMIC)
-                                                <label> Эту сумму вы должны ввести для оплаты </label>
-                                            @endif
                                         </div>
                                         @if($event->setting_payment == \App\Models\OwnerPaymentOperations::DINAMIC)
                                             <div class="container mt-5">
+                                                <div class="form-floating mb-1 mt-1">
+                                                    <select autocomplete="off" class="form-select" id="helper_amount" aria-label="Выбрать">
+                                                        <option data-value="0" selected="">...</option>
+                                                        @foreach($event->helper_amount as $index => $helper)
+                                                            @if($participant_helper_amount && isset($participant_helper_amount['name']))
+                                                                @if($discount['Название'] == $participant_helper_amount['name'])
+                                                                    <option selected data-name="{{ $helper['Название'] }}" data-value="{{ $helper['Цена'] }}" value="{{ $helper['Цена'] }}">{{ $helper['Название'] }} - {{ $helper['Цена'] }} руб.</option>
+                                                                @else
+                                                                    <option data-name="{{ $helper['Название'] }}" data-value="{{ $helper['Цена'] }}" value="{{ $helper['Цена'] }}">{{ $helper['Название'] }} - {{ $helper['Цена'] }} руб.</option>
+                                                                @endif
+                                                            @else
+                                                                <option data-name="{{ $helper['Название'] }}" data-value="{{ $helper['Цена'] }}" value="{{ $helper['Цена'] }}">{{ $helper['Название'] }} - {{ $helper['Цена'] }} руб.</option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
+                                                    <label for="floatingSelect">Выберите</label>
+                                                </div>
                                                 <div id="products">
-                                                    <label for="products" class="mb-1">Выберите мерч:</label>
+                                                    <label for="products" class="mb-1">Выбрать мерч</label>
                                                     @foreach($event->products as $index => $product)
                                                         @if($participant_products_and_discounts && isset($participant_products_and_discounts['products']))
                                                             @if(in_array($product['Название'], $participant_products_and_discounts['products']))
@@ -181,7 +195,7 @@
                                                 </div>
                                                 <div class="container text-center pt-2 pb-2">
                                                     <button data-user_id="{{Auth()->user()->id}}" data-id="{{$event->id}}" id="save_products_discount" class="btn btn-outline-success" style="font-size: 22px">
-                                                        Сохранить выбранный мерч и скидку</button><br>
+                                                        Сохранить выбранное</button><br>
                                                 </div>
                                             </div>
                                             @if($event->registration_time_expired)
@@ -316,8 +330,8 @@
                                 @if($event->amount_start_price)
                                     <div class="container text-center pt-2 pb-2">
                                         <label style="font-size: 15px"> Оплата доступна только после регистрации</label> <br>
-                                        <label> Стартовый взнос: </label>
-                                        <span class="badge bg-success" style="font-size: 22px"> {{$event->amount_start_price}} руб </span><br>
+{{--                                        <label> Стартовый взнос: </label>--}}
+{{--                                        <span class="badge bg-success" style="font-size: 22px"> {{$event->amount_start_price}} руб </span><br>--}}
                                     </div>
                                 @endif
                                 @if($event->options_amount_price)
