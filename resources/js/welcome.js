@@ -249,7 +249,7 @@ $(document).on('click','#save_products_discount', function(e) {
                 button.attr('disabled','disabled');
             }, 1000);
             setTimeout(function () {
-                button.text('Сохранить выбранный мерч и скидку')
+                button.text('Сохранить выбранное')
             }, 2000);
             setTimeout(function () {
                 button.removeAttr('disabled','disabled');
@@ -262,7 +262,7 @@ $(document).on('click','#save_products_discount', function(e) {
                 button.text(xhr.responseJSON.message)
             }, 3000);
             setTimeout(function () {
-                button.text('Сохранить выбранный мерч и скидку')
+                button.text('Сохранить выбранное')
             }, 6000);
 
         },

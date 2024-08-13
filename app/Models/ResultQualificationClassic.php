@@ -49,6 +49,7 @@ class ResultQualificationClassic extends Model
         'last_category_after_merged' =>'json',
         'last_user_place_after_merged' =>'json',
         'last_points_after_merged' =>'json',
+        'helper_amount' =>'json',
     ];
 
 

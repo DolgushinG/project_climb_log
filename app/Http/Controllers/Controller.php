@@ -18,10 +18,9 @@ class Controller extends BaseController
 
     public function main()
     {
-        $active_cities = Event::where('is_public', '=', 1)->distinct()->pluck('city')->toArray();
         $now = Carbon::today();
         $now->setTimezone('Europe/Moscow');
-
+        $active_cities = Event::where('is_public', '=', 1)->whereDate('end_date', '>=', $now)->distinct()->pluck('city')->toArray();
         $cities = [];
         foreach ($active_cities as $city) {
             $count = Event::where('is_public', '=', 1)->whereDate('end_date', '>=', $now)->where('city', '=', $city)->get()->count();

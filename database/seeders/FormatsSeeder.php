@@ -17,6 +17,7 @@ class FormatsSeeder extends Seeder
         $formats = array(
             ['format' => 'N лучших'],
             ['format' => 'Все трассы'],
+            ['format' => 'Все трассы (по баллам)'],
         );
         DB::table('formats')->insert($formats);
     }
