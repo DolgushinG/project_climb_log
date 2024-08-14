@@ -140,8 +140,8 @@
                                                     <select autocomplete="off" class="form-select" id="helper_amount" aria-label="Выбрать">
                                                         <option data-value="0" selected="">...</option>
                                                         @foreach($event->helper_amount as $index => $helper)
-                                                            @if($participant_helper_amount && isset($participant_helper_amount['name']))
-                                                                @if($discount['Название'] == $participant_helper_amount['name'])
+                                                            @if($participant_products_and_discounts && isset($participant_products_and_discounts['helper']))
+                                                                @if($helper['Название'] == $participant_products_and_discounts['helper'])
                                                                     <option selected data-name="{{ $helper['Название'] }}" data-value="{{ $helper['Цена'] }}" value="{{ $helper['Цена'] }}">{{ $helper['Название'] }} - {{ $helper['Цена'] }} руб.</option>
                                                                 @else
                                                                     <option data-name="{{ $helper['Название'] }}" data-value="{{ $helper['Цена'] }}" value="{{ $helper['Цена'] }}">{{ $helper['Название'] }} - {{ $helper['Цена'] }} руб.</option>
@@ -174,8 +174,10 @@
                                                                 <label class="form-check-label" for="{{ $product['Цена'] }}{{ $index }}">{{ $product['Название'] }} ({{ $product['Цена'] }} руб.)</label>
                                                             </div>
                                                         @endif
+
                                                     @endforeach
                                                 </div>
+
                                                 <div class="form-floating mt-2">
                                                     <select autocomplete="off" class="form-select" id="discounts" aria-label="Выберите скидку">
                                                         <option data-value="0" selected="">Нет скидок</option>
@@ -354,6 +356,7 @@
                                                             </div>
                                                         </div>
                                                     @endforeach
+
                                                 </div>
                                             </div>
                                         </div>

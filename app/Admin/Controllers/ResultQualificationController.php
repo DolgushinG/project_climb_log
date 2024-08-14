@@ -120,8 +120,11 @@ class ResultQualificationController extends Controller
         $show->field('user.sports_category', __('Разряд'));
         $show->field('bill', 'Чек')->image('', 600, 800);
         $show->field('document', 'Документ')->image('', 600, 800);
-        $show->field('products_and_discounts', 'Мерч и скидка')->as(function ($content) {
+        $show->field('products_and_discounts', 'Участие мерч и скидка')->as(function ($content) {
             $str = '';
+            if (isset($content['helper'])) {
+                $str .= $content['helper'].', ';
+            }
             if (isset($content['products'])) {
                 foreach ($content['products'] as $pr) {
                     $str .= $pr . ' ,';
@@ -160,7 +163,12 @@ class ResultQualificationController extends Controller
                 }
                 if($all_user_places){
                     foreach($all_user_places as $index => $place){
-                        $str .= '['.$place.' место, '.$categories[$index].']';
+                        if($place && isset($categories[$index])){
+                            $str .= '['.$place.' место, Категория'.$categories[$index].']';
+                        }
+                        if(isset($categories[$index])){
+                            $str .= '[ Категория '.$categories[$index].']';
+                        }
                     }
                 }
                 return $str;
