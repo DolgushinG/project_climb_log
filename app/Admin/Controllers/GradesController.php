@@ -122,9 +122,9 @@ class GradesController extends Controller
             $route_pk->value = $request->value;
             $route_pk->save();
         }
-        if($request->name == 'grade'){
-            $route_pk->grade = $request->value;
-            $route_pk->save();
+        if($request->grade){
+            $route->grade = $request->grade;
+            $route->save();
         }
         if($request->count_routes){
             $grade = Grades::where('event_id', $request->event_id)->first();
@@ -338,7 +338,7 @@ SCRIPT);
             $grid->column('value', 'Ценность трассы');
         } else {
             $grid->column('route_id', 'Номер трассы')->editable();
-            $grid->column('grade', 'Категория трассы')->editable();
+            $grid->column('grade', 'Категория трассы')->select(Grades::getGrades());
             if($event->mode == 1){
                 $grid->column('value', 'Ценность трассы');
                 if($event->is_zone_show){
@@ -628,7 +628,6 @@ SCRIPT);
         } else {
             $form->number('count_routes', 'Кол-во трасс');
         }
-
         return $form;
     }
 }
