@@ -9,6 +9,8 @@ use App\Admin\Actions\BatchAddRoute;
 use App\Admin\Actions\BatchHideGrades;
 use App\Admin\Actions\BatchUpdateOutdoorRoutes;
 use App\Helpers\AllClimbService\Service;
+use App\Jobs\UpdateGradeInResultAllParticipant;
+use App\Jobs\UpdateResultParticipants;
 use App\Models\Area;
 use App\Models\Country;
 use App\Models\Event;
@@ -17,6 +19,8 @@ use App\Http\Controllers\Controller;
 use App\Models\GuidRoutesOutdoor;
 use App\Models\Place;
 use App\Models\PlaceRoute;
+use App\Models\ResultFranceSystemQualification;
+use App\Models\ResultQualificationClassic;
 use App\Models\Route;
 use App\Models\RoutesOutdoor;
 use Encore\Admin\Controllers\HasResourceActions;
@@ -123,6 +127,13 @@ class GradesController extends Controller
             $route_pk->save();
         }
         if($request->grade){
+            if (!$event->is_france_system_qualification && $route->grade) {
+                $results = ResultQualificationClassic::where('event_id', $event->id)->first();
+                if($results){
+                    # Обновляем категорию трассы у всех участников которые добавили свои результаты
+                    UpdateGradeInResultAllParticipant::dispatch($event->id, $route, $request->grade);
+                }
+            }
             $route->grade = $request->grade;
             $route->save();
         }
@@ -253,9 +264,7 @@ SCRIPT);
         }
         $grid->actions(function ($actions) use ($event) {
             $actions->disableView();
-            if($event->type_event){
-                $actions->disableEdit();
-            }
+            $actions->disableEdit();
         });
         $grid->disableFilter();
         $grid->disableBatchActions();

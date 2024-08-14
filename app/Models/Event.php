@@ -307,11 +307,16 @@ class Event extends Model
             if(!$participant){
                 Log::error('Category id not found -event_id - '.$participant->id.'user_id'.$event_id, ['file' => __FILE__, 'line' => __LINE__]);
             }
-            $category_id = $participant->category_id;
-            if ($event->is_auto_categories && $category_id == null) {
+            if ($event->is_auto_categories) {
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $participant->id), 3);
-                if(count($the_best_route_passed) === 0){
+                $count_passed_route = ResultQualificationClassic::get_list_passed_route($event->id, $participant->id);
+                if(count($the_best_route_passed) === 0 || count($count_passed_route) < 3) {
                     $category_id = 0;
+                    if(isset($final_participant_result->category_id)){
+                        if($final_participant_result->category_id){
+                            $category_id = $final_participant_result->category_id;
+                        }
+                    }
                 } else {
                     $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $participant->id);
                     $category_id = ParticipantCategory::where('event_id', '=', $event_id)->where('category', $category)->first();
@@ -1002,5 +1007,57 @@ class Event extends Model
         } else {
             return true;
         }
+    }
+
+    public static function refresh_grade_all_participant_in_result_for_edit($event, $route, $replace_to_grade)
+    {
+        $event_id = $event->id;
+        $participants = ResultQualificationClassic::where('event_id', $event_id)
+            ->where('active', 1)
+            ->where('is_other_event', 0)
+            ->get();
+        foreach ($participants as $participant) {
+            $results = $participant->result_for_edit; // Получаем текущий массив результатов
+            // Проверка, если result_for_edit действительно массив
+            if (is_array($results)) {
+                foreach ($results as &$result) { // Обрабатываем массив по ссылке
+                    // Приведение к одному типу перед сравнением (например, к строке)
+                    if ((string)$result['route_id'] === (string)$route->route_id) {
+                        $result['grade'] = $replace_to_grade; // Обновляем значение grade
+                        break; // Прекращаем цикл после изменения
+                    }
+                }
+            }
+            // Сохраняем измененный массив обратно в модель
+            $participant->result_for_edit = $results;
+            $participant->save(); // Сохраняем изменения в базе данных
+        }
+    }
+
+    public static function refresh_grade_all_participant_in_route_result($event, $route, $grade)
+    {
+        $event_id = $event->id;
+        $owner_id = $event->owner_id;
+        $format = $event->mode ?? null;
+
+        if (!$format) {
+            Log::info('Обновление без формата 1 или 2, пока что недоступно, потому что используется формат подсчета как финал');
+            return;
+        }
+        // Получаем всех участников, соответствующих заданному event_id и route_id
+        $participants = ResultRouteQualificationClassic::where('event_id', $event_id)
+            ->where('route_id', $route->route_id)
+            ->get(); // Выбираем только нужные поля
+        // Обрабатываем каждого участника
+        foreach ($participants as $participant) {
+            $participant->grade = $grade; // Обновляем grade
+            if ($participant->value) { // Если значение value существует
+                // Получаем новое значение value
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $owner_id, $format, $event);
+                $participant->value = $value_route; // Обновляем value
+            }
+            $participant->save();
+        }
+
     }
 }
