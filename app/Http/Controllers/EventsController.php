@@ -494,7 +494,7 @@ class EventsController extends Controller
         } else {
             $participant = ResultQualificationClassic::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
         }
-        $participant->products_and_discounts = ['discount' => $request->discount, 'products' => $request->products];
+        $participant->products_and_discounts = ['discount' => $request->discount, 'products' => $request->products, 'helper' => $request->helper];
         $participant->amount_start_price = intval($request->amount_start_price);
         $participant->save();
         if ($participant->save()) {

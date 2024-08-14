@@ -487,6 +487,9 @@ class ResultQualificationController extends Controller
             if ($event->setting_payment == OwnerPaymentOperations::DINAMIC) {
                 $grid->column('products_and_discounts', 'Мерч и скидка')->display(function ($title, $column) {
                     $str = '';
+                    if (isset($title['helper'])) {
+                        $str .= "<span style='color:green'>Участие {$title['helper']}</span><br>";
+                    }
                     if (isset($title['products'])) {
                         foreach ($title['products'] as $pr) {
                             $str .= "<span style='color:blue'>$pr</span><br>";

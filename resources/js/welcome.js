@@ -224,6 +224,7 @@ $(document).on('click','#save_products_discount', function(e) {
     let user_id = document.getElementById('save_products_discount').getAttribute('data-user_id')
     const productsContainer = document.getElementById('products');
     const discountsContainer = document.getElementById('discounts');
+    const helperAmountContainer = document.getElementById('helper_amount');
     const productCheckboxes = productsContainer.querySelectorAll('input[type="checkbox"]');
     productCheckboxes.forEach(checkbox => {
         if (checkbox.checked) {
@@ -240,6 +241,7 @@ $(document).on('click','#save_products_discount', function(e) {
             'amount_start_price': amount_start_price,
             'discount': discountsContainer.options[discountsContainer.selectedIndex].getAttribute('data-name'),
             'products': products,
+            'helper': helperAmountContainer.options[helperAmountContainer.selectedIndex].getAttribute('data-name'),
         },
         success: function(xhr, status, error) {
             button.attr('disabled','disabled');
