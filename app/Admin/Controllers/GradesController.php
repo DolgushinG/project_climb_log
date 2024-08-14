@@ -399,8 +399,10 @@ SCRIPT);
         $grid->tools(function (Grid\Tools $tools) use ($event)  {
             if($event->type_event && Grades::where('event_id', $event->id)->first()){
                 $tools->append(new BatchAddRoute);
+                $tools->append(new BatchAddPlace);
+                $tools->append(new BatchAddArea);
+                $tools->append(new BatchAddPlaceRoutes);
             }
-
             $tools->append(new BatchHideGrades);
         });
         if($event->type_event){
@@ -410,7 +412,9 @@ SCRIPT);
             $grid->column('image', 'Картинка')->image('', 200, 200);
             $grid->column('grade', 'Категория трассы')->editable('select', Grades::getGrades());
             $grid->column('value', 'Ценность трассы')->editable();
-            $grid->column('flash_value', 'Ценность трассы за флэш')->editable();
+            if($event->is_flash_value){
+                $grid->column('flash_value', 'Ценность трассы за флэш')->editable();
+            }
             if($event->is_zone_show){
                 $grid->column('zone', 'Ценность зоны');
             }
