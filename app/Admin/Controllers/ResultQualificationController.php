@@ -565,8 +565,9 @@ class ResultQualificationController extends Controller
         $grid->column('gender', __('Пол'))
             ->help('Если случается перенос, из одного пола в другой, необходимо обязательно пересчитать результаты')
             ->select(['male' => 'Муж', 'female' => 'Жен']);
-        $grid->column('number_set_id', 'Номер сета')
-            ->select(ResultQualificationClassic::number_sets($event->id));
+        if (!$event->is_input_set) {
+            $grid->column('number_set_id', 'Номер сета')->select(ResultQualificationClassic::number_sets($event->id));
+        }
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
