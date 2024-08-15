@@ -110,30 +110,29 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
         }
         $result = $merged_users->pluck( 'middlename','id');
         $result_semifinal = ResultRouteSemiFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
-        foreach ($result as $index => $res){
-            $user = User::where('middlename', $res)->first()->id;
+        foreach ($result as $user_id => $middlename){
             if($event->is_france_system_qualification) {
-                $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
+                $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->category_id;
             } else {
                 if($event->is_open_main_rating && $event->is_auto_categories){
-                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->global_category_id;
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first()->global_category_id;
                 } else {
-                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first()->category_id;
                 }
             }
             $category = ParticipantCategory::find($category_id)->category;
-            $result[$index] = $res.' ['.$category.']';
-            if(in_array($index, $result_semifinal)){
-                $result_user = ResultRouteSemiFinalStage::where('event_id', $event->id)->where('user_id', $user);
+            $result[$user_id] = $middlename.' ['.$category.']';
+            if(in_array($user_id, $result_semifinal)){
+                $result_user = ResultRouteSemiFinalStage::where('event_id', $event->id)->where('user_id', $user_id);
                 $routes = $result_user->pluck('final_route_id')->toArray();
                 $string_version = '';
                 foreach ($routes as $value) {
                     $string_version .= $value . ', ';
                 }
                 if($result_user->get()->count() == $event->amount_routes_in_final){
-                    $result[$index] = $res.' ['.$category.']'.' [Добавлены все трассы]';
+                    $result[$user_id] = $middlename.' ['.$category.']'.' [Добавлены все трассы]';
                 } else {
-                    $result[$index] = $res.' ['.$category.']'.' [Трассы: '.$string_version.']';
+                    $result[$user_id] = $middlename.' ['.$category.']'.' [Трассы: '.$string_version.']';
                 }
             }
         }
