@@ -224,7 +224,7 @@ class ResultQualificationController extends Controller
             return $this->form($type, $id)->update($id);
         }
         if ($request->gender) {
-            $type = 'gender';
+            $type = 'update';
             return $this->form($type, $id)->update($id);
         }
         return $this->form($type, $id)->update($id);
@@ -712,6 +712,11 @@ class ResultQualificationController extends Controller
                 if (intval($form->input('category_id')) > 0) {
                     $result = $form->model()->find($id);
                     $result->category_id = $form->input('category_id');
+                    $result->save();
+                }
+                if ($form->input('gender')) {
+                    $result = $form->model()->find($id);
+                    $result->gender = $form->input('gender');
                     $result->save();
                 }
                 if ($form->result_for_edit) {

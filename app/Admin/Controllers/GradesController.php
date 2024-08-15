@@ -10,7 +10,6 @@ use App\Admin\Actions\BatchHideGrades;
 use App\Admin\Actions\BatchUpdateOutdoorRoutes;
 use App\Helpers\AllClimbService\Service;
 use App\Jobs\UpdateGradeInResultAllParticipant;
-use App\Jobs\UpdateResultParticipants;
 use App\Models\Area;
 use App\Models\Country;
 use App\Models\Event;
