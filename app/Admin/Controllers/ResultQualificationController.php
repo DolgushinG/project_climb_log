@@ -111,6 +111,7 @@ class ResultQualificationController extends Controller
                     });
             }
         }
+        $show->field('user.id', __('ID участника'));
         $show->field('user.middlename', __('Имя и Фамилия'));
         $show->field('user.birthday', __('Дата Рождения'));
         $show->field('user.email', __('Почта'));
@@ -135,45 +136,98 @@ class ResultQualificationController extends Controller
             }
             return $str;
         });
-        $show->field('id', __('История результатов'))->as(
-            function ($content) use ($event) {
+        $show->field('id', __('История результатов'))
+            ->as(function ($content) use ($event) {
                 $str = '';
+                $all_user_places = [];
+                $categories = [];
+
                 if ($event->is_france_system_qualification) {
                     $res = ResultFranceSystemQualification::find($content);
                     if ($res) {
                         $user_id = $res->user_id;
-                        $all_user_places = ResultFranceSystemQualification::where('user_id', $user_id)->get()->pluck('user_place')->toArray();
-                        $all_categories = ResultFranceSystemQualification::where('user_id', $user_id)->get()->pluck('category_id', 'event_id')->toArray();
+                        $all_user_places = ResultFranceSystemQualification::where('user_id', $user_id)->pluck('user_place')->toArray();
+                        $all_categories = ResultFranceSystemQualification::where('user_id', $user_id)->pluck('category_id')->toArray();
                     }
-
                 } else {
                     $res = ResultQualificationClassic::find($content);
                     if ($res) {
                         $user_id = $res->user_id;
-                        $all_user_places = ResultQualificationClassic::where('user_id', $user_id)->get()->pluck('user_place')->toArray();
-                        $all_categories = ResultQualificationClassic::where('user_id', $user_id)->get()->pluck('category_id')->toArray();
+                        $all_user_places = ResultQualificationClassic::where('user_id', $user_id)->pluck('user_place')->toArray();
+                        $all_categories = ResultQualificationClassic::where('user_id', $user_id)->pluck('category_id')->toArray();
                     }
                 }
-                $categories = [];
-                if($all_categories){
-                    foreach ($all_categories as $category){
+
+                if ($all_categories) {
+                    foreach ($all_categories as $category) {
                         $participant_category = ParticipantCategory::find($category);
-                        $categories[] = $participant_category->category;
-                    }
-                }
-                if($all_user_places){
-                    foreach($all_user_places as $index => $place){
-                        if($place && isset($categories[$index])){
-                            $str .= '['.$place.' место, Категория'.$categories[$index].']';
-                        }
-                        if(isset($categories[$index])){
-                            $str .= '[ Категория '.$categories[$index].']';
+                        if ($participant_category) {
+                            $categories[] = $participant_category->category;
                         }
                     }
                 }
+
+                if (empty($all_user_places) || empty($categories)) {
+                    // Если данных нет, показываем сообщение
+                    return '<div class="alert alert-info">Нет данных для отображения.</div>';
+                }
+
+                // Создание карточек для отображения категорий и мест
+                if ($all_user_places) {
+                    foreach ($all_user_places as $index => $place) {
+                        if ($place && isset($categories[$index])) {
+                            $str .= '<div class="card" style="margin-bottom: 10px;">';
+                            $str .= '<div class="card-body">';
+                            $str .= '<h5 class="card-title">Категория ' . $categories[$index] . '</h5>';
+                            $str .= '<p class="card-text">Место: ' . $place . '</p>';
+                            $str .= '</div>';
+                            $str .= '</div>';
+                        }
+                    }
+                }
+
+                // Создание контейнера для графика
+                $chartId = 'chart_' . uniqid();
+                $str .= '<canvas id="' . $chartId . '" width="400" height="200"></canvas>';
+
+                // Генерация данных для графика в формате JSON
+                $chartData = [
+                    'labels' => $categories,
+                    'datasets' => [
+                        [
+                            'label' => 'Место',
+                            'data' => $all_user_places,
+                            'backgroundColor' => 'rgba(54, 162, 235, 0.2)',
+                            'borderColor' => 'rgba(54, 162, 235, 1)',
+                            'borderWidth' => 1
+                        ]
+                    ]
+                ];
+
+                // Подключение Chart.js и создание графика
+                $str .= '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>';
+                $str .= '<script>
+            var ctx = document.getElementById("' . $chartId . '").getContext("2d");
+            var myChart = new Chart(ctx, {
+                type: "line",
+                data: ' . json_encode($chartData) . ',
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>';
+
                 return $str;
-            }
-        );
+            })
+            ->unescape(); // unescape позволяет интерпретировать HTML
+
+
+
+
 
         return $show;
     }
