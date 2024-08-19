@@ -546,14 +546,14 @@ class EventsController extends Controller
             if($form->type_event){
                 $form->is_access_user_edit_result = 1;
             }
-            if($form->input('products')){
-                $existingData = $form->model()->products;
-                $newData = $form->input('products');
-                // Объедините существующие данные с новыми
-                $mergedData = array_merge($existingData, $newData);
-                // Сохраните объединенные данные
-                $form->model()->products = $mergedData;
-            }
+//            if($form->input('products')){
+//                $existingData = $form->model()->products;
+//                $newData = $form->input('products');
+//                // Объедините существующие данные с новыми
+//                $mergedData = array_merge($existingData, $newData);
+//                // Сохраните объединенные данные
+//                $form->model()->products = $mergedData;
+//            }
             return $form;
         });
         $form->saved(function (Form $form)  use ($type, $id){
