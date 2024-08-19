@@ -41,7 +41,7 @@ $(document).on('click', '#setting', function () {
     getProfile('Setting', '#tabContent','#setting','Пароль');
 });
 function deactivateAllTabs() {
-    $('#overview, #edit, #setting, #events').removeClass('show active');
+    $('#overview, #edit, #setting, #events, #analytics').removeClass('show active');
 }
 function getProfile(tab, id='#tabContent', itab='',text='') {
     $.ajaxSetup({

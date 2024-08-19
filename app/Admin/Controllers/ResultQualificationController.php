@@ -41,6 +41,7 @@ use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\View;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ResultQualificationController extends Controller
@@ -142,6 +143,7 @@ class ResultQualificationController extends Controller
                 $all_user_places = [];
                 $categories = [];
 
+                // Определение системы квалификации и получение данных
                 if ($event->is_france_system_qualification) {
                     $res = ResultFranceSystemQualification::find($content);
                     if ($res) {
@@ -158,7 +160,8 @@ class ResultQualificationController extends Controller
                     }
                 }
 
-                if ($all_categories) {
+                // Получаем категории
+                if (!empty($all_categories)) {
                     foreach ($all_categories as $category) {
                         $participant_category = ParticipantCategory::find($category);
                         if ($participant_category) {
@@ -167,30 +170,30 @@ class ResultQualificationController extends Controller
                     }
                 }
 
+                // Если нет данных для отображения, возвращаем уведомление
                 if (empty($all_user_places) || empty($categories)) {
-                    // Если данных нет, показываем сообщение
                     return '<div class="alert alert-info">Нет данных для отображения.</div>';
                 }
 
-                // Создание карточек для отображения категорий и мест
+                // Генерация HTML-кода для карточек
                 if ($all_user_places) {
                     foreach ($all_user_places as $index => $place) {
-                        if ($place && isset($categories[$index])) {
+                        if (!empty($place) && isset($categories[$index])) {
                             $str .= '<div class="card" style="margin-bottom: 10px;">';
                             $str .= '<div class="card-body">';
-                            $str .= '<h5 class="card-title">Категория ' . $categories[$index] . '</h5>';
-                            $str .= '<p class="card-text">Место: ' . $place . '</p>';
+                            $str .= '<h5 class="card-title">Категория ' . htmlspecialchars($categories[$index], ENT_QUOTES, 'UTF-8') . '</h5>';
+                            $str .= '<p class="card-text">Место: ' . htmlspecialchars($place, ENT_QUOTES, 'UTF-8') . '</p>';
                             $str .= '</div>';
                             $str .= '</div>';
                         }
                     }
                 }
 
-                // Создание контейнера для графика
+                // Генерация графика
                 $chartId = 'chart_' . uniqid();
                 $str .= '<canvas id="' . $chartId . '" width="400" height="200"></canvas>';
 
-                // Генерация данных для графика в формате JSON
+                // Генерация данных для графика
                 $chartData = [
                     'labels' => $categories,
                     'datasets' => [
@@ -208,7 +211,7 @@ class ResultQualificationController extends Controller
                 $str .= '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>';
                 $str .= '<script>
             var ctx = document.getElementById("' . $chartId . '").getContext("2d");
-            var myChart = new Chart(ctx, {
+            new Chart(ctx, {
                 type: "line",
                 data: ' . json_encode($chartData) . ',
                 options: {
@@ -221,9 +224,146 @@ class ResultQualificationController extends Controller
             });
         </script>';
 
+                // Если это не система квалификации по Франции, добавляем другие графики
+                if (!$event->is_france_system_qualification && isset($res)) {
+                    $analytics = ResultQualificationClassic::get_analytics_for_user_data_all($res->user_id) ?? [];
+                    $analytics_progress = ResultQualificationClassic::get_analytics_for_user_data_progress($res->user_id) ?? [];
+
+                    // Проверка и экранирование значений
+                    $semifinal_rate = $analytics['semifinal_rate'] ?? 0;
+                    $final_rate = $analytics['final_rate'] ?? 0;
+                    $averageStability = $analytics['averageStability'] ?? 0;
+                    $totalPrizePlaces = $analytics['totalPrizePlaces'] ?? 0;
+
+                    $labels = $analytics_progress['labels'] ?? [];
+                    $flashes = $analytics_progress['flashes'] ?? [];
+                    $redpoints = $analytics_progress['redpoints'] ?? [];
+
+                    $html = '
+            <div class="container">
+                <table class="table table-bordered mt-4">
+                    <thead>
+                    <tr>
+                        <th>Полуфиналы</th>
+                        <th>Финалы</th>
+                        <th>Коэффициент стабильности</th>
+                        <th>Призовые места</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>' . htmlspecialchars($semifinal_rate, ENT_QUOTES, 'UTF-8') . '</td>
+                        <td>' . htmlspecialchars($final_rate, ENT_QUOTES, 'UTF-8') . '</td>
+                        <td>' . htmlspecialchars($averageStability, ENT_QUOTES, 'UTF-8') . '</td>
+                        <td>' . htmlspecialchars($totalPrizePlaces, ENT_QUOTES, 'UTF-8') . '</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Графики -->
+                <canvas id="analyticsChart" width="400" height="200"></canvas>
+                <canvas id="progressChart" class="mt-5" width="400" height="200"></canvas>
+            </div>
+
+            <!-- Подключаем Chart.js для графиков -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                // Передаем данные из PHP в JavaScript
+                var analyticsData = {
+                    semifinal_rate: ' . json_encode($semifinal_rate) . ',
+                    final_rate: ' . json_encode($final_rate) . ',
+                    averageStability: ' . json_encode($averageStability) . ',
+                    totalPrizePlaces: ' . json_encode($totalPrizePlaces) . '
+                };
+                var analyticsProgressData = {
+                    labels: ' . json_encode($labels) . ',
+                    flashes: ' . json_encode($flashes) . ',
+                    redpoints: ' . json_encode($redpoints) . '
+                };
+
+                // Инициализация первого графика
+                var ctx1 = document.getElementById("analyticsChart").getContext("2d");
+                new Chart(ctx1, {
+                    type: "bar",
+                    data: {
+                        labels: ["Полуфиналы", "Финалы", "Стабильность", "Призы"],
+                        datasets: [{
+                            label: "Статистика",
+                            data: [
+                                analyticsData.semifinal_rate,
+                                analyticsData.final_rate,
+                                analyticsData.averageStability,
+                                analyticsData.totalPrizePlaces
+                            ],
+                            backgroundColor: "rgba(54, 162, 235, 0.2)",
+                            borderColor: "rgba(54, 162, 235, 1)",
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // Инициализация второго графика
+                var ctx2 = document.getElementById("progressChart").getContext("2d");
+                new Chart(ctx2, {
+                    type: "line",
+                    data: {
+                        labels: analyticsProgressData.labels,
+                        datasets: [{
+                            label: "Флеши",
+                            data: analyticsProgressData.flashes,
+                            borderColor: "rgba(75, 192, 192, 1)",
+                            backgroundColor: "rgba(75, 192, 192, 0.2)",
+                            fill: false
+                        }, {
+                            label: "Редпоинты",
+                            data: analyticsProgressData.redpoints,
+                            borderColor: "rgba(153, 102, 255, 1)",
+                            backgroundColor: "rgba(153, 102, 255, 0.2)",
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            </script>
+            <style>
+              @media (min-width: 1200px) {
+                .container {
+                  width: 90%; /* Измените на нужный вам процент или пиксели */
+                  max-width: 1200px; /* Задайте максимальную ширину */
+                }
+              }
+            </style>
+           <style>
+            @media (min-width: 1200px) {
+                .container {
+                    width: 80%; /* Уменьшите ширину контейнера */
+                    max-width: 960px; /* Максимальная ширина контейнера */
+                        }
+                      }
+        </style>
+            ';
+
+                    $str .= $html;
+                }
+
                 return $str;
-            })
-            ->unescape(); // unescape позволяет интерпретировать HTML
+            })->unescape();
+
+
+
 
 
 
