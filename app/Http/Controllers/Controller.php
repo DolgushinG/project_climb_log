@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultQualificationClassic;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\DB;
 
 class Controller extends BaseController
 {
@@ -27,7 +29,12 @@ class Controller extends BaseController
             $cities[] = array('name' => $city, 'count_event' => $count);
         }
         $events = Event::where('is_public', '=', 1)->whereDate('end_date', '>=', $now)->get();
-        return view('main', compact(['events','cities']));
+        $info_climbing_events = [];
+        $info_climbing_events['amount_events'] = Event::where('is_public', 1)->get()->count();
+        $info_climbing_events['amount_users'] = User::all()->count();
+        $info_climbing_events['amount_climbing_gym'] = DB::table('admin_users')->get()->count() - 2;
+        $info_climbing_events['amount_city'] = User::where('city', '!=', null)->select('city')->distinct()->get()->count();
+        return view('main', compact(['info_climbing_events','events','cities']));
     }
 
     public function list_events()
@@ -45,7 +52,7 @@ class Controller extends BaseController
             ->paginate(10);
         foreach ($for_amount_events as $event){
             if($event->is_france_system_qualification){
-                $amount_participant[$event->id] = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('is_other_event', 0)->count();
+                $amount_participant[$event->id] = ResultFranceSystemQualification::where('event_id','=',$event->id)->count();
             } else {
                 $amount_participant[$event->id] = ResultQualificationClassic::where('event_id','=',$event->id)->where('is_other_event', 0)->count();
             }

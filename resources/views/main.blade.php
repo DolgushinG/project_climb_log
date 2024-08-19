@@ -101,5 +101,47 @@
                 </div>
             </section>
         @endif
+    @if($info_climbing_events)
+        <section id="counts" class="counts">
+        <div class="container" data-aos="fade-up">
+
+            <div class="row">
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="count-box">
+                        <i class="bi bi-people"></i>
+                        <span data-purecounter-start="0" data-purecounter-end="{{$info_climbing_events['amount_users']}}" data-purecounter-duration="1" class="purecounter"></span>
+                        <p>Пользователей</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mt-5 mt-md-0">
+                    <div class="count-box">
+                        <i class="bi bi-calendar-event"></i>
+                        <span data-purecounter-start="0" data-purecounter-end="{{$info_climbing_events['amount_events']}}" data-purecounter-duration="1" class="purecounter"></span>
+                        <p>Соревнований</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mt-5 mt-lg-0">
+                    <div class="count-box">
+                        <i class="bi bi-gear"></i>
+                        <span data-purecounter-start="0" data-purecounter-end="{{$info_climbing_events['amount_climbing_gym']}}" data-purecounter-duration="1" class="purecounter"></span>
+                        <p>Скалодромов</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mt-5 mt-lg-0">
+                    <div class="count-box">
+                        <i class="bi bi-building"></i>
+                        <span data-purecounter-start="0" data-purecounter-end="{{$info_climbing_events['amount_city']}}" data-purecounter-duration="1" class="purecounter"></span>
+                        <p>Городов</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section><!-- End Counts Section -->
+    @endif
 {{--        @include('event.carousel')--}}
 @endsection('content')

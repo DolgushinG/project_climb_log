@@ -250,7 +250,6 @@ class ResultRouteQualificationClassic extends Model
                 $merged_users[] = $a;
             }
         }
-        dd($all_group_participants);
         return $merged_users;
     }
 
