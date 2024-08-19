@@ -57,28 +57,19 @@ class ResultQualificationClassic extends Model
     {
         $totalPrizePlaces = 0;
         foreach ($qualification_classic_events as $res){
-            $event = Event::find($res->event_id);
-            $res_final = ResultFinalStage::where('event_id', $event->id)->first();
-            if($event->is_semifinal){
-                $res_semifinal = ResultSemiFinalStage::where('event_id', $event->id)->where('user_id', $user_id)->first();
-                if($res_semifinal){
-                    $res_final = ResultFinalStage::where('event_id', $event->id)->where('user_id', $user_id)->first();
-                    if($res_final){
-                        if($res_final->place <= 3 && $res_final->place != 0 && $res_final->place != null){
-                            $totalPrizePlaces += 1;
-                        }
-                    }
-                }
-            } else {
-                $res_final = ResultFinalStage::where('event_id', $event->id)->where('user_id', $user_id)->first();
-                if($res_final){
-                    if($res_final->place <= 3 && $res_final->place != 0 && $res_final->place != null){
-                        $totalPrizePlaces += 1;
-                    }
+            $res_final = ResultFinalStage::where('event_id', $res->event_id)->first();
+            $res_semifinal = ResultSemiFinalStage::where('event_id', $res->event_id)->where('user_id', $user_id)->first();
+            if($res_semifinal){
+                if($res_semifinal->place <= 3 && $res_semifinal->place != 0 && $res_semifinal->place != null){
+                    $totalPrizePlaces += 1;
                 }
             }
             if(!$res_final){
                 if($res->user_place <= 3){
+                    $totalPrizePlaces += 1;
+                }
+            } else {
+                if($res_final->place <= 3 && $res_final->place != 0 && $res_final->place != null){
                     $totalPrizePlaces += 1;
                 }
             }
@@ -748,13 +739,14 @@ class ResultQualificationClassic extends Model
             ->where('is_other_event', 0)
             ->where('active', 1)
             ->get();
-        $totalPrizePlaces = self::get_amount_prizes_place($qualification_classic_events, $user_id);
-
+        if(count($qualification_classic_events) > 0){
+            $totalPrizePlaces = self::get_amount_prizes_place($qualification_classic_events, $user_id);
+        }
         return [
-            'semifinal_rate' => $totalSemifinal,
-            'final_rate' => $totalFinal,
-            'averageStability' => $averageStability,
-            'totalPrizePlaces' => $totalPrizePlaces,
+            'semifinal_rate' => $totalSemifinal ?? 0,
+            'final_rate' => $totalFinal ?? 0,
+            'averageStability' => $averageStability ?? 0,
+            'totalPrizePlaces' => $totalPrizePlaces ?? 0,
         ];
     }
     public static function get_analytics_for_user_data_progress($user_id)
@@ -772,28 +764,28 @@ class ResultQualificationClassic extends Model
         // Извлекаем данные для каждого события
         foreach ($qualification_classic_events as $res) {
             $event = Event::find($res->event_id);
+            if($event){
+                if(count($qualification_classic_events) < 4){
+                    $label = $event->title;
+                } else {
+                    $label = strlen($event->title) > 10 ? substr($event->title, 0, 12) . '...' : $event->title;
+                }
 
-            // Обрезаем название события до 10 символов и добавляем точки
-            if(count($qualification_classic_events) < 4){
-                $label = $event->title;
-            } else {
-                $label = strlen($event->title) > 10 ? substr($event->title, 0, 12) . '...' : $event->title;
+                $labels[] = $label;
+
+                // Подсчитываем количество флешей и редпоинтов для этого события
+                $flashes = ResultRouteQualificationClassic::where('event_id', $event->id)
+                    ->where('user_id', $user_id)
+                    ->where('attempt', 1)
+                    ->count();
+                $redpoints = ResultRouteQualificationClassic::where('event_id', $event->id)
+                    ->where('user_id', $user_id)
+                    ->where('attempt', 2)
+                    ->count();
+
+                $flashesData[] = $flashes;
+                $redpointsData[] = $redpoints;
             }
-
-            $labels[] = $label;
-
-            // Подсчитываем количество флешей и редпоинтов для этого события
-            $flashes = ResultRouteQualificationClassic::where('event_id', $event->id)
-                ->where('user_id', $user_id)
-                ->where('attempt', 1)
-                ->count();
-            $redpoints = ResultRouteQualificationClassic::where('event_id', $event->id)
-                ->where('user_id', $user_id)
-                ->where('attempt', 2)
-                ->count();
-
-            $flashesData[] = $flashes;
-            $redpointsData[] = $redpoints;
         }
 
     // Подготовка данных для передачи в JavaScript
