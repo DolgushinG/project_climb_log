@@ -139,55 +139,85 @@ class ResultQualificationController extends Controller
         });
         $show->field('id', __('История результатов'))
             ->as(function ($content) use ($event) {
-                $str = '';
                 $all_user_places = [];
                 $categories = [];
+                $place_event_titles = [];
+                // Определение модели квалификации
+                $qualificationModel = $event->is_france_system_qualification
+                    ? ResultFranceSystemQualification::class
+                    : ResultQualificationClassic::class;
 
-                // Определение системы квалификации и получение данных
-                if ($event->is_france_system_qualification) {
-                    $res = ResultFranceSystemQualification::find($content);
-                    if ($res) {
-                        $user_id = $res->user_id;
-                        $all_user_places = ResultFranceSystemQualification::where('user_id', $user_id)->pluck('user_place')->toArray();
-                        $all_categories = ResultFranceSystemQualification::where('user_id', $user_id)->pluck('category_id')->toArray();
-                    }
-                } else {
-                    $res = ResultQualificationClassic::find($content);
-                    if ($res) {
-                        $user_id = $res->user_id;
-                        $all_user_places = ResultQualificationClassic::where('user_id', $user_id)->pluck('user_place')->toArray();
-                        $all_categories = ResultQualificationClassic::where('user_id', $user_id)->pluck('category_id')->toArray();
-                    }
-                }
+                $res = $qualificationModel::find($content);
 
-                // Получаем категории
-                if (!empty($all_categories)) {
-                    foreach ($all_categories as $category) {
-                        $participant_category = ParticipantCategory::find($category);
-                        if ($participant_category) {
-                            $categories[] = $participant_category->category;
+                if ($res) {
+                    $user_id = $res->user_id;
+
+                    // Извлечение данных о местах и категориях
+                    $all_user_places = $qualificationModel::where('user_id', $user_id)
+                        ->where('active', 1)
+                        ->latest()
+                        ->take(20)
+                        ->pluck('user_place', 'category_id')
+                        ->toArray();
+
+                    // Извлечение названий событий и их мест
+                    $res_events = Event::query()
+                        ->leftJoin($qualificationModel::getTable(), 'events.id', '=', $qualificationModel::getTable() . '.event_id')
+                        ->where($qualificationModel::getTable() . '.user_id', '=', $user_id)
+                        ->where($qualificationModel::getTable() . '.active', '=', 1)
+                        ->select('events.title', $qualificationModel::getTable() . '.user_place')
+                        ->latest($qualificationModel::getTable() . '.created_at')
+                        ->take(20)
+                        ->get()
+                        ->toArray();
+
+                    // Формирование массива с категориями
+                    if (!empty($all_user_places)) {
+                        foreach ($all_user_places as $category_id => $place) {
+                            $participant_category = ParticipantCategory::find($category_id);
+                            if ($participant_category) {
+                                $categories[] = $participant_category->category;
+                            }
                         }
                     }
+
+                    // Формирование результирующего массива
+                    foreach ($res_events as $res_event) {
+                        $place_event_titles[] = [
+                            'title' => htmlspecialchars($res_event['title'], ENT_QUOTES, 'UTF-8'),
+                            'place' => htmlspecialchars($res_event['user_place'], ENT_QUOTES, 'UTF-8')
+                        ];
+                    }
                 }
 
-                // Если нет данных для отображения, возвращаем уведомление
-                if (empty($all_user_places) || empty($categories)) {
+// Проверка на наличие данных для отображения
+                if (empty($place_event_titles) || empty($categories)) {
                     return '<div class="alert alert-info">Нет данных для отображения.</div>';
                 }
 
-                // Генерация HTML-кода для карточек
-                if ($all_user_places) {
-                    foreach ($all_user_places as $index => $place) {
-                        if (!empty($place) && isset($categories[$index])) {
-                            $str .= '<div class="card" style="margin-bottom: 10px;">';
-                            $str .= '<div class="card-body">';
-                            $str .= '<h5 class="card-title">Категория ' . htmlspecialchars($categories[$index], ENT_QUOTES, 'UTF-8') . '</h5>';
-                            $str .= '<p class="card-text">Место: ' . htmlspecialchars($place, ENT_QUOTES, 'UTF-8') . '</p>';
-                            $str .= '</div>';
-                            $str .= '</div>';
-                        }
+// Генерация HTML-кода для таблицы
+                $str = '<table class="table">';
+                $str .= '<thead>';
+                $str .= '<tr>';
+                $str .= '<th scope="col">Соревы</th>';
+                $str .= '<th scope="col">Категория</th>';
+                $str .= '<th scope="col">Место</th>';
+                $str .= '</tr>';
+                $str .= '</thead>';
+                $str .= '<tbody>';
+
+                foreach ($place_event_titles as $index => $item) {
+                    if (!empty($item['place']) && isset($categories[$index])) {
+                        $str .= '<tr>';
+                        $str .= '<td>' . $item['title'] . '</td>';
+                        $str .= '<td>' . htmlspecialchars($categories[$index], ENT_QUOTES, 'UTF-8') . '</td>';
+                        $str .= '<td>' . $item['place'] . '</td>';
+                        $str .= '</tr>';
                     }
                 }
+
+                $str .= '</tbody>';
+                $str .= '</table>';
 
                 // Генерация графика
                 $chartId = 'chart_' . uniqid();

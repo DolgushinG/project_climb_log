@@ -668,6 +668,8 @@ class ResultQualificationClassic extends Model
         $qualification_classic_events = ResultQualificationClassic::where('user_id', $user_id)
             ->where('is_other_event', 0)
             ->where('active', 1)
+            ->latest()
+            ->take(30)
             ->pluck('event_id');
 
         // Инициализация массивов для хранения результатов всех участников
@@ -738,6 +740,8 @@ class ResultQualificationClassic extends Model
         $qualification_classic_events = ResultQualificationClassic::where('user_id', $user_id)
             ->where('is_other_event', 0)
             ->where('active', 1)
+            ->latest()
+            ->take(30)
             ->get();
         if(count($qualification_classic_events) > 0){
             $totalPrizePlaces = self::get_amount_prizes_place($qualification_classic_events, $user_id);
@@ -754,6 +758,8 @@ class ResultQualificationClassic extends Model
         $qualification_classic_events = ResultQualificationClassic::where('user_id', $user_id)
             ->where('is_other_event', 0)
             ->where('active', 1)
+            ->latest()
+            ->take(30)
             ->get();
 
         // Массивы для хранения данных
