@@ -378,11 +378,7 @@ class EventsController extends Controller
                         $table->text('Название');
                         $table->number('Проценты');
                     });
-//                    $form->tableproducts('products', 'Мерч', function ($table) use ($form){
-//                        $table->text('Название');
-//                        $table->number('Цена');
-//                    });
-                    $form->table('products', 'Мерч', function (Form\NestedForm $form) {
+                    $form->tableproducts('products', 'Мерч', function (Form\NestedForm $form) {
                         $form->text('Название', 'Название');
                         $form->number('Цена', 'Цена');
                     });
