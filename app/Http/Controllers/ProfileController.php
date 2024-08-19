@@ -67,6 +67,24 @@ class ProfileController extends Controller
         return view('profile.card', compact(['user', 'activities', 'state_user']));
     }
 
+    public static function getTabContentProfileAnalytics()
+    {
+        $user = User::find(476);
+        $user_id = $user->id;
+        $qualification_classic_events = ResultQualificationClassic::where('user_id', $user_id)->where('is_other_event', 0)->where('active',1)->get('event_id');
+        dd($user_id, $qualification_classic_events);
+        $bestTrackCount = 3;
+
+        // Получаем коэффициенты стабильности для обоих форматов
+        $stabilityCoefficients = ResultQualificationClassic::calculate_stability_coefficients($results, $bestTrackCount);
+
+//        echo "Коэффициент стабильности для всех трасс (первый формат): " . $stabilityCoefficients['all_tracks'] . "\n";
+//        echo "Коэффициент стабильности для лучших трасс (второй формат): " . $stabilityCoefficients['best_tracks'] . "\n";
+
+
+//        return view('profile.card', compact());
+    }
+
     public function getTabContentOverview() {
         $user = User::find(Auth()->user()->id);
         if(!$user->password){

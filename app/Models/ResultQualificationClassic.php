@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use function App\Http\Controllers\calculate_stability_coefficient;
 use function Symfony\Component\String\s;
 
 class ResultQualificationClassic extends Model
@@ -635,4 +636,51 @@ class ResultQualificationClassic extends Model
         }
 
     }
+
+    public static function calculate_stability_coefficients($results, $bestTrackCount) {
+        $trackScores = [];
+
+        // Рассчитываем баллы за каждую трассу
+        foreach ($results as $result) {
+            $coefficient = ($result['first_attempt']) ? 1.2 : 1;
+            $score = $coefficient * ($result['total_participants'] / $result['completed']);
+            $trackScores[] = $score;
+        }
+
+        // Если учитываются лучшие трассы, сортируем и берем топ N трасс
+        if ($bestTrackCount) {
+            rsort($trackScores); // Сортируем от наибольшего к наименьшему
+            $trackScores = array_slice($trackScores, 0, $bestTrackCount); // Берем только лучшие трассы
+        }
+
+        // Средний балл
+        $averageScore = array_sum($trackScores) / count($trackScores);
+
+        // Рассчитываем стандартное отклонение
+        $variance = 0.0;
+        foreach ($trackScores as $score) {
+            $variance += pow($score - $averageScore, 2);
+        }
+        $variance /= count($trackScores);
+        $standardDeviation = sqrt($variance);
+
+        // Коэффициент стабильности
+        return ($standardDeviation == 0) ? 0 : $averageScore / $standardDeviation;
+    }
+
+    public static function calculate_stability_coefficient($scores) {
+        $averageScore = array_sum($scores) / count($scores);
+
+        // Рассчитываем стандартное отклонение
+        $variance = 0.0;
+        foreach ($scores as $score) {
+            $variance += pow($score - $averageScore, 2);
+        }
+        $variance /= count($scores);
+        $standardDeviation = sqrt($variance);
+
+        // Коэффициент стабильности
+        return ($standardDeviation == 0) ? 0 : $averageScore / $standardDeviation;
+    }
+
 }

@@ -48,6 +48,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile');
     Route::get('/getProfileOverview', [App\Http\Controllers\ProfileController::class, 'getTabContentOverview'])->name('getProfileOverview');
     Route::get('/getProfileCard', [App\Http\Controllers\ProfileController::class, 'getTabContentProfileCard'])->name('getProfileCard');
+    Route::get('/getProfileAnalytics', [App\Http\Controllers\ProfileController::class, 'getTabContentProfileAnalytics'])->name('getProfileAnalytics');
     Route::get('/getProfileSetting', [App\Http\Controllers\ProfileController::class, 'getTabContentSetting'])->name('getTabContentSetting');
     Route::get('/getProfileEdit', [App\Http\Controllers\ProfileController::class, 'getTabContentEdit'])->name('getTabContentEdit');
     Route::post('/editChanges', [App\Http\Controllers\ProfileController::class, 'editChanges'])->name('editChanges');

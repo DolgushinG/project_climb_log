@@ -378,9 +378,13 @@ class EventsController extends Controller
                         $table->text('Название');
                         $table->number('Проценты');
                     });
-                    $form->tableproducts('products', 'Мерч', function ($table) use ($form){
-                        $table->text('Название');
-                        $table->number('Цена');
+//                    $form->tableproducts('products', 'Мерч', function ($table) use ($form){
+//                        $table->text('Название');
+//                        $table->number('Цена');
+//                    });
+                    $form->table('products', 'Мерч', function (Form\NestedForm $form) {
+                        $form->text('Название', 'Название');
+                        $form->number('Цена', 'Цена');
                     });
                     $form->tableupprice('up_price', 'Цена в зависимости от дат', function ($table) use ($form){
                         $table->number('Цена');
@@ -546,6 +550,15 @@ class EventsController extends Controller
             if($form->type_event){
                 $form->is_access_user_edit_result = 1;
             }
+            if($form->input('products')){
+                $existingData = $form->model()->products;
+                $newData = $form->input('products');
+                // Объедините существующие данные с новыми
+                $mergedData = array_merge($existingData, $newData);
+                // Сохраните объединенные данные
+                $form->model()->products = $mergedData;
+            }
+            return $form;
         });
         $form->saved(function (Form $form)  use ($type, $id){
             if($type != 'active') {

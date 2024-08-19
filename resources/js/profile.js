@@ -24,6 +24,14 @@ $(document).on('click', '#events', function () {
         '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
     getProfile('Events','#tabContent','#events','Соревнования');
 });
+$(document).on('click', '#analytics', function () {
+    deactivateAllTabs();
+    let analytics = $('#analytics')
+    analytics.addClass('active');
+    analytics.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
+    getProfile('Analytics','#tabContent','#analytics','Аналитика');
+});
 $(document).on('click', '#setting', function () {
     deactivateAllTabs();
     let setting = $('#setting')
