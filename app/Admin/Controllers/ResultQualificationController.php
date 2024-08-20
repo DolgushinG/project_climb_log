@@ -572,6 +572,20 @@ class ResultQualificationController extends Controller
                 ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
                 ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         }
+        if(!$event->is_open_main_rating){
+            $grid->column('user.id', 'Лучшие трассы')->display(function ($id) use ($event) {
+                if($event){
+                    $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $id), 3);
+                } else {
+                    $the_best_route_passed = [];
+                }
+                if($the_best_route_passed){
+                    return implode(" ", $the_best_route_passed);
+                } else {
+                    return '';
+                }
+            });
+        }
 //        $categories = (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id);
 //        $grid->column('category_id', 'Общая Категория')->display(function ($category) use ($categories) {
 //            return $categories[$category] ?? 'не определена';
@@ -625,6 +639,16 @@ class ResultQualificationController extends Controller
             if ($event->is_auto_categories) {
                 $grid->column('global_category_id', 'Общая Категория')->display(function ($category) use ($categories) {
                     return $categories[$category] ?? 'не определена';
+                });
+            }
+            if($event->list_merged_events){
+                $grid->column('user.id', 'Общие Лучшие трассы')->display(function ($id) use ($event) {
+                    $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_global_list_passed_route($event->list_merged_events, $id), 3);
+                    if($the_best_route_passed){
+                        return implode(" ", $the_best_route_passed);
+                    } else {
+                        return '';
+                    }
                 });
             }
         }
