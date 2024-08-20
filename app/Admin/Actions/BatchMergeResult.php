@@ -24,20 +24,18 @@ class BatchMergeResult extends Action
     public function handle(Request $request)
     {
         $owner_id = Admin::user()->id;
-
         $active_event = Event::where('owner_id', $owner_id)->where('active', 1)->first();
-        $active_event->is_open_main_rating = 1;
-        $active_event->save();
-
-        $categories = ParticipantCategory::where('event_id', $active_event->id)->get();
-        foreach ($categories as $category) {
-            Cache::forget('result_male_cache_' . $category->category.'_event_id_'.$active_event->id);
-            Cache::forget('result_female_cache_' . $category->category.'_event_id_'.$active_event->id);
-        }
-
         if($request && $active_event){
+            $categories = ParticipantCategory::where('event_id', $active_event->id)->get();
+            foreach ($categories as $category) {
+                Cache::forget('result_male_cache_' . $category->category.'_event_id_'.$active_event->id);
+                Cache::forget('result_female_cache_' . $category->category.'_event_id_'.$active_event->id);
+            }
             $event_ids = array_filter($request->event_id);
             $event_ids[] = $active_event->id;
+
+            Event::update_event_after_merged($active_event, $event_ids);
+
             if(!Helpers::is_categories_events_same($event_ids)){
                 return $this->response()->error('Обьединение невозможно, так как категории разные');
             }

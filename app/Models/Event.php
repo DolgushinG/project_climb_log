@@ -30,6 +30,7 @@ class Event extends Model
         'discounts' => 'json',
         'products' => 'json',
         'helper_amount' => 'json',
+        'list_merged_events' => 'json',
     ];
     /**
      * The attributes that are mass assignable.
@@ -894,8 +895,14 @@ class Event extends Model
                 $users_result->save();
             }
         }
-
     }
+    public static function update_event_after_merged(Event $event, array $event_ids)
+    {
+        $event->is_open_main_rating = 1;
+        $event->list_merged_events = $event_ids;
+        $event->save();
+    }
+
     public static function counting_global_category_place($event)
     {
         $participants = User::query()
