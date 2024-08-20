@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
             success: function(data) {
                 allData = data.routes; // Сохраняем все данные в глобальной переменной
                 updateChart(); // Обновляем график с фильтрацией
+                updateTable(); // Обновляем таблицу с данными
             },
             error: function(xhr, status, error) {
                 console.error("Ошибка: " + error);
@@ -42,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let redpointData = filteredData.map(route => route.redpoint);
 
         myChart = new Chart(ctx, {
-            type: 'bar',
+            type: 'bar', // Используем вертикальный график
             data: {
                 labels: labels,
                 datasets: [
@@ -63,19 +64,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 ]
             },
             options: {
+                responsive: true,
                 scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 10 // Ограничиваем количество меток на оси X
+                        },
+                        title: {
+                            display: true,
+                            text: 'Трассы и их категории'
+                        }
+                    },
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Количество'
+                        }
                     }
                 }
             }
         });
     }
 
+    function updateTable() {
+        let selectedGrade = document.getElementById('gradeSelect').value;
+
+        // Фильтрация данных по выбранному grade
+        let filteredData = selectedGrade ? allData.filter(route => route.grade === selectedGrade) : allData;
+
+        // Обновление таблицы
+        const tableBody = document.getElementById('dataTableBody');
+        tableBody.innerHTML = ''; // Очистить таблицу
+
+        filteredData.forEach(route => {
+            let row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${route.route_id}</td>
+                <td>${route.grade}</td>
+                <td>${route.flash}</td>
+                <td>${route.redpoint}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
     // Привязка события change к элементам select
-    document.getElementById('gradeSelect').addEventListener('change', updateChart);
+    document.getElementById('gradeSelect').addEventListener('change', function() {
+        updateChart();
+        updateTable();
+    });
     document.getElementById('genderSelect').addEventListener('change', loadChart);
 
-    // Первоначальная загрузка графика
+    // Первоначальная загрузка графика и таблицы
     loadChart();
 });
