@@ -33,12 +33,10 @@ class BatchMergeResult extends Action
             }
             $event_ids = array_filter($request->event_id);
             $event_ids[] = $active_event->id;
-
-            Event::update_event_after_merged($active_event, $event_ids);
-
             if(!Helpers::is_categories_events_same($event_ids)){
                 return $this->response()->error('Обьединение невозможно, так как категории разные');
             }
+            Event::update_event_after_merged($active_event, $event_ids);
             $users_ids = ResultQualificationClassic::whereIn('event_id', $event_ids)->distinct()->pluck('user_id')->toArray();
             Event::merge_point($users_ids, $event_ids, $active_event);
             if($active_event->is_auto_categories){
