@@ -24,6 +24,14 @@ $(document).on('click', '#events', function () {
         '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
     getProfile('Events','#tabContent','#events','Соревнования');
 });
+$(document).on('click', '#analytics', function () {
+    deactivateAllTabs();
+    let analytics = $('#analytics')
+    analytics.addClass('active');
+    analytics.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+        '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
+    getProfile('Analytics','#tabContent','#analytics','Аналитика');
+});
 $(document).on('click', '#setting', function () {
     deactivateAllTabs();
     let setting = $('#setting')
@@ -33,7 +41,7 @@ $(document).on('click', '#setting', function () {
     getProfile('Setting', '#tabContent','#setting','Пароль');
 });
 function deactivateAllTabs() {
-    $('#overview, #edit, #setting, #events').removeClass('show active');
+    $('#overview, #edit, #setting, #events, #analytics').removeClass('show active');
 }
 function getProfile(tab, id='#tabContent', itab='',text='') {
     $.ajaxSetup({

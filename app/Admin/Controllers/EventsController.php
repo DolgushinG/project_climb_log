@@ -13,15 +13,21 @@ use App\Exports\AllResultExport;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
+use App\Models\EventAndCoefficientRoute;
 use App\Models\Format;
 use App\Models\Grades;
 use App\Models\OwnerPaymentOperations;
 use App\Models\OwnerPayments;
+use App\Models\ResultFinalStage;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFranceSystemQualification;
+use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultRouteQualificationClassic;
+use App\Models\ResultRouteSemiFinalStage;
+use App\Models\ResultSemiFinalStage;
+use App\Models\Route;
 use App\Models\Set;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -204,6 +210,25 @@ class EventsController extends Controller
                 'message' => "Удаление соревнования невозможно, так как в нем есть участники",
             ];
             return response()->json($response);
+        } else {
+            if(Admin::user()->username == "Tester2") {
+                if ($event->is_france_system_qualification) {
+                    ResultFranceSystemQualification::where('event_id', $event->id)->delete();
+                    ResultRouteFranceSystemQualification::where('event_id', $event->id)->delete();
+                } else {
+                    ResultQualificationClassic::where('event_id', $event->id)->delete();
+                    ResultRouteQualificationClassic::where('event_id', $event->id)->delete();
+                }
+                ResultSemiFinalStage::where('event_id', $event->id)->delete();
+                ResultRouteSemiFinalStage::where('event_id', $event->id)->delete();
+                ResultFinalStage::where('event_id', $event->id)->delete();
+                ResultRouteFinalStage::where('event_id', $event->id)->delete();
+                EventAndCoefficientRoute::where('event_id', $event->id)->delete();
+                ParticipantCategory::where('event_id', $event->id)->delete();
+                Set::where('event_id', $event->id)->delete();
+                Grades::where('event_id', $event->id)->delete();
+                Route::where('event_id', $event->id)->delete();
+            }
         }
 
         return $this->form('destroy')->destroy($id);
@@ -378,9 +403,9 @@ class EventsController extends Controller
                         $table->text('Название');
                         $table->number('Проценты');
                     });
-                    $form->tableproducts('products', 'Мерч', function ($table) use ($form){
-                        $table->text('Название');
-                        $table->number('Цена');
+                    $form->tableproducts('products', 'Мерч', function (Form\NestedForm $form) {
+                        $form->text('Название', 'Название');
+                        $form->number('Цена', 'Цена');
                     });
                     $form->tableupprice('up_price', 'Цена в зависимости от дат', function ($table) use ($form){
                         $table->number('Цена');
@@ -546,6 +571,15 @@ class EventsController extends Controller
             if($form->type_event){
                 $form->is_access_user_edit_result = 1;
             }
+//            if($form->input('products')){
+//                $existingData = $form->model()->products;
+//                $newData = $form->input('products');
+//                // Объедините существующие данные с новыми
+//                $mergedData = array_merge($existingData, $newData);
+//                // Сохраните объединенные данные
+//                $form->model()->products = $mergedData;
+//            }
+            return $form;
         });
         $form->saved(function (Form $form)  use ($type, $id){
             if($type != 'active') {

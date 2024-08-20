@@ -53,6 +53,11 @@
                                             class="hidden-xs">Соревнования</span></button>
                                 </li>
                                 <li class="nav-item" style="margin-right: 8px!important;">
+                                    <button id="analytics" data-target="#profile-analytics" data-toggle="pill"
+                                            class="nav-link"><i class="icon-note"></i> <span class="hidden-xs">Аналитика</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" style="margin-right: 8px!important;">
                                     <button id="setting" data-target="#profile-settings" data-toggle="pill"
                                             class="nav-link"><i class="icon-note"></i> <span class="hidden-xs">Пароль</span>
                                     </button>
@@ -74,4 +79,5 @@
         </div>
     </section>
     <script type="text/javascript" src="{{ asset('js/profile.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 @endsection

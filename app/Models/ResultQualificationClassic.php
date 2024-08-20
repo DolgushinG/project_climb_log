@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use function App\Http\Controllers\calculate_stability_coefficient;
 use function Symfony\Component\String\s;
 
 class ResultQualificationClassic extends Model
@@ -51,6 +52,31 @@ class ResultQualificationClassic extends Model
         'last_points_after_merged' =>'json',
         'helper_amount' =>'json',
     ];
+
+    public static function get_amount_prizes_place($qualification_classic_events, $user_id)
+    {
+        $totalPrizePlaces = 0;
+        foreach ($qualification_classic_events as $res){
+            $res_final = ResultFinalStage::where('event_id', $res->event_id)->first();
+            $res_semifinal = ResultSemiFinalStage::where('event_id', $res->event_id)->where('user_id', $user_id)->first();
+            if($res_semifinal){
+                if($res_semifinal->place <= 3 && $res_semifinal->place != 0 && $res_semifinal->place != null){
+                    $totalPrizePlaces += 1;
+                }
+            }
+            if(!$res_final){
+                if($res->user_place <= 3){
+                    $totalPrizePlaces += 1;
+                }
+            } else {
+                if($res_final->place <= 3 && $res_final->place != 0 && $res_final->place != null){
+                    $totalPrizePlaces += 1;
+                }
+            }
+        }
+        return $totalPrizePlaces;
+
+    }
 
 
     public function owner()
@@ -634,5 +660,145 @@ class ResultQualificationClassic extends Model
 
         }
 
+    }
+
+    public static function calculate_stability_coefficients($user_id) {
+
+        // Получение событий квалификации для выбранного пользователя
+        $qualification_classic_events = ResultQualificationClassic::where('user_id', $user_id)
+            ->where('is_other_event', 0)
+            ->where('active', 1)
+            ->latest()
+            ->take(30)
+            ->pluck('event_id');
+
+        // Инициализация массивов для хранения результатов всех участников
+        $scoresByParticipant = [];
+
+        // Подсчет баллов для всех участников в тех же событиях
+        foreach ($qualification_classic_events as $event_id) {
+            $results = ResultRouteQualificationClassic::where('event_id', $event_id)
+                ->get();
+
+            foreach ($results as $result) {
+                $participantId = $result->user_id;
+                $attempt = $result->attempt;
+
+                if (!isset($scoresByParticipant[$participantId])) {
+                    $scoresByParticipant[$participantId] = ['flash' => 0, 'redpoint' => 0, 'count' => 0];
+                }
+
+                if ($attempt == 1) {
+                    $scoresByParticipant[$participantId]['flash'] += 1.2;
+                } else if ($attempt >= 2) {
+                    $scoresByParticipant[$participantId]['redpoint'] += 1;
+                }
+                $scoresByParticipant[$participantId]['count'] += 1;
+            }
+        }
+
+        // Рассчитываем коэффициенты стабильности для всех участников
+        $allScores = [];
+        foreach ($scoresByParticipant as $participantId => $data) {
+            if ($data['count'] > 0) {
+                $sum = $data['flash'] + $data['redpoint'];
+                $averageScore = $sum / $data['count'];
+                $allScores[$participantId] = $averageScore;
+            }
+        }
+
+        // Рассчитываем среднее значение и стандартное отклонение для всех участников
+        if (count($allScores) > 0) {
+            $overallAverage = array_sum($allScores) / count($allScores);
+
+            $variance = 0.0;
+            foreach ($allScores as $score) {
+                $variance += pow($score - $overallAverage, 2);
+            }
+            $variance /= count($allScores);
+            $standardDeviation = sqrt($variance);
+
+            // Рассчитываем коэффициент стабильности для выбранного участника
+            if (isset($scoresByParticipant[$user_id]) && $scoresByParticipant[$user_id]['count'] > 0) {
+                $userSum = $scoresByParticipant[$user_id]['flash'] + $scoresByParticipant[$user_id]['redpoint'];
+                $userAverageScore = $userSum / $scoresByParticipant[$user_id]['count'];
+                $userStabilityCoefficient = ($standardDeviation == 0) ? 0 : $userAverageScore / $standardDeviation;
+            } else {
+                $userStabilityCoefficient = 0;
+            }
+        } else {
+            $userStabilityCoefficient = 0;
+        }
+        return $userStabilityCoefficient;
+
+    }
+    public static function get_analytics_for_user_data_all($user_id)
+    {
+        $totalSemifinal = ResultSemiFinalStage::where('user_id', $user_id)->get()->count();
+        $totalFinal = ResultFinalStage::where('user_id', $user_id)->get()->count();
+        $averageStability = self::calculate_stability_coefficients($user_id);
+        $qualification_classic_events = ResultQualificationClassic::where('user_id', $user_id)
+            ->where('is_other_event', 0)
+            ->where('active', 1)
+            ->latest()
+            ->take(30)
+            ->get();
+        if(count($qualification_classic_events) > 0){
+            $totalPrizePlaces = self::get_amount_prizes_place($qualification_classic_events, $user_id);
+        }
+        return [
+            'semifinal_rate' => $totalSemifinal ?? 0,
+            'final_rate' => $totalFinal ?? 0,
+            'averageStability' => $averageStability ?? 0,
+            'totalPrizePlaces' => $totalPrizePlaces ?? 0,
+        ];
+    }
+    public static function get_analytics_for_user_data_progress($user_id)
+    {
+        $qualification_classic_events = ResultQualificationClassic::where('user_id', $user_id)
+            ->where('is_other_event', 0)
+            ->where('active', 1)
+            ->latest()
+            ->take(30)
+            ->get();
+
+        // Массивы для хранения данных
+        $labels = [];
+        $flashesData = [];
+        $redpointsData = [];
+
+        // Извлекаем данные для каждого события
+        foreach ($qualification_classic_events as $res) {
+            $event = Event::find($res->event_id);
+            if($event){
+                if(count($qualification_classic_events) < 4){
+                    $label = $event->title;
+                } else {
+                    $label = strlen($event->title) > 10 ? substr($event->title, 0, 12) . '...' : $event->title;
+                }
+
+                $labels[] = $label;
+
+                // Подсчитываем количество флешей и редпоинтов для этого события
+                $flashes = ResultRouteQualificationClassic::where('event_id', $event->id)
+                    ->where('user_id', $user_id)
+                    ->where('attempt', 1)
+                    ->count();
+                $redpoints = ResultRouteQualificationClassic::where('event_id', $event->id)
+                    ->where('user_id', $user_id)
+                    ->where('attempt', 2)
+                    ->count();
+
+                $flashesData[] = $flashes;
+                $redpointsData[] = $redpoints;
+            }
+        }
+
+    // Подготовка данных для передачи в JavaScript
+        return [
+            'labels' => $labels,
+            'flashes' => $flashesData,
+            'redpoints' => $redpointsData
+        ];
     }
 }

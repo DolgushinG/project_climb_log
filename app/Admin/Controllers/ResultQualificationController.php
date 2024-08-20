@@ -41,6 +41,7 @@ use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\View;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ResultQualificationController extends Controller
@@ -138,59 +139,91 @@ class ResultQualificationController extends Controller
         });
         $show->field('id', __('История результатов'))
             ->as(function ($content) use ($event) {
-                $str = '';
                 $all_user_places = [];
                 $categories = [];
+                $place_event_titles = [];
+                // Определение модели квалификации
+                $qualificationModel = $event->is_france_system_qualification
+                    ? ResultFranceSystemQualification::class
+                    : ResultQualificationClassic::class;
 
-                if ($event->is_france_system_qualification) {
-                    $res = ResultFranceSystemQualification::find($content);
-                    if ($res) {
-                        $user_id = $res->user_id;
-                        $all_user_places = ResultFranceSystemQualification::where('user_id', $user_id)->pluck('user_place')->toArray();
-                        $all_categories = ResultFranceSystemQualification::where('user_id', $user_id)->pluck('category_id')->toArray();
-                    }
-                } else {
-                    $res = ResultQualificationClassic::find($content);
-                    if ($res) {
-                        $user_id = $res->user_id;
-                        $all_user_places = ResultQualificationClassic::where('user_id', $user_id)->pluck('user_place')->toArray();
-                        $all_categories = ResultQualificationClassic::where('user_id', $user_id)->pluck('category_id')->toArray();
-                    }
-                }
+                $res = $qualificationModel::find($content);
 
-                if ($all_categories) {
-                    foreach ($all_categories as $category) {
-                        $participant_category = ParticipantCategory::find($category);
-                        if ($participant_category) {
-                            $categories[] = $participant_category->category;
+                if ($res) {
+                    $user_id = $res->user_id;
+
+                    // Извлечение данных о местах и категориях
+                    $all_user_places = $qualificationModel::where('user_id', $user_id)
+                        ->where('active', 1)
+                        ->latest()
+                        ->take(20)
+                        ->pluck('user_place', 'category_id')
+                        ->toArray();
+
+                    // Извлечение названий событий и их мест
+                    $res_events = Event::query()
+                        ->leftJoin($qualificationModel::getTable(), 'events.id', '=', $qualificationModel::getTable() . '.event_id')
+                        ->where($qualificationModel::getTable() . '.user_id', '=', $user_id)
+                        ->where($qualificationModel::getTable() . '.active', '=', 1)
+                        ->select('events.title', $qualificationModel::getTable() . '.user_place')
+                        ->latest($qualificationModel::getTable() . '.created_at')
+                        ->take(20)
+                        ->get()
+                        ->toArray();
+
+                    // Формирование массива с категориями
+                    if (!empty($all_user_places)) {
+                        foreach ($all_user_places as $category_id => $place) {
+                            $participant_category = ParticipantCategory::find($category_id);
+                            if ($participant_category) {
+                                $categories[] = $participant_category->category;
+                            }
                         }
                     }
+
+                    // Формирование результирующего массива
+                    foreach ($res_events as $res_event) {
+                        $place_event_titles[] = [
+                            'title' => htmlspecialchars($res_event['title'], ENT_QUOTES, 'UTF-8'),
+                            'place' => htmlspecialchars($res_event['user_place'], ENT_QUOTES, 'UTF-8')
+                        ];
+                    }
                 }
 
-                if (empty($all_user_places) || empty($categories)) {
-                    // Если данных нет, показываем сообщение
+// Проверка на наличие данных для отображения
+                if (empty($place_event_titles) || empty($categories)) {
                     return '<div class="alert alert-info">Нет данных для отображения.</div>';
                 }
 
-                // Создание карточек для отображения категорий и мест
-                if ($all_user_places) {
-                    foreach ($all_user_places as $index => $place) {
-                        if ($place && isset($categories[$index])) {
-                            $str .= '<div class="card" style="margin-bottom: 10px;">';
-                            $str .= '<div class="card-body">';
-                            $str .= '<h5 class="card-title">Категория ' . $categories[$index] . '</h5>';
-                            $str .= '<p class="card-text">Место: ' . $place . '</p>';
-                            $str .= '</div>';
-                            $str .= '</div>';
-                        }
+// Генерация HTML-кода для таблицы
+                $str = '<table class="table">';
+                $str .= '<thead>';
+                $str .= '<tr>';
+                $str .= '<th scope="col">Соревы</th>';
+                $str .= '<th scope="col">Категория</th>';
+                $str .= '<th scope="col">Место</th>';
+                $str .= '</tr>';
+                $str .= '</thead>';
+                $str .= '<tbody>';
+
+                foreach ($place_event_titles as $index => $item) {
+                    if (!empty($item['place']) && isset($categories[$index])) {
+                        $str .= '<tr>';
+                        $str .= '<td>' . $item['title'] . '</td>';
+                        $str .= '<td>' . htmlspecialchars($categories[$index], ENT_QUOTES, 'UTF-8') . '</td>';
+                        $str .= '<td>' . $item['place'] . '</td>';
+                        $str .= '</tr>';
                     }
                 }
 
-                // Создание контейнера для графика
+                $str .= '</tbody>';
+                $str .= '</table>';
+
+                // Генерация графика
                 $chartId = 'chart_' . uniqid();
                 $str .= '<canvas id="' . $chartId . '" width="400" height="200"></canvas>';
 
-                // Генерация данных для графика в формате JSON
+                // Генерация данных для графика
                 $chartData = [
                     'labels' => $categories,
                     'datasets' => [
@@ -208,7 +241,7 @@ class ResultQualificationController extends Controller
                 $str .= '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>';
                 $str .= '<script>
             var ctx = document.getElementById("' . $chartId . '").getContext("2d");
-            var myChart = new Chart(ctx, {
+            new Chart(ctx, {
                 type: "line",
                 data: ' . json_encode($chartData) . ',
                 options: {
@@ -221,9 +254,146 @@ class ResultQualificationController extends Controller
             });
         </script>';
 
+                // Если это не система квалификации по Франции, добавляем другие графики
+                if (!$event->is_france_system_qualification && isset($res)) {
+                    $analytics = ResultQualificationClassic::get_analytics_for_user_data_all($res->user_id) ?? [];
+                    $analytics_progress = ResultQualificationClassic::get_analytics_for_user_data_progress($res->user_id) ?? [];
+
+                    // Проверка и экранирование значений
+                    $semifinal_rate = $analytics['semifinal_rate'] ?? 0;
+                    $final_rate = $analytics['final_rate'] ?? 0;
+                    $averageStability = $analytics['averageStability'] ?? 0;
+                    $totalPrizePlaces = $analytics['totalPrizePlaces'] ?? 0;
+
+                    $labels = $analytics_progress['labels'] ?? [];
+                    $flashes = $analytics_progress['flashes'] ?? [];
+                    $redpoints = $analytics_progress['redpoints'] ?? [];
+
+                    $html = '
+            <div class="container">
+                <table class="table table-bordered mt-4">
+                    <thead>
+                    <tr>
+                        <th>Полуфиналы</th>
+                        <th>Финалы</th>
+                        <th>Коэффициент стабильности</th>
+                        <th>Призовые места</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>' . htmlspecialchars($semifinal_rate, ENT_QUOTES, 'UTF-8') . '</td>
+                        <td>' . htmlspecialchars($final_rate, ENT_QUOTES, 'UTF-8') . '</td>
+                        <td>' . htmlspecialchars($averageStability, ENT_QUOTES, 'UTF-8') . '</td>
+                        <td>' . htmlspecialchars($totalPrizePlaces, ENT_QUOTES, 'UTF-8') . '</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Графики -->
+                <canvas id="analyticsChart" width="400" height="200"></canvas>
+                <canvas id="progressChart" class="mt-5" width="400" height="200"></canvas>
+            </div>
+
+            <!-- Подключаем Chart.js для графиков -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                // Передаем данные из PHP в JavaScript
+                var analyticsData = {
+                    semifinal_rate: ' . json_encode($semifinal_rate) . ',
+                    final_rate: ' . json_encode($final_rate) . ',
+                    averageStability: ' . json_encode($averageStability) . ',
+                    totalPrizePlaces: ' . json_encode($totalPrizePlaces) . '
+                };
+                var analyticsProgressData = {
+                    labels: ' . json_encode($labels) . ',
+                    flashes: ' . json_encode($flashes) . ',
+                    redpoints: ' . json_encode($redpoints) . '
+                };
+
+                // Инициализация первого графика
+                var ctx1 = document.getElementById("analyticsChart").getContext("2d");
+                new Chart(ctx1, {
+                    type: "bar",
+                    data: {
+                        labels: ["Полуфиналы", "Финалы", "Стабильность", "Призы"],
+                        datasets: [{
+                            label: "Статистика",
+                            data: [
+                                analyticsData.semifinal_rate,
+                                analyticsData.final_rate,
+                                analyticsData.averageStability,
+                                analyticsData.totalPrizePlaces
+                            ],
+                            backgroundColor: "rgba(54, 162, 235, 0.2)",
+                            borderColor: "rgba(54, 162, 235, 1)",
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // Инициализация второго графика
+                var ctx2 = document.getElementById("progressChart").getContext("2d");
+                new Chart(ctx2, {
+                    type: "line",
+                    data: {
+                        labels: analyticsProgressData.labels,
+                        datasets: [{
+                            label: "Флеши",
+                            data: analyticsProgressData.flashes,
+                            borderColor: "rgba(75, 192, 192, 1)",
+                            backgroundColor: "rgba(75, 192, 192, 0.2)",
+                            fill: false
+                        }, {
+                            label: "Редпоинты",
+                            data: analyticsProgressData.redpoints,
+                            borderColor: "rgba(153, 102, 255, 1)",
+                            backgroundColor: "rgba(153, 102, 255, 0.2)",
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            </script>
+            <style>
+              @media (min-width: 1200px) {
+                .container {
+                  width: 90%; /* Измените на нужный вам процент или пиксели */
+                  max-width: 1200px; /* Задайте максимальную ширину */
+                }
+              }
+            </style>
+           <style>
+            @media (min-width: 1200px) {
+                .container {
+                    width: 80%; /* Уменьшите ширину контейнера */
+                    max-width: 960px; /* Максимальная ширина контейнера */
+                        }
+                      }
+        </style>
+            ';
+
+                    $str .= $html;
+                }
+
                 return $str;
-            })
-            ->unescape(); // unescape позволяет интерпретировать HTML
+            })->unescape();
+
+
+
 
 
 

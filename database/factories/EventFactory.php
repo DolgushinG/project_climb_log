@@ -60,22 +60,22 @@ class EventFactory extends Factory
      */
     public function definition()
     {
-        $date = $this->faker->date();
+        $date = $this->faker->dateTimeBetween('now', '+01 days');
         return [
             'image' => $this->faker->randomElement(['images/20231115_cea82537af86871a32344dcd5c6a23ba.jpeg','images/vT94mFyT9xU.jpg']),
             'active' => true,
             'is_registration_state' => true,
             'is_send_result_state' => true,
             'start_date' => $date,
-            'end_date' => $this->faker->date(),
+            'end_date' => $this->faker->dateTimeBetween('now', '+2 years'),
             'description' => $this->faker->paragraph(20),
             'contact' => '+7(932)-782-22-11',
             'address' => $this->faker->address(),
             'title' => 'competition',
             'title_eng' => 'competition',
             'subtitle' => $this->faker->word(),
-            'link' => '/event/'.$date.'/admin/competition',
-            'admin_link' => '/admin/event/'.$date.'/admin/competition',
+            'link' => '/event/'.$date->format('d-m-Y').'/admin/competition',
+            'admin_link' => '/admin/event/'.$date->format('d-m-Y').'/admin/competition',
             'link_payment' => "https://www.tinkoff.ru/cf/1ZyTiSRkXmZ",
             'img_payment' => "images/qr.png",
             'info_payment' => $this->faker->paragraph(20),

@@ -83,7 +83,6 @@
                         </div>
                     </div>
                 @endif
-
                 <div class="card-body">
                     <!-- Accordion without outline borders -->
                     <div class="accordion accordion-flush" id="accordionFlushExample">
@@ -116,20 +115,6 @@
                                  aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
                                 <div class="accordion-body">
                                     @if($event->amount_start_price)
-                                        @if($event->setting_payment == \App\Models\OwnerPaymentOperations::DINAMIC)
-                                        <div class="container pt-2 pb-2">
-                                            <label class="mb-1">Для корректного процесса оплаты нужно: </label>
-                                            <ol class="list-group list-group-numbered">
-                                                <li class="list-group-item bold">Выбрать мерч (если нужно)</li>
-                                                <li class="list-group-item bold">Выбрать скидку (если есть основание для нее, действует только на стартовый взнос)</li>
-                                                <li class="list-group-item bold">Нажать сохранить выбранный мерч и скидку</li>
-                                                <li class="list-group-item bold">Нажать оплатить и оплатить ту сумму которая была показана</li>
-                                                <li class="list-group-item bold">Прикрепить чек в разделе чек</li>
-                                                <li class="list-group-item bold">Прикрепить документ (основание для скидки) в разделе документ</li>
-                                                <li class="list-group-item bold">Дождаться одобрения оплаты (придет на почту письмо)</li>
-                                            </ol><!-- End List group Numbered -->
-                                        </div>
-                                        @endif
                                         <div class="container text-center pt-2 pb-2">
                                             <label> Стартовый взнос: </label>
                                             <span id="price" data-main-price="{{$event->amount_start_price}}" class="badge bg-success" style="font-size: 22px"> <span data-current-amount-start-price="{{$current_amount_start_price ?? $event->amount_start_price}}" id="price-value">{{$event->amount_start_price}}</span> руб. </span><br>
@@ -372,15 +357,13 @@
     @guest
         @if($event->amount_start_price)
             <div class="container text-center pt-2 pb-2">
+                <label> Стартовый взнос (может менять): </label>
                 <label> Стартовый взнос: </label>
                 <span class="badge bg-success" style="font-size: 22px"> <span id="price-value">{{$event->amount_start_price}}</span> руб. </span><br>
             </div>
         @endif
         @if(!$event->info_payment && !$event->options_amount_price)
             <p>Информации нет</p>
-        @endif
-        @if($event->info_payment)
-            <p>{!! $event->info_payment !!}</p>
         @endif
         @if($event->options_amount_price)
             <section id="pricing" class="pricing">

@@ -67,6 +67,18 @@ class ProfileController extends Controller
         return view('profile.card', compact(['user', 'activities', 'state_user']));
     }
 
+    public static function getTabContentProfileAnalytics()
+    {
+        $user = User::find(Auth()->user()->id);
+        $user_id = $user->id;
+        $analytics = ResultQualificationClassic::get_analytics_for_user_data_all($user_id);
+        $analytics_progress = ResultQualificationClassic::get_analytics_for_user_data_progress($user_id);
+        return view('profile.analytics', [
+            'analytics' => $analytics,
+            'analytics_progress' => $analytics_progress
+        ]);
+    }
+
     public function getTabContentOverview() {
         $user = User::find(Auth()->user()->id);
         if(!$user->password){
