@@ -114,7 +114,7 @@ class BatchResultFinalCustomFillOneRoute extends Action
                 $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->category_id;
             } else {
                 if($event->is_open_main_rating && $event->is_auto_categories){
-                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->where('active', 1)->first()->global_category_id;
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first()->global_category_id;
                 } else {
                     $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->where('active', 1)->first()->category_id;
                 }

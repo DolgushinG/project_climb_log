@@ -317,8 +317,7 @@ class ResultQualificationClassic extends Model
             $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->pluck('user_id')->toArray();
         }
         $users_id = User::whereIn('id', $participant_users_id)->pluck('id');
-
-        $participant_sort_id = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('active', '=', 1)->get()->sortByDesc('global_points')->pluck('user_id');
+        $participant_sort_id = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->get()->sortByDesc('global_points')->pluck('user_id');
         $after_slice_participant_final_sort_id = array_slice($participant_sort_id->toArray(), 0, $amount_better);
         return User::whereIn('id', $after_slice_participant_final_sort_id)->get();
     }
