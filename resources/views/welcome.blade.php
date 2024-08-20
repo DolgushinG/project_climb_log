@@ -135,6 +135,7 @@
                             @endif
                             <a href="{{route('participants', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                class="btn btn-primary rounded-pill">Список участников</a>
+
                             @if(!$event->is_france_system_qualification)
                                 <a href="{{route('get_qualification_classic_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Предварительные результаты</a>
@@ -142,6 +143,8 @@
                                 <a href="{{route('get_qualification_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Предварительные результаты</a>
                             @endif
+                            <a href="{{route('index_analytics', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                               class="btn btn-primary rounded-pill">Статистика</a>
                             @if($event->is_semifinal && $is_show_button_semifinal)
                                 <a href="{{route('get_semifinal_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-success rounded-pill">Результаты полуфинала</a>

@@ -35,6 +35,8 @@ Route::get('/privacyconf', [App\Http\Controllers\Controller::class, 'indexPrivac
 Route::get('/privatedata', [App\Http\Controllers\Controller::class, 'indexPrivacyData'])->name('privatedata');
 //Route::get('/event/{id}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::get('/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
+Route::get('/event/{start_date}/{climbing_gym}/{title}/analytics', [App\Http\Controllers\EventsController::class, 'index_analytics'])->name('index_analytics');
+Route::get('/get_analytics', [App\Http\Controllers\EventsController::class, 'get_analytics']);
 Route::post('event/{start_date}/{climbing_gym}/sendAllResult', [App\Http\Controllers\EventsController::class, 'sendAllResult'])->middleware('throttle:5,1');
 Route::get('event/{start_date}/{climbing_gym}/getInfoPayment/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_payment']);
 Route::get('event/{start_date}/{climbing_gym}/getInfoPay/{event_id}', [App\Http\Controllers\EventsController::class, 'event_info_pay']);

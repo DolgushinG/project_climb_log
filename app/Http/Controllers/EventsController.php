@@ -893,4 +893,47 @@ class EventsController extends Controller
 
 
     }
+    public function index_analytics(Request $request, $start_date, $climbing_gym, $title)
+    {
+        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        if($event) {
+            $categories = ParticipantCategory::where('event_id', $event->id)->pluck('category', 'id')->toArray();
+            if($event->type_event){
+                $grades = RoutesOutdoor::where('event_id', $event->id)->pluck('grade', 'route_id')->toArray();
+            } else {
+                $grades = Route::where('event_id', $event->id)->pluck('grade', 'route_id')->toArray();
+            }
+
+        } else {
+            return view('404');
+        }
+        return view('event.analytics', compact(['event','categories', 'grades']));
+    }
+    public function get_analytics(Request $request)
+    {
+        // Получаем данные из тела запроса
+        $gender = $request->input('gender');
+        $event_id = $request->input('event_id');
+        // Пример запроса к базе данных
+        $stats = [];
+        $routes = Route::where('event_id', $event_id)->get();
+        foreach ($routes as $route){
+            $flash = ResultRouteQualificationClassic::where('event_id', $event_id)
+                ->where('gender', $gender)
+                ->where('grade', $route->grade)
+                ->where('route_id', $route->route_id)
+                ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_FLASH)
+                ->get()->count();
+            $redpoint = ResultRouteQualificationClassic::where('event_id', $event_id)
+                ->where('gender', $gender)
+                ->where('grade', $route->grade)
+                ->where('route_id', $route->route_id)
+                ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)
+                ->get()->count();
+            $stats[] =  array('route_id' => $route->route_id, 'grade' => $route->grade, 'flash' => $flash, 'redpoint' => $redpoint);
+        }
+        return response()->json([
+            'routes' => $stats,
+        ]);
+    }
 }
