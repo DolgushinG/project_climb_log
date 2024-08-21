@@ -59,7 +59,6 @@
                                                         @if($event->is_france_system_qualification)
                                                             @include('event.buttons.participant_already')
                                                         @else
-                                                            {{--                                                          Отправка результатов открыта/закрыта--}}
                                                             @if($event->is_send_result_state)
                                                                 @include('event.buttons.send_result')
                                                             @endif
@@ -143,8 +142,6 @@
                                 <a href="{{route('get_qualification_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Предварительные результаты</a>
                             @endif
-                            <a href="{{route('index_analytics', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
-                               class="btn btn-primary rounded-pill">Статистика</a>
                             @if($event->is_semifinal && $is_show_button_semifinal)
                                 <a href="{{route('get_semifinal_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-success rounded-pill">Результаты полуфинала</a>
@@ -155,6 +152,8 @@
                             @endif
                             @if(!$event->is_send_result_state && $event->is_open_send_result_state)
                                 @include('event.get_all_result_to_email')
+                                <a href="{{route('index_analytics', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                   class="btn btn-warning rounded-pill">Статистика</a>
                             @endif
                         </div>
                     </div>

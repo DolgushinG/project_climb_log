@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function () {
         let labels = filteredData.map(route => `${route.grade} (Трасса : ${route.route_id})`);
         let flashData = filteredData.map(route => route.flash);
         let redpointData = filteredData.map(route => route.redpoint);
-        let allPassedData = filteredData.map(route => route.all_passed);
 
         myChart = new Chart(ctx, {
             type: 'bar', // Используем вертикальный график
@@ -62,13 +61,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
                     },
-                    {
-                        label: 'Всего',
-                        data: allPassedData,
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
-                    }
                 ]
             },
             options: {
@@ -115,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${route.flash}</td>
                 <td>${route.redpoint}</td>
                 <td>${route.all_passed}</td>
+                <td>${route.coefficient}</td>
             `;
             tableBody.appendChild(row);
         });

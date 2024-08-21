@@ -9,6 +9,7 @@ use App\Jobs\UpdateResultParticipants;
 use App\Jobs\UpdateRouteCoefficientParticipants;
 use App\Models\Area;
 use App\Models\Event;
+use App\Models\EventAndCoefficientRoute;
 use App\Models\Format;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
@@ -924,6 +925,16 @@ class EventsController extends Controller
                     ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT,
                     ResultRouteQualificationClassic::STATUS_ZONE])
                 ->get()->count();
+            if($gender == 'male'){
+                $coefficient = EventAndCoefficientRoute::where('event_id', $event_id)
+                    ->where('route_id', $route->route_id)
+                    ->first()->coefficient_male;
+            } else {
+                $coefficient = EventAndCoefficientRoute::where('event_id', $event_id)
+                    ->where('route_id', $route->route_id)
+                    ->first()->coefficient_female;
+            }
+
             $flash = ResultRouteQualificationClassic::where('event_id', $event_id)
                 ->where('gender', $gender)
                 ->where('grade', $route->grade)
@@ -936,7 +947,14 @@ class EventsController extends Controller
                 ->where('route_id', $route->route_id)
                 ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)
                 ->get()->count();
-            $stats[] =  array('route_id' => $route->route_id, 'grade' => $route->grade, 'flash' => $flash, 'redpoint' => $redpoint, 'all_passed' => $all_passed);
+            $stats[] =  array(
+                'route_id' => $route->route_id,
+                'grade' => $route->grade,
+                'flash' => $flash,
+                'redpoint' => $redpoint,
+                'all_passed' => $all_passed,
+                'coefficient' => $coefficient
+            );
         }
         return response()->json([
             'routes' => $stats,

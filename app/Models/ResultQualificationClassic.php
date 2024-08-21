@@ -275,7 +275,7 @@ class ResultQualificationClassic extends Model
         if($category_id){
             $active_participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where('category_id', '=', $category_id)->where('active', '=', 1)->pluck('user_id')->toArray();
         } else {
-            $active_participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where('active', '=', 1)->pluck('user_id')->toArray();
+            $active_participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where('active', '=', 1)->where('is_other_event', '=', 0)->pluck('user_id')->toArray();
         }
         if ($active_participant) {
             return count(User::whereIn('id', $active_participant)->get()->toArray());

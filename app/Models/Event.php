@@ -176,6 +176,7 @@ class Event extends Model
     {
         $custom_red_point = $event->amount_point_redpoint;
         $custom_flash = $event->amount_point_flash;
+        Event::update_coefficient_for_all_route($event->id, $participant->gender);
         $routes_id_passed_with_red_point = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $participant->id)->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)->pluck('route_id');
         $counting_routes_with_red_point_passed = count($routes_id_passed_with_red_point);
         $routes_id_passed_with_flash = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $participant->id)->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_FLASH)->pluck('route_id');
@@ -275,7 +276,7 @@ class Event extends Model
         return $finish_flash_result + $finish_red_point_result + $finish_zone_result;
     }
 
-    public static function refresh_final_points_all_participant($event)
+    public static function refresh_final_points_all_participant(Event $event)
     {
         $event_id = $event->id;
         $format = $event->mode ?? null;

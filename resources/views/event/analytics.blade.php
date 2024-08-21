@@ -4,8 +4,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.css">
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js"></script>
-    <section class="section-bg contact">
-        <div class="container mt-3">
+    <section>
+        <div class="container">
+            <div class="row">
+            </div>
+        </div>
+    </section>
+    <section class="section">
+        <div class="container align-center">
             <h2>Аналитика прохождений трасс</h2>
 
             <div class="row mb-3">
@@ -14,7 +20,7 @@
                     <select id="gradeSelect" class="form-control">
                         <option value="">Все категории</option>
                         @foreach($grades as $route_id => $grade)
-                            <option value="{{$grade}}">{{$route_id}}. {{$grade}}</option>
+                            <option value="{{$grade}}">{{$grade}}</option>
                         @endforeach
                     </select>
                 </div>
@@ -43,6 +49,7 @@
                     <th>Флеши</th>
                     <th>Редпоинты</th>
                     <th>Всего прохождений(М + Ж)</th>
+                    <th>Коэффициент трассы</th>
                 </tr>
                 </thead>
                 <tbody id="dataTableBody">
