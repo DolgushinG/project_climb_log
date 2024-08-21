@@ -80,20 +80,13 @@ class ResultRouteQualificationClassic extends Model
     }
     public static function counting_result($event_id, $route_id, $gender)
     {
-        $users = User::query()
-            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
-            ->where('result_qualification_classic.event_id', '=', $event_id)
-            ->where('result_qualification_classic.active', '=', 1)
-            ->select(
-                'users.id',
-            )
-            ->pluck('id');
-        return count(ResultRouteQualificationClassic::whereIn('user_id', $users)
-            ->where('gender', '=', $gender)
+        $users = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where('active', '=', 1)->where('is_other_event', '=', 0)->pluck('user_id')->toArray();
+        return ResultRouteQualificationClassic::whereIn('user_id', $users)
+            ->where('event_id', '=', $event_id)
+            ->where('gender', $gender)
             ->where('route_id', '=', $route_id)
-            ->whereNotIn('attempt',[0])
-            ->get()
-            ->toArray());
+            ->whereNotIn('attempt', [0])
+            ->count();
     }
 
     public static function get_coefficient($active_participant, $count_route_passed){

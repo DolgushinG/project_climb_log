@@ -275,7 +275,7 @@ class Event extends Model
         return $finish_flash_result + $finish_red_point_result + $finish_zone_result;
     }
 
-    public static function refresh_final_points_all_participant($event)
+    public static function refresh_final_points_all_participant(Event $event)
     {
         $event_id = $event->id;
         $format = $event->mode ?? null;

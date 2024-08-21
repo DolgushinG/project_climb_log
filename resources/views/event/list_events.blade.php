@@ -19,7 +19,7 @@
                     <thead class="table-primary">
                     <tr>
                         <th class="col-md-2 col-xs-3">Афиша</th>
-                        <th class="col-md-3 col-xs-3">Название</th>
+                        <th class="col-md-3 col-xs-3">Название и Статус</th>
                         <th class="col-md-2 col-xs-2">Скалодром</th>
                         <th class="col-md-3 col-xs-3">Город</th>
                         <th class="col-md-5 col-xs-5">Дата</th>
@@ -34,7 +34,11 @@
                     @foreach($events as $index => $event)
                         <tr>
                             <td><a href="{{$event->link}}"><img width="100px" height="80px" class="img-thumbnail" src="storage/{{$event->image}}" alt="image"></a></td>
-                            <td><a href="{{$event->link}}">{{$event->title}}</a> <br>Регистрация {{($event->is_registration_state ? 'открыта' : 'закрыта')}}<br>Участников {{$amount_participant[$event->id]}}</td>
+                            @if(\App\Models\Event::event_is_open($event))
+                                <td><a href="{{$event->link}}">{{$event->title}}</a> <br>Регистрация {{($event->is_registration_state ? 'открыта' : 'закрыта')}}<br>Участников {{$amount_participant[$event->id]}}</td>
+                            @else
+                                <td><a href="{{$event->link}}">{{$event->title}}</a> <br>Соревнование завершено<br>Участников {{$amount_participant[$event->id]}}</td>
+                            @endif
                             <td>{{$event->climbing_gym_name}}</td>
                             <td>{{$event->city}}</td>
                             <td><b>{{date("d/m", strtotime($event->start_date))}}-{{date("d/m/y", strtotime($event->end_date))}}</b></td>
