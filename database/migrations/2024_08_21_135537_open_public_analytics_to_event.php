@@ -13,7 +13,7 @@ class OpenPublicAnalyticsToEvent extends Migration
      */
     public function up()
     {
-        Schema::table('event', function (Blueprint $table) {
+        Schema::table('events', function (Blueprint $table) {
             $table->boolean('is_open_public_analytics')->after('setting_payment')->nullable();
         });
     }
@@ -25,7 +25,7 @@ class OpenPublicAnalyticsToEvent extends Migration
      */
     public function down()
     {
-        Schema::table('event', function (Blueprint $table) {
+        Schema::table('events', function (Blueprint $table) {
             $table->boolean('is_open_public_analytics')->nullable();
         });
     }

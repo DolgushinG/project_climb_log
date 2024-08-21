@@ -3,13 +3,27 @@
 namespace App\Helpers;
 
 use App\Models\Event;
+use App\Models\ParticipantCategory;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class Helpers
 {
+
+    public static function clear_cache(Event $event)
+    {
+        $categories = ParticipantCategory::where('event_id', $event->id)->get();
+        foreach ($categories as $category) {
+            Cache::forget('result_male_cache_' . $category->category.'_event_id_'.$event->id);
+            Cache::forget('result_female_cache_' . $category->category.'_event_id_'.$event->id);
+        }
+        Cache::forget('result_analytics_cache_event_id_'.$event->id);
+        Cache::forget('result_male_analytics_cache_event_id_'.$event->id);
+        Cache::forget('result_female_analytics_cache_event_id_'.$event->id);
+    }
 
     public static function valid_email($email)
     {

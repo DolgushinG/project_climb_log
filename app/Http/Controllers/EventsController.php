@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Admin\Controllers\AnalyticsController;
 use App\Helpers\Helpers;
 use App\Http\Requests\StoreRequest;
 use App\Jobs\UpdateAttemptInRoutesParticipants;
@@ -682,11 +683,7 @@ class EventsController extends Controller
         }
 //        Event::refresh_final_points_all_participant($event);
         UpdateResultParticipants::dispatch($event_id);
-        $categories = ParticipantCategory::where('event_id', $event_id)->get();
-        foreach ($categories as $category) {
-            Cache::forget('result_male_cache_'.$category->category.'_event_id_'.$event_id);
-            Cache::forget('result_female_cache_'.$category->category.'_event_id_'.$event_id);
-        }
+        Helpers::clear_cache($event);
         if ($result) {
             return response()->json(['success' => true, 'message' => 'Успешная внесение результатов', 'link' => $event->link], 201);
         } else {
@@ -913,48 +910,9 @@ class EventsController extends Controller
     {
         $gender = $request->input('gender');
         $event_id = $request->input('event_id');
-        $stats = [];
-        $routes = Route::where('event_id', $event_id)->get();
-        foreach ($routes as $route){
-            $all_passed = ResultRouteQualificationClassic::where('event_id', $event_id)
-                ->where('grade', $route->grade)
-                ->where('route_id', $route->route_id)
-                ->whereIn('attempt', [
-                    ResultRouteQualificationClassic::STATUS_PASSED_FLASH,
-                    ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT,
-                    ResultRouteQualificationClassic::STATUS_ZONE])
-                ->get()->count();
-            if($gender == 'male'){
-                $coefficient = EventAndCoefficientRoute::where('event_id', $event_id)
-                    ->where('route_id', $route->route_id)
-                    ->first()->coefficient_male;
-            } else {
-                $coefficient = EventAndCoefficientRoute::where('event_id', $event_id)
-                    ->where('route_id', $route->route_id)
-                    ->first()->coefficient_female;
-            }
-
-            $flash = ResultRouteQualificationClassic::where('event_id', $event_id)
-                ->where('gender', $gender)
-                ->where('grade', $route->grade)
-                ->where('route_id', $route->route_id)
-                ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_FLASH)
-                ->get()->count();
-            $redpoint = ResultRouteQualificationClassic::where('event_id', $event_id)
-                ->where('gender', $gender)
-                ->where('grade', $route->grade)
-                ->where('route_id', $route->route_id)
-                ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)
-                ->get()->count();
-            $stats[] =  array(
-                'route_id' => $route->route_id,
-                'grade' => $route->grade,
-                'flash' => $flash,
-                'redpoint' => $redpoint,
-                'all_passed' => $all_passed,
-                'coefficient' => $coefficient
-            );
-        }
+        $stats = Cache::remember('result_analytics_cache_event_id_'.$event_id, 60 * 60, function () use ($event_id, $gender) {
+            return AnalyticsController::get_stats_gender($event_id, $gender);
+        });
         return response()->json([
             'routes' => $stats,
         ]);
