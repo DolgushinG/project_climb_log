@@ -69,6 +69,10 @@ class Event extends Model
     {
         return $this->hasOne(ResultQualificationClassic::class);
     }
+    public function participant_route()
+    {
+        return $this->hasOne(ResultRouteQualificationClassic::class);
+    }
     public function sets()
     {
         return $this->hasOne(Set::class);

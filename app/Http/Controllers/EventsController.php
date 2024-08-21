@@ -897,14 +897,13 @@ class EventsController extends Controller
     public function index_analytics(Request $request, $start_date, $climbing_gym, $title)
     {
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-        if($event) {
+        if($event && $event->is_open_public_analytics) {
             $categories = ParticipantCategory::where('event_id', $event->id)->pluck('category', 'id')->toArray();
             if($event->type_event){
                 $grades = RoutesOutdoor::where('event_id', $event->id)->pluck('grade', 'route_id')->toArray();
             } else {
                 $grades = Route::where('event_id', $event->id)->pluck('grade', 'route_id')->toArray();
             }
-
         } else {
             return view('404');
         }
