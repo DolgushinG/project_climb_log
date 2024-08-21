@@ -911,13 +911,19 @@ class EventsController extends Controller
     }
     public function get_analytics(Request $request)
     {
-        // Получаем данные из тела запроса
         $gender = $request->input('gender');
         $event_id = $request->input('event_id');
-        // Пример запроса к базе данных
         $stats = [];
         $routes = Route::where('event_id', $event_id)->get();
         foreach ($routes as $route){
+            $all_passed = ResultRouteQualificationClassic::where('event_id', $event_id)
+                ->where('grade', $route->grade)
+                ->where('route_id', $route->route_id)
+                ->whereIn('attempt', [
+                    ResultRouteQualificationClassic::STATUS_PASSED_FLASH,
+                    ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT,
+                    ResultRouteQualificationClassic::STATUS_ZONE])
+                ->get()->count();
             $flash = ResultRouteQualificationClassic::where('event_id', $event_id)
                 ->where('gender', $gender)
                 ->where('grade', $route->grade)
@@ -930,7 +936,7 @@ class EventsController extends Controller
                 ->where('route_id', $route->route_id)
                 ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)
                 ->get()->count();
-            $stats[] =  array('route_id' => $route->route_id, 'grade' => $route->grade, 'flash' => $flash, 'redpoint' => $redpoint);
+            $stats[] =  array('route_id' => $route->route_id, 'grade' => $route->grade, 'flash' => $flash, 'redpoint' => $redpoint, 'all_passed' => $all_passed);
         }
         return response()->json([
             'routes' => $stats,

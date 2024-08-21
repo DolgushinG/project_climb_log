@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     let myChart = null;
     let allData = []; // Переменная для хранения всех данных
 
@@ -14,12 +14,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 gender: gender,
                 event_id: event_id
             },
-            success: function(data) {
+            success: function (data) {
                 allData = data.routes; // Сохраняем все данные в глобальной переменной
                 updateChart(); // Обновляем график с фильтрацией
                 updateTable(); // Обновляем таблицу с данными
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error("Ошибка: " + error);
             }
         });
@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let labels = filteredData.map(route => `${route.grade} (Трасса : ${route.route_id})`);
         let flashData = filteredData.map(route => route.flash);
         let redpointData = filteredData.map(route => route.redpoint);
+        let allPassedData = filteredData.map(route => route.all_passed);
 
         myChart = new Chart(ctx, {
             type: 'bar', // Используем вертикальный график
@@ -57,6 +58,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         label: 'Редпоинты',
                         data: redpointData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Всего',
+                        data: allPassedData,
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
@@ -106,13 +114,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${route.grade}</td>
                 <td>${route.flash}</td>
                 <td>${route.redpoint}</td>
+                <td>${route.all_passed}</td>
             `;
             tableBody.appendChild(row);
         });
     }
 
     // Привязка события change к элементам select
-    document.getElementById('gradeSelect').addEventListener('change', function() {
+    document.getElementById('gradeSelect').addEventListener('change', function () {
         updateChart();
         updateTable();
     });
@@ -120,4 +129,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Первоначальная загрузка графика и таблицы
     loadChart();
+});
+$(document).ready(function () {
+    $(".search").keyup(function () {
+        var searchTerm = $(".search").val();
+        var listItem = $('.results tbody').children('tr');
+        var searchSplit = searchTerm.replace(/ /g, "'):containsi('")
+
+        $.extend($.expr[':'], {
+            'containsi': function (elem, i, match, array) {
+                return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+            }
+        });
+
+        $(".results tbody tr").not(":containsi('" + searchSplit + "')").each(function (e) {
+            $(this).attr('visible', 'false');
+        });
+
+        $(".results tbody tr:containsi('" + searchSplit + "')").each(function (e) {
+            $(this).attr('visible', 'true');
+        });
+
+        var jobCount = $('.results tbody tr[visible="true"]').length;
+        $('.counter').text('Найдено сорев ' + jobCount);
+
+        if (jobCount == '0') {
+            $('.no-result').show();
+        } else {
+            $('.no-result').hide();
+        }
+    });
 });

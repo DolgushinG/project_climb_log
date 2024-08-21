@@ -2,9 +2,12 @@
 @section('content')
     <script src="{{asset('js/analytics.js')}}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js"></script>
     <section class="section-bg contact">
         <div class="container mt-3">
             <h2>Аналитика прохождений трасс</h2>
+
             <div class="row mb-3">
                 <div class="col">
                     <label for="gradeSelect">Трасса</label>
@@ -27,15 +30,19 @@
             <div class="chart-container">
                 <canvas id="myChart" data-id="{{$event->id}}"></canvas>
             </div>
-
+            <div class="form-group">
+                <label class="m-1" for="search"> Поиск тут </label>
+                <input id="search" type="text" class="search form-control" placeholder="Что ищем?">
+            </div>
             <!-- Добавляем таблицу данных -->
-            <table class="table table-striped mt-4">
+            <table class="table table-striped mt-4 results" id="dataTable">
                 <thead>
                 <tr>
                     <th>Трасса</th>
                     <th>Степень</th>
                     <th>Флеши</th>
                     <th>Редпоинты</th>
+                    <th>Всего прохождений(М + Ж)</th>
                 </tr>
                 </thead>
                 <tbody id="dataTableBody">
