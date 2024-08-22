@@ -375,7 +375,7 @@ class ResultQualificationClassic extends Model
         $users = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
             ->where('result_qualification_classic.event_id', '=', $event_id)
-            ->where('result_qualification_classic.active', '=', 1)
+//            ->where('result_qualification_classic.active', '=', 1)
             ->where('result_qualification_classic.'.$column_category_id, '=', $category_id)
             ->select(
                 'users.id',
@@ -389,16 +389,18 @@ class ResultQualificationClassic extends Model
                 'result_qualification_classic.number_set_id',
             )
             ->where('result_qualification_classic.gender', '=', $gender)->get()->sortBy($column_place)->toArray();
-        $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->where('active', 1)->pluck('user_id')->toArray();
-        foreach ($users as $index => $user){
-            $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter,  $user['id'], $gender, $category_id, true, $global);
-            $set = Set::find($user['number_set_id']);
-            $users[$index][$column_place] = $place;
-            if($event->is_input_set != 1){
-                $users[$index]['number_set_id'] = $set->number_set ?? '';
-            }
 
-        }
+//        $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->where('active', 1)->pluck('user_id')->toArray();
+//        foreach ($users as $index => $user){
+//            $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter,  $user['id'], $gender, $category_id, true, $global);
+//            dd($user, $place);
+//            $set = Set::find($user['number_set_id']);
+//            $users[$index][$column_place] = $place;
+//            if($event->is_input_set != 1){
+//                $users[$index]['number_set_id'] = $set->number_set ?? '';
+//            }
+//
+//        }
         $users_need_sorted = collect($users)->toArray();
         if($event->is_open_main_rating){
             usort($users_need_sorted, function ($a, $b) {
@@ -423,7 +425,6 @@ class ResultQualificationClassic extends Model
                 }
             });
         }
-//        dd($users_need_sorted);
         return collect($users_need_sorted);
     }
 
