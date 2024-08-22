@@ -5,8 +5,7 @@
                 <div class="col-xl-12 mb-3">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Мужчины <span
-                                    class="badge bg-success text-light">{{$stats->male}}</span></h5>
+                            <h5 class="card-title">Мужчины </h5>
                             <!-- Bordered Tabs Justified -->
                             <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
                                 @foreach($categories as $index => $category)
@@ -15,8 +14,7 @@
                                                 data-bs-toggle="tab"
                                                 data-bs-target="#bordered-justified-{{$category['id']}}" type="button"
                                                 role="tab" aria-controls="{{$category['id']}}"
-                                                aria-selected="true">{{$category['category']}} <span
-                                                class="badge bg-primary text-light">{{$stats->male_categories[$category['id']]}}</span>
+                                                aria-selected="true">{{$category['category']}}
                                         </button>
                                     </li>
                                 @endforeach
@@ -66,8 +64,7 @@
                 <div class="col-xl-12 mb-3">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Женщины <span
-                                    class="badge bg-dark text-white">{{$stats->female}}</span></h5>
+                            <h5 class="card-title">Женщины </h5>
                             <!-- Bordered Tabs Justified -->
                             <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified"
                                 role="tablist">
@@ -77,8 +74,7 @@
                                                 data-bs-toggle="tab"
                                                 data-bs-target="#bordered-justified-women-{{$category['id']}}"
                                                 type="button" role="tab" aria-controls="women-{{$category['id']}}"
-                                                aria-selected="true">{{$category['category']}} <span
-                                                class="badge bg-primary text-light">{{$stats->female_categories[$category['id']]}}</span>
+                                                aria-selected="true">{{$category['category']}}</span>
                                         </button>
                                     </li>
                                 @endforeach
