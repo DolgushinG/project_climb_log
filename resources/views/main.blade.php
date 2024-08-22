@@ -110,48 +110,76 @@
         <div class="container" data-aos="fade-up">
 
             <div class="section-title">
-                <h2>Регистрация и логин через соц сети</h2>
-                <p>Регистрация и вход через социальные сети, такие как Yandex, Telegram и ВКонтакте, предлагают удобный и быстрый способ доступа к вашему аккаунту на нашем сервисе.</p>
+                <h2>Удобное создание и управление соревнованиями</h2>
+                <p>Создание и управление соревнованиями через админ-панель разработано с акцентом на удобство и эффективность.</p>
             </div>
 
             <div class="row">
                 <div class="col-lg-6 pt-4 pt-lg-0 content d-flex flex-column justify-content-center" data-aos="fade-up" data-aos-delay="100">
                     <ul>
                         <li>
-                            <i class="bx bx-time"></i>
+                            <i class="bx bx-lock-open"></i>
                             <div>
-                                <h5>Экономия времени</h5>
-                                <p>Вам не нужно заполнять длинные формы регистрации, придумывать и запоминать новый пароль</p>
+                                <h5>Гибкий подход</h5>
+                                <p>Организаторы могут легко создавать новые соревнования, задавая ключевые параметры, такие как формат, оплата, подсчет, статус и многое другое</p>
                             </div>
                         </li>
                         <li>
-                            <i class="bx bx-accessibility"></i>
+                            <i class="bx bx-envelope"></i>
                             <div>
-                                <h5>Упрощённый доступ</h5>
-                                <p>Использование социальных сетей для входа облегчает процесс доступа к вашему аккаунту на разных устройствах</p>
+                                <h5>Доступность</h5>
+                                <p>Благодаря интуитивно понятному интерфейсу, все этапы настройки доступны из одного окна, позволяя быстро вносить изменения и актуализировать информацию</p>
                             </div>
                         </li>
                         <li>
-                            <i class="bx bx-lock"></i>
+                            <i class="bx bx-info-square"></i>
                             <div>
-                                <h5>Безопасность</h5>
-                                <p>Вход через социальные сети осуществляется с использованием современных методов аутентификации, таких как двухфакторная авторизация</p>
+                                <h5>Информативность</h5>
+                                <p>Инструменты аналитики и отчетности, встроенные в админ-панель, позволяют отслеживать ключевые метрики, такие как количество зарегистрированных участников, статус оплат, и результаты</p>
                             </div>
                         </li>
                         <li>
-                            <i class="bx bx-arrow-back"></i>
+                            <i class="bx bx-message"></i>
                             <div>
-                                <h5>Лёгкая интеграция</h5>
-                                <p>Если у вас уже есть профиль в одной из поддерживаемых соцсетей (Yandex, Telegram или ВКонтакте), вы можете сразу начать использовать наш сервис</p>
+                                <h5>Уведомления</h5>
+                                <p>Массовой отправка уведомлений и добавления предупреждений помогает эффективно коммуницировать с участниками, гарантируя, что все важные изменения или новости будут своевременно доведены до их сведения</p>
                             </div>
                         </li>
                     </ul>
                 </div>
+
                 <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
-                    <img src="{{asset('images/login.png')}}" class="img-fluid" alt="">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- Slides with fade transition -->
+                            <div id="carouselExampleFade" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                        <img src="{{asset('images/management.png')}}" class="d-block w-100" alt="...">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="{{asset('images/analytics.png')}}" class="d-block w-100" alt="...">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="{{asset('images/main.png')}}" class="d-block w-100" alt="...">
+                                    </div>
+                                </div>
+
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+
+                            </div><!-- End Slides with fade transition -->
+
+                        </div>
+                    </div>
                 </div>
             </div>
-
         </div>
     </section><!-- End About Section -->
     @if(count($events) > 0)
