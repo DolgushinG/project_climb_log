@@ -43,6 +43,7 @@ Route::get('event/{start_date}/{climbing_gym}/getInfoPay/{event_id}', [App\Http\
 Route::get('/admin/event/{start_date}/{climbing_gym}/{title}', [App\Http\Controllers\EventsController::class, 'show']);
 Route::get('/event/{start_date}/{climbing_gym}/{title}/participants', [App\Http\Controllers\EventsController::class, 'get_participants'])->name('participants');
 Route::get('/event/{start_date}/{climbing_gym}/{title}/qualificationClassic/results', [App\Http\Controllers\EventsController::class, 'get_qualification_classic_results'])->name('get_qualification_classic_results');
+Route::get('/event/{start_date}/{climbing_gym}/{title}/qualificationGlobalClassic/results', [App\Http\Controllers\EventsController::class, 'get_qualification_classic_global_results'])->name('get_qualification_classic_global_results');
 Route::get('/event/{start_date}/{climbing_gym}/{title}/qualificationFranceSystem/results', [App\Http\Controllers\EventsController::class, 'get_qualification_france_system_results'])->name('get_qualification_france_system_results');
 Route::get('/event/{start_date}/{climbing_gym}/{title}/semifinalFranceSystem/results', [App\Http\Controllers\EventsController::class, 'get_semifinal_france_system_results'])->name('get_semifinal_france_system_results');
 Route::get('/event/{start_date}/{climbing_gym}/{title}/finalFranceSystem/results', [App\Http\Controllers\EventsController::class, 'get_final_france_system_results'])->name('get_final_france_system_results');

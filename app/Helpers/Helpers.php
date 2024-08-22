@@ -18,6 +18,10 @@ class Helpers
         $categories = ParticipantCategory::where('event_id', $event->id)->get();
         foreach ($categories as $category) {
             Cache::forget('result_male_cache_' . $category->category.'_event_id_'.$event->id);
+            if($event->is_open_main_rating){
+                Cache::forget('global_result_male_cache_' . $category->category.'_event_id_'.$event->id);
+                Cache::forget('global_result_female_cache_' . $category->category.'_event_id_'.$event->id);
+            }
             Cache::forget('result_female_cache_' . $category->category.'_event_id_'.$event->id);
         }
         Cache::forget('result_analytics_cache_event_id_'.$event->id);
