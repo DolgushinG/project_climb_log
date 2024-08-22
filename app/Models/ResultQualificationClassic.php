@@ -355,22 +355,48 @@ class ResultQualificationClassic extends Model
 
     public static function get_sorted_group_participant($event_id, $gender, $category_id)
     {
-        $event = Event::find($event_id);
-        if($event->is_open_main_rating){
-            $column_place = 'user_global_place';
-            $column_points = 'global_points';
-            if($event->is_auto_categories){
-                $column_category_id = 'global_category_id';
+        $column_place = 'user_place';
+        $column_points = 'points';
+        $column_category_id = 'category_id';
+        $users = User::query()
+            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+            ->where('result_qualification_classic.event_id', '=', $event_id)
+//            ->where('result_qualification_classic.active', '=', 1)
+            ->where('result_qualification_classic.'.$column_category_id, '=', $category_id)
+            ->select(
+                'users.id',
+                'users.city',
+                'result_qualification_classic.'.$column_place,
+                'users.middlename',
+                'result_qualification_classic.'.$column_points,
+                'result_qualification_classic.owner_id',
+                'result_qualification_classic.gender',
+                'result_qualification_classic.'.$column_category_id,
+                'result_qualification_classic.number_set_id',
+            )
+            ->where('result_qualification_classic.gender', '=', $gender)->get()->sortBy($column_place)->toArray();
+        $users_need_sorted = collect($users)->toArray();
+        usort($users_need_sorted, function ($a, $b) {
+            // Проверяем, если значение 'user_place' пустое, перемещаем его в конец
+            if (empty($a['user_place'])) {
+                return 1; // $a должно быть после $b
+            } elseif (empty($b['user_place'])) {
+                return -1; // $a должно быть перед $b
             } else {
-                $column_category_id = 'category_id';
+                return $a['user_place'] <=> $b['user_place'];
             }
-
-            $global = true;
+        });
+        return collect($users_need_sorted);
+    }
+    public static function get_global_sorted_group_participant($event_id, $gender, $category_id)
+    {
+        $event = Event::find($event_id);
+        $column_place = 'user_global_place';
+        $column_points = 'global_points';
+        if($event->is_auto_categories){
+            $column_category_id = 'global_category_id';
         } else {
-            $column_place = 'user_place';
-            $column_points = 'points';
             $column_category_id = 'category_id';
-            $global = false;
         }
         $users = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
@@ -389,45 +415,19 @@ class ResultQualificationClassic extends Model
                 'result_qualification_classic.number_set_id',
             )
             ->where('result_qualification_classic.gender', '=', $gender)->get()->sortBy($column_place)->toArray();
-
-//        $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->where('active', 1)->pluck('user_id')->toArray();
-//        foreach ($users as $index => $user){
-//            $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter,  $user['id'], $gender, $category_id, true, $global);
-//            dd($user, $place);
-//            $set = Set::find($user['number_set_id']);
-//            $users[$index][$column_place] = $place;
-//            if($event->is_input_set != 1){
-//                $users[$index]['number_set_id'] = $set->number_set ?? '';
-//            }
-//
-//        }
         $users_need_sorted = collect($users)->toArray();
-        if($event->is_open_main_rating){
-            usort($users_need_sorted, function ($a, $b) {
-                // Проверяем, если значение 'user_place' пустое, перемещаем его в конец
-                if (empty($a['user_global_place'])) {
-                    return 1; // $a должно быть после $b
-                } elseif (empty($b['user_global_place'])) {
-                    return -1; // $a должно быть перед $b
-                } else {
-                    return $a['user_global_place'] <=> $b['user_global_place'];
-                }
-            });
-        } else {
-            usort($users_need_sorted, function ($a, $b) {
-                // Проверяем, если значение 'user_place' пустое, перемещаем его в конец
-                if (empty($a['user_place'])) {
-                    return 1; // $a должно быть после $b
-                } elseif (empty($b['user_place'])) {
-                    return -1; // $a должно быть перед $b
-                } else {
-                    return $a['user_place'] <=> $b['user_place'];
-                }
-            });
-        }
+        usort($users_need_sorted, function ($a, $b) {
+            // Проверяем, если значение 'user_place' пустое, перемещаем его в конец
+            if (empty($a['user_global_place'])) {
+                return 1; // $a должно быть после $b
+            } elseif (empty($b['user_global_place'])) {
+                return -1; // $a должно быть перед $b
+            } else {
+                return $a['user_global_place'] <=> $b['user_global_place'];
+            }
+        });
         return collect($users_need_sorted);
     }
-
     public static function sorted_team_points($result_team)
     {
         asort($result_team);
@@ -450,14 +450,8 @@ class ResultQualificationClassic extends Model
     }
     public static function get_list_team_and_points_participant($event_id, $team)
     {
-        $event = Event::find($event_id);
-        if($event->is_open_main_rating){
-            $column_place = 'user_global_place';
-            $column_points = 'global_points';
-        } else {
-            $column_place = 'user_place';
-            $column_points = 'points';
-        }
+        $column_place = 'user_place';
+        $column_points = 'points';
         $teams = 0;
         $users = User::query()
             ->where('users.team', '=', $team)
@@ -477,7 +471,36 @@ class ResultQualificationClassic extends Model
         return $teams;
     }
 
-
+    public static function get_global_list_team_and_points_participant($event_id, $team)
+    {
+        $column_place = 'user_global_place';
+        $column_points = 'global_points';
+        $teams = 0;
+        $users = User::query()
+            ->where('users.team', '=', $team)
+            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+            ->where('result_qualification_classic.event_id', $event_id)
+            ->where(function ($query) {
+                $query->where('result_qualification_classic.active', '=', 1)
+                    ->orWhere(function ($query) {
+                        $query->where('result_qualification_classic.active', '=', 0)
+                            ->where('result_qualification_classic.is_other_event', '=', 1);
+                    });
+            })
+            ->select(
+                'users.id',
+                'result_qualification_classic.' . $column_place,
+                'users.team',
+                'result_qualification_classic.' . $column_points
+            )
+            ->get()
+            ->sortBy($column_place)
+            ->toArray();
+        foreach ($users as $user){
+            $teams += $user[$column_points];
+        }
+        return $teams;
+    }
     public static function get_list_passed_route($event_id, $user_id)
     {
         return ResultRouteQualificationClassic::where('event_id', $event_id)->where('user_id', $user_id)->whereIn('attempt', [1,2,3])->pluck('grade');

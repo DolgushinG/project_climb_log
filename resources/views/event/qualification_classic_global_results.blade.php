@@ -41,11 +41,11 @@
                                                 <tbody>
                                                 @foreach($result as $res)
                                                     @if($res['gender'] == "male")
-                                                        @if($res['category_id'] == $category['id'])
+                                                        @if($res['global_category_id'] == $category['id'])
                                                             <tr>
-                                                                <td>{{$res['user_place']}}</td>
+                                                                <td>{{$res['user_global_place']}}</td>
                                                                 <td>{{$res['middlename']}}</td>
-                                                                <td>{{$res['points']}}</td>
+                                                                <td>{{$res['global_points']}}</td>
                                                             </tr>
                                                         @endif
                                                     @endif
@@ -100,11 +100,11 @@
                                             <tbody>
                                             @foreach($result as $res)
                                                 @if($res['gender'] == "female")
-                                                    @if($res['category_id'] == $category['id'])
+                                                    @if($res['global_category_id'] == $category['id'])
                                                         <tr>
-                                                            <td>{{$res['user_place']}}</td>
+                                                            <td>{{$res['user_global_place']}}</td>
                                                             <td>{{$res['middlename']}}</td>
-                                                            <td>{{$res['points']}}</td>
+                                                            <td>{{$res['global_points']}}</td>
                                                         </tr>
                                                     @endif
                                                 @endif
