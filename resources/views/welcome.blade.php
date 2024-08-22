@@ -145,6 +145,10 @@
                             @if(!$event->is_france_system_qualification)
                                 <a href="{{route('get_qualification_classic_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Предварительные результаты</a>
+                                @if($event->is_open_main_rating)
+                                    <a href="{{route('get_qualification_classic_global_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                       class="btn btn-dark rounded-pill">Совмещенные результаты</a>
+                                @endif
                             @else
                                 <a href="{{route('get_qualification_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
                                    class="btn btn-primary rounded-pill">Предварительные результаты</a>
