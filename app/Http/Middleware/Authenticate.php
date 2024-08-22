@@ -15,7 +15,7 @@ class Authenticate extends Middleware
     protected function redirectTo($request)
     {
         if($request->path() === 'admin'){
-            return abort('404');
+            return abort('errors.404');
         }
         if (! $request->expectsJson()) {
             return route('login');

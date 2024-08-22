@@ -3,6 +3,7 @@
 namespace App\Admin\Actions;
 
 use App\Helpers\Generators\Generators;
+use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ResultQualificationClassic;
@@ -65,11 +66,7 @@ class BatchGenerateParticipant extends Action
 //            Event::refresh_final_points_all_participant($event);
         }
 
-        $categories = ParticipantCategory::where('event_id', $event->id)->get();
-        foreach ($categories as $category) {
-            Cache::forget('result_male_cache_' . $category->category.'_event_id_'.$event->id);
-            Cache::forget('result_female_cache_' . $category->category.'_event_id_'.$event->id);
-        }
+        Helpers::clear_cache($event);
         return $this->response()->success($text)->refresh();
     }
 

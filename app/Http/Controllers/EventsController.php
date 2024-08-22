@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Admin\Controllers\AnalyticsController;
 use App\Helpers\Helpers;
 use App\Http\Requests\StoreRequest;
 use App\Jobs\UpdateAttemptInRoutesParticipants;
@@ -9,13 +10,11 @@ use App\Jobs\UpdateResultParticipants;
 use App\Jobs\UpdateRouteCoefficientParticipants;
 use App\Models\Area;
 use App\Models\Event;
-use App\Models\EventAndCoefficientRoute;
 use App\Models\Format;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
 use App\Models\MessageForParticipant;
 use App\Models\OwnerPaymentOperations;
-use App\Models\OwnerPayments;
 use App\Models\Place;
 use App\Models\PlaceRoute;
 use App\Models\ResultQualificationClassic;
@@ -28,8 +27,6 @@ use App\Models\Route;
 use App\Models\RoutesOutdoor;
 use App\Models\Set;
 use App\Models\User;
-use Carbon\Carbon;
-use Encore\Admin\Admin;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -116,7 +113,7 @@ class EventsController extends Controller
             $current_amount_start_price = OwnerPaymentOperations::current_amount_start_price_before_date($event);
             return view('welcome', compact(['current_amount_start_price','participant_products_and_discounts','message_for_participants','event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
-            return view('404');
+            return view('errors.404');
         }
     }
 
@@ -216,7 +213,7 @@ class EventsController extends Controller
                 $index++;
             }
         } else {
-            return view('404');
+            return view('errors.404');
         }
 //        dd($days, $participants, $sets);
         return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
@@ -297,7 +294,7 @@ class EventsController extends Controller
                 $categories = $categories->toArray();
             }
         } else {
-            return view('404');
+            return view('errors.404');
         }
         return view('event.qualification_classic_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats', 'columns']));
     }
@@ -324,7 +321,7 @@ class EventsController extends Controller
                 }
             }
         } else {
-            return view('404');
+            return view('errors.404');
         }
         return view('event.france_system_qualification_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
@@ -354,7 +351,7 @@ class EventsController extends Controller
                 $result_each_routes['female'] = $users_female2;
             }
         } else {
-            return view('404');
+            return view('errors.404');
         }
         return view('event.france_system_semifinal_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
@@ -384,7 +381,7 @@ class EventsController extends Controller
                 $result_each_routes['female'] = $users_female2;
             }
         } else {
-            return view('404');
+            return view('errors.404');
         }
 //        dd($result_each_routes, $routes);
         return view('event.france_system_final_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
@@ -682,11 +679,7 @@ class EventsController extends Controller
         }
 //        Event::refresh_final_points_all_participant($event);
         UpdateResultParticipants::dispatch($event_id);
-        $categories = ParticipantCategory::where('event_id', $event_id)->get();
-        foreach ($categories as $category) {
-            Cache::forget('result_male_cache_'.$category->category.'_event_id_'.$event_id);
-            Cache::forget('result_female_cache_'.$category->category.'_event_id_'.$event_id);
-        }
+        Helpers::clear_cache($event);
         if ($result) {
             return response()->json(['success' => true, 'message' => 'Успешная внесение результатов', 'link' => $event->link], 201);
         } else {
@@ -697,7 +690,7 @@ class EventsController extends Controller
     public function listRoutesEvent(Request $request, $start_date, $climbing_gym, $title) {
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if(!$event){
-            return view('404');
+            return view('errors.404');
         }
         if($event->type_event){
             $grades = RoutesOutdoor::where('owner_id', '=', $event->owner_id)->where('event_id', '=', $event->id)->get();
@@ -780,7 +773,10 @@ class EventsController extends Controller
     {
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
         $user = User::find($request->user_id);
-        if (!$event || !$event->is_registration_state) {
+        if(!$event){
+            return response()->json(['success' => false, 'message' => 'Ошибка внесения в лист ожидания'], 422);
+        }
+        if (!$event->is_registration_state) {
             return response()->json(['success' => false, 'message' => 'Ошибка внесения в лист ожидания'], 422);
         }
         if (!Helpers::valid_email($user->email)) {
@@ -836,6 +832,9 @@ class EventsController extends Controller
     {
         if($request->event_id){
             $event = Event::find($request->event_id);
+            if(!$event){
+                return response()->json(['failed' => true, 'message' => 'Ошибка отмены регистрации']);
+            }
             if($event->is_france_system_qualification){
                 $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
             } else {
@@ -896,66 +895,34 @@ class EventsController extends Controller
     }
     public function index_analytics(Request $request, $start_date, $climbing_gym, $title)
     {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-        if($event) {
-            $categories = ParticipantCategory::where('event_id', $event->id)->pluck('category', 'id')->toArray();
-            if($event->type_event){
-                $grades = RoutesOutdoor::where('event_id', $event->id)->pluck('grade', 'route_id')->toArray();
-            } else {
-                $grades = Route::where('event_id', $event->id)->pluck('grade', 'route_id')->toArray();
+        $event = Event::where('start_date', $start_date)
+            ->where('title_eng', '=', $title)
+            ->where('climbing_gym_name_eng', '=', $climbing_gym)
+            ->where('is_public', 1)
+            ->first();
+        if(!$event) {
+            if (!$event->is_open_public_analytics) {
+                return view('errors.404');
             }
-
-        } else {
-            return view('404');
+            return view('errors.404');
         }
+
+        $categories = ParticipantCategory::where('event_id', $event->id)->pluck('category', 'id')->toArray();
+        if($event->type_event){
+            $grades = RoutesOutdoor::where('event_id', $event->id)->pluck('grade', 'route_id')->toArray();
+        } else {
+            $grades = Route::where('event_id', $event->id)->pluck('grade', 'route_id')->toArray();
+        }
+
         return view('event.analytics', compact(['event','categories', 'grades']));
     }
     public function get_analytics(Request $request)
     {
         $gender = $request->input('gender');
         $event_id = $request->input('event_id');
-        $stats = [];
-        $routes = Route::where('event_id', $event_id)->get();
-        foreach ($routes as $route){
-            $all_passed = ResultRouteQualificationClassic::where('event_id', $event_id)
-                ->where('grade', $route->grade)
-                ->where('route_id', $route->route_id)
-                ->whereIn('attempt', [
-                    ResultRouteQualificationClassic::STATUS_PASSED_FLASH,
-                    ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT,
-                    ResultRouteQualificationClassic::STATUS_ZONE])
-                ->get()->count();
-            if($gender == 'male'){
-                $coefficient = EventAndCoefficientRoute::where('event_id', $event_id)
-                    ->where('route_id', $route->route_id)
-                    ->first()->coefficient_male;
-            } else {
-                $coefficient = EventAndCoefficientRoute::where('event_id', $event_id)
-                    ->where('route_id', $route->route_id)
-                    ->first()->coefficient_female;
-            }
-
-            $flash = ResultRouteQualificationClassic::where('event_id', $event_id)
-                ->where('gender', $gender)
-                ->where('grade', $route->grade)
-                ->where('route_id', $route->route_id)
-                ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_FLASH)
-                ->get()->count();
-            $redpoint = ResultRouteQualificationClassic::where('event_id', $event_id)
-                ->where('gender', $gender)
-                ->where('grade', $route->grade)
-                ->where('route_id', $route->route_id)
-                ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)
-                ->get()->count();
-            $stats[] =  array(
-                'route_id' => $route->route_id,
-                'grade' => $route->grade,
-                'flash' => $flash,
-                'redpoint' => $redpoint,
-                'all_passed' => $all_passed,
-                'coefficient' => $coefficient
-            );
-        }
+        $stats = Cache::remember('result_analytics_cache_event_id_'.$event_id, 60 * 60, function () use ($event_id, $gender) {
+            return AnalyticsController::get_stats_gender($event_id, $gender);
+        });
         return response()->json([
             'routes' => $stats,
         ]);

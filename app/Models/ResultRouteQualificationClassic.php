@@ -281,4 +281,8 @@ class ResultRouteQualificationClassic extends Model
         $users_male = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount);
         return $users_male->merge($users_female);
     }
+    public function event()
+    {
+        return $this->belongsTo(Event::class)->where('active', '=', 1);
+    }
 }
