@@ -12,6 +12,7 @@ use App\Models\ResultRouteQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\Route;
+use App\Models\User;
 use Encore\Admin\Actions\Action;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
@@ -41,21 +42,22 @@ class BatchGenerateParticipant extends Action
             ResultQualificationClassic::where('event_id',  $event->id)->delete();
             ResultRouteQualificationClassic::where('event_id',  $event->id)->delete();
         }
+        $start_number_participant = User::first();
+
         if($event->is_auto_categories){
-            Generators::prepare_participant_with_owner($owner_id, $event->id, $count, $table_result);
+            Generators::prepare_participant_with_owner($owner_id, $event->id, $count, $table_result, $start_number_participant->id);
         } else {
             $part_category = ParticipantCategory::where('event_id', $event->id)->get();
             $amount_categories = count($event->categories);
             $parts = intval($count / $amount_categories);
             $next = $parts;
-            $start = 1;
+            $start = $start_number_participant->id;
             foreach($part_category as $category){
                 Generators::prepare_participant_with_owner($owner_id, $event->id, $next, $table_result, $start, $category->category);
                 $next = $next+$parts;
                 $start = $start+$parts;
             }
         }
-
 
         Generators::prepare_result_route_qualification_classic($owner_id, $event->id, $table_result_routes, $count);
         if($event->is_france_system_qualification){

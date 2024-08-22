@@ -20,7 +20,7 @@
                     <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
                         <div class="icon-box" data-aos="fade-up" data-aos-delay="100">
                             <div class="icon"><i class="bx bxl-dribbble"></i></div>
-                            <h4 class="title"><a href="">Удобная регистрация участников через соц. сети</a></h4>
+                            <h4 class="title"><a href="#about">Удобная регистрация участников через соц. сети</a></h4>
                             <p class="description">
                                 <img src="{{asset('storage/img/icons/telegram.svg')}}" alt="telegram">
                                 <img src="{{asset('storage/img/icons/vk.svg')}}" alt="vk">
@@ -57,7 +57,104 @@
 
             </div>
         </section><!-- End Featured Services Section -->
-        @if(count($events) > 0)
+    <!-- ======= About Section ======= -->
+    <section id="about" class="about section-bg">
+        <div class="container" data-aos="fade-up">
+
+            <div class="section-title">
+                <h2>Регистрация и логин через соц сети</h2>
+                <p>Регистрация и вход через социальные сети, такие как Yandex, Telegram и ВКонтакте, предлагают удобный и быстрый способ доступа к вашему аккаунту на нашем сервисе.</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+                    <img src="{{asset('images/login.png')}}" class="img-fluid" alt="">
+                </div>
+                <div class="col-lg-6 pt-4 pt-lg-0 content d-flex flex-column justify-content-center" data-aos="fade-up" data-aos-delay="100">
+                    <ul>
+                        <li>
+                            <i class="bx bx-time"></i>
+                            <div>
+                                <h5>Экономия времени</h5>
+                                <p>Вам не нужно заполнять длинные формы регистрации, придумывать и запоминать новый пароль</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bx bx-accessibility"></i>
+                            <div>
+                                <h5>Упрощённый доступ</h5>
+                                <p>Использование социальных сетей для входа облегчает процесс доступа к вашему аккаунту на разных устройствах</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bx bx-lock"></i>
+                            <div>
+                                <h5>Безопасность</h5>
+                                <p>Вход через социальные сети осуществляется с использованием современных методов аутентификации, таких как двухфакторная авторизация</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bx bx-arrow-back"></i>
+                            <div>
+                                <h5>Лёгкая интеграция</h5>
+                                <p>Если у вас уже есть профиль в одной из поддерживаемых соцсетей (Yandex, Telegram или ВКонтакте), вы можете сразу начать использовать наш сервис</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </section><!-- End About Section -->
+    <section id="about" class="about section-bg">
+        <div class="container" data-aos="fade-up">
+
+            <div class="section-title">
+                <h2>Регистрация и логин через соц сети</h2>
+                <p>Регистрация и вход через социальные сети, такие как Yandex, Telegram и ВКонтакте, предлагают удобный и быстрый способ доступа к вашему аккаунту на нашем сервисе.</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6 pt-4 pt-lg-0 content d-flex flex-column justify-content-center" data-aos="fade-up" data-aos-delay="100">
+                    <ul>
+                        <li>
+                            <i class="bx bx-time"></i>
+                            <div>
+                                <h5>Экономия времени</h5>
+                                <p>Вам не нужно заполнять длинные формы регистрации, придумывать и запоминать новый пароль</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bx bx-accessibility"></i>
+                            <div>
+                                <h5>Упрощённый доступ</h5>
+                                <p>Использование социальных сетей для входа облегчает процесс доступа к вашему аккаунту на разных устройствах</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bx bx-lock"></i>
+                            <div>
+                                <h5>Безопасность</h5>
+                                <p>Вход через социальные сети осуществляется с использованием современных методов аутентификации, таких как двухфакторная авторизация</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bx bx-arrow-back"></i>
+                            <div>
+                                <h5>Лёгкая интеграция</h5>
+                                <p>Если у вас уже есть профиль в одной из поддерживаемых соцсетей (Yandex, Telegram или ВКонтакте), вы можете сразу начать использовать наш сервис</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+                    <img src="{{asset('images/login.png')}}" class="img-fluid" alt="">
+                </div>
+            </div>
+
+        </div>
+    </section><!-- End About Section -->
+    @if(count($events) > 0)
         <!-- ======= Portfolio Section ======= -->
         <section id="portfolio" class="portfolio">
             <div class="container" data-aos="fade-up">

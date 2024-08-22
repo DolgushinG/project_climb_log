@@ -26,7 +26,7 @@ class ListMergedEventsToEvents extends Migration
     public function down()
     {
         Schema::table('events', function (Blueprint $table) {
-            $table->json('list_merged_events')->after('setting_payment')->nullable();
+            $table->json('list_merged_events');
         });
     }
 }

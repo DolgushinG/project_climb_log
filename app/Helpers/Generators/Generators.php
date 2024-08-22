@@ -83,20 +83,21 @@ class Generators
     public static function prepare_participant_with_owner($owner_id, $event_id, $users, $table, $start_user_id=null, $category=null)
     {
         $participants = array();
+        $genders = ['male','female'];
         if($category){
             $category_id = ParticipantCategory::where('category', $category)->where('owner_id', $owner_id)->where('event_id', $event_id)->first()->id;
-            for ($i = $start_user_id; $i <= $users; $i++) {
+            for ($i = $start_user_id; $i <= $users + $start_user_id; $i++) {
                 $user = User::find($i);
                 $user->category = $category_id;
                 $user->save();
                 $sets = Set::where('event_id', $event_id)->pluck('id','number_set')->toArray();
-                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'category_id' => $category_id,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
+                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'category_id' => $category_id,'gender' => $user->gender ?? $genders[array_rand(['male','female'])], 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         } else {
-            for ($i = 1; $i <= $users; $i++) {
+            for ($i = 1; $i <= $users + $start_user_id ; $i++) {
                 $user = User::find($i);
                 $sets = Set::where('event_id', $event_id)->pluck('id','number_set')->toArray();
-                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'gender' => $user->gender, 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
+                $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'gender' => $user->gender ?? $genders[array_rand(['male','female'])], 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         }
         DB::table($table)->insert($participants);
@@ -108,7 +109,6 @@ class Generators
             ResultRouteQualificationClassic::where('event_id', $event_id)->delete();
             $active_participants = ResultQualificationClassic::where('event_id', $event_id)->where('owner_id', $owner_id)->where('active', 1)->get();
             $event = Event::find($event_id);
-
             $type_group_routes = ['beginner', 'middle', 'pro'];
             foreach ($active_participants as $active_participant){
                 $result_route_qualification_classic = array();
@@ -118,6 +118,7 @@ class Generators
                     $attempt = Grades::getAttemptFromGrades($route->grade, $group);
                     $result_route_qualification_classic[] = array('owner_id' => $owner_id ,'gender' => $active_participant->gender,'user_id' => $active_participant->user_id,'event_id' => $event_id,'route_id' => $route->route_id,'attempt' => $attempt,'grade' => $route->grade, 'created_at' => Carbon::now());
                 }
+
                 $participant = ResultQualificationClassic::where('event_id', $event_id)->where('user_id', $active_participant->user_id)->first();
                 $participant->result_for_edit = $result_route_qualification_classic;
                 $participant->save();

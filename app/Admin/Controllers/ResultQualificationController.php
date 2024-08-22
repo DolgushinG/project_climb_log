@@ -549,9 +549,9 @@ class ResultQualificationController extends Controller
             }
             $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
             $is_enabled = Route::where('event_id', $event->id)->first();
-            if ($is_enabled && Admin::user()->username == "Tester2") {
-                $tools->append(new BatchGenerateParticipant);
-            }
+//            if ($is_enabled && Admin::user()->username == "Tester2") {
+//                $tools->append(new BatchGenerateParticipant);
+//            }
             $tools->append(new BatchForceRecouting);
         });
         $grid->actions(function ($actions) use ($event) {
