@@ -17,7 +17,6 @@ use Encore\Admin\Layout\Row;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Jxlwqq\DataTable\DataTable;
-use Encore\Admin\Widgets\Tab;
 
 class AnalyticsController extends Controller
 {
@@ -37,15 +36,12 @@ class AnalyticsController extends Controller
                 if($event){
                     if(!$event->is_france_system_qualification){
                         $row->column(5, function (Column $column) use ($event) {
-//                        $column->row($this->male());
                             $column->row($this->gridWithTitle('Женщины', 'female'));
                         });
                         $row->column(5, function (Column $column) use ($event) {
-//                        $column->row($this->male());
                             $column->row($this->gridWithTitle('Мужчины', 'male'));
                         });
                         $row->column(10, function (Column $column) use ($event) {
-//                        $column->row($this->male());
                             $column->row($this->event_analytics());
                         });
                     }
@@ -61,7 +57,6 @@ class AnalyticsController extends Controller
         $chartData = Cache::remember('result_'.$gender.'_analytics_cache_event_id_'.$event->id, 60 * 60, function () use ($event, $gender) {
             return self::get_stats_gender($event->id, $gender);
         });
-//        $chartData = self::get_stats_gender($event->id, $gender);
         return view('admin.charts.analytics-result-'.$gender, compact('chartData'));
     }
     protected function gridWithTitle($title, $gender)
@@ -131,7 +126,6 @@ class AnalyticsController extends Controller
             $stats = Cache::remember('result_analytics_cache_event_id_'.$event->id, 60 * 60, function () use ($event) {
                 return self::get_stats($event->id);
             });
-//            $stats = self::get_stats($event->id);
             return new DataTable($headers, $stats, $style, $options);
         });
 
@@ -159,8 +153,12 @@ class AnalyticsController extends Controller
 
                 $coefficient = EventAndCoefficientRoute::where('event_id', $event_id)
                     ->where('route_id', $route->route_id)
-                    ->first()->{'coefficient_' . $gender};
-
+                    ->first();
+                if($coefficient){
+                    $coefficient = $coefficient->{'coefficient_' . $gender};
+                } else {
+                    $coefficient = 0;
+                }
                 $flash = ResultRouteQualificationClassic::where('event_id', $event_id)
                     ->where('gender', $gender)
                     ->where('grade', $route->grade)
@@ -209,8 +207,12 @@ class AnalyticsController extends Controller
 
             $coefficient = EventAndCoefficientRoute::where('event_id', $event_id)
                 ->where('route_id', $route->route_id)
-                ->first()->{'coefficient_' . $gender};
-
+                ->first();
+            if($coefficient){
+                $coefficient = $coefficient->{'coefficient_' . $gender};
+            } else {
+                $coefficient = 0;
+            }
             $flash = ResultRouteQualificationClassic::where('event_id', $event_id)
                 ->where('gender', $gender)
                 ->where('grade', $route->grade)
