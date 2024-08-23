@@ -55,7 +55,7 @@ class BatchGenerateParticipant extends Action
             foreach($part_category as $category){
                 Generators::prepare_participant_with_owner($owner_id, $event->id, $next, $table_result, $start, $category->category);
                 $next = $next+$parts;
-                $start = $start+$parts;
+                $start = $start+$parts+1;
             }
         }
 
