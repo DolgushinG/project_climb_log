@@ -538,7 +538,7 @@ class ResultQualificationController extends Controller
             $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
         $grid->disableBatchActions();
-        $grid->disableFilter();
+//        $grid->disableFilter();
         $grid->disableExport();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
