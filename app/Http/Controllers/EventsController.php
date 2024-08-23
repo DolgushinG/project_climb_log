@@ -1002,7 +1002,7 @@ class EventsController extends Controller
     {
         $gender = $request->input('gender');
         $event_id = $request->input('event_id');
-        $stats = Cache::remember('result_analytics_cache_event_id_'.$event_id, 60 * 60, function () use ($event_id, $gender) {
+        $stats = Cache::rememberForever('result_analytics_cache_event_id_'.$event_id, function () use ($event_id, $gender) {
             return AnalyticsController::get_stats_gender($event_id, $gender);
         });
         return response()->json([
