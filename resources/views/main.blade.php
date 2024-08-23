@@ -52,9 +52,7 @@
                             <p class="description">Статистика по соревнованиям в личном кабинете каждого участника</p>
                         </div>
                     </div>
-
                 </div>
-
             </div>
         </section><!-- End Featured Services Section -->
     <!-- ======= About Section ======= -->
