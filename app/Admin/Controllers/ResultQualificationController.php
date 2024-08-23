@@ -560,6 +560,10 @@ class ResultQualificationController extends Controller
 //            $actions->disableView();
 //            $actions->disableDelete();
         });
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $filter->like('user.middlename', 'Участник');
+        });
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.birthday', __('Дата Рождения'));
         $grid->column('gender', __('Пол'))
