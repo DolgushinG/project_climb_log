@@ -900,6 +900,16 @@ class Event extends Model
             }
         }
     }
+    public static function merge_categories($event, $users_ids)
+    {
+        foreach ($users_ids as $user_id){
+            $users_result = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
+            if($users_result){
+                $users_result->global_category_id = $users_result->category_id;
+                $users_result->save();
+            }
+        }
+    }
     public static function update_event_after_merged(Event $event, array $event_ids)
     {
         $event->is_open_main_rating = 1;
@@ -946,7 +956,7 @@ class Event extends Model
             ->where('result_qualification_classic.event_id', '=', $event->id)
             ->select(
                 'users.id',
-                'result_qualification_classic.category_id',
+                'result_qualification_classic.global_category_id',
                 'result_qualification_classic.gender',
             )->where('active', 1);
         $users_id = $participants->pluck('id');
@@ -955,7 +965,7 @@ class Event extends Model
             foreach (['female', 'male'] as $gender) {
                 foreach ($categories as $category) {
                     $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)
-                        ->where('category_id', $category->id)
+                        ->where('global_category_id', $category->id)
                         ->where('event_id', $event->id)
                         ->where('gender', $gender)
                         ->orderBy('global_points', 'desc')

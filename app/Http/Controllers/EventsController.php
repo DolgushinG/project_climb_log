@@ -348,6 +348,7 @@ class EventsController extends Controller
 //                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
                     $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
+
                     $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
                     $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
                 }

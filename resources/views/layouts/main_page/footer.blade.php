@@ -16,7 +16,6 @@
                     <h4>Полезные ссылки</h4>
                     <ul>
                         <li><i class="bx bx-chevron-right"></i> <a href="{{route('main')}}">Домой</a></li>
-{{--                        <li><i class="bx bx-chevron-right"></i> <a href="#">О нас</a></li>--}}
                         <li><i class="bx bx-chevron-right"></i> <a href="{{route('privatedata')}}">Согласие на обработку персональных данных</a></li>
                         <li><i class="bx bx-chevron-right"></i> <a href="{{route('privacyconf')}}">Политика в отношении обработки персональных данных</a></li>
                     </ul>
@@ -25,11 +24,10 @@
                 <div class="col-lg-3 col-md-6 footer-links">
                     <h4>Наши сервисы</h4>
                     <ul>
-                        <li><i class="bx bx-chevron-right"></i>Создание соревнований</li>
-                        <li><i class="bx bx-chevron-right"></i>Подсчет результатов</li>
-                        <li><i class="bx bx-chevron-right"></i>Удобная регистрация для участников</li>
-                        <li><i class="bx bx-chevron-right"></i>Личные кабинет участника</li>
-                        <li><i class="bx bx-chevron-right"></i>Экпорт результатов</li>
+                        <li><i class="bx bx-chevron-right"></i><a href="#management">Cоздание и управление соревнованиями</a></li>
+                        <li><i class="bx bx-chevron-right"></i><a href="#login">Удобная регистрация для участников</a></li>
+                        <li><i class="bx bx-chevron-right"></i><a href="#event-results">Просмотра результата соревнований</a></li>
+                        <li><i class="bx bx-chevron-right"></i><a href="#rating">Рейтинг по всей России</a></li>
                     </ul>
                 </div>
 

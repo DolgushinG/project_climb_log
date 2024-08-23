@@ -32,7 +32,7 @@
     <link href="{{asset('vendor/glightbox/css/glightbox.min.css')}}" rel="stylesheet">
     <link href="{{asset('vendor/swiper/swiper-bundle.min.css')}}" rel="stylesheet">
     <!-- Template Main CSS File -->
-    <link href="{{asset('css/style.css?v=1.4')}}" rel="stylesheet">
+    <link href="{{asset('css/style.css?v=2.0')}}" rel="stylesheet">
     <!-- Yandex.Metrika counter -->
     @if(env('APP_ENV') == "prod")
         <script type="text/javascript" >
