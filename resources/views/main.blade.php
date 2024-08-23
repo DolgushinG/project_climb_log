@@ -20,7 +20,7 @@
                     <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
                         <div class="icon-box" data-aos="fade-up" data-aos-delay="100">
                             <div class="icon"><i class="bx bxl-dribbble"></i></div>
-                            <h4 class="title"><a href="#about">Удобная регистрация участников через соц. сети</a></h4>
+                            <h4 class="title"><a href="#login">Удобная регистрация участников через соц. сети</a></h4>
                             <p class="description">
                                 <img src="{{asset('storage/img/icons/telegram.svg')}}" alt="telegram">
                                 <img src="{{asset('storage/img/icons/vk.svg')}}" alt="vk">
@@ -32,7 +32,7 @@
                     <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
                         <div class="icon-box" data-aos="fade-up" data-aos-delay="200">
                             <div class="icon"><i class="bx bx-file"></i></div>
-                            <h4 class="title"><a href="">Удобное создание и управление соревнованиями</a></h4>
+                            <h4 class="title"><a href="#management">Удобное создание и управление соревнованиями</a></h4>
                             <p class="description">Быстрый подсчет, просмотр и экспорт</p>
                         </div>
                     </div>
@@ -40,15 +40,15 @@
                     <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
                         <div class="icon-box" data-aos="fade-up" data-aos-delay="300">
                             <div class="icon"><i class="bx bx-tachometer"></i></div>
-                            <h4 class="title"><a href="">Возможность просмотра результата соревнований</a></h4>
-                            <p class="description">Прошедних,предстоящих и текущих по всей России</p>
+                            <h4 class="title"><a href="#event-results">Возможность просмотра результата соревнований</a></h4>
+                            <p class="description">Прошедших, предстоящих и текущих по всей России</p>
                         </div>
                     </div>
 
                     <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
                         <div class="icon-box" data-aos="fade-up" data-aos-delay="400">
                             <div class="icon"><i class="bx bx-world"></i></div>
-                            <h4 class="title"><a href="">Рейтинг по всей России</a></h4>
+                            <h4 class="title"><a href="#rating">Рейтинг по всей России</a></h4>
                             <p class="description">Статистика по соревнованиям в личном кабинете каждого участника</p>
                         </div>
                     </div>
@@ -58,7 +58,7 @@
             </div>
         </section><!-- End Featured Services Section -->
     <!-- ======= About Section ======= -->
-    <section id="about" class="about section-bg">
+    <section id="login" class="about section-bg"  style="background-color: #fff;!important;">
         <div class="container" data-aos="fade-up">
 
             <div class="section-title">
@@ -68,7 +68,33 @@
 
             <div class="row">
                 <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
-                    <img src="{{asset('images/login.png')}}" class="img-fluid" alt="">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- Slides with fade transition -->
+                            <div id="carouselExampleFade" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                        <a href="{{asset('images/login.png')}}"><img src="{{asset('images/login.png')}}" class="d-block w-100" alt="..."></a>
+                                    </div>
+                                    <div class="carousel-item">
+                                        <a href="{{asset('images/profile.png')}}"><img src="{{asset('images/profile.png')}}" class="d-block w-100" alt="..."></a>
+                                    </div>
+                                </div>
+
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+
+                            </div><!-- End Slides with fade transition -->
+
+                        </div>
+                    </div>
+
                 </div>
                 <div class="col-lg-6 pt-4 pt-lg-0 content d-flex flex-column justify-content-center" data-aos="fade-up" data-aos-delay="100">
                     <ul>
@@ -106,7 +132,7 @@
 
         </div>
     </section><!-- End About Section -->
-    <section id="about" class="about section-bg">
+    <section id="management" class="about section-bg">
         <div class="container" data-aos="fade-up">
 
             <div class="section-title">
@@ -152,27 +178,168 @@
                     <div class="card">
                         <div class="card-body">
                             <!-- Slides with fade transition -->
-                            <div id="carouselExampleFade" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                            <div id="carouselExampleFade2" class="carousel slide carousel-fade" data-bs-ride="carousel">
                                 <div class="carousel-inner">
                                     <div class="carousel-item active">
-                                        <img src="{{asset('images/management.png')}}" class="d-block w-100" alt="...">
+                                        <a href="{{asset('images/management.png')}}"><img  src="{{asset('images/management.png')}}" class="d-block w-100" alt="..."></a>
                                     </div>
                                     <div class="carousel-item">
-                                        <img src="{{asset('images/analytics.png')}}" class="d-block w-100" alt="...">
+                                        <a href="{{asset('images/analytics.png')}}"><img src="{{asset('images/analytics.png')}}" class="d-block w-100" alt="..."></a>
                                     </div>
                                     <div class="carousel-item">
-                                        <img src="{{asset('images/main.png')}}" class="d-block w-100" alt="...">
+                                        <a href="{{asset('images/main.png')}}"><img src="{{asset('images/main.png')}}" class="d-block w-100" alt="..."></a>
                                     </div>
                                 </div>
-
-                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade2" data-bs-slide="next">
                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                     <span class="visually-hidden">Next</span>
                                 </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade2" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+
+
+                            </div><!-- End Slides with fade transition -->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- End About Section -->
+    <section id="event-results" class="about section-bg"  style="background-color: #fff;!important;">
+        <div class="container" data-aos="fade-up">
+
+            <div class="section-title">
+                <h2>Возможность просмотра результата соревнований</h2>
+                <p>Результатов квалификации, финалов, полуфиналов, командного зачета и совмещенных результатов</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- Slides with fade transition -->
+                            <div id="carouselExampleFade3" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                        <a href="{{asset('images/events-list.png')}}"><img src="{{asset('images/events-list.png')}}" class="d-block w-100" alt="..."></a>
+                                    </div>
+                                    <div class="carousel-item">
+                                        <a href="{{asset('images/final.png')}}"><img src="{{asset('images/final.png')}}" class="d-block w-100" alt="..."></a>
+                                    </div>
+                                    <div class="carousel-item">
+                                        <a href="{{asset('images/qualification.png')}}"><img src="{{asset('images/qualification.png')}}" class="d-block w-100" alt="..."></a>
+                                    </div>
+                                </div>
+
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade3" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade3" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+
+                            </div><!-- End Slides with fade transition -->
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-lg-6 pt-4 pt-lg-0 content d-flex flex-column justify-content-center" data-aos="fade-up" data-aos-delay="100">
+                    <ul>
+                        <li>
+                            <i class="bx bx-mobile"></i>
+                            <div>
+                                <h5>Моментальный подсчет</h5>
+                                <p>Результаты считаются сразу, их может видеть как участники так и организаторы</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bx bx-line-chart-down"></i>
+                            <div>
+                                <h5>Гибкость вносимых результатов</h5>
+                                <p>Можно вносить результаты как одной трассе так и сразу все</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bx bx-save"></i>
+                            <div>
+                                <h5>Безопастный подсчет</h5>
+                                <p>При внесении результата сервис проводит проверки их корректности</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </section><!-- End About Section -->
+    <section id="rating" class="about section-bg">
+        <div class="container" data-aos="fade-up">
+
+            <div class="section-title">
+                <h2>Рейтинг по всей России(скоро)</h2>
+                <p>Различные рейтинги для поддержания соревновательной мотивации на каждом соревновании</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6 pt-4 pt-lg-0 content d-flex flex-column justify-content-center" data-aos="fade-up" data-aos-delay="100">
+                    <ul>
+                        <li>
+                            <i class="bx bx-lock-open"></i>
+                            <div>
+                                <h5>Рейтинг по России</h5>
+                                <p>Отражает положение участника на национальном уровне, показывая его результаты по сравнению с соперниками из всей страны.
+                                </p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bx bx-envelope"></i>
+                            <div>
+                                <h5>Рейтинг по Городам</h5>
+                                <p>Показывает, как участник выступает среди спортсменов своего города, позволяя оценить успехи на локальном уровне.
+                                </p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bx bx-message"></i>
+                            <div>
+                                <h5>Рейтинги по параметрам</h5>
+                                <p>Сравнивает результаты участников по возрасту, полу, спортивной категории и другим критериям, давая детализированное представление об их достижениях.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- Slides with fade transition -->
+                            <div id="carouselExampleFade4" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                        <a href="{{asset('images/management.png')}}"><img  src="{{asset('images/anala.png')}}" class="d-block w-100" alt="..."></a>
+                                    </div>
+                                    <div class="carousel-item">
+                                        <a href="{{asset('images/analytics.png')}}"><img src="{{asset('images/stats.png')}}" class="d-block w-100" alt="..."></a>
+                                    </div>
+                                    <div class="carousel-item">
+                                        <a href="{{asset('images/main.png')}}"><img src="{{asset('images/profile-analytics.png')}}" class="d-block w-100" alt="..."></a>
+                                    </div>
+                                </div>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade4" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade4" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+
 
                             </div><!-- End Slides with fade transition -->
 
