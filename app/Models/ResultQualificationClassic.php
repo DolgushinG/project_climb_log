@@ -306,11 +306,7 @@ class ResultQualificationClassic extends Model
     }
     public static function better_global_participants($event_id, $gender, $amount_better, $category_id = null){
         $event = Event::find($event_id);
-        if($event->is_auto_categories){
-            $column_category_id = 'global_category_id';
-        } else {
-            $column_category_id = 'category_id';
-        }
+        $column_category_id = 'global_category_id';
         if($category_id){
             $participant_users_id = ResultQualificationClassic::where('event_id', '=', $event_id)->where('gender', '=', $gender)->where($column_category_id, '=', $category_id)->pluck('user_id')->toArray();
         } else {
@@ -393,11 +389,7 @@ class ResultQualificationClassic extends Model
         $event = Event::find($event_id);
         $column_place = 'user_global_place';
         $column_points = 'global_points';
-        if($event->is_auto_categories){
-            $column_category_id = 'global_category_id';
-        } else {
-            $column_category_id = 'category_id';
-        }
+        $column_category_id = 'global_category_id';
         $users = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
             ->where('result_qualification_classic.event_id', '=', $event_id)

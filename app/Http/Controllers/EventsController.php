@@ -291,13 +291,6 @@ class EventsController extends Controller
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if($event){
             if(!$event->is_france_system_qualification){
-                if($event->is_auto_categories){
-                    $columns = ['column_place' => 'user_global_place', 'column_points' => 'global_points', 'column_category_id' => 'global_category_id'];
-                    $column_category_id = 'global_category_id';
-                } else {
-                    $columns = ['column_place' => 'user_global_place', 'column_points' => 'global_points', 'column_category_id' => 'category_id'];
-                    $column_category_id = 'category_id';
-                }
                 $user_male_ids = ResultQualificationClassic::where(function($query) {
                     $query->where('active', 1)
                         ->orWhere(function($query) {
@@ -307,7 +300,7 @@ class EventsController extends Controller
                 })
                     ->where('event_id', $event->id)
                     ->where('gender', 'male')
-                    ->where($column_category_id, '!=', 0)
+                    ->where('global_category_id', '!=', 0)
                     ->pluck('user_id')
                     ->toArray();
                 $user_female_ids = ResultQualificationClassic::where(function($query) {
@@ -319,7 +312,7 @@ class EventsController extends Controller
                 })
                     ->where('event_id', $event->id)
                     ->where('gender', 'female')
-                    ->where($column_category_id, '!=', 0)
+                    ->where('global_category_id', '!=', 0)
                     ->pluck('user_id')
                     ->toArray();
 
@@ -356,8 +349,8 @@ class EventsController extends Controller
                     $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
                     $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
 
-                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where($column_category_id, '=', $category->id)->get()->count();
-                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where($column_category_id, '=', $category->id)->get()->count();
+                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
+                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
                 }
                 if($event->is_open_team_result){
                     foreach ($teams as $team){
@@ -379,7 +372,7 @@ class EventsController extends Controller
         } else {
             return view('errors.404');
         }
-        return view('event.qualification_classic_global_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats', 'columns']));
+        return view('event.qualification_classic_global_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats']));
     }
 
     public function get_qualification_france_system_results(Request $request, $start_date, $climbing_gym, $title)

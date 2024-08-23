@@ -39,6 +39,7 @@ class BatchMergeResult extends Action
                 Event::merge_auto_categories($active_event, $users_ids, $event_ids);
                 Event::counting_global_category_place($active_event);
             } else {
+                Event::merge_categories($active_event, $users_ids);
                 Event::counting_global_points_place($active_event);
             }
 //            MergeResultsParticipants::dispatch($active_event->id, $users_ids, $event_ids, 'merge_point');
