@@ -332,10 +332,10 @@ class EventsController extends Controller
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
                 foreach ($categories as $category) {
                     if($stats->male + $stats->female > 100){
-                        $result_male_cache = Cache::remember('global_result_male_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
+                        $result_male_cache = Cache::rememberForever('global_result_male_cache_'.$category->category.'_event_id_'.$event->id, function () use ($event, $category) {
                             return ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'male', $category->id)->toArray();
                         });
-                        $result_female_cache = Cache::remember('global_result_female_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
+                        $result_female_cache = Cache::rememberForever('global_result_female_cache_'.$category->category.'_event_id_'.$event->id, function () use ($event, $category) {
                             return ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                         });
                     } else {
