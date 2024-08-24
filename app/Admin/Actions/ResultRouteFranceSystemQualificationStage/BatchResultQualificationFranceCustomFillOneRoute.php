@@ -5,19 +5,15 @@ namespace App\Admin\Actions\ResultRouteFranceSystemQualificationStage;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\Grades;
-use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
-use App\Models\ResultFinalStage;
 use App\Models\ResultFranceSystemQualification;
-use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\User;
-use Encore\Admin\Actions\Action;
 use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
-class BatchResultQualificationFranceCustomFillOneRoute extends Action
+use App\Admin\Extensions\CustomAction;
+class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
 {
     protected $selector = '.result-add-qualification-france-one-route';
 
@@ -87,9 +83,13 @@ class BatchResultQualificationFranceCustomFillOneRoute extends Action
         if($result){
             return $this->response()->error('Результат уже есть по '.$user.' и трассе '.$route_id);
         } else {
+            $existing_result_for_edit = $participant->result_for_edit_france_system_qualification ?? [];
+
+            // Объединяем старые и новые данные
+            $merged_result_for_edit = array_merge($existing_result_for_edit, $result_for_edit);
             $participant = ResultFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
             $participant->active = 1;
-            $participant->result_for_edit_france_system_qualification = $result_for_edit;
+            $participant->result_for_edit_france_system_qualification = $merged_result_for_edit;
             $participant->save();
 
             DB::table('result_route_france_system_qualification')->insert($data);
@@ -98,7 +98,7 @@ class BatchResultQualificationFranceCustomFillOneRoute extends Action
         }
     }
 
-    public function form()
+    public function custom_form()
     {
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
