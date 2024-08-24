@@ -2,6 +2,7 @@
 
 namespace App\Admin\Actions\ResultRouteSemiFinalStage;
 
+use App\Admin\Extensions\CustomAction;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
@@ -14,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class BatchResultSemiFinal extends Action
+class BatchResultSemiFinal extends CustomAction
 {
     public $name = 'Внести результат полуфинала';
 
@@ -105,7 +106,7 @@ class BatchResultSemiFinal extends Action
 
     }
 
-    public function form()
+    public function custom_form()
     {
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)

@@ -2,6 +2,7 @@
 
 namespace App\Admin\Actions\ResultRouteSemiFinalStage;
 
+use App\Admin\Extensions\CustomAction;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
@@ -16,7 +17,7 @@ use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class BatchResultSemiFinalCustomFillOneRoute extends Action
+class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
 {
     protected $selector = '.result-add-one-route';
 
@@ -97,7 +98,7 @@ class BatchResultSemiFinalCustomFillOneRoute extends Action
         }
     }
 
-    public function form()
+    public function custom_form()
     {
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)

@@ -2,6 +2,7 @@
 
 namespace App\Admin\Actions\ResultRouteFinalStage;
 
+use App\Admin\Extensions\CustomAction;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
@@ -16,7 +17,7 @@ use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class BatchResultFinalCustomFillOneRoute extends Action
+class BatchResultFinalCustomFillOneRoute extends CustomAction
 {
     protected $selector = '.result-add-final-one-route';
 
@@ -91,13 +92,14 @@ class BatchResultFinalCustomFillOneRoute extends Action
             return $this->response()->error('Результат уже есть по '.$user.' и трассе '.$final_route_id);
         } else {
             DB::table('result_route_final_stage')->insert($data);
+            // Объединяем старые и новые данные
             Event::send_result_final(intval($results['event_id']), $owner_id, intval($results['user_id']), $category_id, $result_for_edit, $gender);
             Event::refresh_final_points_all_participant_in_final($event->id);
             return $this->response()->success('Результат успешно внесен')->refresh();
         }
     }
 
-    public function form()
+    public function custom_form()
     {
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
