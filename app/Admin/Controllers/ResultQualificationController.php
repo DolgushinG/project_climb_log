@@ -434,6 +434,10 @@ class ResultQualificationController extends Controller
             $type = 'update';
             return $this->form($type, $id)->update($id);
         }
+        if ($request->number_set_id) {
+            $type = 'update';
+            return $this->form($type, $id)->update($id);
+        }
         if ($request->is_paid) {
             $type = 'is_paid';
             return $this->form($type, $id)->update($id);
@@ -968,6 +972,11 @@ class ResultQualificationController extends Controller
                 if (intval($form->input('category_id')) > 0) {
                     $result = $form->model()->find($id);
                     $result->category_id = $form->input('category_id');
+                    $result->save();
+                }
+                if (intval($form->input('number_set_id')) > 0) {
+                    $result = $form->model()->find($id);
+                    $result->number_set_id = $form->input('number_set_id');
                     $result->save();
                 }
                 if ($form->input('gender')) {
