@@ -2,6 +2,7 @@
 
 namespace App\Admin\Actions\ResultRouteFranceSystemQualificationStage;
 
+use App\Admin\Extensions\CustomAction;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\Grades;
@@ -17,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class BatchResultFranceSystemQualification extends Action
+class BatchResultFranceSystemQualification extends CustomAction
 {
     public $category;
     public $name = 'Внести результат квалификации';
@@ -94,7 +95,7 @@ class BatchResultFranceSystemQualification extends Action
 
     }
 
-    public function form()
+    public function custom_form()
     {
         $this->modalLarge();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
