@@ -617,10 +617,12 @@ class Event extends Model
                 $table . '.amount_zone',
                 $table . '.amount_try_zone',
             )->where($table . '.gender', '=', $gender);
+
         if ($category) {
             $users = $users->where('category_id', '=', $category->id);
         }
         $users = $users->get()->sortBy('place')->toArray();
+
         foreach ($users as $index => $user) {
             if ($table == 'result_final_stage') {
                 $final_result = ResultRouteFinalStage::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->get();

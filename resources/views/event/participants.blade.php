@@ -49,16 +49,18 @@
                                                             </thead>
                                                             <tbody>
                                                             @foreach($participants as $participant)
-                                                                @if($participant['number_set'] == $set->number_set)
-                                                                    <tr>
-                                                                        <td>{{$participant['middlename']}}</td>
-                                                                        @if(!$event->is_auto_categories)
-                                                                            <td>{{$participant['category']}}</td>
-                                                                        @endif
-                                                                        <td>{{$participant['city']}}</td>
-                                                                        <td>{{$participant['team']}}</td>
-                                                                    </tr>
-                                                                @endif
+                                                               @isset($participant['number_set'])
+                                                                   @if($participant['number_set'] == $set->number_set)
+                                                                       <tr>
+                                                                           <td>{{$participant['middlename']}}</td>
+                                                                           @if(!$event->is_auto_categories)
+                                                                               <td>{{$participant['category']}}</td>
+                                                                           @endif
+                                                                           <td>{{$participant['city']}}</td>
+                                                                           <td>{{$participant['team']}}</td>
+                                                                       </tr>
+                                                                   @endif
+                                                               @endif
                                                                 <tr class="warning no-result">
                                                                     <td colspan="6"><i class="fa fa-warning"></i> Нет результата</td>
                                                                 </tr>

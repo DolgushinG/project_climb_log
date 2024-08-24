@@ -200,14 +200,16 @@ class EventsController extends Controller
                     } else {
                         # Регистрация с сетов + без категории
                         $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
-                        if($participants[$index]['category_id'] == 0){
-                            $category = 'Нет группы';
-                        } else {
-                            $category = $categories[$participants[$index]['category_id']] ?? 'Нет группы';
+                        if(isset($set->number_set)){
+                            if($participants[$index]['category_id'] == 0){
+                                $category = 'Нет группы';
+                            } else {
+                                $category = $categories[$participants[$index]['category_id']] ?? 'Нет группы';
+                            }
+                            $participants[$index_user]['category'] = $category;
+                            $participants[$index_user]['number_set'] = $set->number_set;
+                            $participants[$index_user]['time'] = $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10);
                         }
-                        $participants[$index_user]['category'] = $category;
-                        $participants[$index_user]['number_set'] = $set->number_set;
-                        $participants[$index_user]['time'] = $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10);
                     }
                 }
                 $index++;
@@ -390,9 +392,10 @@ class EventsController extends Controller
                 foreach ($event->categories as $category) {
                     $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
                     $users_female2 = Event::get_france_system_result('result_france_system_qualification', $event->id, 'female', $category)->toArray();
+
                     $users_male2 = Event::get_france_system_result('result_france_system_qualification', $event->id, 'male', $category)->toArray();
-                    $result_each_routes['male'][$category->id] = $users_female2;
-                    $result_each_routes['female'][$category->id] = $users_male2;
+                    $result_each_routes['female'][$category->id] = $users_female2;
+                    $result_each_routes['male'][$category->id] = $users_male2;
                 }
             }
         } else {
