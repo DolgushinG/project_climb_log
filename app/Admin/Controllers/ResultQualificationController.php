@@ -137,15 +137,16 @@ class ResultQualificationController extends Controller
             }
             return $str;
         });
-        $show->field('id', __('История результатов'))
-            ->as(function ($content) use ($event) {
-                $all_user_places = [];
-                $categories = [];
-                $place_event_titles = [];
-                // Определение модели квалификации
-                $qualificationModel = $event->is_france_system_qualification
-                    ? ResultFranceSystemQualification::class
-                    : ResultQualificationClassic::class;
+        if (!$event->is_france_system_qualification) {
+            $show->field('id', __('История результатов'))
+                ->as(function ($content) use ($event) {
+                    $all_user_places = [];
+                    $categories = [];
+                    $place_event_titles = [];
+                    // Определение модели квалификации
+                    $qualificationModel = $event->is_france_system_qualification
+                        ? ResultFranceSystemQualification::class
+                        : ResultQualificationClassic::class;
 
                 $res = $qualificationModel::find($content);
 
