@@ -390,8 +390,10 @@ class ResultQualificationController extends Controller
                     $str .= $html;
                 }
 
-                return $str;
-            })->unescape();
+                    return $str;
+                })->unescape();
+        }
+
 
 
 
