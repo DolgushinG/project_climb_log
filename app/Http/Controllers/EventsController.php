@@ -810,7 +810,7 @@ class EventsController extends Controller
                 $route_class->web_link = $route->web_link;
             } else {
                 $route_class->color = $route->color;
-                $route_class->text_color = Helpers::getContrastColor($route->color);
+                $route_class->text_color = Grades::colors()[$route->color];
             }
             $route_class->grade = $route->grade;
             $route_class->count = $route->route_id;

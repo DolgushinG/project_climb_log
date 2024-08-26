@@ -36,7 +36,8 @@
                                 <table class="table">
                                     <thead>
                                     <tr>
-                                        <th scope="col">Трасса</th>
+                                        <th class="text-center" scope="col">Трасса</th>
+                                        <th scope="col">Цвет</th>
                                         @if(!$event->is_hide_grades)
                                             <th id="grade" style="font-size: 15px" scope="col">Категория</th>
                                         @endif
@@ -64,8 +65,17 @@
                                             @if($event->type_event)
                                                 <th>{{$route->route_name}}</th>
                                             @else
+                                                <th class="text-center">{{$route->count}}</th>
                                                 <th>
-                                                    <label style="background-color: {{ $route->color}};color: {{$route->text_color}}" class="">{{ $route->count }}</label>
+                                                     <span style="
+                                                        border-top:1px solid #000000;
+                                                        border-bottom:1px solid #000000;
+                                                        border-left:1px solid #000000;
+                                                        border-right:1px solid #000000;
+                                                        background-color: {{ $route->color}};
+                                                        color: {{ $route->color}};
+                                                        font-size: 12px;"
+                                                           class="badge text-center">1</span>
                                                 </th>
                                             @endif
                                             @if(!$event->is_hide_grades)
@@ -205,16 +215,6 @@
             });
         }
     </script>
-        <style>
-                /* Определение стиля для цвета фона и текста */
-            .color-cell {
-                color: #fff; /* Белый текст для темных фонов */
-                font-weight: bold;
-            }
-            .color-cell-dark {
-                color: #000; /* Черный текст для светлых фонов */
-            }
-        </style>
     <script>
         function reset_flash(){
             let check = document.querySelector("#all-flash"),
