@@ -47,7 +47,7 @@
                                    class="btn btn-warning rounded-pill">Статистика</a>
                             </li>
                         @endif
-                        @if(\App\Models\User::user_participant($event->id) && \App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))
+                        @if(!$event->is_france_system_qualification &&\App\Models\User::user_participant($event->id) && \App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))
                             @if(!$event->is_access_user_edit_result && !$event->is_send_result_state)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     @include('event.buttons.show_sent_result')
