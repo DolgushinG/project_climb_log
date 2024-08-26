@@ -1,8 +1,8 @@
 
-<button type="button" class="btn btn-info rounded-pill" data-bs-toggle="modal" data-bs-target="#disablebackdrop">
+<button type="button" class="btn btn-info rounded-pill" data-bs-toggle="modal" data-bs-target="#disablebackdrop-{{$event->id}}">
     Получить полные результаты
 </button>
-<div class="modal fade" id="disablebackdrop" tabindex="-1" data-bs-backdrop="false">
+<div class="modal fade" id="disablebackdrop-{{$event->id}}" tabindex="-1" data-bs-backdrop="false">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">

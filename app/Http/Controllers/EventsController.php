@@ -806,11 +806,16 @@ class EventsController extends Controller
                     $sectors[] = $sector->name;
                 }
                 $sector_fields[$sector->name] = array('area_name' => ucfirst($area->name),'place_name' => ucfirst($place->name),'description' => $sector->description,'name' => $sector->name,'image' => $sector->image, 'web_link' => $sector->web_link);
+                $route_class->image = $route->image;
+                $route_class->web_link = $route->web_link;
+            } else {
+                if($route->color != 'not_set_color'){
+                    $route_class->color = $route->color;
+                    $route_class->text_color = Grades::colors()[$route->color];
+                }
             }
             $route_class->grade = $route->grade;
             $route_class->count = $route->route_id;
-            $route_class->image = $route->image;
-            $route_class->web_link = $route->web_link;
             $routes[] = $route_class;
 
         }

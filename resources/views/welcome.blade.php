@@ -51,6 +51,7 @@
                                                         @include('event.buttons.participant_already')
                                                         @include('event.buttons.results_have_been_sent_already')
                                                     @else
+                                                        @include('event.buttons.show_sent_result')
                                                         @include('event.buttons.participant_already')
                                                         @include('event.buttons.results_have_been_sent_already')
                                                     @endif
@@ -132,6 +133,9 @@
                                         </div>
                                     @else
                                         @include('event.buttons.event-close')
+                                        @if(\App\Models\User::user_participant($event->id) && \App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))
+                                            @include('event.buttons.show_sent_result')
+                                        @endif
                                     @endif
                                 @else
                                     <a href="{{route('profile')}}" class="btn btn-secondary rounded-pill">Заполните
