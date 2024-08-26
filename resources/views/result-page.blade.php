@@ -6,20 +6,8 @@
                 <div class="col">
                     <div class="container">
                         <div class="row">
-                            @if(\App\Models\ResultQualificationClassic::is_active_participant($event->id, Auth()->user()->id) && !$event->is_access_user_edit_result)
-                                <section class="list-route">
-                                    <div class="row mt-3 gy-4">
-                                    </div>
-                                </section>
-                                <h1> Ваш результат уже был добавлен </h1>
-                                <section class="list-route">
-                                    <div class="row mt-3 gy-4">
-                                    </div>
-                                </section>
-                            @else
-                                <h1> Внести результаты </h1>
-                                <div>
-                                </div>
+                            <h1> Трассы </h1>
+                            @if($event->is_access_user_edit_result && $event->is_send_result_state)
                                 <div class="text-right">
                                     @if($event->is_flash_value)
                                     <button type="button" class="btn btn-dark mb-2" id="all-flash">Отметить все FLASH
@@ -33,56 +21,62 @@
                                         </button>
                                     @endif
                                 </div>
-                                <table class="table">
-                                    <thead>
+                            @endif
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th class="text-center" scope="col">Трасса</th>
+                                    <th scope="col">Цвет</th>
+                                    @if(!$event->is_hide_grades)
+                                        <th id="grade" class="text-center" style="font-size: 15px" scope="col">Категория</th>
+                                    @endif
+                                    @if($event->is_zone_show)
+                                        <th scope="col">Нет</th>
+                                    @else
+                                        <th scope="col">Не пролез</th>
+                                    @endif
+                                    @if($event->is_flash_value)
+                                        <th scope="col">Флэш</th>
+                                    @endif
+                                    @if($event->is_zone_show)
+                                        <th scope="col">Зона</th>
+                                    @endif
+                                    @if($event->is_flash_value)
+                                        <th scope="col">Редпоинт</th>
+                                    @else
+                                        <th scope="col">Пролез</th>
+                                    @endif
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($routes as $index => $route)
                                     <tr>
-                                        <th class="text-center" scope="col">Трасса</th>
-                                        <th scope="col">Цвет</th>
-                                        @if(!$event->is_hide_grades)
-                                            <th id="grade" style="font-size: 15px" scope="col">Категория</th>
-                                        @endif
-                                        @if($event->is_zone_show)
-                                            <th scope="col">Нет</th>
+                                        @if($event->type_event)
+                                            <th>{{$route->route_name}}</th>
                                         @else
-                                            <th scope="col">Не пролез</th>
-                                        @endif
-                                        @if($event->is_flash_value)
-                                            <th scope="col">Флэш</th>
-                                        @endif
-                                        @if($event->is_zone_show)
-                                            <th scope="col">Зона</th>
-                                        @endif
-                                        @if($event->is_flash_value)
-                                            <th scope="col">Редпоинт</th>
-                                        @else
-                                            <th scope="col">Пролез</th>
-                                        @endif
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    @foreach($routes as $index => $route)
-                                        <tr>
-                                            @if($event->type_event)
-                                                <th>{{$route->route_name}}</th>
-                                            @else
-                                                <th class="text-center">{{$route->count}}</th>
+                                            <th class="text-center">{{$route->count}}</th>
+                                            @isset($route->color)
                                                 <th>
-                                                     <span style="
-                                                        border-top:1px solid #000000;
-                                                        border-bottom:1px solid #000000;
-                                                        border-left:1px solid #000000;
-                                                        border-right:1px solid #000000;
-                                                        background-color: {{ $route->color}};
-                                                        color: {{ $route->color}};
-                                                        font-size: 12px;"
-                                                           class="badge text-center">1</span>
+                                                 <span style="
+                                                    border-top:1px solid #000000;
+                                                    border-bottom:1px solid #000000;
+                                                    border-left:1px solid #000000;
+                                                    border-right:1px solid #000000;
+                                                    background-color: {{ $route->color}};
+                                                    color: {{ $route->color}};
+                                                    font-size: 12px;"
+                                                       class="badge text-center">1</span>
                                                 </th>
+                                            @else
+                                                <th>Не установлен</th>
                                             @endif
-                                            @if(!$event->is_hide_grades)
-                                                <th>{{$route->grade}}</th>
-                                            @endif
-                                            <td>
-                                                @if($result_participant)
+                                        @endif
+                                        @if(!$event->is_hide_grades)
+                                            <th>{{$route->grade}}</th>
+                                        @endif
+                                        <td>
+                                            @if($result_participant)
+                                                @if($event->is_access_user_edit_result && $event->is_send_result_state)
                                                     @if($result_participant[$index]['attempt'] == '0')
                                                         <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                                name="{{$route->count}}" id="failed-{{$route->count}}"
@@ -92,23 +86,37 @@
                                                                name="{{$route->count}}" id="failed-{{$route->count}}"
                                                                autocomplete="off">
                                                     @endif
-
                                                 @else
-                                                    <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
-                                                           name="{{$route->count}}" id="failed-{{$route->count}}"
-                                                           autocomplete="off">
-                                                @endif
-                                                    @if($event->is_zone_show)
-                                                        <label class="btn btn-outline-danger btn-failed"
-                                                               for="failed-{{$route->count}}">Нет</label>
+                                                    @if($result_participant[$index]['attempt'] == '0')
+                                                        <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                               name="{{$route->count}}" id="failed-{{$route->count}}"
+                                                               autocomplete="off" checked disabled>
                                                     @else
-                                                        <label class="btn btn-outline-danger btn-failed"
-                                                               for="failed-{{$route->count}}">Не пролез</label>
+                                                        <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                               name="{{$route->count}}" id="failed-{{$route->count}}"
+                                                               autocomplete="off" disabled>
                                                     @endif
-                                            </td>
-                                            @if($event->is_flash_value)
-                                                <td>
-                                                    @if($result_participant)
+                                                @endif
+
+
+                                            @else
+                                                <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                       name="{{$route->count}}" id="failed-{{$route->count}}"
+                                                       autocomplete="off">
+                                            @endif
+                                            @if($event->is_zone_show)
+                                                <label class="btn btn-outline-danger btn-failed"
+                                                       for="failed-{{$route->count}}">Нет</label>
+                                            @else
+                                                <label class="btn btn-outline-danger btn-failed"
+                                                       for="failed-{{$route->count}}">Не пролез</label>
+                                            @endif
+                                        </td>
+                                        @if($event->is_flash_value)
+                                            <td>
+
+                                                @if($result_participant)
+                                                    @if($event->is_access_user_edit_result && $event->is_send_result_state)
                                                         @if($result_participant[$index]['attempt'] == '1')
                                                             <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
                                                                    class="btn-check"
@@ -120,21 +128,34 @@
                                                                    name="{{$route->count}}" id="flash-{{$route->count}}"
                                                                    autocomplete="off">
                                                         @endif
-
                                                     @else
-                                                        <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
-                                                               class="btn-check"
-                                                               name="{{$route->count}}" id="flash-{{$route->count}}"
-                                                               autocomplete="off">
+                                                        @if($result_participant[$index]['attempt'] == '1')
+                                                            <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
+                                                                   class="btn-check"
+                                                                   name="{{$route->count}}" id="flash-{{$route->count}}"
+                                                                   autocomplete="off" checked disabled>
+                                                        @else
+                                                            <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
+                                                                   class="btn-check"
+                                                                   name="{{$route->count}}" id="flash-{{$route->count}}"
+                                                                   autocomplete="off" disabled>
+                                                        @endif
                                                     @endif
+                                                @else
+                                                    <input type="radio" data-id="all-flash" data-grade="{{$route->grade}}"
+                                                           class="btn-check"
+                                                           name="{{$route->count}}" id="flash-{{$route->count}}"
+                                                           autocomplete="off">
+                                                @endif
 
-                                                    <label class="btn btn-outline-success  btn-flash"
-                                                           for="flash-{{$route->count}}">FLASH</label>
-                                                </td>
-                                            @endif
-                                            @if($event->is_zone_show)
-                                                <td>
-                                                    @if($result_participant)
+                                                <label class="btn btn-outline-success  btn-flash"
+                                                       for="flash-{{$route->count}}">FLASH</label>
+                                            </td>
+                                        @endif
+                                        @if($event->is_zone_show)
+                                            <td>
+                                                @if($result_participant)
+                                                    @if($event->is_access_user_edit_result && $event->is_send_result_state)
                                                         @if($result_participant[$index]['attempt'] == '3')
                                                             <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                                    name="{{$route->count}}" id="zone-{{$route->count}}"
@@ -144,19 +165,30 @@
                                                                    name="{{$route->count}}" id="zone-{{$route->count}}"
                                                                    autocomplete="off">
                                                         @endif
-
                                                     @else
-                                                        <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
-                                                               name="{{$route->count}}" id="zone-{{$route->count}}"
-                                                               autocomplete="off">
+                                                        @if($result_participant[$index]['attempt'] == '3')
+                                                            <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                                   name="{{$route->count}}" id="zone-{{$route->count}}"
+                                                                   autocomplete="off" checked disabled>
+                                                        @else
+                                                            <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                                   name="{{$route->count}}" id="zone-{{$route->count}}"
+                                                                   autocomplete="off" disabled>
+                                                        @endif
                                                     @endif
-                                                    <label class="btn btn-outline-secondary btn-failed"
-                                                           for="zone-{{$route->count}}">Зона</label>
-                                                </td>
-                                            @endif
+                                                @else
+                                                    <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
+                                                           name="{{$route->count}}" id="zone-{{$route->count}}"
+                                                           autocomplete="off">
+                                                @endif
+                                                <label class="btn btn-outline-secondary btn-failed"
+                                                       for="zone-{{$route->count}}">Зона</label>
+                                            </td>
+                                        @endif
 
-                                            <td>
-                                                @if($result_participant)
+                                        <td>
+                                            @if($result_participant)
+                                                @if($event->is_access_user_edit_result && $event->is_send_result_state)
                                                     @if($result_participant[$index]['attempt'] == '2')
                                                         <input type="radio" data-id="all-redpoint" class="btn-check"
                                                                data-grade="{{$route->grade}}" name="{{$route->count}}"
@@ -165,26 +197,39 @@
                                                         <input type="radio" data-id="all-redpoint" class="btn-check"
                                                                data-grade="{{$route->grade}}" name="{{$route->count}}"
                                                                id="redpoint-{{$route->count}}" autocomplete="off">
-                                                   @endif
+                                                    @endif
                                                 @else
-                                                    <input type="radio" data-id="all-redpoint" class="btn-check"
-                                                           data-grade="{{$route->grade}}" name="{{$route->count}}"
-                                                           id="redpoint-{{$route->count}}" autocomplete="off">
+                                                    @if($result_participant[$index]['attempt'] == '2')
+                                                        <input type="radio" data-id="all-redpoint" class="btn-check"
+                                                               data-grade="{{$route->grade}}" name="{{$route->count}}"
+                                                               id="redpoint-{{$route->count}}" autocomplete="off" checked disabled>
+                                                    @else
+                                                        <input type="radio" data-id="all-redpoint" class="btn-check"
+                                                               data-grade="{{$route->grade}}" name="{{$route->count}}"
+                                                               id="redpoint-{{$route->count}}" autocomplete="off" disabled>
+                                                    @endif
                                                 @endif
-                                                @if($event->is_flash_value)
-                                                    <label class="btn btn-outline-warning btn-redpoint"
-                                                           for="redpoint-{{$route->count}}">REDPOINT</label>
-                                                @else
-                                                    <label class="btn btn-outline-warning btn-redpoint"
-                                                           for="redpoint-{{$route->count}}">ТОП</label>
-                                                @endif
-                                            </td>
 
-                                        </tr>
+                                            @else
+                                                <input type="radio" data-id="all-redpoint" class="btn-check"
+                                                       data-grade="{{$route->grade}}" name="{{$route->count}}"
+                                                       id="redpoint-{{$route->count}}" autocomplete="off">
+                                            @endif
+                                            @if($event->is_flash_value)
+                                                <label class="btn btn-outline-warning btn-redpoint"
+                                                       for="redpoint-{{$route->count}}">REDPOINT</label>
+                                            @else
+                                                <label class="btn btn-outline-warning btn-redpoint"
+                                                       for="redpoint-{{$route->count}}">ТОП</label>
+                                            @endif
+                                        </td>
 
-                                    @endforeach
-                                    </tbody>
-                                </table>
+                                    </tr>
+
+                                @endforeach
+                                </tbody>
+                            </table>
+                            @if($event->is_access_user_edit_result && $event->is_send_result_state)
                                 <div id="mobile-fixed" class="btn-container-desktop-fixed">
                                     <button type="button" id="btn-send-result" data-owner-id="{{$event->owner_id}}"
                                             data-id="{{$event->id}}" data-user-id="{{Auth()->user()->id}}"
@@ -192,8 +237,8 @@
                                         Внести
                                     </button>
                                 </div>
-                                <!-- End Table with stripped rows -->
                             @endif
+                            <!-- End Table with stripped rows -->
                         </div>
                     </div>
                 </div>

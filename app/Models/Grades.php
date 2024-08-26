@@ -166,6 +166,7 @@ class Grades extends Model
     public static function colors()
     {
         return [
+            'not_set_color' => 'Не установлен',
             '#FF0000' => 'Красный',
             '#FF4500' => 'Оранжевый',
             '#FFD700' => 'Золотой',

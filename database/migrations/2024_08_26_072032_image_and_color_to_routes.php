@@ -14,8 +14,8 @@ class ImageAndColorToRoutes extends Migration
     public function up()
     {
         Schema::table('routes', function (Blueprint $table) {
-            $table->string('color')->after('route_id')->default("#000000");
-            $table->string('color_view')->after('route_id')->default("#000000");
+            $table->string('color')->after('route_id')->default("not_set_color");
+            $table->string('color_view')->after('route_id')->default("not_set_color");
         });
     }
 
@@ -27,8 +27,8 @@ class ImageAndColorToRoutes extends Migration
     public function down()
     {
         Schema::table('routes', function (Blueprint $table) {
-            $table->string('color')->after('route_id')->default("#000000");
-            $table->string('color_view')->after('route_id')->default("#000000");
+            $table->string('color')->after('route_id')->default("not_set_color");
+            $table->string('color_view')->after('route_id')->default("not_set_color");
         });
     }
 }

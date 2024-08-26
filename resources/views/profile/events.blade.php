@@ -12,7 +12,7 @@
                     {{$event->title}}
                 </button>
             </h2>
-            <div id="collapse{{$event->id}}" class="accordion-collapse collapse show" aria-labelledby="heading{{$event->id}}" data-bs-parent="#accordion{{$event->id}}">
+            <div id="collapse{{$event->id}}" class="accordion-collapse collapse" aria-labelledby="heading{{$event->id}}" data-bs-parent="#accordion{{$event->id}}">
                 <div class="accordion-body">
                     <ul class="list-group">
                         @if($event->user_qualification_place)
@@ -41,8 +41,21 @@
                             <span class="badge bg-primary rounded-pill">{{$event->amount_participant}}</span>
                         </li>
 
+                        @if(!$event->is_send_result_state && $event->is_open_public_analytics)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{{route('index_analytics', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                   class="btn btn-warning rounded-pill">Статистика</a>
+                            </li>
+                        @endif
+                        @if(\App\Models\User::user_participant($event->id) && \App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))
+                            @if(!$event->is_access_user_edit_result && !$event->is_send_result_state)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @include('event.buttons.show_sent_result')
+                                </li>
+                            @endif
+                        @endif
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{{$event->link}}" class="btn btn-success">Перейти на страницу с соревнованием</a>
+                            <a href="{{$event->link}}" class="btn btn-success rounded-pill">Перейти на страницу с соревнованием</a>
                         </li>
                     </ul><!-- End List With badges -->
                 </div>
