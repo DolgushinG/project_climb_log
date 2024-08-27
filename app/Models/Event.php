@@ -335,7 +335,6 @@ class Event extends Model
                 $final_participant_result->category_id = $category_id;
             }
             $final_participant_result->points = $points;
-            Log::info('user_id - '.$participant->id.' - '.$points);
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $participant->id;
             $final_participant_result->save();
