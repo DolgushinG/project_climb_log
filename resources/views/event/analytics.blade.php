@@ -36,11 +36,94 @@
             <div class="chart-container">
                 <canvas id="myChart" data-id="{{$event->id}}"></canvas>
             </div>
+            <div class="accordion mb-2" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Как определяется оценка сложности трассы?
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="container align-center">
+                                <h2>Пороговые значения для оценки сложности</h2>
+                                <p>Классифицируем сложность трассы в зависимости от процента флешей и редпоинтов:</p>
+                                <div class="row">
+                                    <div class="col">
+                                        <table class="thresholds">
+                                            <thead>
+                                            <tr>
+                                                <th>Уровень сложности</th>
+                                                <th>Процент флешей</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td>Слишком легкая</td>
+                                                <td>90% и выше</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Легкая</td>
+                                                <td>75% - 89%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Сбалансированная</td>
+                                                <td>50% - 74%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Сложная</td>
+                                                <td>25% - 49%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Слишком сложная</td>
+                                                <td>Менее 25%</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col mt-1">
+                                        <table class="thresholds">
+                                            <thead>
+                                            <tr>
+                                                <th>Уровень сложности</th>
+                                                <th>Процент редпоинтов</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td>Слишком легкая</td>
+                                                <td>0%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Легкая</td>
+                                                <td>1% - 10%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Сбалансированная</td>
+                                                <td>11% - 20%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Сложная</td>
+                                                <td>21% - 30%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Слишком сложная</td>
+                                                <td>Более 30%</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- End Default Accordion Example -->
+
             <div class="form-group">
                 <label class="m-1" for="search"> Поиск тут </label>
                 <input id="search" type="text" class="search form-control" placeholder="Что ищем?">
             </div>
-            <!-- Добавляем таблицу данных -->
             <table class="table table-striped mt-4 results" id="dataTable">
                 <thead>
                 <tr>
@@ -50,7 +133,7 @@
                     <th>% флешей</th>
                     <th>Редпоинты</th>
                     <th>% редпоинтов</th>
-                    <th>Оценка сложности</th>
+                    <th >Оценка сложности </th>
                     <th>Всего прохождений(М + Ж)</th>
                     <th>Коэффициент трассы</th>
                 </tr>

@@ -111,7 +111,7 @@ class AnalyticsController extends Controller
         $grid->disablePagination();
 
         $grid->column('title', 'Соревы')->expand(function () use ($event) {
-            $headers = ['Трасса','Категория','Флеши','Редпоинты','Всего прохождений(М + Ж)','Коэффициент трассы', 'Пол'];
+            $headers = ['Трасса','Категория','Флеши','Редпоинты','% флешей','% редпоинтов','оценка','Всего прохождений(М + Ж)','Коэффициент трассы', 'Пол'];
             $style = ['table-bordered','table-hover', 'table-striped'];
             $options = [
                 'responsive' => true,
@@ -135,56 +135,68 @@ class AnalyticsController extends Controller
     }
     public static function get_stats($event_id)
     {
-        $stats = [];
+        // Получаем информацию о событии и маршрутах
         $event = Event::find($event_id);
-        if($event->type_event){
-            $routes = RoutesOutdoor::where('event_id', $event_id)->get();
-        } else {
-            $routes = Route::where('event_id', $event_id)->get();
-        }
-        foreach ($routes as $route){
+        $routeModel = $event->type_event ? RoutesOutdoor::class : Route::class;
+        $routes = $routeModel::where('event_id', $event_id)->get();
+
+        // Предварительно загружаем коэффициенты
+        $coefficients = EventAndCoefficientRoute::where('event_id', $event_id)
+            ->get()
+            ->keyBy('route_id');
+
+        // Подготовка данных для расчета
+        $results = ResultRouteQualificationClassic::where('event_id', $event_id)
+            ->whereIn('attempt', [
+                ResultRouteQualificationClassic::STATUS_PASSED_FLASH,
+                ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT,
+                ResultRouteQualificationClassic::STATUS_ZONE
+            ])
+            ->get()
+            ->groupBy(function($item) {
+                return $item->route_id . '-' . $item->grade . '-' . $item->gender . '-' . $item->attempt;
+            });
+
+        $stats = [];
+
+        foreach ($routes as $route) {
             foreach (['male', 'female'] as $gender) {
-                $all_passed = ResultRouteQualificationClassic::where('event_id', $event_id)
-                    ->where('grade', $route->grade)
-                    ->where('route_id', $route->route_id)
-                    ->whereIn('attempt', [
-                        ResultRouteQualificationClassic::STATUS_PASSED_FLASH,
-                        ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT,
-                        ResultRouteQualificationClassic::STATUS_ZONE])
-                    ->get()->count();
+                $route_key = $route->route_id . '-' . $route->grade . '-' . $gender;
 
-                $coefficient = EventAndCoefficientRoute::where('event_id', $event_id)
-                    ->where('route_id', $route->route_id)
-                    ->first();
-                if($coefficient){
-                    $coefficient = $coefficient->{'coefficient_' . $gender};
-                } else {
-                    $coefficient = 0;
-                }
-                $flash = ResultRouteQualificationClassic::where('event_id', $event_id)
-                    ->where('gender', $gender)
-                    ->where('grade', $route->grade)
-                    ->where('route_id', $route->route_id)
-                    ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_FLASH)
-                    ->get()->count();
-                $redpoint = ResultRouteQualificationClassic::where('event_id', $event_id)
-                    ->where('gender', $gender)
-                    ->where('grade', $route->grade)
-                    ->where('route_id', $route->route_id)
-                    ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)
-                    ->get()->count();
+                // Получаем данные из предварительно загруженных результатов
+                $all_passed = $results->get($route_key . '-' . ResultRouteQualificationClassic::STATUS_PASSED_FLASH, collect())->count()
+                    + $results->get($route_key . '-' . ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT, collect())->count()
+                    + $results->get($route_key . '-' . ResultRouteQualificationClassic::STATUS_ZONE, collect())->count();
 
-                $stats[] =  array(
+                $flash = $results->get($route_key . '-' . ResultRouteQualificationClassic::STATUS_PASSED_FLASH, collect())->count();
+                $redpoint = $results->get($route_key . '-' . ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT, collect())->count();
+
+                // Получаем коэффициент
+                $coefficient = $coefficients->get($route->route_id);
+                $coefficient_value = $coefficient ? $coefficient->{'coefficient_' . $gender} : 0;
+
+                // Рассчитываем процентные значения
+                $flash_percentage = self::getFlashPercentagesForGender($event_id, $route, $gender);
+                $redpoint_percentage = self::getRedpointPercentagesForGender($event_id, $route, $gender);
+
+                // Анализируем сложность маршрута
+                $difficulty = self::analyzeRouteDifficulty($event_id, $route->grade, $gender, $flash_percentage, $redpoint_percentage);
+
+                $stats[] = [
                     'route_id' => $route->route_id,
                     'grade' => $route->grade,
                     'flash' => $flash,
                     'redpoint' => $redpoint,
+                    'flash_percentage' => $flash_percentage,
+                    'redpoint_percentage' => $redpoint_percentage,
+                    'difficulty' => $difficulty,
                     'all_passed' => $all_passed,
-                    'coefficient' => $coefficient,
+                    'coefficient' => $coefficient_value,
                     'gender' => $gender == 'male' ? 'Мужчина' : 'Женщина',
-                );
+                ];
             }
         }
+
         return $stats;
     }
 
@@ -320,6 +332,9 @@ class AnalyticsController extends Controller
             ->whereIn('user_id', $participants_gender)
             ->get()
             ->count();
+        if ($total == 0) {
+            return 'Не определено';
+        }
         // Средний процент флеша и редпоинта для данной категории трасс
         $average_percentage_flash = $total > 0 ? round(($amount_flash / $total) * 100, 2) : 0;
         $average_percentage_redpoint = $total > 0 ? round(($amount_redpoint / $total) * 100, 2) : 0;

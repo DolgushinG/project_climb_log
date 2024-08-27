@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     let myChart = null;
     let allData = []; // Переменная для хранения всех данных
-
+    $('[data-toggle="tooltip"]').tooltip();
     function loadChart() {
         let gender = document.getElementById('genderSelect').value;
         let event_id = document.getElementById('myChart').getAttribute('data-id');
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${route.flash_percentage}</td>
                 <td>${route.redpoint}</td>
                 <td>${route.redpoint_percentage}</td>
-                <td>${route.difficulty}</td>
+                <td >${route.difficulty}</td>
                 <td>${route.all_passed}</td>
                 <td>${route.coefficient}</td>
             `;
