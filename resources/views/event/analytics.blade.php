@@ -119,11 +119,6 @@
                     </div>
                 </div>
             </div><!-- End Default Accordion Example -->
-
-            <div class="form-group">
-                <label class="m-1" for="search"> Поиск тут </label>
-                <input id="search" type="text" class="search form-control" placeholder="Что ищем?">
-            </div>
             <table class="table table-striped mt-4 results" id="dataTable">
                 <thead>
                 <tr>
@@ -142,6 +137,8 @@
                 <!-- Данные будут добавляться сюда -->
                 </tbody>
             </table>
+            <!-- Элементы для мобильной сортировки -->
+
         </div>
     </section>
 @endsection
