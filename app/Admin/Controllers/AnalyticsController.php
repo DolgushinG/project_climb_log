@@ -5,6 +5,8 @@ namespace App\Admin\Controllers;
 use App\Models\Event;
 use App\Models\EventAndCoefficientRoute;
 use App\Http\Controllers\Controller;
+use App\Models\ParticipantCategory;
+use App\Models\ResultQualificationClassic;
 use App\Models\ResultRouteQualificationClassic;
 use App\Models\Route;
 use App\Models\RoutesOutdoor;
@@ -204,7 +206,6 @@ class AnalyticsController extends Controller
                     ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT,
                     ResultRouteQualificationClassic::STATUS_ZONE])
                 ->get()->count();
-
             $coefficient = EventAndCoefficientRoute::where('event_id', $event_id)
                 ->where('route_id', $route->route_id)
                 ->first();
@@ -225,16 +226,156 @@ class AnalyticsController extends Controller
                 ->where('route_id', $route->route_id)
                 ->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)
                 ->get()->count();
-
+            $flash_percentage = self::getFlashPercentagesForGender($event_id, $route, $gender);
+            $redpoint_percentage = self::getRedpointPercentagesForGender($event_id, $route, $gender);
+            $difficulty = self::analyzeRouteDifficulty($event_id, $route->grade, $gender, $flash_percentage, $redpoint_percentage);
             $stats[] =  array(
                 'route_id' => $route->route_id,
                 'grade' => $route->grade,
                 'flash' => $flash,
                 'redpoint' => $redpoint,
+                'flash_percentage' => $flash_percentage,
+                'redpoint_percentage' => $redpoint_percentage,
+                'difficulty' => $difficulty,
                 'all_passed' => $all_passed,
                 'coefficient' => $coefficient,
             );
         }
         return $stats;
+    }
+    public static function getFlashPercentagesForGender($eventId, $route, $gender)
+    {
+        $participants_gender = ResultQualificationClassic::where('event_id', $eventId)
+            ->where('active', 1)
+            ->where('is_other_event', 0)
+            ->where('gender', $gender)
+            ->pluck('user_id');
+        $totalAttempts = ResultRouteQualificationClassic::where('event_id', $eventId)
+            ->whereIn('attempt', [1,2])
+            ->whereIn('user_id', $participants_gender)
+            ->where('route_id', $route->route_id)
+            ->get()
+            ->count();
+        $flashCounts = ResultRouteQualificationClassic::where('event_id', $eventId)
+            ->where('attempt', 1)
+            ->where('route_id', $route->route_id)
+            ->whereIn('user_id', $participants_gender)
+            ->get()
+            ->count();
+        if($totalAttempts > 0){
+            $flash_percentage = round(($flashCounts / $totalAttempts) * 100, 2);
+        } else {
+            $flash_percentage = 0;
+        }
+        return $flash_percentage;
+    }
+
+    public static function getRedpointPercentagesForGender($eventId, $route, $gender)
+    {
+        $participants_gender = ResultQualificationClassic::where('event_id', $eventId)
+            ->where('active', 1)
+            ->where('is_other_event', 0)
+            ->where('gender', $gender)
+            ->pluck('user_id');
+        $totalAttempts = ResultRouteQualificationClassic::where('event_id', $eventId)
+            ->whereIn('attempt', [1,2])
+            ->whereIn('user_id', $participants_gender)
+            ->where('route_id', $route->route_id)
+            ->get()
+            ->count();
+        $redpointCounts = ResultRouteQualificationClassic::where('event_id', $eventId)
+            ->where('attempt', 2)
+            ->where('route_id', $route->route_id)
+            ->whereIn('user_id', $participants_gender)
+            ->get()
+            ->count();
+        if($totalAttempts > 0){
+            $redpoint_percentage = round(($redpointCounts / $totalAttempts) * 100, 2);
+        } else {
+            $redpoint_percentage = 0;
+        }
+        return $redpoint_percentage;
+    }
+    public static function analyzeRouteDifficulty($event_id, $grade, $gender, $flashPercentage, $redpointPercentage) {
+        $participants_gender = ResultQualificationClassic::where('event_id', $event_id)
+            ->where('active', 1)
+            ->where('is_other_event', 0)
+            ->where('gender', $gender)
+            ->pluck('user_id');
+        $amount_flash = ResultRouteQualificationClassic::where('event_id', $event_id)
+            ->where('grade', $grade)
+            ->where('attempt', 1)
+            ->whereIn('user_id', $participants_gender)
+            ->get()
+            ->count();
+        $amount_redpoint = ResultRouteQualificationClassic::where('event_id', $event_id)
+            ->where('grade', $grade)
+            ->where('attempt', 1)
+            ->whereIn('user_id', $participants_gender)
+            ->get()
+            ->count();
+        $total = ResultRouteQualificationClassic::where('event_id', $event_id)
+            ->whereIn('attempt', [1,2])
+            ->where('grade', $grade)
+            ->whereIn('user_id', $participants_gender)
+            ->get()
+            ->count();
+        // Средний процент флеша и редпоинта для данной категории трасс
+        $average_percentage_flash = $total > 0 ? round(($amount_flash / $total) * 100, 2) : 0;
+        $average_percentage_redpoint = $total > 0 ? round(($amount_redpoint / $total) * 100, 2) : 0;
+
+        // Определение пороговых значений для различий
+        // Пороговые значения теперь более интуитивные
+        $flash_thresholds = [
+            'Слишком легкая' => 90,  // 90% и выше считается слишком легкой
+            'Легкая' => 75,          // 75% - 89% считается легкой
+            'Сбалансированная' => 50, // 50% - 74% считается сбалансированной
+            'Сложная' => 25,         // 25% - 49% считается сложной
+            'Слишком сложная' => 0   // Менее 25% считается слишком сложной
+        ];
+
+        $redpoint_thresholds = [
+            'Слишком легкая' => 0,   // 0% редпоинтов может указывать на легкость трассы
+            'Легкая' => 10,          // 1% - 10% редпоинтов может быть приемлемым для легкой трассы
+            'Сбалансированная' => 20, // 11% - 20% редпоинтов может указывать на сбалансированную сложность
+            'Сложная' => 30,         // 21% - 30% редпоинтов указывает на сложность
+            'Слишком сложная' => 31  // Более 30% редпоинтов считается слишком сложной
+        ];
+
+        // Рассчитываем разницу между фактическими и средними значениями
+        $flash_difference = $flashPercentage - $average_percentage_flash;
+        $redpoint_difference = $redpointPercentage - $average_percentage_redpoint;
+
+        // Определение сложности трассы на основе разницы
+        $difficulty_flash = 'Сбалансированная';
+        foreach ($flash_thresholds as $level => $threshold) {
+            if ($flashPercentage >= $threshold) {
+                $difficulty_flash = $level;
+                break;
+            }
+        }
+
+        $difficulty_redpoint = 'Сбалансированная';
+        foreach ($redpoint_thresholds as $level => $threshold) {
+            if ($redpointPercentage <= $threshold) {
+                $difficulty_redpoint = $level;
+                break;
+            }
+        }
+
+        // Определение общего уровня сложности
+        if ($difficulty_flash === 'Слишком легкая' || $difficulty_redpoint === 'Слишком сложная') {
+            $difficulty = 'Слишком легкая';
+        } elseif ($difficulty_flash === 'Легкая' || $difficulty_redpoint === 'Сложная') {
+            $difficulty = 'Легкая';
+        } elseif ($difficulty_flash === 'Сложная' || $difficulty_redpoint === 'Легкая') {
+            $difficulty = 'Сложная';
+        } elseif ($difficulty_flash === 'Слишком сложная' || $difficulty_redpoint === 'Слишком легкая') {
+            $difficulty = 'Слишком сложная';
+        } else {
+            $difficulty = 'Сбалансированная';
+        }
+        return $difficulty;
+
     }
 }

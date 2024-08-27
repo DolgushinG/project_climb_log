@@ -43,10 +43,10 @@ class BatchGenerateParticipant extends Action
             ResultRouteQualificationClassic::where('event_id',  $event->id)->delete();
         }
         $start_number_participant = User::first();
-
         if($event->is_auto_categories){
             Generators::prepare_participant_with_owner($owner_id, $event->id, $count, $table_result, $start_number_participant->id);
         } else {
+
             $part_category = ParticipantCategory::where('event_id', $event->id)->get();
             $amount_categories = count($event->categories);
             $parts = intval($count / $amount_categories);

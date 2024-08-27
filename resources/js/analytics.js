@@ -105,7 +105,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${route.route_id}</td>
                 <td>${route.grade}</td>
                 <td>${route.flash}</td>
+                <td>${route.flash_percentage}</td>
                 <td>${route.redpoint}</td>
+                <td>${route.redpoint_percentage}</td>
+                <td>${route.difficulty}</td>
                 <td>${route.all_passed}</td>
                 <td>${route.coefficient}</td>
             `;
