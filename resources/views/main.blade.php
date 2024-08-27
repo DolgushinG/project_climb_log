@@ -69,7 +69,7 @@
                     <div class="card">
                         <div class="card-body">
                             <!-- Slides with fade transition -->
-                            <div id="carouselExampleFade" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                            <div id="carouselExampleFade" class="carousel slide carousel-fade" data-bs-ride="false">
                                 <div class="carousel-inner">
                                     <div class="carousel-item active">
                                         <a href="{{asset('images/login.png')}}"><img src="{{asset('images/login.png')}}" class="d-block w-100" alt="..."></a>
@@ -176,7 +176,7 @@
                     <div class="card">
                         <div class="card-body">
                             <!-- Slides with fade transition -->
-                            <div id="carouselExampleFade2" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                            <div id="carouselExampleFade2" class="carousel slide carousel-fade" data-bs-ride="false">
                                 <div class="carousel-inner">
                                     <div class="carousel-item active">
                                         <a href="{{asset('images/management.png')}}"><img  src="{{asset('images/management.png')}}" class="d-block w-100" alt="..."></a>
@@ -219,7 +219,7 @@
                     <div class="card">
                         <div class="card-body">
                             <!-- Slides with fade transition -->
-                            <div id="carouselExampleFade3" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                            <div id="carouselExampleFade3" class="carousel slide carousel-fade" data-bs-ride="false">
                                 <div class="carousel-inner">
                                     <div class="carousel-item active">
                                         <a href="{{asset('images/events-list.png')}}"><img src="{{asset('images/events-list.png')}}" class="d-block w-100" alt="..."></a>
@@ -317,7 +317,7 @@
                     <div class="card">
                         <div class="card-body">
                             <!-- Slides with fade transition -->
-                            <div id="carouselExampleFade4" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                            <div id="carouselExampleFade4" class="carousel slide carousel-fade" data-bs-ride="false">
                                 <div class="carousel-inner">
                                     <div class="carousel-item active">
                                         <a href="{{asset('images/management.png')}}"><img  src="{{asset('images/anala.png')}}" class="d-block w-100" alt="..."></a>
