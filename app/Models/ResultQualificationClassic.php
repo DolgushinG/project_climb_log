@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use function App\Http\Controllers\calculate_stability_coefficient;
-use function Symfony\Component\String\s;
 
 class ResultQualificationClassic extends Model
 {

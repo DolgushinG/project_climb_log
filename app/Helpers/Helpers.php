@@ -111,7 +111,10 @@ class Helpers
     }
     public static function validate_amount_try_top_and_zone($amount_try_top, $amount_try_zone)
     {
-
+        # Если нет пролаза на топ, то правило не работает
+        if(intval($amount_try_top) == 0 && intval($amount_try_zone) > 0){
+            return false;
+        }
         return intval($amount_try_zone) > intval($amount_try_top);
     }
     public static function save_qr_code($event)

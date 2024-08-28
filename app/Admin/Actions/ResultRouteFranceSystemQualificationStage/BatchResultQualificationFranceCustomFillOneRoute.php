@@ -137,7 +137,7 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
 
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
-        $this->select('route_id', 'Трасса')->options($routes);
+        $this->select('route_id', 'Трасса')->options($routes)->required();
         $this->integer('amount_try_top', 'Попытки на топ');
         $this->integer('amount_try_zone', 'Попытки на зону');
         Admin::script("// Получаем все элементы с атрибутом modal

@@ -44,7 +44,9 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
         } else {
             $amount_zone  = 0;
         }
-
+        if(intval($results['final_route_id']) == 0){
+            return $this->response()->error('Вы не выбрали номер маршрута');
+        }
         # Если есть ТОП то зона не может быть 0
         if(Helpers::validate_amount_top_and_zone($amount_top, $amount_zone)){
             return $this->response()->error('У трассы '.$results['final_route_id'].' отмечен ТОП, и получается зона не может быть 0');
@@ -145,7 +147,7 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
 
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
-        $this->select('final_route_id', 'Трасса')->options($routes);
+        $this->select('final_route_id', 'Трасса')->options($routes)->required();
         $this->integer('amount_try_top', 'Попытки на топ');
         $this->integer('amount_try_zone', 'Попытки на зону');
         Admin::script("// Получаем все элементы с атрибутом modal

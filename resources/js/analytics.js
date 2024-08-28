@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     let myChart = null;
     let allData = []; // Переменная для хранения всех данных
-
     function loadChart() {
         let gender = document.getElementById('genderSelect').value;
         let event_id = document.getElementById('myChart').getAttribute('data-id');
@@ -88,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-
     function updateTable() {
         let selectedGrade = document.getElementById('gradeSelect').value;
 
@@ -105,11 +103,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${route.route_id}</td>
                 <td>${route.grade}</td>
                 <td>${route.flash}</td>
+                <td>${route.flash_percentage}</td>
                 <td>${route.redpoint}</td>
+                <td>${route.redpoint_percentage}</td>
+                <td >${route.difficulty}</td>
                 <td>${route.all_passed}</td>
                 <td>${route.coefficient}</td>
             `;
             tableBody.appendChild(row);
+        });
+        // Если таблица уже инициализирована, уничтожаем её перед повторной инициализацией
+        if ($.fn.DataTable.isDataTable('#dataTable')) {
+            $('#dataTable').DataTable().destroy(); // Уничтожаем старую инстанцию DataTable
+        }
+
+        table = $('#dataTable').DataTable({
+            "paging": false,
+            "ordering": true,
+            "info": false,
+            "language": {
+                "search": "Поиск:",
+                "zeroRecords": "Ничего не найдено"
+            },
+            "orderMulti": true
         });
     }
 

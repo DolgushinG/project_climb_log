@@ -31,6 +31,7 @@
                                             </tr>
                                             </thead>
                                             <tbody>
+                                            @if(count($result_each_routes['male'][$category['id']]) > 0)
                                                 @foreach($result_each_routes['male'][$category['id']] as $res)
                                                     <tr>
                                                     <th scope="row">{{$res['place']}}</th>
@@ -64,6 +65,18 @@
                                                     </td>
                                                     </tr>
                                                 @endforeach
+                                            @else
+                                                <tr>
+                                                    <th scope="row">-</th>
+                                                    <td>Результата пока нет</td>
+                                                    <td>
+                                                        -
+                                                    </td>
+                                                    <td>
+                                                        -
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             </tbody>
                                         </table>
                                         <!-- End Table with stripped rows -->
@@ -84,7 +97,8 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            @foreach($result_each_routes['male'] as $res)
+                                            @if(count($result_each_routes['male']) > 0)
+                                                @foreach($result_each_routes['male'] as $res)
                                                 <tr>
                                                     <th scope="row">{{$res['place'] ?? ''}}</th>
                                                     <td>{{$res['middlename']}}</td>
@@ -117,6 +131,18 @@
                                                     </td>
                                                 </tr>
                                             @endforeach
+                                            @else
+                                                <tr>
+                                                    <th scope="row">-</th>
+                                                    <td>Результата пока нет</td>
+                                                    <td>
+                                                        -
+                                                    </td>
+                                                    <td>
+                                                        -
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             </tbody>
                                         </table>
                                         <!-- End Table with stripped rows -->
@@ -152,6 +178,7 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody>
+                                                @if(count($result_each_routes['female'][$category['id']]))
                                                     @foreach($result_each_routes['female'][$category['id']] as $res)
                                                         <tr>
                                                         <th scope="row">{{$res['place']}}</th>
@@ -185,6 +212,18 @@
                                                         </td>
                                                         </tr>
                                                     @endforeach
+                                                @else
+                                                    <tr>
+                                                        <th scope="row">-</th>
+                                                        <td>Результата пока нет</td>
+                                                        <td>
+                                                            -
+                                                        </td>
+                                                        <td>
+                                                            -
+                                                        </td>
+                                                    </tr>
+                                                @endif
                                                 </tbody>
                                             </table>
                                     </div>
@@ -204,7 +243,8 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            @foreach($result_each_routes['female'] as $res)
+                                            @if(count($result_each_routes['female']) > 0)
+                                                @foreach($result_each_routes['female'] as $res)
                                                 <tr>
                                                     <th scope="row">{{$res['place']}}</th>
                                                     <td>{{$res['middlename']}}</td>
@@ -237,6 +277,18 @@
                                                     </td>
                                                 </tr>
                                             @endforeach
+                                            @else
+                                                <tr>
+                                                    <th scope="row">-</th>
+                                                    <td>Результата пока нет</td>
+                                                    <td>
+                                                        -
+                                                    </td>
+                                                    <td>
+                                                        -
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             </tbody>
                                         </table>
                                     </div>

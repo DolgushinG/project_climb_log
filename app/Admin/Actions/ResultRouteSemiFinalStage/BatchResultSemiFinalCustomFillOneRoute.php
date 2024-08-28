@@ -191,7 +191,7 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
         }
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
-        $this->select('final_route_id', 'Трасса')->attribute('id', 'final_route_id')->options($routes);
+        $this->select('final_route_id', 'Трасса')->attribute('id', 'final_route_id')->options($routes)->required();
         $this->integer('amount_try_top', 'Попытки на топ');
         $this->integer('amount_try_zone', 'Попытки на зону');
     }

@@ -32,7 +32,7 @@
     <link href="{{asset('vendor/glightbox/css/glightbox.min.css')}}" rel="stylesheet">
     <link href="{{asset('vendor/swiper/swiper-bundle.min.css')}}" rel="stylesheet">
     <!-- Template Main CSS File -->
-    <link href="{{asset('css/style.css?v=2.0')}}" rel="stylesheet">
+    <link href="{{asset('css/style.css?v=2.2')}}" rel="stylesheet">
     <!-- Yandex.Metrika counter -->
     @if(env('APP_ENV') == "prod")
         <script type="text/javascript" >
@@ -56,17 +56,12 @@
 </head>
 
 <body class="light-mode">
-
-{{--<div class="container-fluid">--}}
-<div class="main-content-wrapper">
 @include('layouts.main_page.header')
+{{--<div class="container-fluid">--}}
+<div class="main">
 {{--@include('cookie.cookies')--}}
-@yield("content")
-@include('layouts.main_page.footer')
-
-<div id="preloader"></div>
-<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
-        class="bi bi-arrow-up-short"></i></a>
+    @yield("content")
+</div>
 {{--<script src="{{asset('plugins/cropper/cropper.js')}}"></script>--}}
 {{--<script src="{{asset('vendor/apexcharts/apexcharts.min.js')}}"></script>--}}
 <script src="{{asset('vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
@@ -82,10 +77,12 @@
 <script src="{{asset('vendor/isotope-layout/isotope.pkgd.min.js')}}"></script>
 <script src="{{asset('vendor/swiper/swiper-bundle.min.js')}}"></script>
 {{--<script src="{{asset('vendor/waypoints/noframework.waypoints.js')}}"></script>--}}
-
 <!-- Template Main JS File -->
 <script src="{{asset('js/main.js')}}"></script>
-</div>
+@include('layouts.main_page.footer')
+{{--<div id="preloader"></div>--}}
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
 {{--</div>--}}
 </body>
 </html>
