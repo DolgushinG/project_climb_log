@@ -119,6 +119,9 @@
                     </div>
                 </div>
             </div><!-- End Default Accordion Example -->
+            <div class="container">
+                <p>На компьютере Shift для многократной сортировки.</p>
+            </div>
             <table class="table table-striped mt-4 results" id="dataTable">
                 <thead>
                 <tr>

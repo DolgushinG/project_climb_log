@@ -1,16 +1,22 @@
 @extends('layouts.main_page.app')
 @section('content')
+    <section>
+        <div class="container">
+            <div class="row">
+            </div>
+        </div>
+    </section>
     <section class="section contact">
             <div class="row m-3">
                 @if(count($participants) != 0 )
                     @if($days)
                         @foreach($days as $day)
-                            <div class="form-group m-3">
-                                <label class="m-1 bold" for="search"> Поиск тут </label>
-                                <input id="search" type="text" class="search form-control" placeholder="Что ищем?">
-                            </div>
                             <div class="col-md-2"></div>
                             <div class="col-md-8 mb-2">
+                                <div class="form-group m-3">
+                                    <label class="m-1 bold" for="search"> Поиск тут </label>
+                                    <input id="search" type="text" class="search form-control" placeholder="Что ищем?">
+                                </div>
                                 <div class="card">
                                     <div class="card-body">
                                         <!-- Bordered Tabs Justified -->
@@ -61,11 +67,12 @@
                                                                        </tr>
                                                                    @endif
                                                                @endif
-                                                                <tr class="warning no-result">
-                                                                    <td colspan="6"><i class="fa fa-warning"></i> Нет результата</td>
-                                                                </tr>
+
                                                             </tbody>
                                                             @endforeach
+                                                            <tr class="warning no-result">
+                                                                <td colspan="6"><i class="fa fa-warning"></i> Нет результата</td>
+                                                            </tr>
                                                         </table>
                                                     </div>
                                                 @endif
@@ -167,11 +174,6 @@
                     </div>
                     <div class="col-md-2"></div>
                 @endif
-            </div>
-
-        </section>
-        <section class="section contact">
-            <div class="row mt-3">
             </div>
         </section>
     <script>
