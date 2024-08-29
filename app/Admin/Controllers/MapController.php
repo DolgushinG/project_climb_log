@@ -10,9 +10,11 @@ use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
+use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
+use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
-
+use Illuminate\Http\Request;
 class MapController extends Controller
 {
     use HasResourceActions;
@@ -26,9 +28,20 @@ class MapController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header(trans('admin.index'))
-            ->description(trans('admin.description'))
-            ->body($this->grid());
+            ->row(function(Row $row) {
+                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+                if($event){
+                    if(!$event->is_france_system_qualification && !$event->type_event){
+                        $row->column(10, function (Column $column) use ($event) {
+                            $column->row($this->grid());
+
+                        });
+                        $row->column(10, function (Column $column) use ($event) {
+                            $column->row($this->list_points());
+                        });
+                    }
+                }
+            });
     }
 
     /**
@@ -36,9 +49,20 @@ class MapController extends Controller
      *
      * @return mixed
      */
-    public function store()
+    public function store(Request $request)
     {
-        $data = request()->only(['event_id', 'owner_id' , 'author', 'grade', 'color', 'x', 'y']);
+        $data = $request->only(['route_id', 'author', 'color', 'x', 'y']);
+
+        // Добавляем или изменяем данные
+        $data['created_at'] = now(); // Добавляем текущую дату и время
+        $data['updated_at'] = now(); // Добавляем текущую дату и время
+        $event = Event::where('owner_id', '=', 2)->where('active', 1)->first();
+        $route = Route::where('event_id', $event->id)->where('route_id', $data['route_id'])->first();
+        // Вы можете добавить дополнительные данные
+        // Например, если вам нужно установить ID пользователя:
+        $data['grade'] = $route->grade; // Пример добавления ID текущего пользователя
+        $data['event_id'] = $event->id; // Пример добавления ID текущего пользователя
+        $data['owner_id'] = $event->owner_id; // Пример добавления ID текущего пользователя
         $point = Map::create($data);
 
         return response()->json([
@@ -61,6 +85,18 @@ class MapController extends Controller
             ->body($this->form());
     }
 
+    protected function list_points()
+    {
+        $grid = new Grid(new Map);
+        $grid->column('route_id', 'Номер маршрут');
+        $grid->column('grade', 'Категория');
+        $grid->column('author', 'Автор');
+        $grid->column('color', __('Цвет'))->display(function ($color) {
+            return "<div style='width: 50px; height: 20px; background-color: {$color}; border: 1px solid #ddd;'></div>";
+        });
+        return $grid;
+    }
+
     /**
      * Make a grid builder.
      *
@@ -70,8 +106,10 @@ class MapController extends Controller
     {
         $points = Map::all();
         $event = Event::where('owner_id', '=', 2)->where('active', 1)->first();
+        $points_exist = Map::where('event_id', $event->id)->pluck('route_id')->toArray();
         $routes = Route::where('event_id', $event->id)->get();
-        return Admin::component('admin::map', compact(['points', 'event', 'routes']));
+        $scheme_climbing_gym = '/storage/images/map.jpeg';
+        return Admin::component('admin::map', compact(['points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
     }
 
     /**

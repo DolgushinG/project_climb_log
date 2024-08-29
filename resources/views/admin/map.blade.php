@@ -1,11 +1,19 @@
-<div id="map" style="width: 800px; height: 600px; background-image: url('/storage/images/map.png'); background-size: cover; position: relative; border: 1px solid #ddd;">
+<div id="map"
+     style="width: 1200px;
+            height: 800px;
+            background-image: url({{$scheme_climbing_gym}});
+            background-size: contain;
+            position: relative;
+            background-position: center; /* Центрирование изображения */
+            background-repeat: no-repeat">
+
     @foreach($points as $point)
         <div class="point"
              style="background-color: {{ $point->color }};
                     left: {{ $point->x }}px;
                     top: {{ $point->y }}px;
-                    width: 50px;
-                    height: 50px;
+                    width: 40px;
+                    height: 36px;
                     border-radius: 50%;
                     position: absolute;
                     display: flex;
@@ -13,7 +21,7 @@
                     align-items: center;
                     justify-content: center;
                     color: white;
-                    font-size: 12px;
+                    font-size: 10px;
                     text-align: center;"
              data-id="{{ $point->id }}"
              data-author="{{ $point->author }}"
@@ -32,19 +40,21 @@
         <label for="author">Author:</label>
         <input type="text" id="author" name="author" required><br>
         <label for="route_id"></label>
-        <select id="route_id" class="form-select">
+        <select id="route_id" name="route_id" class="form-select">
         @foreach($routes as $route)
-            <option value="{{$route->route_id}}">{{$route->route_id}}</option>
+            @if(in_array($route->route_id, $points_exist))
+                    <option data-grade="{{$route->grade}}" value="{{$route->route_id}}" disabled>{{$route->route_id}}</option>
+            @else
+                <option data-grade="{{$route->grade}}" value="{{$route->route_id}}">{{$route->route_id}}</option>
+            @endif
         @endforeach
         </select>
-        <label for="grade">Grade:</label>
-        <input type="text" id="grade" name="grade" required><br>
-        <label for="route_id">Route:</label>
-        <input type="text" id="route_id" name="route_id" required><br>
         <label for="color">Color:</label>
         <input type="color" id="color" name="color" required><br>
         <input type="hidden" id="x-coordinate" name="x">
         <input type="hidden" id="y-coordinate" name="y">
+        <input type="hidden" id="event_id" name="event_id">
+        <input type="hidden" id="owner_id" name="owner_id">
         <button type="submit">Save</button>
         <button id="btn_close">Close</button>
     </form>
@@ -65,7 +75,6 @@
             // Открываем модальное окно для ввода данных новой точки
             document.getElementById('point-id').value = '';
             document.getElementById('author').value = '';
-            document.getElementById('grade').value = '';
             document.getElementById('color').value = '#000000';
             document.getElementById('x-coordinate').value = x;
             document.getElementById('y-coordinate').value = y;
@@ -75,16 +84,19 @@
 
     // Обработчик клика на точку для редактирования
     document.getElementById('map').addEventListener('click', function(e) {
-        if (e.target.classList.contains('point')) {
-            isNewPoint = false;
-            const point = e.target;
-            document.getElementById('point-id').value = point.dataset.id;
-            document.getElementById('author').value = point.dataset.author;
-            document.getElementById('grade').value = point.dataset.grade;
-            document.getElementById('color').value = point.style.backgroundColor;
-            document.getElementById('x-coordinate').value = parseInt(point.style.left);
-            document.getElementById('y-coordinate').value = parseInt(point.style.top);
-            document.getElementById('modal').style.display = 'block';
+        if (e.target.classList.contains('point') || e.target.closest('.point')) {
+            // Получаем ближайший элемент с классом 'point'
+            const point = e.target.closest('.point');
+            if (point) {
+                isNewPoint = false;
+                document.getElementById('point-id').value = point.dataset.id;
+                document.getElementById('author').value = point.dataset.author;
+                document.getElementById('color').value = point.style.backgroundColor;
+                document.getElementById('route_id').value = point.dataset.route_id;
+                document.getElementById('x-coordinate').value = parseInt(point.style.left);
+                document.getElementById('y-coordinate').value = parseInt(point.style.top);
+                document.getElementById('modal').style.display = 'block';
+            }
         }
     });
 
@@ -93,6 +105,12 @@
         e.preventDefault();
 
         let formData = new FormData(this);
+        let routeSelect = document.getElementById('route_id');
+        let selectedOption = routeSelect.options[routeSelect.selectedIndex];
+        let grade = selectedOption.getAttribute('data-grade');
+
+        // Добавляем значение `data-grade` в FormData
+        formData.set('grade', grade);
         let url = isNewPoint ? '/admin/map' : `/admin/map/${document.getElementById('point-id').value}`;
         let method = isNewPoint ? 'POST' : 'POST'; // Для Laravel используется 'POST' с 'X-HTTP-Method-Override'
 
@@ -127,10 +145,9 @@
                         newPoint.style.textAlign = 'center';
                         newPoint.dataset.id = data.point.id;
                         newPoint.dataset.author = formData.get('author');
-                        newPoint.dataset.grade = formData.get('grade');
                         newPoint.dataset.route_id = formData.get('route_id');
 
-                        newPoint.innerHTML = `<span>${formData.get('route_id')}</span><span>${formData.get('grade')}</span>`;
+                        newPoint.innerHTML = `<span>${formData.get('route_id')}</span><br><span>${formData.get('grade')}</span>`;
                         document.getElementById('map').appendChild(newPoint);
                     } else {
                         // Обновление существующей точки
@@ -139,9 +156,8 @@
                         point.style.left = `${formData.get('x')}px`;
                         point.style.top = `${formData.get('y')}px`;
                         point.dataset.author = formData.get('author');
-                        point.dataset.grade = formData.get('grade');
                         point.dataset.route_id = formData.get('route_id');
-                        point.innerHTML = `<span>${formData.get('route_id')}</span><span>${formData.get('grade')}</span>`;
+                        point.innerHTML = `<span>${formData.get('route_id')}</span><br><span>${formData.get('grade')}</span>`;
                     }
 
                     document.getElementById('modal').style.display = 'none';
