@@ -15,7 +15,7 @@ class Posts extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('author_id');
+            $table->integer('owner_id');
             $table->string('title');
             $table->string('seo_title')->nullable();
             $table->text('excerpt');
@@ -25,7 +25,6 @@ class Posts extends Migration
             $table->text('meta_description');
             $table->text('meta_keywords');
             $table->enum('status', ['PUBLISHED', 'DRAFT', 'PENDING'])->default('DRAFT');
-            $table->boolean('featured')->default(0);
             $table->timestamps();
         });
     }
