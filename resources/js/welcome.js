@@ -136,7 +136,7 @@ function getInfoPayment(event_id, id) {
         },
     });
 }
-function getInfoPaymentBll(event_id, id) {
+function getInfoPay(event_id, id) {
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -144,7 +144,21 @@ function getInfoPaymentBll(event_id, id) {
     });
     $.ajax({
         type: 'GET',
-        url: 'getInfoPaymentBill/' + event_id,
+        url: 'getInfoPay/' + event_id,
+        success: function (data) {
+            $(id).html(data);
+        },
+    });
+}
+function getInfoPaymentDocument(event_id, id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.ajax({
+        type: 'GET',
+        url: 'getInfoPaymentDocument/' + event_id,
         success: function (data) {
             $(id).html(data);
         },
@@ -191,6 +205,66 @@ $(document).on('click','#btn-participant-change-set', function(e) {
             }, 3000);
             setTimeout(function () {
                 button.text('Изменить сет')
+            }, 6000);
+
+        },
+
+    });
+});
+$(document).on('click','#save_products_discount', function(e) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    let products = Array();
+    let event_id = document.getElementById('save_products_discount').getAttribute('data-id')
+    let amount_start_price = document.getElementById('price-value').textContent
+    let button = $('#save_products_discount')
+    let user_id = document.getElementById('save_products_discount').getAttribute('data-user_id')
+    const productsContainer = document.getElementById('products');
+    const discountsContainer = document.getElementById('discounts');
+    const helperAmountContainer = document.getElementById('helper_amount');
+    const productCheckboxes = productsContainer.querySelectorAll('input[type="checkbox"]');
+    productCheckboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            products.push(checkbox.getAttribute('data-name'))
+        }
+    });
+    e.preventDefault()
+    $.ajax({
+        type: 'POST',
+        url: '/sendProductsAndDiscount',
+        data: {
+            'event_id': event_id,
+            'user_id': user_id,
+            'amount_start_price': amount_start_price,
+            'discount': discountsContainer.options[discountsContainer.selectedIndex].getAttribute('data-name'),
+            'products': products,
+            'helper': helperAmountContainer.options[helperAmountContainer.selectedIndex].getAttribute('data-name'),
+        },
+        success: function(xhr, status, error) {
+            button.attr('disabled','disabled');
+            button.text('').append('<i id="spinner" class="fa fa-spinner fa-spin"></i> Обработка...')
+            setTimeout(function () {
+                button.text(xhr.message)
+                button.attr('disabled','disabled');
+            }, 1000);
+            setTimeout(function () {
+                button.text('Сохранить выбранное')
+            }, 2000);
+            setTimeout(function () {
+                button.removeAttr('disabled','disabled');
+            }, 3000);
+
+        },
+        error: function(xhr, status, error) {
+            button.text('').append('<i id="spinner" class="fa fa-spinner fa-spin"></i> Обработка...')
+            setTimeout(function () {
+                button.text(xhr.responseJSON.message)
+            }, 3000);
+            setTimeout(function () {
+                button.text('Сохранить выбранное')
             }, 6000);
 
         },
@@ -439,9 +513,11 @@ $(document).on('click','#send-all-result', function(e) {
 });
 
 var $modal = $('#modal');
+var $modal_document = $('#modal-document');
 var image = document.getElementById('image');
+var image_document = document.getElementById('image-document');
 var cropper;
-$("body").on("change", ".image", function (e) {
+$("body").on("change", ".imageBill", function (e) {
     var files = e.target.files;
     var done = function (url) {
         image.src = url;
@@ -463,6 +539,47 @@ $("body").on("change", ".image", function (e) {
             reader.readAsDataURL(file);
         }
     }
+});
+$("body").on("change", ".imageDocument", function (e) {
+    var files = e.target.files;
+    var done = function (url) {
+        image_document.src = url;
+        $modal_document.modal('show');
+    };
+    var reader;
+    var file;
+    var url;
+    if (files && files.length > 0) {
+        file = files[0];
+
+        if (URL) {
+            done(URL.createObjectURL(file));
+        } else if (FileReader) {
+            reader = new FileReader();
+            reader.onload = function (e) {
+                done(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+});
+$modal_document.on('shown.bs.modal', function () {
+    cropper = new Cropper(image_document, {
+        autoCrop: true,
+        autoCropArea: 1,
+        minContainerHeight  : 400,
+        minContainerWidth   : 400,
+        minCanvasWidth      : 400,
+        minCanvasHeight     : 400,
+        aspectRatio: 500 / 660,
+        minCropBoxWidth: 500,
+        minCropBoxHeight: 660,
+        viewMode: 2,
+        preview: '.preview'
+    });
+}).on('hidden.bs.modal', function () {
+    cropper.destroy();
+    cropper = null;
 });
 $modal.on('shown.bs.modal', function () {
     cropper = new Cropper(image, {
@@ -496,7 +613,6 @@ $("#crop").click(function () {
             var block_attach_bill = document.getElementById('attachBill')
             var btn_cancel_take_part = document.getElementById('btn_cancel_take_part')
             var event_id = document.getElementById('attachBill').getAttribute('data-event-id')
-            var block_checking_bill = document.getElementById('checkingBill')
             let button_pay = $('#btn-payment')
             $.ajax({
                 headers: {
@@ -508,19 +624,56 @@ $("#crop").click(function () {
                 data: {'image': base64data , 'event_id': event_id},
                 success: function (data) {
                     $modal.modal('hide');
-                    getInfoPaymentBll(event_id, '#paymentTab')
-                    button_pay.text('Чек отправлен (На проверке..)')
-                    button_pay.attr('disabled', 'disabled')
-                    btn_cancel_take_part.style.display = 'none';
-                    block_attach_bill.style.display = 'none';
-                    document.querySelector('#bill').style.display = 'None'
-                    setTimeout(function () {
-                        block_checking_bill.style.display = 'block';
-                    }, 1000);
-
+                    window.location.reload();
+                    // getInfoPay(event_id, '#paymentTab')
+                    // button_pay.text('Чек отправлен (На проверке..)')
+                    // button_pay.attr('disabled', 'disabled')
+                    // if(btn_cancel_take_part){
+                    //     btn_cancel_take_part.style.display = 'none';
+                    // }
+                    // block_attach_bill.style.display = 'none';
+                    // document.querySelector('#bill').style.display = 'None'
+                    // document.getElementById('checkingBillTab').style.display = 'block';
                 },
                 error: function (xhr, status, error) {
                     $modal.modal('hide');
+                }
+            });
+        }
+    });
+})
+
+$("#crop-document").click(function () {
+    canvas = cropper.getCroppedCanvas({
+        width: 500,
+        height: 600,
+    });
+    canvas.toBlob(function (blob) {
+        url = URL.createObjectURL(blob);
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = function () {
+            var base64data = reader.result;
+            var block_attach_document = document.getElementById('attachDocument')
+            var btn_cancel_take_part = document.getElementById('btn_cancel_take_part')
+            var event_id = document.getElementById('attachDocument').getAttribute('data-event-id')
+            var block_checking_document = document.getElementById('checkingDocument')
+            let button_pay = $('#btn-payment')
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                type: "POST",
+                dataType: "json",
+                url: "/cropdocumentupload",
+                data: {'image': base64data , 'event_id': event_id},
+                success: function (data) {
+                    $modal_document.modal('hide');
+                    window.location.reload();
+
+                },
+                error: function (xhr, status, error) {
+                    $modal_document.modal('hide');
                 }
             });
         }

@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchMessageForParticipant;
 use App\Admin\Actions\BatchNotificationOfParticipant;
 use App\Admin\CustomAction\ActionCloneEvent;
 use App\Admin\CustomAction\ActionExport;
@@ -12,15 +13,21 @@ use App\Exports\AllResultExport;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
+use App\Models\EventAndCoefficientRoute;
 use App\Models\Format;
 use App\Models\Grades;
 use App\Models\OwnerPaymentOperations;
 use App\Models\OwnerPayments;
+use App\Models\ResultFinalStage;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFranceSystemQualification;
+use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultRouteQualificationClassic;
+use App\Models\ResultRouteSemiFinalStage;
+use App\Models\ResultSemiFinalStage;
+use App\Models\Route;
 use App\Models\Set;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -44,6 +51,10 @@ class EventsController extends Controller
                 'on' => ['value' => 1, 'text' => 'Открыта', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => 'Закрыта', 'color' => 'default'],
             ];
+    const STATES_BTN_FLASH_OPEN_AND_CLOSE = [
+        'on' => ['value' => 1, 'text' => 'Учитываются', 'color' => 'success'],
+        'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+    ];
 
     /**
      * Store a newly created resource in storage.
@@ -199,6 +210,25 @@ class EventsController extends Controller
                 'message' => "Удаление соревнования невозможно, так как в нем есть участники",
             ];
             return response()->json($response);
+        } else {
+            if(Admin::user()->username == "Tester2") {
+                if ($event->is_france_system_qualification) {
+                    ResultFranceSystemQualification::where('event_id', $event->id)->delete();
+                    ResultRouteFranceSystemQualification::where('event_id', $event->id)->delete();
+                } else {
+                    ResultQualificationClassic::where('event_id', $event->id)->delete();
+                    ResultRouteQualificationClassic::where('event_id', $event->id)->delete();
+                }
+                ResultSemiFinalStage::where('event_id', $event->id)->delete();
+                ResultRouteSemiFinalStage::where('event_id', $event->id)->delete();
+                ResultFinalStage::where('event_id', $event->id)->delete();
+                ResultRouteFinalStage::where('event_id', $event->id)->delete();
+                EventAndCoefficientRoute::where('event_id', $event->id)->delete();
+                ParticipantCategory::where('event_id', $event->id)->delete();
+                Set::where('event_id', $event->id)->delete();
+                Grades::where('event_id', $event->id)->delete();
+                Route::where('event_id', $event->id)->delete();
+            }
         }
 
         return $this->form('destroy')->destroy($id);
@@ -229,6 +259,7 @@ class EventsController extends Controller
         if($event){
             $grid->tools(function (Grid\Tools $tools) use ($event) {
                 $tools->append(new BatchNotificationOfParticipant);
+                $tools->append(new BatchMessageForParticipant);
             });
         }
         $grid->disableFilter();
@@ -278,7 +309,6 @@ class EventsController extends Controller
 
         $form = new Form(new Event);
         $form->tab('Общая информация о соревновании', function ($form) {
-
             $this->install_admin_script();
             $form->footer(function ($footer) {
 //                $footer->disableReset();
@@ -319,19 +349,16 @@ class EventsController extends Controller
 //            $form->disableSubmit();
         })->tab('Оплата', function ($form) use ($id) {
             $form->radio('setting_payment','Настройка оплаты')
-                ->options([0 => 'Простая', 1 => 'Сложная(разные пакеты и стоимости)'])
+                ->options([0 => 'Простая', 1 => 'Сложная(разные пакеты и стоимости)', 3 => 'Динамическая'])
                 ->when(0, function (Form $form) {
                     $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
                     $form->image('img_payment', 'QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
                     $form->number('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма');
-                    $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
                 })->when(1, function (Form $form) use ($id) {
                     $payments = OwnerPayments::where('event_id', $id)->first();
-                    $form->html('Если вы приложили здесь QR код, то здесь он не будет отображаться, проверьте его отображение на странице с соревнованием');
-
+//                    $form->html('Если вы приложили здесь QR код, то здесь он не будет отображаться, проверьте его отображение на странице с соревнованием');
                     if($payments){
                         if($payments->amount_for_pay > 0){
-                            $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
                             $form->tableamount('options_amount_price','Настройка оплаты' , function ($table) {
                                 $table->text('Название')->width('100px');
                                 $table->number('Сумма')->attribute('inputmode', 'none');
@@ -347,7 +374,6 @@ class EventsController extends Controller
                         }');
                             });
                         } else {
-                            $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
                             $form->tableamount('options_amount_price','Настройка оплаты' , function ($table) {
                                 $table->text('Название')->width('100px');
                                 $table->number('Сумма')->attribute('inputmode', 'none');
@@ -357,7 +383,6 @@ class EventsController extends Controller
                             });
                         }
                     } else {
-                        $form->textarea('info_payment', 'Доп инфа об оплате')->rows(10)->placeholder('Инфа...');
                         $form->tableamount('options_amount_price','Настройка оплаты' , function ($table) {
                             $table->text('Название')->width('100px');
                             $table->number('Сумма')->attribute('inputmode', 'none');
@@ -366,7 +391,27 @@ class EventsController extends Controller
 //                            $table->image('QR код на оплату')->attribute('inputmode', 'none')->placeholder('QR');
                         });
                     }
+                })->when(3, function (Form $form) {
+                    $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
+                    $form->number('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма');
+                    $form->tableproducts('helper_amount', 'Доп опция на которую действует скидка', function ($table) use ($form){
+                        $table->text('Название');
+                        $table->number('Цена');
+                    });
+                    $form->tablediscounts('discounts', 'Скидки', function ($table) use ($form){
+                        $table->text('Название');
+                        $table->number('Проценты');
+                    });
+                    $form->tableproducts('products', 'Мерч', function (Form\NestedForm $form) {
+                        $form->text('Название', 'Название');
+                        $form->number('Цена', 'Цена');
+                    });
+                    $form->tableupprice('up_price', 'Цена в зависимости от дат', function ($table) use ($form){
+                        $table->number('Цена');
+                        $table->datetime('До даты')->attribute('type','date');
+                    });
                 })->default(0);
+            $form->summernote('info_payment', 'Доп инфа об оплате')->placeholder('Инфа...');
         })->tab('Параметры соревнования', function ($form) use ($id) {
             $form->radio('is_france_system_qualification','Настройка подсчета квалификации')
                 ->options([
@@ -377,10 +422,14 @@ class EventsController extends Controller
                     $form->radio('mode','Настройка формата')
                         ->options($formats)->when(1, function (Form $form) {
                             $form->number('mode_amount_routes','Кол-во трасс лучших трасс для подсчета')->attribute('inputmode', 'none')->value(10);
-                            $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+                            $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN);
+                            $form->switch('is_flash_value', 'Флеши учитываются')->help('По умолчанию флэши учитываются')->states(self::STATES_BTN_FLASH_OPEN_AND_CLOSE)->default(1);
                         })->when(2, function (Form $form) {
                             $form->currency('amount_point_flash','Балл за флэш')->default(1)->symbol('');
                             $form->currency('amount_point_redpoint','Балл за редпоинт')->default(0.9)->symbol('');
+                        })->when(3, function (Form $form) {
+                            $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN);
+                            $form->switch('is_flash_value', 'Флеши учитываются')->help('По умолчанию флэши учитываются')->states(self::STATES_BTN_FLASH_OPEN_AND_CLOSE)->default(1);
                         });
                     $form->radio('is_semifinal','Настройка кол-ва стадий соревнований')
                         ->options([
@@ -455,6 +504,7 @@ class EventsController extends Controller
             $form->switch('is_access_user_edit_result', 'Дать доступ к редактированию результата')->help('Участник может сам редактировать свой результат')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->switch('is_access_user_cancel_take_part', 'Дать доступ к отмене регистрации')->help('Участник может сам отменить регистрацию, кнопка будет показана до закрытия регистрации, и до оплаты, и внесение результата')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->switch('is_open_send_result_state', 'Открыть полные результаты')->help('Даже если включить, кнопка появиться только после закрытия внесения результатов')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            $form->switch('is_open_public_analytics', 'Открыть публичную аналитику')->help('Даже если включить, кнопка появиться только после закрытия внесения результатов')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->switch('is_open_team_result', 'Показать командные результаты')->help('В предварительных результатах отобразиться таблица с результатами по командам')->states(self::STATES_BTN_OPEN_AND_CLOSE);
             $form->datetime('datetime_send_result_state', 'Дата закрытия отправки результатов [AUTO]')->help('Обновление статуса каждый час, например время закрытия 21:40 статусы обновятся в 22:00')->attribute('inputmode', 'none')->placeholder('дата и время');
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
@@ -521,6 +571,15 @@ class EventsController extends Controller
             if($form->type_event){
                 $form->is_access_user_edit_result = 1;
             }
+//            if($form->input('products')){
+//                $existingData = $form->model()->products;
+//                $newData = $form->input('products');
+//                // Объедините существующие данные с новыми
+//                $mergedData = array_merge($existingData, $newData);
+//                // Сохраните объединенные данные
+//                $form->model()->products = $mergedData;
+//            }
+            return $form;
         });
         $form->saved(function (Form $form)  use ($type, $id){
             if($type != 'active') {
@@ -575,9 +634,9 @@ class EventsController extends Controller
                         }
 
                     }
-                    $exist_sets = Set::where('owner_id', '=', Admin::user()->id)->first();
+                    $exist_sets = Set::where('event_id', '=', $form->model()->id)->first();
                     if (!$exist_sets) {
-                        $this->install_set(Admin::user()->id);
+                        $this->install_set(Admin::user()->id, $form->model()->id);
                     }
                     return back()->isRedirect('events');
                 }
@@ -607,6 +666,7 @@ class EventsController extends Controller
 
     public function cloneEvent(Request $request)
     {
+        $owner_id = Admin::user()->id;
         if($request){
             $event_original = Event::find($request->id);
             $event_clone = $event_original->replicate();
@@ -617,14 +677,20 @@ class EventsController extends Controller
             $event_clone->admin_link = $event_clone->admin_link.'-copy';
             $event_clone->active = 0;
             $event_clone->is_open_send_result_state = 0;
+            $event_clone->is_open_main_rating = 0;
             $event_clone->datetime_send_result_state = null;
             $event_clone->is_registration_state = 0;
             $event_clone->datetime_registration_state = null;
             $event_clone->save();
 
+            $exist_sets = Set::where('event_id', '=', $event_clone->id)->first();
+            if (!$exist_sets) {
+                $this->install_set($owner_id, $event_clone->id);
+            }
+
             foreach ($event_clone->categories as $category) {
                 $participant_categories = new ParticipantCategory;
-                $participant_categories->owner_id = Admin::user()->id;
+                $participant_categories->owner_id = $owner_id;
                 $participant_categories->event_id = $event_clone->id;
                 $participant_categories->category = $category;
                 $participant_categories->save();
@@ -668,16 +734,16 @@ class EventsController extends Controller
         }
         return $result;
     }
-    public function install_set($owner_id){
+    public function install_set($owner_id, $event_id){
         $sets = array(
-            ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 1],
-            ['owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 2],
-            ['owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 6],
-            ['owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 3],
-            ['owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 7],
-            ['owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 4],
-            ['owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 8],
-            ['owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 5],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 1],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 2],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '13:00-15:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 6],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 3],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '16:00-18:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 7],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'Friday','number_set' => 4],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '20:00-22:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 8],
+            ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 5],
         );
         DB::table('sets')->insert($sets);
     }

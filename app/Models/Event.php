@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Admin\Controllers\ResultRouteSemiFinalStageController;
+use Carbon\Carbon;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,11 @@ class Event extends Model
         'options_categories' => 'json',
         'categories' => 'json',
         'options_amount_price' => 'json',
+        'up_price' => 'json',
+        'discounts' => 'json',
+        'products' => 'json',
+        'helper_amount' => 'json',
+        'list_merged_events' => 'json',
     ];
     /**
      * The attributes that are mass assignable.
@@ -63,7 +69,14 @@ class Event extends Model
     {
         return $this->hasOne(ResultQualificationClassic::class);
     }
-
+    public function participant_route()
+    {
+        return $this->hasOne(ResultRouteQualificationClassic::class);
+    }
+    public function sets()
+    {
+        return $this->hasOne(Set::class);
+    }
 
 
     public function ownerPayments()
@@ -206,9 +219,9 @@ class Event extends Model
             if (!$event_route) {
                 Log::error('При создание соревнований было указано один формат все трасс или француская система, а были с
                 сгенерировано трассы, потом изменен формат и пытаемся сгенерироват результат
-                ');
+                ', ['file' => __FILE__, 'line' => __LINE__]);
             }
-            $route->value = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $event_route, $event->mode, $event->id);
+            $route->value = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $event_route, $event->mode, $event);
         }
         $routes_id_passed_with_red_point = $routes->sortByDesc('value')->take($event->mode_amount_routes)->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)->pluck('route_id');
         if ($routes_id_passed_with_red_point->isNotEmpty()) {
@@ -241,15 +254,9 @@ class Event extends Model
             if (!$event_route) {
                 Log::error('При создание соревнований было указано один формат все трасс или француская система, а были с
                 сгенерировано трассы, потом изменен формат и пытаемся сгенерироват результат
-                ');
+                ', ['file' => __FILE__, 'line' => __LINE__]);
             }
-            if($event->mode == 2){
-                # ставим принудительно 3 формат для скального феста если организатор выбрал 2
-                $mode = 3;
-            } else {
-                $mode = $event->mode;
-            }
-            $route->value = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $event_route, $mode, $event->id);
+            $route->value = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $event_route, $event->mode, $event);
         }
         $routes_id_passed_with_red_point = $routes->sortByDesc('value')->where('attempt', ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT)->pluck('route_id');
         if ($routes_id_passed_with_red_point->isNotEmpty()) {
@@ -272,7 +279,7 @@ class Event extends Model
         return $finish_flash_result + $finish_red_point_result + $finish_zone_result;
     }
 
-    public static function refresh_final_points_all_participant($event)
+    public static function refresh_final_points_all_participant(Event $event)
     {
         $event_id = $event->id;
         $format = $event->mode ?? null;
@@ -293,28 +300,33 @@ class Event extends Model
             if($event->type_event){
                 $points = self::get_result_format_n_outdoor_route($event, $participant);
             } else {
-                if ($format == 1) {
+                if ($format == Format::N_ROUTE) {
                     $points = self::get_result_format_n_route($event, $participant);
                 }
-                if ($format == 2) {
+                if ($format == Format::ALL_ROUTE) {
                     $points = self::get_result_format_all_route($event, $participant);
                 }
             }
 
             $final_participant_result = ResultQualificationClassic::where('user_id', '=', $participant->id)->where('event_id', '=', $event_id)->first();
             if(!$participant){
-                Log::error('Category id not found -event_id - '.$participant->id.'user_id'.$event_id);
+                Log::error('Category id not found -event_id - '.$participant->id.'user_id'.$event_id, ['file' => __FILE__, 'line' => __LINE__]);
             }
-            $category_id = $participant->category_id;
-            if ($event->is_auto_categories && $category_id == null) {
+            if ($event->is_auto_categories) {
                 $the_best_route_passed = Grades::findMaxIndices(Grades::grades(), ResultQualificationClassic::get_list_passed_route($event->id, $participant->id), 3);
-                if(count($the_best_route_passed) === 0){
+                $count_passed_route = ResultQualificationClassic::get_list_passed_route($event->id, $participant->id);
+                if(count($the_best_route_passed) === 0 || count($count_passed_route) < 3) {
                     $category_id = 0;
+                    if(isset($final_participant_result->category_id)){
+                        if($final_participant_result->category_id){
+                            $category_id = $final_participant_result->category_id;
+                        }
+                    }
                 } else {
                     $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $participant->id);
                     $category_id = ParticipantCategory::where('event_id', '=', $event_id)->where('category', $category)->first();
                     if(!$category_id){
-                         Log::error('Не удалось определить категорию - у юзера'.$participant->id);
+                         Log::error('Не удалось определить категорию - у юзера'.$participant->id, ['file' => __FILE__, 'line' => __LINE__]);
                         $category_id = 0;
                     } else {
                         $category_id = $category_id->id;
@@ -323,7 +335,6 @@ class Event extends Model
                 $final_participant_result->category_id = $category_id;
             }
             $final_participant_result->points = $points;
-            Log::info('user_id - '.$participant->id.' - '.$points);
             $final_participant_result->event_id = $event_id;
             $final_participant_result->user_id = $participant->id;
             $final_participant_result->save();
@@ -545,7 +556,7 @@ class Event extends Model
                     $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
                     $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first();
                     if(!$category_id){
-                        Log::error('Не удалось определить категорию - у юзера'.$user_id);
+                        Log::error('Не удалось определить категорию - у юзера'.$user_id, ['file' => __FILE__, 'line' => __LINE__]);
                         $category_id = 0;
                     } else {
                         $category_id = $category_id->id;
@@ -571,7 +582,7 @@ class Event extends Model
                     $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
                     $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first();
                     if(!$category_id){
-                        Log::error('Не удалось определить категорию - у юзера'.$user_id);
+                        Log::error('Не удалось определить категорию - у юзера'.$user_id, ['file' => __FILE__, 'line' => __LINE__]);
                         $category_id = 0;
                     } else {
                         $category_id = $category_id->id;
@@ -589,6 +600,10 @@ class Event extends Model
         $users = User::query()
             ->leftJoin($table, 'users.id', '=', $table . '.user_id')
             ->where($table . '.event_id', '=', $event_id)
+            ->where($table . '.amount_top', '!=', null)
+            ->where($table . '.amount_try_top', '!=', null)
+            ->where($table . '.amount_zone', '!=', null)
+            ->where($table . '.amount_try_zone', '!=', null)
             ->select(
                 $table . '.place',
                 'users.id',
@@ -601,10 +616,12 @@ class Event extends Model
                 $table . '.amount_zone',
                 $table . '.amount_try_zone',
             )->where($table . '.gender', '=', $gender);
+
         if ($category) {
             $users = $users->where('category_id', '=', $category->id);
         }
         $users = $users->get()->sortBy('place')->toArray();
+
         foreach ($users as $index => $user) {
             if ($table == 'result_final_stage') {
                 $final_result = ResultRouteFinalStage::where('event_id', '=', $event_id)->where('user_id', '=', $user['id'])->get();
@@ -712,7 +729,7 @@ class Event extends Model
                 $category_id = $category_id->id;
                 $result->category_id = $category_id;
             } else {
-                Log::error('It has not found category_id ' . $users_sorted[$index]['category_id'] . ' ' . $model->id);
+                Log::error('It has not found category_id ' . $users_sorted[$index]['category_id'] . ' ' . $model->id, ['file' => __FILE__, 'line' => __LINE__]);
             }
             $result->event_id = $users_sorted[$index]['event_id'];
             $result->user_id = $users_sorted[$index]['user_id'];
@@ -789,44 +806,80 @@ class Event extends Model
     {
         # Чисто подсчет очков
         foreach ($users_ids as $user_id) {
-            for ($i = 0; $i < count($event_ids); $i++) {
-                $gender = null;
-                $users_result = ResultQualificationClassic::where('event_id', $event_ids[$i])->where('active', 1)->where('user_id', $user_id)->first();
-                $active_event_result = ResultQualificationClassic::where('event_id', $active_event->id)->where('user_id', $user_id)->first();
-                if ($users_result) {
-                    $gender = $users_result->gender;
-                    if ($active_event_result) {
-                        $active_event_result->global_points = $users_result->points + $active_event_result->points;
-                        $active_event_result->save();
-                    } else {
-                        if($active_event->is_auto_categories){
-                            $category_id = 0;
-                        } else {
-                            $participant_category = ParticipantCategory::find($users_result->category_id);
-                            $active_event_category = ParticipantCategory::where('event_id', $active_event->id)->where('category', $participant_category->category)->first();
-                            if($active_event_category){
-                                $category_id = $active_event_category->id;
+            $sum_points = ResultQualificationClassic::whereIn('event_id', $event_ids)->where('user_id', $user_id)->get()->sum('points');
+            $all_points = ResultQualificationClassic::whereIn('event_id', $event_ids)->where('user_id', $user_id)->get()->pluck('points')->toArray();
+            $all_user_places = ResultQualificationClassic::whereIn('event_id', $event_ids)->where('user_id', $user_id)->get()->pluck('user_place')->toArray();
+            $all_categories = ResultQualificationClassic::whereIn('event_id', $event_ids)->where('user_id', $user_id)->get()->pluck('category_id', 'event_id')->toArray();
+            $users_result = ResultQualificationClassic::whereIn('event_id', $event_ids)->where('active', 1)->where('user_id', $user_id)->first();
+            $active_event_result = ResultQualificationClassic::where('event_id', $active_event->id)->where('user_id', $user_id)->first();
+            if ($users_result) {
+                $gender = $users_result->gender;
+            }
+            if ($active_event_result) {
+                $categories_name = [];
+                $active_event_result->last_points_after_merged = $all_points;
+                $active_event_result->last_user_place_after_merged = $all_user_places;
+                if(count($all_categories) > 0){
+                    foreach ($all_categories as $category){
+                        if($category != 0){
+                            $participant_category = ParticipantCategory::find($category);
+                            if(!$participant_category){
+                                Log::error('category - '.$category.' user_id - '.$user_id, ['file' => __FILE__, 'line' => __LINE__ ]);
+                                $categories_name[] = 'Не определена';
                             } else {
-                                $category_id = 0;
+                                $categories_name[] = $participant_category->category;
                             }
+                        } else {
+                            $categories_name[] = 'Не определена';
                         }
-                        $owner_id = Admin::user()->id;
-                        $active_event_result = new ResultQualificationClassic;
-                        $global_points = $users_result->points;
-                        $active_event_result->owner_id = $owner_id;
-                        $active_event_result->event_id = $active_event->id;
-                        $active_event_result->user_id = $user_id;
-                        $active_event_result->gender = $gender;
-                        $active_event_result->global_points = $global_points;
-                        $active_event_result->category_id = $category_id;
-                        $active_event_result->number_set_id = 0;
-                        $active_event_result->active = 0;
-                        $active_event_result->is_other_event = 1;
-                        $active_event_result->save();
                     }
                 }
+                $active_event_result->last_category_after_merged = $categories_name;
+                $active_event_result->global_points = $sum_points;
+                $active_event_result->save();
+            } else {
+                if ($active_event->is_auto_categories) {
+                    $category_id = 0;
+                } else {
+                    $participant_category = ParticipantCategory::find($users_result->category_id);
+                    $active_event_category = ParticipantCategory::where('event_id', $active_event->id)->where('category', $participant_category->category)->first();
+                    if ($active_event_category) {
+                        $category_id = $active_event_category->id;
+                    }
+                }
+                $owner_id = Admin::user()->id;
+                $active_event_result = new ResultQualificationClassic;
+                $active_event_result->owner_id = $owner_id;
+                $active_event_result->event_id = $active_event->id;
+                $active_event_result->user_id = $user_id;
+                $active_event_result->gender = $gender;
+                $categories_name = [];
+                $active_event_result->last_points_after_merged = $all_points;
+                $active_event_result->last_user_place_after_merged = $all_user_places;
+                if(count($all_categories) > 0){
+                    foreach ($all_categories as $category){
+                        if($category != 0){
+                            $participant_category = ParticipantCategory::find($category);
+                            if(!$participant_category){
+                                Log::error('category - '.$category.' user_id - '.$user_id, ['file' => __FILE__, 'line' => __LINE__ ]);
+                                $categories_name[] = 'Не определена';
+                            } else {
+                                $categories_name[] = $participant_category->category;
+                            }
+                        } else {
+                            $categories_name[] = 'Не определена';
+                        }
+                    }
+                }
+                $active_event_result->last_category_after_merged = $categories_name;
+                $active_event_result->global_points = $sum_points;
+                $active_event_result->category_id = $category_id;
+                $active_event_result->number_set_id = 0;
+                $active_event_result->active = 0;
+                $active_event_result->is_other_event = 1;
             }
-        }
+            $active_event_result->save();
+            }
     }
     public static function merge_auto_categories($event, $users_ids, $event_ids)
     {
@@ -838,7 +891,7 @@ class Event extends Model
                 $category = ResultQualificationClassic::get_category_from_result($event, $the_best_route_passed, $user_id);
                 $category_id = ParticipantCategory::where('event_id', '=', $event->id)->where('category', $category)->first();
                 if(!$category_id){
-                    Log::error('Не удалось определить категорию - у юзера'.$user_id);
+                    Log::error('Не удалось определить категорию - у юзера'.$user_id, ['file' => __FILE__, 'line' => __LINE__]);
                     $category_id = 0;
                 } else {
                     $category_id = $category_id->id;
@@ -847,8 +900,24 @@ class Event extends Model
                 $users_result->save();
             }
         }
-
     }
+    public static function merge_categories($event, $users_ids)
+    {
+        foreach ($users_ids as $user_id){
+            $users_result = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
+            if($users_result){
+                $users_result->global_category_id = $users_result->category_id;
+                $users_result->save();
+            }
+        }
+    }
+    public static function update_event_after_merged(Event $event, array $event_ids)
+    {
+        $event->is_open_main_rating = 1;
+        $event->list_merged_events = $event_ids;
+        $event->save();
+    }
+
     public static function counting_global_category_place($event)
     {
         $participants = User::query()
@@ -888,7 +957,7 @@ class Event extends Model
             ->where('result_qualification_classic.event_id', '=', $event->id)
             ->select(
                 'users.id',
-                'result_qualification_classic.category_id',
+                'result_qualification_classic.global_category_id',
                 'result_qualification_classic.gender',
             )->where('active', 1);
         $users_id = $participants->pluck('id');
@@ -897,7 +966,7 @@ class Event extends Model
             foreach (['female', 'male'] as $gender) {
                 foreach ($categories as $category) {
                     $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)
-                        ->where('category_id', $category->id)
+                        ->where('global_category_id', $category->id)
                         ->where('event_id', $event->id)
                         ->where('gender', $gender)
                         ->orderBy('global_points', 'desc')
@@ -938,6 +1007,79 @@ class Event extends Model
             $event_and_coefficient_route->save();
         }
 
+
+    }
+
+    /**
+     * Этап закрыт если
+     * Регистрация закрыта
+     * Закрыт доступ к редактированию
+     * Закрыт доступ к отправке результатов
+     * Даты конца соревнования прошли
+     *
+     * @return bool
+     * @var Event $event
+     */
+    public static function event_is_open(Event $event): bool
+    {
+        $now = Carbon::today();
+        $now->setTimezone('Europe/Moscow');
+        if(!$event->is_access_user_edit_result && !$event->is_send_result_state && !$event->is_registration_state && $event->end_date < $now){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public static function refresh_grade_all_participant_in_result_for_edit($event, $route, $replace_to_grade)
+    {
+        $event_id = $event->id;
+        $participants = ResultQualificationClassic::where('event_id', $event_id)
+            ->where('active', 1)
+            ->where('is_other_event', 0)
+            ->get();
+        foreach ($participants as $participant) {
+            $results = $participant->result_for_edit; // Получаем текущий массив результатов
+            // Проверка, если result_for_edit действительно массив
+            if (is_array($results)) {
+                foreach ($results as &$result) { // Обрабатываем массив по ссылке
+                    // Приведение к одному типу перед сравнением (например, к строке)
+                    if ((string)$result['route_id'] === (string)$route->route_id) {
+                        $result['grade'] = $replace_to_grade; // Обновляем значение grade
+                        break; // Прекращаем цикл после изменения
+                    }
+                }
+            }
+            // Сохраняем измененный массив обратно в модель
+            $participant->result_for_edit = $results;
+            $participant->save(); // Сохраняем изменения в базе данных
+        }
+    }
+
+    public static function refresh_grade_all_participant_in_route_result($event, $route, $grade)
+    {
+        $event_id = $event->id;
+        $owner_id = $event->owner_id;
+        $format = $event->mode ?? null;
+
+        if (!$format) {
+            Log::info('Обновление без формата 1 или 2, пока что недоступно, потому что используется формат подсчета как финал');
+            return;
+        }
+        // Получаем всех участников, соответствующих заданному event_id и route_id
+        $participants = ResultRouteQualificationClassic::where('event_id', $event_id)
+            ->where('route_id', $route->route_id)
+            ->get(); // Выбираем только нужные поля
+        // Обрабатываем каждого участника
+        foreach ($participants as $participant) {
+            $participant->grade = $grade; // Обновляем grade
+            if ($participant->value) { // Если значение value существует
+                // Получаем новое значение value
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route->attempt, $owner_id, $format, $event);
+                $participant->value = $value_route; // Обновляем value
+            }
+            $participant->save();
+        }
 
     }
 }

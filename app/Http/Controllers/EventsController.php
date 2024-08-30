@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Admin\Controllers\AnalyticsController;
 use App\Helpers\Helpers;
 use App\Http\Requests\StoreRequest;
 use App\Jobs\UpdateAttemptInRoutesParticipants;
@@ -9,8 +10,11 @@ use App\Jobs\UpdateResultParticipants;
 use App\Jobs\UpdateRouteCoefficientParticipants;
 use App\Models\Area;
 use App\Models\Event;
+use App\Models\Format;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
+use App\Models\MessageForParticipant;
+use App\Models\OwnerPaymentOperations;
 use App\Models\Place;
 use App\Models\PlaceRoute;
 use App\Models\ResultQualificationClassic;
@@ -23,7 +27,6 @@ use App\Models\Route;
 use App\Models\RoutesOutdoor;
 use App\Models\Set;
 use App\Models\User;
-use Encore\Admin\Admin;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,7 +56,7 @@ class EventsController extends Controller
         }
         $is_show_button_list_pending = false;
         if($event_public_exist || $pre_show){
-            $sets = Set::where('owner_id', '=', $event->owner_id)->orderBy('number_set')->get();
+            $sets = Set::where('event_id', '=', $event->id)->orderBy('number_set')->get();
             foreach ($sets as $set){
                 if($event->is_france_system_qualification){
                     $participants_event = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
@@ -99,12 +102,16 @@ class EventsController extends Controller
             $sport_categories = User::sport_categories;
             if($event->is_france_system_qualification){
                 $count_participants = ResultFranceSystemQualification::where('event_id','=',$event->id)->count();
+                $participant = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('user_id', $user_id)->first();
             } else {
                 $count_participants = ResultQualificationClassic::where('event_id','=',$event->id)->count();
+                $participant = ResultQualificationClassic::where('event_id','=',$event->id)->where('user_id', $user_id)->first();
             }
-
+            $message_for_participants = MessageForParticipant::where('event_id', $event->id)->first();
             $google_iframe = $this->google_maps_iframe($event->address.','.$event->city);
-            return view('welcome', compact(['event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
+            $participant_products_and_discounts = $participant->products_and_discounts ?? null;
+            $current_amount_start_price = OwnerPaymentOperations::current_amount_start_price_before_date($event);
+            return view('welcome', compact(['current_amount_start_price','participant_products_and_discounts','message_for_participants','event','google_iframe','count_participants','is_show_button_list_pending','list_pending','is_add_to_list_pending', 'sport_categories', 'sets', 'is_show_button_final',  'is_show_button_semifinal']));
         } else {
             return view('errors.404');
         }
@@ -115,12 +122,13 @@ class EventsController extends Controller
         $event = Event::find($event_id);
         return view('event.tab.payment_without_bill', compact('event'));
     }
-    public function event_info_payment_bill(Request $request, $start_date, $climbing_gym, $event_id)
+    public function event_info_pay(Request $request, $start_date, $climbing_gym, $event_id)
     {
         $event = Event::find($event_id);
-        return view('event.tab.payment', compact('event'));
+        $participant_products_and_discounts = $participant->products_and_discounts ?? null;
+        $current_amount_start_price = OwnerPaymentOperations::current_amount_start_price_before_date($event);
+        return view('event.tab.payment', compact(['current_amount_start_price','participant_products_and_discounts','event']));
     }
-
     public function get_participants(Request $request, $start_date, $climbing_gym, $title){
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if($event) {
@@ -155,9 +163,9 @@ class EventsController extends Controller
                     )->get()->toArray();
             }
             if($event->is_input_set != 1){
-                $days = Set::where('owner_id', '=', $event->owner_id)->select('day_of_week')->distinct()->get();
-                $sets = Set::where('owner_id', '=', $event->owner_id)->get();
-                $number_sets = Set::where('owner_id', '=', $event->owner_id)->pluck('id');
+                $days = Set::where('event_id', '=', $event->id)->select('day_of_week')->distinct()->get();
+                $sets = Set::where('event_id', '=', $event->id)->get();
+                $number_sets = Set::where('event_id', '=', $event->id)->pluck('id');
                 foreach ($number_sets as $index => $set) {
                     if($event->is_france_system_qualification){
                         $sets[$index]->count_participant = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('number_set_id', $set)->count();
@@ -192,14 +200,16 @@ class EventsController extends Controller
                     } else {
                         # Регистрация с сетов + без категории
                         $set = $sets->where('id', '=', $user['number_set_id'])->where('owner_id', '=', $event->owner_id)->first();
-                        if($participants[$index]['category_id'] == 0){
-                            $category = 'Нет группы';
-                        } else {
-                            $category = $categories[$participants[$index]['category_id']] ?? 'Нет группы';
+                        if(isset($set->number_set)){
+                            if($participants[$index]['category_id'] == 0){
+                                $category = 'Нет группы';
+                            } else {
+                                $category = $categories[$participants[$index]['category_id']] ?? 'Нет группы';
+                            }
+                            $participants[$index_user]['category'] = $category;
+                            $participants[$index_user]['number_set'] = $set->number_set;
+                            $participants[$index_user]['time'] = $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10);
                         }
-                        $participants[$index_user]['category'] = $category;
-                        $participants[$index_user]['number_set'] = $set->number_set;
-                        $participants[$index_user]['time'] = $set->time . ' ' . trans_choice('somewords.' . $set->day_of_week, 10);
                     }
                 }
                 $index++;
@@ -252,21 +262,8 @@ class EventsController extends Controller
 //                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                     $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
                     $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
-                    if($event->is_open_main_rating){
-                        if($event->is_auto_categories){
-                            $columns = ['column_place' => 'user_global_place', 'column_points' => 'global_points', 'column_category_id' => 'global_category_id'];
-                            $column_category_id = 'global_category_id';
-                        } else {
-                            $columns = ['column_place' => 'user_global_place', 'column_points' => 'global_points', 'column_category_id' => 'category_id'];
-                            $column_category_id = 'category_id';
-                        }
-                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where($column_category_id, '=', $category->id)->get()->count();
-                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where($column_category_id, '=', $category->id)->get()->count();
-                    } else {
-                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
-                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
-                        $columns = ['column_place' => 'user_place', 'column_points' => 'points', 'column_category_id' => 'category_id'];
-                    }
+                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
                 }
                 if($event->is_open_team_result){
                     foreach ($teams as $team){
@@ -288,9 +285,97 @@ class EventsController extends Controller
         } else {
             return view('errors.404');
         }
-        return view('event.qualification_classic_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats', 'columns']));
+        return view('event.qualification_classic_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats']));
     }
 
+    public function get_qualification_classic_global_results(Request $request, $start_date, $climbing_gym, $title)
+    {
+        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        if($event){
+            if(!$event->is_france_system_qualification){
+                $user_male_ids = ResultQualificationClassic::where(function($query) {
+                    $query->where('active', 1)
+                        ->orWhere(function($query) {
+                            $query->where('active', 0)
+                                ->where('is_other_event', 1);
+                        });
+                })
+                    ->where('event_id', $event->id)
+                    ->where('gender', 'male')
+                    ->where('global_category_id', '!=', 0)
+                    ->pluck('user_id')
+                    ->toArray();
+                $user_female_ids = ResultQualificationClassic::where(function($query) {
+                    $query->where('active', 1)
+                        ->orWhere(function($query) {
+                            $query->where('active', 0)
+                                ->where('is_other_event', 1);
+                        });
+                })
+                    ->where('event_id', $event->id)
+                    ->where('gender', 'female')
+                    ->where('global_category_id', '!=', 0)
+                    ->pluck('user_id')
+                    ->toArray();
+
+                $stats = new stdClass();
+                if($event->is_open_team_result){
+                    $user_team_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('active','=', 1)->pluck('user_id')->toArray();
+                    $teams = User::whereIn('id', $user_team_ids)->where('team','!=', null)->distinct()->pluck('team')->toArray();
+                    $stats->team = count($teams);
+                    $result_team = array();
+                }
+                $female_categories = array();
+                $male_categories = array();
+                $stats->male = User::whereIn('id', $user_male_ids)->get()->count();
+                $stats->female = User::whereIn('id', $user_female_ids)->get()->count();
+                $result_male = array();
+                $result_female = array();
+                $categories = ParticipantCategory::where('event_id', $event->id)->get();
+                foreach ($categories as $category) {
+                    if($stats->male + $stats->female > 100){
+                        $result_male_cache = Cache::rememberForever('global_result_male_cache_'.$category->category.'_event_id_'.$event->id, function () use ($event, $category) {
+                            return ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                        });
+                        $result_female_cache = Cache::rememberForever('global_result_female_cache_'.$category->category.'_event_id_'.$event->id, function () use ($event, $category) {
+                            return ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        });
+                    } else {
+                        $result_male_cache = ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                        $result_female_cache =  ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                    }
+                    $result_male[] = $result_male_cache;
+                    $result_female[] = $result_female_cache;
+//                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+//                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                    $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
+                    $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
+
+                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
+                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
+                }
+                if($event->is_open_team_result){
+                    foreach ($teams as $team){
+                        $result_team_cache = ResultQualificationClassic::get_global_list_team_and_points_participant($event->id, $team);
+                        $result_team[$team] = $result_team_cache;
+                    }
+                    $result_team = ResultQualificationClassic::sorted_team_points($result_team);
+                } else {
+                    $result_team = null;
+                    $teams = null;
+                }
+                $result_male_final = Helpers::arrayValuesRecursive($result_male);
+                $result_female_final = Helpers::arrayValuesRecursive($result_female);
+                $result = array_merge($result_male_final, $result_female_final);
+                $stats->female_categories = $female_categories;
+                $stats->male_categories = $male_categories;
+                $categories = $categories->toArray();
+            }
+        } else {
+            return view('errors.404');
+        }
+        return view('event.qualification_classic_global_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats']));
+    }
 
     public function get_qualification_france_system_results(Request $request, $start_date, $climbing_gym, $title)
     {
@@ -307,9 +392,10 @@ class EventsController extends Controller
                 foreach ($event->categories as $category) {
                     $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
                     $users_female2 = Event::get_france_system_result('result_france_system_qualification', $event->id, 'female', $category)->toArray();
+
                     $users_male2 = Event::get_france_system_result('result_france_system_qualification', $event->id, 'male', $category)->toArray();
-                    $result_each_routes['male'][$category->id] = $users_female2;
-                    $result_each_routes['female'][$category->id] = $users_male2;
+                    $result_each_routes['female'][$category->id] = $users_female2;
+                    $result_each_routes['male'][$category->id] = $users_male2;
                 }
             }
         } else {
@@ -406,7 +492,7 @@ class EventsController extends Controller
 
         if($event->is_input_set != 1){
             $number_set = $request->number_set;
-            $set = Set::where('number_set', $number_set)->where('owner_id', $event->owner_id)->first();
+            $set = Set::where('number_set', $number_set)->where('event_id', $event->id)->first();
             $participant->number_set_id = $set->id;
         }
         if($event->is_auto_categories){
@@ -453,7 +539,7 @@ class EventsController extends Controller
         if(!$event || !$event->is_registration_state){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
-        $set = Set::where('owner_id',$event->owner_id)->where('number_set', $request->number_set)->first();
+        $set = Set::where('event_id',$event->id)->where('number_set', $request->number_set)->first();
         if($event->is_france_system_qualification){
             $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
             $participants_event = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
@@ -467,8 +553,24 @@ class EventsController extends Controller
         }
         $event = Event::find($request->event_id);
         $number_set = $request->number_set;
-        $set = Set::where('number_set', $number_set)->where('owner_id', $event->owner_id)->first();
+        $set = Set::where('number_set', $number_set)->where('event_id', $event->id)->first();
         $participant->number_set_id = $set->id;
+        $participant->save();
+        if ($participant->save()) {
+            return response()->json(['success' => true, 'message' => 'Успешно сохранено']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+        }
+    }
+    public function sendProductsAndDiscount(Request $request) {
+        $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
+        if($event->is_france_system_qualification){
+            $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        } else {
+            $participant = ResultQualificationClassic::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
+        }
+        $participant->products_and_discounts = ['discount' => $request->discount, 'products' => $request->products, 'helper' => $request->helper];
+        $participant->amount_start_price = intval($request->amount_start_price);
         $participant->save();
         if ($participant->save()) {
             return response()->json(['success' => true, 'message' => 'Успешно сохранено']);
@@ -548,13 +650,7 @@ class EventsController extends Controller
             foreach ($data as $route){
                 # Варианты форматов подсчета баллов
                 $owner_route = RoutesOutdoor::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
-                # ставим принудительно 3 формат для скального феста если организатор выбрал 2
-                if($format == 2){
-                    $mode = 3;
-                } else {
-                    $mode = $format;
-                }
-                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $mode, $event_id);
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event);
 
                 # Формат все трассы считаем сразу
                 $route['points'] = $value_route;
@@ -567,7 +663,7 @@ class EventsController extends Controller
             }
             # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
         } else {
-            if($format == 2){
+            if($format == Format::ALL_ROUTE){
                 UpdateRouteCoefficientParticipants::dispatch($event_id, $gender);
                 $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
             }
@@ -575,9 +671,9 @@ class EventsController extends Controller
             foreach ($data as $route){
                 # Варианты форматов подсчета баллов
                 $owner_route = Route::where('grade','=',$route['grade'])->where('event_id','=', $event_id)->first();
-                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event_id);
+                $value_route = (new \App\Models\ResultRouteQualificationClassic)->get_value_route($route['attempt'], $owner_route, $format, $event);
                 # Формат все трассы считаем сразу
-                if($format == 2) {
+                if($format == Format::ALL_ROUTE) {
                     $count_route_passed = ResultRouteQualificationClassic::counting_result($event_id, $route['route_id'], $gender);
 //                (new \App\Models\EventAndCoefficientRoute)->update_coefficitient($route['event_id'], $route['route_id'], $route['owner_id'], $gender);
                     $coefficient = ResultRouteQualificationClassic::get_coefficient($active_participant, $count_route_passed);
@@ -592,12 +688,11 @@ class EventsController extends Controller
                     $final_data_only_passed_route[] = $route;
                 }
             }
-            # Формат 10 лучших считаем уже после подсчета, так как ценность трассы еще зависит от коэффициента прохождений
         }
-        if($format == 2){
+        if($format == Format::ALL_ROUTE || $format == Format::ALL_ROUTE_WITH_POINTS){
             (new \App\Models\Event)->insert_final_participant_result($event_id, $points_for_mode_2, $user_id);
         }
-        if($format == 1){
+        if($format == Format::N_ROUTE){
             usort($final_data_only_passed_route, function($a, $b) {
                 return $a['points'] <=> $b['points'];
             });
@@ -662,11 +757,7 @@ class EventsController extends Controller
         }
 //        Event::refresh_final_points_all_participant($event);
         UpdateResultParticipants::dispatch($event_id);
-        $categories = ParticipantCategory::where('event_id', $event_id)->get();
-        foreach ($categories as $category) {
-            Cache::forget('result_male_cache_'.$category->category.'_event_id_'.$event_id);
-            Cache::forget('result_female_cache_'.$category->category.'_event_id_'.$event_id);
-        }
+        Helpers::clear_cache($event);
         if ($result) {
             return response()->json(['success' => true, 'message' => 'Успешная внесение результатов', 'link' => $event->link], 201);
         } else {
@@ -715,11 +806,16 @@ class EventsController extends Controller
                     $sectors[] = $sector->name;
                 }
                 $sector_fields[$sector->name] = array('area_name' => ucfirst($area->name),'place_name' => ucfirst($place->name),'description' => $sector->description,'name' => $sector->name,'image' => $sector->image, 'web_link' => $sector->web_link);
+                $route_class->image = $route->image;
+                $route_class->web_link = $route->web_link;
+            } else {
+                if($route->color != 'not_set_color'){
+                    $route_class->color = $route->color;
+                    $route_class->text_color = Grades::colors()[$route->color];
+                }
             }
             $route_class->grade = $route->grade;
             $route_class->count = $route->route_id;
-            $route_class->image = $route->image;
-            $route_class->web_link = $route->web_link;
             $routes[] = $route_class;
 
         }
@@ -760,7 +856,10 @@ class EventsController extends Controller
     {
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
         $user = User::find($request->user_id);
-        if (!$event || !$event->is_registration_state) {
+        if(!$event){
+            return response()->json(['success' => false, 'message' => 'Ошибка внесения в лист ожидания'], 422);
+        }
+        if (!$event->is_registration_state) {
             return response()->json(['success' => false, 'message' => 'Ошибка внесения в лист ожидания'], 422);
         }
         if (!Helpers::valid_email($user->email)) {
@@ -816,6 +915,9 @@ class EventsController extends Controller
     {
         if($request->event_id){
             $event = Event::find($request->event_id);
+            if(!$event){
+                return response()->json(['failed' => true, 'message' => 'Ошибка отмены регистрации']);
+            }
             if($event->is_france_system_qualification){
                 $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
             } else {
@@ -873,5 +975,39 @@ class EventsController extends Controller
         }
 
 
+    }
+    public function index_analytics(Request $request, $start_date, $climbing_gym, $title)
+    {
+        $event = Event::where('start_date', $start_date)
+            ->where('title_eng', '=', $title)
+            ->where('climbing_gym_name_eng', '=', $climbing_gym)
+            ->where('is_public', 1)
+            ->first();
+        if(!$event) {
+            if (!$event->is_open_public_analytics) {
+                return view('errors.404');
+            }
+            return view('errors.404');
+        }
+
+        $categories = ParticipantCategory::where('event_id', $event->id)->pluck('category', 'id')->toArray();
+        if($event->type_event){
+            $grades = RoutesOutdoor::where('event_id', $event->id)->pluck('grade', 'route_id')->toArray();
+        } else {
+            $grades = Route::where('event_id', $event->id)->pluck('grade', 'route_id')->toArray();
+        }
+
+        return view('event.analytics', compact(['event','categories', 'grades']));
+    }
+    public function get_analytics(Request $request)
+    {
+        $gender = $request->input('gender');
+        $event_id = $request->input('event_id');
+        $stats = Cache::rememberForever('result_'.$gender.'analytics_cache_event_id_'.$event_id, function () use ($event_id, $gender) {
+            return AnalyticsController::get_stats_gender($event_id, $gender);
+        });
+        return response()->json([
+            'routes' => $stats,
+        ]);
     }
 }

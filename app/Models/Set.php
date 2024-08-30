@@ -6,15 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Set extends Model
 {
-    public static function getParticipantSets($owner_id)
+    public static function getParticipantSets($event_id)
     {
-        $sets =  Set::where('owner_id', $owner_id)->pluck('number_set', 'id')->toArray();
-        $sets[0] = '-';
+        $sets =  Set::where('event_id', $event_id)->pluck('number_set', 'id')->toArray();
+        $sets[0] = "-";
         return $sets;
     }
     public function participant()
     {
         return $this->belongsTo(ResultQualificationClassic::class);
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class)->where('active', '=', 1);
     }
     public function result_france_system_qualification()
     {

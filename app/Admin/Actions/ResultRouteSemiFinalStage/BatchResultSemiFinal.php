@@ -2,6 +2,7 @@
 
 namespace App\Admin\Actions\ResultRouteSemiFinalStage;
 
+use App\Admin\Extensions\CustomAction;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
@@ -14,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class BatchResultSemiFinal extends Action
+class BatchResultSemiFinal extends CustomAction
 {
     public $name = 'Внести результат полуфинала';
 
@@ -54,7 +55,7 @@ class BatchResultSemiFinal extends Action
                 $participant = ResultQualificationClassic::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
             }
             if(!$participant){
-                Log::error('Category id not found -event_id - '.$results['event_id'].'user_id'.$results['user_id']);
+                Log::error('Category id not found -event_id - '.$results['event_id'].'user_id'.$results['user_id'], ['file' => __FILE__, 'line' => __LINE__]);
             }
             $gender = $participant->gender;
             if($event->is_open_main_rating && $event->is_auto_categories){
@@ -105,7 +106,7 @@ class BatchResultSemiFinal extends Action
 
     }
 
-    public function form()
+    public function custom_form()
     {
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)

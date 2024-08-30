@@ -29,7 +29,8 @@ class BatchExportProtocolRouteParticipantsQualification extends Action
     public function form()
     {
         $this->modalSmall();
-        $sets = Set::where('owner_id', Admin::user()->id)->get()->sortBy('number_set');
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+        $sets = Set::where('event_id', $event->id)->get()->sortBy('number_set');
         $sets_for = array();
         foreach ($sets as $set){
             $sets_for[$set->id] = $set->number_set.' ['.$set->time.']['.$set->day_of_week.']';

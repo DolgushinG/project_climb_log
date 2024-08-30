@@ -2,6 +2,7 @@
 
 namespace App\Admin\Actions\ResultRouteFinalStage;
 
+use App\Admin\Extensions\CustomAction;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
@@ -16,7 +17,7 @@ use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class BatchResultFinalCustomFillOneRoute extends Action
+class BatchResultFinalCustomFillOneRoute extends CustomAction
 {
     protected $selector = '.result-add-final-one-route';
 
@@ -43,7 +44,9 @@ class BatchResultFinalCustomFillOneRoute extends Action
         } else {
             $amount_zone  = 0;
         }
-
+        if(intval($results['final_route_id']) == 0){
+            return $this->response()->error('Вы не выбрали номер маршрута');
+        }
         # Если есть ТОП то зона не может быть 0
         if(Helpers::validate_amount_top_and_zone($amount_top, $amount_zone)){
             return $this->response()->error('У трассы '.$results['final_route_id'].' отмечен ТОП, и получается зона не может быть 0');
@@ -91,13 +94,14 @@ class BatchResultFinalCustomFillOneRoute extends Action
             return $this->response()->error('Результат уже есть по '.$user.' и трассе '.$final_route_id);
         } else {
             DB::table('result_route_final_stage')->insert($data);
+            // Объединяем старые и новые данные
             Event::send_result_final(intval($results['event_id']), $owner_id, intval($results['user_id']), $category_id, $result_for_edit, $gender);
             Event::refresh_final_points_all_participant_in_final($event->id);
             return $this->response()->success('Результат успешно внесен')->refresh();
         }
     }
 
-    public function form()
+    public function custom_form()
     {
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
@@ -109,30 +113,29 @@ class BatchResultFinalCustomFillOneRoute extends Action
         }
         $result = $merged_users->pluck( 'middlename','id');
         $result_final = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
-        foreach ($result as $index => $res){
-            $user = User::where('middlename', $res)->first()->id;
+        foreach ($result as $user_id => $middlename){
             if($event->is_france_system_qualification) {
-                $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
+                $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->category_id;
             } else {
                 if($event->is_open_main_rating && $event->is_auto_categories){
-                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->global_category_id;
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first()->global_category_id;
                 } else {
-                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->where('active', 1)->first()->category_id;
                 }
             }
             $category = ParticipantCategory::find($category_id)->category;
-            $result[$index] = $res.' ['.$category.']';
-            if(in_array($index, $result_final)){
-                $result_user = ResultRouteFinalStage::where('event_id', $event->id)->where('user_id', $user);
+            $result[$user_id] = $middlename.' ['.$category.']';
+            if(in_array($user_id, $result_final)){
+                $result_user = ResultRouteFinalStage::where('event_id', $event->id)->where('user_id', $user_id);
                 $routes = $result_user->pluck('final_route_id')->toArray();
                 $string_version = '';
                 foreach ($routes as $value) {
                     $string_version .= $value . ', ';
                 }
                 if($result_user->get()->count() == $event->amount_routes_in_final){
-                    $result[$index] = $res.' ['.$category.']'.' [Добавлены все трассы]';
+                    $result[$user_id] = $middlename.' ['.$category.']'.' [Добавлены все трассы]';
                 } else {
-                    $result[$index] = $res.' ['.$category.']'.' [Трассы: '.$string_version.']';
+                    $result[$user_id] = $middlename.' ['.$category.']'.' [Трассы: '.$string_version.']';
                 }
             }
         }
@@ -144,7 +147,7 @@ class BatchResultFinalCustomFillOneRoute extends Action
 
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
-        $this->select('final_route_id', 'Трасса')->options($routes);
+        $this->select('final_route_id', 'Трасса')->options($routes)->required();
         $this->integer('amount_try_top', 'Попытки на топ');
         $this->integer('amount_try_zone', 'Попытки на зону');
         Admin::script("// Получаем все элементы с атрибутом modal

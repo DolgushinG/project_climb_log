@@ -25,7 +25,6 @@ class BatchDisableSets extends Action
             }
             $event->save();
         }
-
         return $this->response()->success('готово')->refresh();
     }
 

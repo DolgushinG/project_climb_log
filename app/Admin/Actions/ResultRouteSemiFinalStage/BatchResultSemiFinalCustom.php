@@ -2,6 +2,7 @@
 
 namespace App\Admin\Actions\ResultRouteSemiFinalStage;
 
+use App\Admin\Extensions\CustomAction;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
@@ -17,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class BatchResultSemiFinalCustom extends Action
+class BatchResultSemiFinalCustom extends CustomAction
 {
     protected $selector = '.result-add';
 
@@ -88,6 +89,12 @@ class BatchResultSemiFinalCustom extends Action
                 'Попытки на зону' => intval($results['amount_try_zone_'.$i])
             );
         }
+        $result = ResultRouteSemiFinalStage::where('event_id', $results['event_id']
+        )->where('user_id', $results['user_id'])->first();
+        $user = User::find(intval($results['user_id']))->middlename;
+        if($result) {
+            return $this->response()->error('Результат уже есть по ' . $user);
+        }
         DB::table('result_route_semifinal_stage')->insert($data);
 
         Event::send_result_semifinal(intval($results['event_id']), $owner_id, intval($results['user_id']), $category_id, $result_for_edit, $gender);
@@ -96,7 +103,7 @@ class BatchResultSemiFinalCustom extends Action
         return $this->response()->success('Результат успешно внесен')->refresh();
     }
 
-    public function form()
+    public function custom_form()
     {
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
@@ -109,21 +116,20 @@ class BatchResultSemiFinalCustom extends Action
         }
         $result = $merged_users->pluck( 'middlename','id');
         $result_semifinal = ResultRouteSemiFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
-        foreach ($result as $index => $res){
-            $user = User::where('middlename', $res)->first()->id;
+        foreach ($result as $user_id => $middlename){
             if($event->is_france_system_qualification) {
-                $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user)->first()->category_id;
+                $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->category_id;
             } else {
                 if($event->is_open_main_rating && $event->is_auto_categories){
-                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->global_category_id;
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first()->global_category_id;
                 } else {
-                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user)->first()->category_id;
+                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first()->category_id;
                 }
             }
             $category = ParticipantCategory::find($category_id)->category;
-            $result[$index] = $res.' ['.$category.']';
-            if(in_array($index, $result_semifinal)){
-                $result[$index] = $res.' ['.$category.']'.' [Уже добавлен]';
+            $result[$user_id] = $middlename.' ['.$category.']';
+            if(in_array($user_id, $result_semifinal)){
+                $result[$user_id] = $middlename.' ['.$category.']'.' [Уже добавлен]';
             }
         }
         Admin::script("// Получаем все элементы с атрибутом modal

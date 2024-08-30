@@ -3,6 +3,7 @@
     "/js/main.js": "/js/main.js",
     "/vendor/bootstrap/js/bootstrap.bundle.min.js": "/vendor/bootstrap/js/bootstrap.bundle.min.js",
     "/js/welcome.js": "/js/welcome.js",
+    "/js/dinamic-payment.js": "/js/dinamic-payment.js",
     "/js/profile.js": "/js/profile.js",
     "/js/ddata.js": "/js/ddata.js",
     "/js/datepicker.js": "/js/datepicker.js",

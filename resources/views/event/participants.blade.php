@@ -1,7 +1,9 @@
 @extends('layouts.main_page.app')
 @section('content')
-    <section class="section contact">
-        <div class="row m-3">
+    <section>
+        <div class="container">
+            <div class="row">
+            </div>
         </div>
     </section>
     <section class="section contact">
@@ -11,6 +13,10 @@
                         @foreach($days as $day)
                             <div class="col-md-2"></div>
                             <div class="col-md-8 mb-2">
+                                <div class="form-group m-3">
+                                    <label class="m-1 bold" for="search"> Поиск тут </label>
+                                    <input id="search" type="text" class="search form-control" placeholder="Что ищем?">
+                                </div>
                                 <div class="card">
                                     <div class="card-body">
                                         <!-- Bordered Tabs Justified -->
@@ -36,7 +42,7 @@
                                                 @if($day->day_of_week == $set->day_of_week)
                                                     <div class="tab-pane fade show {{ $index_set == 0 ? 'active' : '' }}" id="bordered-justified-{{$set->id}}"
                                                          role="tabpanel" aria-labelledby="{{$set->id}}-tab">
-                                                        <table class="table table-sm table-striped">
+                                                        <table class="table table-sm table-striped results">
                                                             <thead>
                                                             <tr>
                                                                 <th scope="col">Участник</th>
@@ -49,18 +55,24 @@
                                                             </thead>
                                                             <tbody>
                                                             @foreach($participants as $participant)
-                                                                @if($participant['number_set'] == $set->number_set)
-                                                                    <tr>
-                                                                        <td>{{$participant['middlename']}}</td>
-                                                                        @if(!$event->is_auto_categories)
-                                                                            <td>{{$participant['category']}}</td>
-                                                                        @endif
-                                                                        <td>{{$participant['city']}}</td>
-                                                                        <td>{{$participant['team']}}</td>
-                                                                    </tr>
-                                                                @endif
+                                                               @isset($participant['number_set'])
+                                                                   @if($participant['number_set'] == $set->number_set)
+                                                                       <tr>
+                                                                           <td>{{$participant['middlename']}}</td>
+                                                                           @if(!$event->is_auto_categories)
+                                                                               <td>{{$participant['category']}}</td>
+                                                                           @endif
+                                                                           <td>{{$participant['city']}}</td>
+                                                                           <td>{{$participant['team']}}</td>
+                                                                       </tr>
+                                                                   @endif
+                                                               @endif
+
                                                             </tbody>
                                                             @endforeach
+                                                            <tr class="warning no-result">
+                                                                <td colspan="6"><i class="fa fa-warning"></i> Нет результата</td>
+                                                            </tr>
                                                         </table>
                                                     </div>
                                                 @endif
@@ -72,7 +84,12 @@
                             <div class="col-md-2"></div>
                         @endforeach
                     @else
-                        <div class="col mb-3">
+                        <div class="col-md-2"></div>
+                        <div class="col mb-8">
+                            <div class="form-group m-3">
+                                <label class="m-1 bold" for="search"> Поиск тут </label>
+                                <input id="search" type="text" class="search form-control" placeholder="Что ищем?">
+                            </div>
                             <div class="card">
                                 <div class="card-body">
                                     <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
@@ -90,7 +107,7 @@
                                         @foreach(['male', 'female'] as $index_gender => $var)
                                             <div class="tab-pane fade show {{ $index_gender == 0 ? 'active' : '' }}" id="bordered-justified-{{$var}}"
                                                  role="tabpanel" aria-labelledby="{{$var}}-tab">
-                                                <table class="table table-sm table-striped">
+                                                <table class="table table-sm table-striped results">
                                                     <thead>
                                                     <tr>
                                                         <th scope="col">Участник</th>
@@ -116,6 +133,9 @@
 
                                                        @endif
                                                     @endforeach
+                                                    <tr class="warning no-result">
+                                                        <td colspan="6"><i class="fa fa-warning"></i> Нет результата</td>
+                                                    </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -124,6 +144,7 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-2"></div>
                     @endif
                 @else
                     <div class="col-md-2"></div>
@@ -154,13 +175,34 @@
                     <div class="col-md-2"></div>
                 @endif
             </div>
-
-        </section>
-        <section class="section contact">
-            <div class="row mt-3">
-            </div>
         </section>
     <script>
+        $(document).ready(function() {
+            $(".search").keyup(function () {
+                var searchTerm = $(".search").val();
+                var listItem = $('.results tbody').children('tr');
+                var searchSplit = searchTerm.replace(/ /g, "'):containsi('")
+
+                $.extend($.expr[':'], {'containsi': function(elem, i, match, array){
+                        return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+                    }
+                });
+
+                $(".results tbody tr").not(":containsi('" + searchSplit + "')").each(function(e){
+                    $(this).attr('visible','false');
+                });
+
+                $(".results tbody tr:containsi('" + searchSplit + "')").each(function(e){
+                    $(this).attr('visible','true');
+                });
+
+                var jobCount = $('.results tbody tr[visible="true"]').length;
+                $('.counter').text('Найдено сорев ' + jobCount );
+
+                if(jobCount == '0') {$('.no-result').show();}
+                else {$('.no-result').hide();}
+            });
+        });
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             $(document).ready(function () {
                 {

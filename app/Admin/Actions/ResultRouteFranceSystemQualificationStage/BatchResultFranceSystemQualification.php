@@ -2,6 +2,7 @@
 
 namespace App\Admin\Actions\ResultRouteFranceSystemQualificationStage;
 
+use App\Admin\Extensions\CustomAction;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\Grades;
@@ -17,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class BatchResultFranceSystemQualification extends Action
+class BatchResultFranceSystemQualification extends CustomAction
 {
     public $category;
     public $name = 'Внести результат квалификации';
@@ -94,7 +95,7 @@ class BatchResultFranceSystemQualification extends Action
 
     }
 
-    public function form()
+    public function custom_form()
     {
         $this->modalLarge();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
@@ -103,17 +104,16 @@ class BatchResultFranceSystemQualification extends Action
         $participant_users_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('category_id', $this->category->id)->pluck('user_id')->toArray();
         $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
         $result_france_system_qualification = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
-        foreach ($result as $index => $res){
-            $user = User::where('middlename', $res)->first()->id;
-            $res_fra = ResultFranceSystemQualification::where('event_id', $event->id)->where('user_id', $user)->first();
+        foreach ($result as $user_id => $middlename){
+            $res_fra = ResultFranceSystemQualification::where('event_id', $event->id)->where('user_id', $user_id)->first();
             if(!$res_fra){
-                Log::error('Category id not found -event_id - '.$event->id.'user_id'.$user);
+                Log::error('Category id not found -event_id - '.$event->id.'user_id'.$user_id);
             }
             $category_id = $res_fra->category_id;
             $category = ParticipantCategory::find($category_id)->category;
-            $result[$index] = $res.' ['.$category.']';
-            if(in_array($index, $result_france_system_qualification)){
-                $result[$index] = $res.' ['.$category.']'.' [Уже добавлен]';
+            $result[$user_id] = $middlename.' ['.$category.']';
+            if(in_array($user_id, $result_france_system_qualification)){
+                $result[$user_id] = $middlename.' ['.$category.']'.' [Уже добавлен]';
             }
         }
 

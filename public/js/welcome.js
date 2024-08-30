@@ -317,12 +317,14 @@ $("#crop").click(function () {
           getInfoPaymentBll(event_id, '#paymentTab');
           button_pay.text('Чек отправлен (На проверке..)');
           button_pay.attr('disabled', 'disabled');
+          btn_cancel_take_part.style.display = 'none';
           block_attach_bill.style.display = 'none';
+          document.querySelector('#bill').style.display = 'None';
           setTimeout(function () {
             block_checking_bill.style.display = 'block';
           }, 1000);
         },
-        error: function error(xhr, status, _error4) {
+        error: function error(xhr, status, _error7) {
           $modal.modal('hide');
         }
       });
@@ -332,6 +334,38 @@ $("#crop").click(function () {
 $(document).ready(function () {
   $(document).on('click', '#modalclose', function (e) {
     $modal.modal('hide');
+  });
+  $(document).on('change', '#floatingSelect', function (e) {
+    var free = this.options[this.selectedIndex].getAttribute('data-free');
+    if (free > 0) {
+      var btn_participant = $('#btn-participant');
+      btn_participant.attr('disabled', false);
+      btn_participant.text('Участвовать');
+    }
+  });
+  $(document).on('change', '#floatingSelectChangeSet', function (e) {
+    var free = this.options[this.selectedIndex].getAttribute('data-free');
+    var data_set = this.options[this.selectedIndex].getAttribute('data-set');
+    if (data_set === "current") {
+      var btn_participant_change_set = $('#btn-participant-change-set');
+      btn_participant_change_set.attr('disabled', true);
+      btn_participant_change_set.text('Вы уже в этом сете');
+    } else {
+      if (free == null) {
+        var _btn_participant_change_set = $('#btn-participant-change-set');
+        _btn_participant_change_set.attr('disabled', false);
+        _btn_participant_change_set.text('Изменить сет');
+      }
+      if (free > 0) {
+        var _btn_participant_change_set2 = $('#btn-participant-change-set');
+        _btn_participant_change_set2.attr('disabled', false);
+        _btn_participant_change_set2.text('Изменить сет');
+      } else {
+        var _btn_participant_change_set3 = $('#btn-participant-change-set');
+        _btn_participant_change_set3.attr('disabled', true);
+        _btn_participant_change_set3.text('Этот сет заполнен');
+      }
+    }
   });
 });
 /******/ })()

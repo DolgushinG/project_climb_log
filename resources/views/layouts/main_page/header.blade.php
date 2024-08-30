@@ -1,16 +1,14 @@
-<header id="header" class="d-flex align-items-center">
+<header id="header" class="d-flex align-items-center fixed-top">
     <div class="container d-flex align-items-center justify-content-between">
 
         <h1 class="logo"><a href="{{route('main')}}">Climbing Events<span>.</span></a></h1>
         <!-- Uncomment below if you prefer to use an image logo -->
         <!-- <a href="index.html" class="logo"><img src="assets/img/logo.png" alt=""></a>-->
-
         <nav id="navbar" class="navbar">
             <ul>
-                <li><a class="nav-link scrollto active" href="{{route('main')}}">Главная</a></li>
-                @if(!env('BLOG'))
-                    <li><a class="nav-link scrollto" href="{{route('posts')}}">Статьи</a></li>
-                @endif
+                <li><a class="nav-link scrollto " href="{{route('main')}}">Главная</a></li>
+                <li><a class="nav-link scrollto" href="{{route('list_events')}}">Cоревнования</a></li>
+{{--                <li><a class="nav-link scrollto" href="#about">About</a></li>--}}
 {{--                <li><a class="nav-link scrollto" href="#services">Services</a></li>--}}
 {{--                <li><a class="nav-link scrollto " href="#portfolio">Portfolio</a></li>--}}
 {{--                <li><a class="nav-link scrollto" href="#team">Team</a></li>--}}

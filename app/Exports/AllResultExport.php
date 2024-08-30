@@ -5,6 +5,8 @@ namespace App\Exports;
 use App\Exports\Sheets\Results;
 use App\Models\Event;
 use App\Models\ParticipantCategory;
+use App\Models\ResultRouteFinalStage;
+use App\Models\ResultRouteSemiFinalStage;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class AllResultExport implements WithMultipleSheets
@@ -47,24 +49,36 @@ class AllResultExport implements WithMultipleSheets
             $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
             foreach ($genders as $gender) {
                 foreach ($categories as $category) {
-                    $sheets[] = new Results($this->event_id, 'SemiFinal', $gender, $category);
+                    $result = ResultRouteSemiFinalStage::where('event_id', $this->event_id)->where('category_id', $category->id)->first();
+                    if($result){
+                        $sheets[] = new Results($this->event_id, 'SemiFinal', $gender, $category);
+                    }
                 }
             }
         } else {
             foreach ($genders as $gender) {
-                $sheets[] = new Results($this->event_id, 'SemiFinal', $gender);
+                $result = ResultRouteSemiFinalStage::where('event_id', $this->event_id)->where('gender', $gender)->first();
+                if($result){
+                    $sheets[] = new Results($this->event_id, 'SemiFinal', $gender);
+                }
             }
         }
         if($event->is_sort_group_final){
             $categories = ParticipantCategory::where('event_id', $this->event_id)->get();
             foreach ($genders as $gender) {
                 foreach ($categories as $category) {
-                    $sheets[] = new Results($this->event_id, 'Final', $gender, $category);
+                    $result = ResultRouteFinalStage::where('event_id', $this->event_id)->where('category_id', $category->id)->first();
+                    if($result){
+                        $sheets[] = new Results($this->event_id, 'Final', $gender, $category);
+                    }
                 }
             }
         } else {
             foreach ($genders as $gender) {
-                $sheets[] = new Results($this->event_id, 'Final', $gender);
+                $result = ResultRouteFinalStage::where('event_id', $this->event_id)->where('gender', $gender)->first();
+                if($result){
+                    $sheets[] = new Results($this->event_id, 'Final', $gender);
+                }
             }
         }
         if($event->is_open_team_result){

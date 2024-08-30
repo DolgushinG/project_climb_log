@@ -29,8 +29,8 @@ jobs:
             /usr/local/bin/composer install
             /usr/bin/php artisan down
             /usr/bin/php artisan migrate
-            /usr/bin/php artisan optimize
-            /usr/bin/php artisan config:clear
+            /usr/bin/php artisan optimize:clear
+            /usr/bin/php artisan db:seed --class=AdminTablesSeeder
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             npm run prod

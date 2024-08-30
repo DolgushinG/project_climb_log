@@ -36,6 +36,7 @@ Route::group([
         $router->resource('/posts', PostsController::class);
         $router->get('events/clone/{id}', 'EventsController@cloneEvent')->name('cloneEvent');
         $router->resource('result-qualification', ResultQualificationController::class);
+        $router->resource('analytics', AnalyticsController::class);
         $router->resource('grades', GradesController::class);
         $router->resource('formats', FormatsController::class);
         $router->resource('semifinal-stage', ResultRouteSemiFinalStageController::class);

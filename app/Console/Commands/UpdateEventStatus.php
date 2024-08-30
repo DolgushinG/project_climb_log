@@ -30,6 +30,7 @@ class UpdateEventStatus extends Command
            if($event->datetime_send_result_state){
                if ($now->gte($event->datetime_send_result_state)) {
                    $event->is_send_result_state = false;
+                   $event->is_access_user_edit_result = 0;
                    $event->save();
                }
            }

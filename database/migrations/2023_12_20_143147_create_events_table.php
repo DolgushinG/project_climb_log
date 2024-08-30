@@ -39,7 +39,14 @@ class CreateEventsTable extends Migration
             $table->longText('info_payment')->nullable();
             $table->integer('amount_start_price')->nullable();
             $table->boolean('setting_payment')->default(0);
+            $table->json('list_merged_events')->nullable();
+            $table->boolean('is_open_public_analytics')->nullable();
+            $table->json('discounts')->nullable();
+            $table->json('products')->nullable();
+            $table->json('up_price')->nullable();
             $table->json('options_amount_price')->nullable();
+            $table->json('helper_amount')->nullable();
+            $table->integer('is_flash_value')->default(1);
             $table->integer('is_semifinal')->default(0);
             $table->integer('is_sort_group_final')->default(0);
             $table->integer('is_sort_group_semifinal')->default(0);

@@ -383,7 +383,7 @@ class ResultRouteSemiFinalStageController extends Controller
                 $category_id = $category_id->id;
                 $result->category_id = $category_id;
             } else {
-                Log::error('It has not found category_id '.$users_sorted[$index]['category_id'].' '.$model->id);
+                Log::error('It has not found category_id '.$users_sorted[$index]['category_id'].' '.$model->id, ['file' => __FILE__, 'line' => __LINE__]);
             }
             $result->event_id = $users_sorted[$index]['event_id'];
             $result->user_id = $users_sorted[$index]['user_id'];

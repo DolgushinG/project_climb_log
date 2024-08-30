@@ -12,6 +12,7 @@ class ResultFranceSystemQualification extends Model
 
     protected $casts = [
         'result_for_edit_france_system_qualification' =>'json',
+        'products_and_discounts' =>'json',
     ];
 
     public function event()
@@ -58,5 +59,38 @@ class ResultFranceSystemQualification extends Model
                 $table.'.amount_zone',
                 $table.'.amount_try_zone',
             )->where($table.'.gender', '=', $gender)->get();
+    }
+
+    public static function get_qualification_france_global_participants($event, $one_group=null, $get_array=false)
+    {
+        $amount_participant = ResultFranceSystemQualification::where('event_id', '=', $event->id)->get()->count();
+        if($one_group){
+            $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_only_one_group($event, $amount_participant, $one_group);
+        } else {
+            $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_group($event, $amount_participant);
+        }
+
+        if($get_array){
+            return $merged_users->toArray();
+        } else {
+            return $merged_users;
+        }
+
+    }
+    public static function get_qualification_france_participants($event, $one_group=null, $get_array=false)
+    {
+        $amount_participant = ResultFranceSystemQualification::where('event_id', '=', $event->id)->get()->count();
+        if($one_group){
+            $merged_users = ResultRouteQualificationClassic::get_participant_qualification_only_one_group($event, $amount_participant, $one_group);
+        } else {
+            $merged_users = ResultRouteQualificationClassic::get_participant_qualification_group($event, $amount_participant);
+        }
+
+        if($get_array){
+            return $merged_users->toArray();
+        } else {
+            return $merged_users;
+        }
+
     }
 }

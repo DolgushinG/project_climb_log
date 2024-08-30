@@ -122,4 +122,5 @@ class Route extends Model
         Log::error('Этой категории нет в списке - '.$grade);
         return null;
     }
+
 }

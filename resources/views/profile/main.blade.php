@@ -28,7 +28,7 @@
                 @if(!$user->contact)
                         <div class="container d-flex align-items-center" data-aos="zoom-out" data-aos-delay="100">
                             <div class="alert alert-warning  alert-dismissible fade show w-100" role="alert">
-                                <p>Рекомендуется добавить номер телефона, телеграмм или другой способ</p>
+                                <p>Рекомендуется заполнить контакты для быстрой связи номером телефона, телеграмм или другой способом</p>
                                 <p>Чтобы организаторы в случае каких то вопросов могли быстро уведомить вас индивидуально</p>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
@@ -53,6 +53,11 @@
                                             class="hidden-xs">Соревнования</span></button>
                                 </li>
                                 <li class="nav-item" style="margin-right: 8px!important;">
+                                    <button id="analytics" data-target="#profile-analytics" data-toggle="pill"
+                                            class="nav-link"><i class="icon-note"></i> <span class="hidden-xs">Аналитика</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" style="margin-right: 8px!important;">
                                     <button id="setting" data-target="#profile-settings" data-toggle="pill"
                                             class="nav-link"><i class="icon-note"></i> <span class="hidden-xs">Пароль</span>
                                     </button>
@@ -74,4 +79,5 @@
         </div>
     </section>
     <script type="text/javascript" src="{{ asset('js/profile.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 @endsection
