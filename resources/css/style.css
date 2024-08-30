@@ -762,6 +762,13 @@ h6 {
   .btn-redpoint {
     font-size: 13px;
   }
+  img {
+      width: 80%!important;
+      height: 80%!important;
+  }
+  .img-fluid {
+      width: 100%!important;
+  }
 }
 
 /*--------------------------------------------------------------
