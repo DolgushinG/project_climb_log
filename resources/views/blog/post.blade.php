@@ -36,9 +36,6 @@
                                     <a>{{ $post->likes() }}</a></li>
                                 <li class="d-flex"><i class="bi bi-hand-thumbs-down"></i>
                                     <a>{{ $post->dislikes() }}</a></li>
-                                <li class="d-flex"><i class="bi bi-clock"></i>
-                                    <a>{{$countTimeRead }}min</a>
-                                </li>
                             </ul>
                         </div>
 

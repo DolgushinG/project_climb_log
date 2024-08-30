@@ -77,8 +77,7 @@ class PostsController extends Controller
         if($postStatus->status !== 'PUBLISHED') {
             return redirect('/');
         }
-        $countTimeRead = round(strlen($post->body) / 1500);
         $recentlyPost = Posts::latest('created_at')->where('status', '=', 'PUBLISHED')->paginate(6);
-        return view('blog.post', compact(['post', 'countTimeRead','recentlyPost']));
+        return view('blog.post', compact(['post','recentlyPost']));
     }
 }
