@@ -13,7 +13,6 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
-use Encore\Admin\Show;
 use Illuminate\Http\Request;
 class MapController extends Controller
 {
@@ -61,6 +60,7 @@ class MapController extends Controller
         // Вы можете добавить дополнительные данные
         // Например, если вам нужно установить ID пользователя:
         $data['grade'] = $route->grade; // Пример добавления ID текущего пользователя
+        $data['author'] = 'Иванов'; // Пример добавления ID текущего пользователя
         $data['event_id'] = $event->id; // Пример добавления ID текущего пользователя
         $data['owner_id'] = $event->owner_id; // Пример добавления ID текущего пользователя
         $point = Map::create($data);
@@ -96,7 +96,6 @@ class MapController extends Controller
         });
         return $grid;
     }
-
     /**
      * Make a grid builder.
      *
@@ -113,6 +112,20 @@ class MapController extends Controller
     }
 
     /**
+     * Edit interface.
+     *
+     * @param Content $content
+     * @return Content
+     */
+    public function edit($id, Content $content)
+    {
+        return $content
+            ->header(trans('admin.edit'))
+            ->description(trans('admin.description'))
+            ->body($this->form()->edit($id));
+    }
+
+    /**
      * Make a form builder.
      *
      * @return Form
@@ -123,10 +136,10 @@ class MapController extends Controller
 
         $form->hidden('event_id', __('Author'))->rules('required');
         $form->hidden('owner_id', __('Author'))->rules('required');
-        $form->text('author', __('Author'))->rules('required');
-        $form->text('grade', __('Category'))->rules('required');
-        $form->text('route_id', __('Route'))->rules('required');
-        $form->color('color', __('Color'))->rules('required');
+        $form->text('author', __('Автор'))->rules('required');
+        $form->text('grade', __('Категория'))->rules('required');
+        $form->text('route_id', __('Маршрут'))->rules('required');
+        $form->color('color', __('Цвет'))->rules('required');
         $form->hidden('x'); // Скрываем, так как x и y будут установлены через JavaScript
         $form->hidden('y');
 

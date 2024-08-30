@@ -37,26 +37,26 @@
 <div id="modal" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 20px; border: 1px solid #ddd;">
     <form id="point-form">
         <input type="hidden" id="point-id" name="id">
-        <label for="author">Author:</label>
-        <input type="text" id="author" name="author" required><br>
-        <label for="route_id"></label>
+        <label for="author">Автор:</label>
+        <input class="form-control" type="text" id="author" name="author" value="Иванов"><br>
+        <label for="route_id">Маршрут:</label>
         <select id="route_id" name="route_id" class="form-select">
         @foreach($routes as $route)
             @if(in_array($route->route_id, $points_exist))
-                    <option data-grade="{{$route->grade}}" value="{{$route->route_id}}" disabled>{{$route->route_id}}</option>
+                <option data-grade="{{$route->grade}}" value="{{$route->route_id}}" style="display: none">{{$route->route_id}}</option>
             @else
                 <option data-grade="{{$route->grade}}" value="{{$route->route_id}}">{{$route->route_id}}</option>
             @endif
         @endforeach
-        </select>
-        <label for="color">Color:</label>
-        <input type="color" id="color" name="color" required><br>
+        </select><br>
+        <label for="color">Цвет:</label>
+        <input class="form-control" type="color" id="color" name="color" required><br>
         <input type="hidden" id="x-coordinate" name="x">
         <input type="hidden" id="y-coordinate" name="y">
         <input type="hidden" id="event_id" name="event_id">
         <input type="hidden" id="owner_id" name="owner_id">
-        <button type="submit">Save</button>
-        <button id="btn_close">Close</button>
+        <button class="btn btn-secondary" type="submit">Сохранить</button>
+        <button class="btn btn-secondary" id="btn_close">Закрыть</button>
     </form>
 </div>
 
@@ -132,8 +132,8 @@
                         newPoint.style.backgroundColor = formData.get('color');
                         newPoint.style.left = `${formData.get('x')}px`;
                         newPoint.style.top = `${formData.get('y')}px`;
-                        newPoint.style.width = '50px';
-                        newPoint.style.height = '50px';
+                        newPoint.style.width = '40px';
+                        newPoint.style.height = '36px';
                         newPoint.style.borderRadius = '50%';
                         newPoint.style.position = 'absolute';
                         newPoint.style.display = 'flex';
@@ -141,12 +141,14 @@
                         newPoint.style.alignItems = 'center';
                         newPoint.style.justifyContent = 'center';
                         newPoint.style.color = 'white';
-                        newPoint.style.fontSize = '12px';
+                        newPoint.style.fontSize = '10px';
                         newPoint.style.textAlign = 'center';
                         newPoint.dataset.id = data.point.id;
                         newPoint.dataset.author = formData.get('author');
                         newPoint.dataset.route_id = formData.get('route_id');
-
+                        let selectedOption = routeSelect.options[routeSelect.selectedIndex];
+                        selectedOption.style.display = 'None';
+                        routeSelect.selectedIndex = -1;
                         newPoint.innerHTML = `<span>${formData.get('route_id')}</span><br><span>${formData.get('grade')}</span>`;
                         document.getElementById('map').appendChild(newPoint);
                     } else {
