@@ -19,7 +19,7 @@ class Posts extends Migration
             $table->string('title');
             $table->string('seo_title')->nullable();
             $table->text('excerpt');
-            $table->text('body');
+            $table->longText('body');
             $table->string('image')->nullable();
             $table->string('slug')->unique();
             $table->text('meta_description');

@@ -433,5 +433,8 @@
         </div>
     </section><!-- End Counts Section -->
     @endif
-{{--        @include('event.carousel')--}}
+    @if(env('BLOG'))
+        @include('blog.homePosts')
+    @endif
+    {{--        @include('event.carousel')--}}
 @endsection('content')
