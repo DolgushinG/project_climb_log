@@ -84,8 +84,6 @@ class PostsController extends Controller
     {
 
         $grid = new Grid(new Posts);
-//        $grid->id('ID');
-//        $grid->author_id('author_id');
         $grid->title('title');
         $grid->seo_title('seo_title');
         $grid->column('image', 'Афиша')->image('', 100, 100);
@@ -93,9 +91,6 @@ class PostsController extends Controller
         $grid->meta_description('meta_description');
         $grid->meta_keywords('meta_keywords');
         $grid->column('status', 'Статус')->editable('select', self::status);
-        $grid->featured('featured');
-//        $grid->created_at(trans('admin.created_at'));
-//        $grid->updated_at(trans('admin.updated_at'));
 
         return $grid;
     }
@@ -111,7 +106,6 @@ class PostsController extends Controller
         $show = new Show(Posts::findOrFail($id));
         $show->id('id');
         $show->owner('owner_id');
-        $show->author_id('author_id');
         $show->title('title');
         $show->seo_title('seo_title');
         $show->excerpt('excerpt');
@@ -121,7 +115,6 @@ class PostsController extends Controller
         $show->meta_description('meta_description');
         $show->meta_keywords('meta_keywords');
         $show->status('status');
-        $show->featured('featured');
         $show->created_at(trans('admin.created_at'));
         $show->updated_at(trans('admin.updated_at'));
 
@@ -138,7 +131,6 @@ class PostsController extends Controller
         $form = new Form(new Posts);
         $form->hidden('id');
         $form->hidden('owner_id')->default(1);
-        $form->hidden('author_id', 'author_id')->default(1);
         $form->text('title', 'Название');
         $form->text('seo_title', 'Сео название');
         $form->text('excerpt', 'excerpt');
@@ -148,7 +140,6 @@ class PostsController extends Controller
         $form->text('meta_description', 'meta_description');
         $form->text('meta_keywords', 'meta_keywords');
         $form->select('status', 'status')->options(['PUBLISHED' => 'PUBLISHED', 'DRAFT' => 'DRAFT', 'PENDING' => 'PENDING']);
-        $form->hidden('featured', 'featured')->default(0);
         return $form;
     }
 }
