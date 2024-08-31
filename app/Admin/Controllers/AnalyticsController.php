@@ -180,7 +180,7 @@ class AnalyticsController extends Controller
                 $redpoint_percentage = self::getRedpointPercentagesForGender($all_passed, $redpoint);
 
                 // Анализируем сложность маршрута
-                $difficulty = self::analyzeRouteDifficulty($flash, $redpoint, $all_passed, $flash_percentage, $redpoint_percentage);
+                $difficulty = self::analyzeRouteDifficulty($all_passed, $flash_percentage, $redpoint_percentage);
 
                 $stats[] = [
                     'route_id' => $route->route_id,
@@ -212,6 +212,7 @@ class AnalyticsController extends Controller
         foreach ($routes as $route){
             $all_passed = ResultRouteQualificationClassic::where('event_id', $event_id)
                 ->where('grade', $route->grade)
+                ->where('gender', $gender)
                 ->where('route_id', $route->route_id)
                 ->whereIn('attempt', [
                     ResultRouteQualificationClassic::STATUS_PASSED_FLASH,
@@ -240,7 +241,7 @@ class AnalyticsController extends Controller
                 ->get()->count();
             $flash_percentage = self::getFlashPercentagesForGender($all_passed, $flash);
             $redpoint_percentage = self::getRedpointPercentagesForGender($all_passed, $redpoint);
-            $difficulty = self::analyzeRouteDifficulty($flash, $redpoint, $all_passed, $flash_percentage, $redpoint_percentage);
+            $difficulty = self::analyzeRouteDifficulty($all_passed, $flash_percentage, $redpoint_percentage);
             $stats[] =  array(
                 'route_id' => $route->route_id,
                 'grade' => $route->grade,
@@ -253,6 +254,7 @@ class AnalyticsController extends Controller
                 'coefficient' => $coefficient,
             );
         }
+//        dd($gender, $stats);
         return $stats;
     }
     public static function getFlashPercentagesForGender($total, $flash_counts)
@@ -274,58 +276,28 @@ class AnalyticsController extends Controller
         }
         return $redpoint_percentage;
     }
-    public static function analyzeRouteDifficulty($amount_flash, $amount_redpoint, $total, $flashPercentage, $redpointPercentage) {
+    public static function analyzeRouteDifficulty($total, $flashPercentage, $redpointPercentage) {
         if ($total == 0) {
             return 'Не определено';
         }
-        // Определение пороговых значений для различий
-        // Пороговые значения теперь более интуитивные
-        $flash_thresholds = [
-            'Слишком легкая' => 90,  // 90% и выше считается слишком легкой
-            'Легкая' => 75,          // 75% - 89% считается легкой
-            'Сбалансированная' => 50, // 50% - 74% считается сбалансированной
-            'Сложная' => 25,         // 25% - 49% считается сложной
-            'Слишком сложная' => 0   // Менее 25% считается слишком сложной
-        ];
-
-        $redpoint_thresholds = [
-            'Слишком легкая' => 0,   // 0% редпоинтов может указывать на легкость трассы
-            'Легкая' => 10,          // 1% - 10% редпоинтов может быть приемлемым для легкой трассы
-            'Сбалансированная' => 20, // 11% - 20% редпоинтов может указывать на сбалансированную сложность
-            'Сложная' => 30,         // 21% - 30% редпоинтов указывает на сложность
-            'Слишком сложная' => 31  // Более 30% редпоинтов считается слишком сложной
-        ];
-
-        // Определение сложности трассы на основе разницы
-        $difficulty_flash = 'Сбалансированная';
-        foreach ($flash_thresholds as $level => $threshold) {
-            if ($flashPercentage >= $threshold) {
-                $difficulty_flash = $level;
-                break;
-            }
+        if ($total == 0) {
+            return 'Не определено';
         }
 
-        $difficulty_redpoint = 'Сбалансированная';
-        foreach ($redpoint_thresholds as $level => $threshold) {
-            if ($redpointPercentage <= $threshold) {
-                $difficulty_redpoint = $level;
-                break;
-            }
-        }
+        // Вычисляем разницу между процентом флешей и редпоинтов
+        $difference = $flashPercentage - $redpointPercentage;
 
-        // Определение общего уровня сложности
-        if ($difficulty_flash === 'Слишком легкая' || $difficulty_redpoint === 'Слишком сложная') {
-            $difficulty = 'Слишком легкая';
-        } elseif ($difficulty_flash === 'Легкая' || $difficulty_redpoint === 'Сложная') {
-            $difficulty = 'Легкая';
-        } elseif ($difficulty_flash === 'Сложная' || $difficulty_redpoint === 'Легкая') {
-            $difficulty = 'Сложная';
-        } elseif ($difficulty_flash === 'Слишком сложная' || $difficulty_redpoint === 'Слишком легкая') {
-            $difficulty = 'Слишком сложная';
+        // Определение сложности трассы на основе соотношения флешей и редпоинтов
+        if ($difference > 30) {
+            return 'Слишком легкая'; // Если флешей на 30% и больше больше, чем редпоинтов, трасса слишком легкая
+        } elseif ($difference > 10 && $difference <= 30) {
+            return 'Легкая'; // Если флешей больше редпоинтов на 10%-30%, трасса легкая
+        } elseif ($difference >= -10 && $difference <= 10) {
+            return 'Сбалансированная'; // Если разница между флешами и редпоинтами в пределах ±10%, трасса сбалансированная
+        } elseif ($difference < -10 && $difference >= -30) {
+            return 'Сложная'; // Если редпоинтов больше флешей на 10%-30%, трасса сложная
         } else {
-            $difficulty = 'Сбалансированная';
+            return 'Слишком сложная'; // Если редпоинтов больше флешей на более чем 30%, трасса слишком сложная
         }
-        return $difficulty;
-
     }
 }

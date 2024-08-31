@@ -8,7 +8,7 @@
                             <!-- Icon -->
                             <div class="fadeIn first" style="padding-top: 17px;">
                                 <div class="container"><i class="fa fa-cogs" style="font-size: 200px; color: #0a53be">  </i><span style="font-size: 200px">500</span></div>
-                                <span>ОПППССС кажется что то пошло не так !</span>
+                                <span>ОПППССС кажется что-то пошло не так !</span>
                                 <span>Возможно технические не поладки, обратитесь к создателю этого сайта</span>
                             </div>
                             <!-- Login Form -->
