@@ -32,6 +32,7 @@ class CreateAdminTables extends Migration
             $table->string('climbing_gym_link')->nullable();
             $table->string('address')->nullable();
             $table->boolean('is_access_to_create_event')->default(0);
+            $table->string('map')->nullable();
             $table->string('city')->nullable();
             $table->string('phone')->nullable();
             $table->string('optional_phone')->nullable();

@@ -60,7 +60,7 @@ class MapController extends Controller
         // Вы можете добавить дополнительные данные
         // Например, если вам нужно установить ID пользователя:
         $data['grade'] = $route->grade; // Пример добавления ID текущего пользователя
-        $data['author'] = 'Иванов'; // Пример добавления ID текущего пользователя
+//        $data['author'] = 'Иванов'; // Пример добавления ID текущего пользователя
         $data['event_id'] = $event->id; // Пример добавления ID текущего пользователя
         $data['owner_id'] = $event->owner_id; // Пример добавления ID текущего пользователя
         $point = Map::create($data);
@@ -94,6 +94,11 @@ class MapController extends Controller
         $grid->column('color', __('Цвет'))->display(function ($color) {
             return "<div style='width: 50px; height: 20px; background-color: {$color}; border: 1px solid #ddd;'></div>";
         });
+        $grid->disableFilter();
+        $grid->disableBatchActions();
+        $grid->disableColumnSelector();
+        $grid->disableExport();
+        $grid->disableCreateButton();
         return $grid;
     }
     /**
@@ -107,7 +112,7 @@ class MapController extends Controller
         $event = Event::where('owner_id', '=', 2)->where('active', 1)->first();
         $points_exist = Map::where('event_id', $event->id)->pluck('route_id')->toArray();
         $routes = Route::where('event_id', $event->id)->get();
-        $scheme_climbing_gym = '/storage/images/map.jpeg';
+        $scheme_climbing_gym = '/storage/'.Admin::user()->map;
         return Admin::component('admin::map', compact(['points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
     }
 

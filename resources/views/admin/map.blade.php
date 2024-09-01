@@ -38,9 +38,9 @@
     <form id="point-form">
         <input type="hidden" id="point-id" name="id">
         <label for="author">Автор:</label>
-        <input class="form-control" type="text" id="author" name="author" value="Иванов"><br>
+        <input class="form-control" type="text" id="author" name="author"><br>
         <label for="route_id">Маршрут:</label>
-        <select id="route_id" name="route_id" class="form-select">
+        <select id="route_id" name="route_id" class="form-select" autocomplete="off">
         @foreach($routes as $route)
             @if(in_array($route->route_id, $points_exist))
                 <option data-grade="{{$route->grade}}" value="{{$route->route_id}}" style="display: none">{{$route->route_id}}</option>
@@ -148,6 +148,7 @@
                         newPoint.dataset.route_id = formData.get('route_id');
                         let selectedOption = routeSelect.options[routeSelect.selectedIndex];
                         selectedOption.style.display = 'None';
+                        selectedOption.disabled = true;
                         routeSelect.selectedIndex = -1;
                         newPoint.innerHTML = `<span>${formData.get('route_id')}</span><br><span>${formData.get('grade')}</span>`;
                         document.getElementById('map').appendChild(newPoint);
