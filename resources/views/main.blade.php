@@ -22,9 +22,9 @@
                             <div class="icon"><i class="bx bxl-dribbble"></i></div>
                             <h4 class="title"><a href="#login">Удобная регистрация участников через соц. сети</a></h4>
                             <p class="description">
-                                <img src="{{asset('storage/img/icons/telegram.svg')}}" alt="telegram">
-                                <img src="{{asset('storage/img/icons/vk.svg')}}" alt="vk">
-                                <img src="{{asset('storage/img/icons/yandex.svg')}}" alt="yandex">
+                                <img style="display: inline" src="{{asset('storage/img/icons/telegram.svg')}}" alt="telegram">
+                                <img style="display: inline" src="{{asset('storage/img/icons/vk.svg')}}" alt="vk">
+                                <img style="display: inline" src="{{asset('storage/img/icons/yandex.svg')}}" alt="yandex">
                             </p>
                         </div>
                     </div>
@@ -386,7 +386,7 @@
             <section id="portfolio" class="portfolio">
                 <div class="container" data-aos="fade-up">
                     <div class="section-title">
-                        <h2>Прошедшие соревнования можно найти тут <a href="{{route('list_events')}}" class="btn btn-primary"> перейти </a></h2>
+                        <h2>Список прошлых соревнований можно найти тут <a style="font-size: 12px" href="{{route('list_events')}}" class="btn btn-outline-primary"> перейти </a></h2>
                     </div>
                 </div>
             </section>
@@ -433,5 +433,8 @@
         </div>
     </section><!-- End Counts Section -->
     @endif
-{{--        @include('event.carousel')--}}
+    @if(env('BLOG'))
+        @include('blog.homePosts')
+    @endif
+    {{--        @include('event.carousel')--}}
 @endsection('content')

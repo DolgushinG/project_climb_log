@@ -33,6 +33,7 @@ Route::group([
     $router->get('/', 'HomeController@index')->name('home');
     Route::middleware(['owner'])->group(function ($router) {
         $router->resource('events', EventsController::class);
+        $router->resource('/posts', PostsController::class);
         $router->get('events/clone/{id}', 'EventsController@cloneEvent')->name('cloneEvent');
         $router->resource('result-qualification', ResultQualificationController::class);
         $router->resource('map', MapController::class);

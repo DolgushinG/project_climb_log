@@ -39,79 +39,66 @@
             <div class="accordion mb-2" id="accordionExample">
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingOne">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                             Как определяется оценка сложности трассы?
                         </button>
                     </h2>
-                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                         data-bs-parent="#accordionExample">
                         <div class="accordion-body">
-                            <div class="container align-center">
-                                <h2>Пороговые значения для оценки сложности</h2>
-                                <p>Классифицируем сложность трассы в зависимости от процента флешей и редпоинтов:</p>
+                            <div class="container align-center" style="font-size: 0.9em;">
+                                <h2>Как определяется оценка сложности трассы?</h2>
+                                <p>
+                                    Сложность трассы оценивается на основе соотношения между процентами флешей и редпоинтов.
+                                    Мы учитываем разницу между этими показателями, чтобы определить,
+                                    насколько трасса легкая, сложная или сбалансированная.
+                                </p>
                                 <div class="row">
                                     <div class="col">
                                         <table class="thresholds">
                                             <thead>
                                             <tr>
                                                 <th>Уровень сложности</th>
-                                                <th>Процент флешей</th>
+                                                <th>Соотношение флешей и редпоинтов</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             <tr>
                                                 <td>Слишком легкая</td>
-                                                <td>90% и выше</td>
+                                                <td>Процент флешей превышает процент редпоинтов на 30% и более</td>
                                             </tr>
                                             <tr>
                                                 <td>Легкая</td>
-                                                <td>75% - 89%</td>
+                                                <td>Процент флешей превышает процент редпоинтов на 10%-30%</td>
                                             </tr>
                                             <tr>
                                                 <td>Сбалансированная</td>
-                                                <td>50% - 74%</td>
+                                                <td>Разница между процентом флешей и редпоинтов не превышает 10%
+                                                    в любую сторону</td>
                                             </tr>
                                             <tr>
                                                 <td>Сложная</td>
-                                                <td>25% - 49%</td>
+                                                <td>Процент редпоинтов превышает процент флешей на 10%-30%</td>
                                             </tr>
                                             <tr>
                                                 <td>Слишком сложная</td>
-                                                <td>Менее 25%</td>
+                                                <td>Процент редпоинтов превышает процент флешей на 30% и более</td>
                                             </tr>
                                             </tbody>
                                         </table>
                                     </div>
                                     <div class="col mt-1">
-                                        <table class="thresholds">
-                                            <thead>
-                                            <tr>
-                                                <th>Уровень сложности</th>
-                                                <th>Процент редпоинтов</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr>
-                                                <td>Слишком легкая</td>
-                                                <td>0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Легкая</td>
-                                                <td>1% - 10%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Сбалансированная</td>
-                                                <td>11% - 20%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Сложная</td>
-                                                <td>21% - 30%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Слишком сложная</td>
-                                                <td>Более 30%</td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
+                                        <p style="line-height: 1.5;">
+                                            Пример: Если на трассе 70% флешей и 50% редпоинтов, разница составляет 20%,
+                                            и трасса будет классифицирована как легкая. <br>
+                                            <br>
+                                            Если на трассе 40% флешей и 50% редпоинтов, разница составляет -10%,
+                                            и трасса будет классифицирована как сбалансированная. <br>
+                                            <br>
+                                            Если на трассе 20% флешей и 60% редпоинтов, разница составляет -40%,
+                                            и трасса будет классифицирована как слишком сложная.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -119,6 +106,8 @@
                     </div>
                 </div>
             </div><!-- End Default Accordion Example -->
+
+
             <div class="container">
                 <p>На компьютере Shift для многократной сортировки.</p>
             </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Posts;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultQualificationClassic;
 use App\Models\User;
@@ -32,9 +33,10 @@ class Controller extends BaseController
         $info_climbing_events = [];
         $info_climbing_events['amount_events'] = Event::where('is_public', 1)->get()->count();
         $info_climbing_events['amount_users'] = User::all()->count();
+        $recentlyPost = Posts::latest('created_at')->where('status', '=', 'PUBLISHED')->paginate(3);
         $info_climbing_events['amount_climbing_gym'] = DB::table('admin_users')->get()->count() - 2;
         $info_climbing_events['amount_city'] = User::where('city', '!=', null)->select('city')->distinct()->get()->count();
-        return view('main', compact(['info_climbing_events','events','cities']));
+        return view('main', compact(['info_climbing_events','events','cities', 'recentlyPost']));
     }
 
     public function list_events()
@@ -68,5 +70,9 @@ class Controller extends BaseController
     public function indexPrivacyData()
     {
         return view('privacy.privatedata');
+    }
+    public function indexBlog()
+    {
+        return view('blog.index');
     }
 }
