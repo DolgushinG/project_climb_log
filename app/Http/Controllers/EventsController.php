@@ -43,7 +43,7 @@ class EventsController extends Controller
      */
     public function show(Request $request, $start_date, $climbing_gym, $title){
         $event_public_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-        $event_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
+        $event_exist = Event::where('start_date', $start_date)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
         $pre_show = false;
         $user_id = Auth()->user()->id ?? null;
         if($event_public_exist){
@@ -54,6 +54,7 @@ class EventsController extends Controller
                 $event = $event_exist;
             }
         }
+//        dd($event_exist->title_eng, $title);
         $is_show_button_list_pending = false;
         if($event_public_exist || $pre_show){
             $sets = Set::where('event_id', '=', $event->id)->orderBy('number_set')->get();

@@ -1043,10 +1043,10 @@ class ResultQualificationController extends Controller
                     return response()->json($response);
                 }
                 $amount_participant = $form->model()->where('event_id', $participant->event_id)->get()->count();
-                $participant->is_paid = $form->input('is_paid');
-                $participant->save();
+
                 $admin = Admin::user();
                 if ($form->input('is_paid') === "1") {
+                    dd(21);
                     if ($event->options_amount_price) {
                         $amounts = [];
                         $names = [];
@@ -1055,7 +1055,7 @@ class ResultQualificationController extends Controller
                             if (!$amount['Сумма'] || $amount['Сумма'] < 0) {
                                 $response = [
                                     'status' => false,
-                                    'message' => "Сумма для оплаты не может быть 0 или меньше 0",
+                                    'message' => "Сумма для оплаты не может быть 0",
                                 ];
                                 return response()->json($response);
                             }
@@ -1076,17 +1076,20 @@ class ResultQualificationController extends Controller
                     if (!$amount_start_price || $amount_start_price < 0) {
                         $response = [
                             'status' => false,
-                            'message' => "Сумма для оплаты не может быть 0 или меньше 0",
+                            'message' => "Сумма для оплаты не может быть 0",
                         ];
                         return response()->json($response);
+                    } else {
+                        dd(1);
+                        $participant->is_paid = $form->input('is_paid');
+                        $participant->save();
+                        OwnerPaymentOperations::execute_payment_operations($participant, $admin, $amount_start_price, $amount_name);
+                        # Пересчитываем оплату за соревы
+                        OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
+
+                        $user = User::find($participant->user_id);
+                        ResultQualificationClassic::send_confirm_bill($event, $user);
                     }
-
-                    OwnerPaymentOperations::execute_payment_operations($participant, $admin, $amount_start_price, $amount_name);
-                    # Пересчитываем оплату за соревы
-                    OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
-
-                    $user = User::find($participant->user_id);
-                    ResultQualificationClassic::send_confirm_bill($event, $user);
                 }
                 if ($form->input('is_paid') === "0") {
                     $user_id = $form->model()->find($id)->user_id;
@@ -1095,6 +1098,7 @@ class ResultQualificationController extends Controller
                     } else {
                         $allow_delete = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
                     }
+                    dd($user_id);
                     # Не допускать отмену об оплате если результат уже внесен, так как так можно не платить за сервис
                     if (!$allow_delete) {
                         $transaction = OwnerPaymentOperations::where('event_id', $participant->event_id)
@@ -1105,8 +1109,9 @@ class ResultQualificationController extends Controller
                             OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
                         }
                     } else {
+                        dd(0);
                         $participant = $form->model()->find($id);
-                        $participant->is_paid = 1;
+                        $participant->is_paid = $form->input('is_paid');
                         $participant->save();
                         $response = [
                             'status' => false,
@@ -1124,6 +1129,7 @@ class ResultQualificationController extends Controller
                 $participant->save();
             }
         });
+
         return $form;
     }
 
