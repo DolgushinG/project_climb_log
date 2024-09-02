@@ -1,3 +1,8 @@
+<div class="container text-center">
+    <h2>Карта трасс для скалодрома</h2>
+</div>
+
+
 <div id="map"
      style="width: 1200px;
             height: 800px;
@@ -78,6 +83,7 @@
             document.getElementById('color').value = '#000000';
             document.getElementById('x-coordinate').value = x;
             document.getElementById('y-coordinate').value = y;
+            document.getElementById('route_id').value = '';
             document.getElementById('modal').style.display = 'block';
         }
     });
