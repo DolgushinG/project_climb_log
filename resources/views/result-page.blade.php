@@ -68,14 +68,15 @@
                                                        class="badge text-center">1</span>
                                                 </th>
                                             @else
-                                                <th>Не установлен</th>
+                                                <th>Нету</th>
                                             @endif
                                         @endif
                                         @if(!$event->is_hide_grades)
-                                            <th>{{$route->grade}}</th>
+                                            <th class="text-center">{{$route->grade}}</th>
                                         @endif
                                         <td>
                                             @if($result_participant)
+{{--                                                 Если есть доступ и можно отправлять результаты--}}
                                                 @if($event->is_access_user_edit_result && $event->is_send_result_state)
                                                     @if($result_participant[$index]['attempt'] == '0')
                                                         <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
@@ -87,6 +88,7 @@
                                                                autocomplete="off">
                                                     @endif
                                                 @else
+{{--                                                    Если есть нет доступ и нельзя отправлять результаты--}}
                                                     @if($result_participant[$index]['attempt'] == '0')
                                                         <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                                name="{{$route->count}}" id="failed-{{$route->count}}"
@@ -102,7 +104,7 @@
                                             @else
                                                 <input type="radio" class="btn-check" data-grade="{{$route->grade}}"
                                                        name="{{$route->count}}" id="failed-{{$route->count}}"
-                                                       autocomplete="off">
+                                                       autocomplete="off" checked>
                                             @endif
                                             @if($event->is_zone_show)
                                                 <label class="btn btn-outline-danger btn-failed"
@@ -248,12 +250,12 @@
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             $(document).ready(function () {
                 {
-                    var mobile = $('#mobile-fixed')
-                    mobile.removeClass('btn-container-desktop-fixed');
-                    mobile.addClass('btn-container-mobile-fixed');
-                    var send = $('#btn-send-result')
-                    send.removeClass('button-desktop-fixed');
-                    send.addClass('button-mobile-fixed');
+                    // var mobile = $('#mobile-fixed')
+                    // mobile.removeClass('btn-container-desktop-fixed');
+                    // mobile.addClass('btn-container-mobile-fixed');
+                    // var send = $('#btn-send-result')
+                    // send.removeClass('button-desktop-fixed');
+                    // send.addClass('button-mobile-fixed');
                     var col = $('#grade')
                     col.text('').append('Кате-<br>гория')
                 }

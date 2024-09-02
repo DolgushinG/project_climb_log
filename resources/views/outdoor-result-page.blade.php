@@ -324,12 +324,12 @@
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             $(document).ready(function () {
                 {
-                    var mobile = $('#mobile-fixed')
-                    mobile.removeClass('btn-container-desktop-fixed');
-                    mobile.addClass('btn-container-mobile-fixed');
-                    var send = $('#btn-send-result')
-                    send.removeClass('button-desktop-fixed');
-                    send.addClass('button-mobile-fixed');
+                    // var mobile = $('#mobile-fixed')
+                    // mobile.removeClass('btn-container-desktop-fixed');
+                    // mobile.addClass('btn-container-mobile-fixed');
+                    // var send = $('#btn-send-result')
+                    // send.removeClass('button-desktop-fixed');
+                    // send.addClass('button-mobile-fixed');
                     var col = $('#grade')
                     col.text('').append('Кате-<br>гория')
                 }
