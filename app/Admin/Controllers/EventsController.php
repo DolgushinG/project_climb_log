@@ -394,7 +394,7 @@ class EventsController extends Controller
                 })->when(3, function (Form $form) {
                     $form->url('link_payment', 'Ссылка на оплату')->placeholder('Ссылка');
                     $form->number('amount_start_price', 'Сумма стартового взноса')->placeholder('сумма');
-                    $form->tableproducts('helper_amount', 'Доп опция на которую действует скидка', function ($table) use ($form){
+                    $form->tablehelperamount('helper_amount', 'Доп опция на которую действует скидка', function ($table) use ($form){
                         $table->text('Название');
                         $table->number('Цена');
                     });
@@ -571,14 +571,83 @@ class EventsController extends Controller
             if($form->type_event){
                 $form->is_access_user_edit_result = 1;
             }
-//            if($form->input('products')){
-//                $existingData = $form->model()->products;
-//                $newData = $form->input('products');
-//                // Объедините существующие данные с новыми
-//                $mergedData = array_merge($existingData, $newData);
-//                // Сохраните объединенные данные
-//                $form->model()->products = $mergedData;
-//            }
+            if($form->input('products')){
+                $existingData = $form->model()->products;
+                $newData = $form->input('products');
+                if($existingData){
+                    // Объедините существующие данные с новыми
+                    $mergedData = array_merge($existingData, $newData);
+                    // Сохраните объединенные данные
+                    $form->model()->products = $mergedData;
+                } else {
+                    $form->model()->products = $newData;
+                }
+
+            }
+            if($form->input('options_categories')){
+                $existingData = $form->model()->options_categories;
+                $newData = $form->input('options_categories');
+                if($existingData){
+                    // Объедините существующие данные с новыми
+                    $mergedData = array_merge($existingData, $newData);
+                    // Сохраните объединенные данные
+                    $form->model()->options_categories = $mergedData;
+                } else {
+                    $form->model()->options_categories = $form->input('options_categories');
+                }
+
+            }
+            if($form->input('options_amount_price')){
+                $existingData = $form->model()->options_amount_price;
+                $newData = $form->input('options_amount_price');
+                if($existingData){
+                    // Объедините существующие данные с новыми
+                    $mergedData = array_merge($existingData, $newData);
+                    // Сохраните объединенные данные
+                    $form->model()->options_amount_price = $mergedData;
+                } else {
+                    $form->model()->options_amount_price = $form->input('options_amount_price');
+                }
+
+            }
+            if($form->input('helper_amount')){
+                $existingData = $form->model()->helper_amount;
+                $newData = $form->input('helper_amount');
+                if($existingData){
+                    // Объедините существующие данные с новыми
+                    $mergedData = array_merge($existingData, $newData);
+                    // Сохраните объединенные данные
+                    $form->model()->helper_amount = $mergedData;
+                } else {
+                    $form->model()->helper_amount = $form->input('helper_amount');
+                }
+
+            }
+            if($form->input('discounts')){
+                $existingData = $form->model()->discounts;
+                $newData = $form->input('discounts');
+                if($existingData){
+                    // Объедините существующие данные с новыми
+                    $mergedData = array_merge($existingData, $newData);
+                    // Сохраните объединенные данные
+                    $form->model()->discounts = $mergedData;
+                } else {
+                    $form->model()->discounts = $form->input('discounts');
+                }
+            }
+            if($form->input('up_price')){
+                $existingData = $form->model()->up_price;
+                $newData = $form->input('up_price');
+                if($existingData){
+                    // Объедините существующие данные с новыми
+                    $mergedData = array_merge($existingData, $newData);
+                    // Сохраните объединенные данные
+                    $form->model()->up_price = $mergedData;
+                } else {
+                    $form->model()->up_price = $form->input('up_price');
+                }
+            }
+
             return $form;
         });
         $form->saved(function (Form $form)  use ($type, $id){
