@@ -60,6 +60,7 @@ class HasMany extends Field
         'tableCustom' => 'admin::form.hasmanytablecustom',
         'tableDiscounts' => 'admin::form.hasmanytablediscounts',
         'tableProducts' => 'admin::form.hasmanytableproducts',
+        'tableHelperAmount' => 'admin::form.hasmanytablehelperamount',
         'tableUpPrice' => 'admin::form.hasmanytableupprice',
         'tableAmount' => 'admin::form.hasmanytableamount',
         'tableRoutes' => 'admin::form.hasmanytableroutes',
@@ -645,7 +646,8 @@ EOT;
          * {count} is increment number of current sub form count.
          */
         $script = <<<EOT
-var indexUpPrice = 0;
+var current_index_up_price = document.querySelectorAll('.remove-up-price').length
+var indexUpPrice = 0 + current_index_up_price;
 $('#has-many-{$this->column}').on('click', '.add-up-price', function () {
     var tpl = $('template.{$this->column}-tpl');
     var template = tpl.html().replace(/{$defaultKey}/g, indexUpPrice);
@@ -692,7 +694,8 @@ EOT;
          * {count} is increment number of current sub form count.
          */
         $script = <<<EOT
-var indexProduct = 0;
+var current_index_products = document.querySelectorAll('.remove-product').length
+var indexProduct = 0 + current_index_products;
 $('#has-many-{$this->column}').on('click', '.add-products', function () {
     var tpl = $('template.{$this->column}-tpl');
     var template = tpl.html().replace(/{$defaultKey}/g, indexProduct);
@@ -726,6 +729,53 @@ EOT;
      *
      * @return void
      */
+    protected function setupScriptForTableHelperAmountView($templateScript)
+    {
+        $removeClass = NestedForm::REMOVE_FLAG_CLASS;
+        $defaultKey = NestedForm::DEFAULT_KEY_NAME;
+
+        /**
+         * When add a new sub form, replace all element key in new sub form.
+         *
+         * @example comments[new___key__][title]  => comments[new_{index}][title]
+         *
+         * {count} is increment number of current sub form count.
+         */
+        $script = <<<EOT
+var current_index_helper_amount = document.querySelectorAll('.remove-helper-amount').length
+var indexHelperAmount = 0 + current_index_helper_amount;
+$('#has-many-{$this->column}').on('click', '.add-helper-amount', function () {
+    var tpl = $('template.{$this->column}-tpl');
+    var template = tpl.html().replace(/{$defaultKey}/g, indexHelperAmount);
+    $('.has-many-{$this->column}-forms').append(template);
+    {$templateScript}
+    indexHelperAmount++;
+    return false;
+});
+
+$('#has-many-{$this->column}').on('click', '.remove-helper-amount', function () {
+    var first_input_name = $(this).closest('.has-many-{$this->column}-form').find('input[name]:first').attr('name');
+    if (first_input_name.match('{$this->column}\\\[new_')) {
+        $(this).closest('.has-many-{$this->column}-form').remove();
+    } else {
+        $(this).closest('.has-many-{$this->column}-form').hide();
+        $(this).closest('.has-many-{$this->column}-form').find('.$removeClass').val(1);
+        $(this).closest('.has-many-{$this->column}-form').find('input').removeAttr('required');
+    }
+    return false;
+});
+
+EOT;
+
+        Admin::script($script);
+    }
+    /**
+     * Setup default template script.
+     *
+     * @param string $templateScript
+     *
+     * @return void
+     */
     protected function setupScriptForTableDiscountsView($templateScript)
     {
         $removeClass = NestedForm::REMOVE_FLAG_CLASS;
@@ -739,7 +789,8 @@ EOT;
          * {count} is increment number of current sub form count.
          */
         $script = <<<EOT
-var indexDiscounts = 0;
+var current_index_discounts = document.querySelectorAll('.remove-discounts').length
+var indexDiscounts = 0 + current_index_discounts;
 $('#has-many-{$this->column}').on('click', '.add-discounts', function () {
     var tpl = $('template.{$this->column}-tpl');
     var template = tpl.html().replace(/{$defaultKey}/g, indexDiscounts);
@@ -785,7 +836,8 @@ EOT;
          * {count} is increment number of current sub form count.
          */
         $script = <<<EOT
-var index = 0;
+var current_index_amount = document.querySelectorAll('.remove').length
+var index = 0 + current_index_amount;
 $('#has-many-{$this->column}').on('click', '.add-amount', function () {
 
     var tpl = $('template.{$this->column}-tpl');

@@ -21,8 +21,12 @@ class Route extends Model
         $grades = array();
         foreach ($routes as $route){
             if(isset($route['Ценность'])){
-                if(isset($route['Ценность зоны'])){
+                if(isset($route['Ценность зоны']) && isset($route['Ценность флеша'])){
+                    $grades[] = array('owner_id' => $owner_id ,'event_id' => $event_id, 'amount' => $route['Кол-во'], 'grade' => $route['Категория'], 'flash' => $route['Ценность флеша'],'zone' => $route['Ценность зоны'], 'value' => $route['Ценность']);
+                } elseif(isset($route['Ценность зоны'])) {
                     $grades[] = array('owner_id' => $owner_id ,'event_id' => $event_id, 'amount' => $route['Кол-во'], 'grade' => $route['Категория'], 'zone' => $route['Ценность зоны'], 'value' => $route['Ценность']);
+                } elseif(isset($route['Ценность флеша'])) {
+                    $grades[] = array('owner_id' => $owner_id ,'event_id' => $event_id, 'amount' => $route['Кол-во'], 'grade' => $route['Категория'], 'value' => $route['Ценность'], 'flash' => $route['Ценность флеша']);
                 } else {
                     $grades[] = array('owner_id' => $owner_id ,'event_id' => $event_id, 'amount' => $route['Кол-во'], 'grade' => $route['Категория'], 'value' => $route['Ценность']);
                 }

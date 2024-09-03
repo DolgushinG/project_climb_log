@@ -102,6 +102,49 @@ class Grades extends Model
             ['Категория' => '8A', 'Кол-во' => 0, 'Ценность' => 12800, 'Ценность зоны' => 6400],
         ];
     }
+    public static function getRoutesWithFlash()
+    {
+        return [
+            ['Категория' => '4', 'Кол-во' => 3,'Ценность' => 50, 'Ценность флеша' => 20],
+            ['Категория' => '5', 'Кол-во' => 3,'Ценность' => 100, 'Ценность флеша' => 30],
+            ['Категория' => '5+', 'Кол-во' => 2,'Ценность' => 150, 'Ценность флеша' => 40],
+            ['Категория' => '6A', 'Кол-во' => 2,'Ценность' => 200, 'Ценность флеша' => 60],
+            ['Категория' => '6A+', 'Кол-во' => 2,'Ценность' => 300, 'Ценность флеша' => 80],
+            ['Категория' => '6B', 'Кол-во' => 3,'Ценность' => 400, 'Ценность флеша' => 120],
+            ['Категория' => '6B+', 'Кол-во' => 2,'Ценность' => 600, 'Ценность флеша' => 160],
+            ['Категория' => '6C', 'Кол-во' => 2,'Ценность' => 800, 'Ценность флеша' => 240],
+            ['Категория' => '6C+', 'Кол-во' => 2,'Ценность' => 1200, 'Ценность флеша' => 320],
+            ['Категория' => '7A', 'Кол-во' => 2,'Ценность' => 1600, 'Ценность флеша' => 480],
+            ['Категория' => '7A+', 'Кол-во' => 2,'Ценность' => 2400, 'Ценность флеша' => 640],
+            ['Категория' => '7B', 'Кол-во' => 2,'Ценность' => 3200, 'Ценность флеша' => 960],
+            ['Категория' => '7B+', 'Кол-во' => 1,'Ценность' => 4800, 'Ценность флеша' => 1280],
+            ['Категория' => '7C', 'Кол-во' => 1,'Ценность' => 6400, 'Ценность флеша' => 1920],
+            ['Категория' => '7C+', 'Кол-во' => 1,'Ценность' => 9600, 'Ценность флеша' => 2560],
+            ['Категория' => '8A', 'Кол-во' => 0,'Ценность' => 12800, 'Ценность флеша' => 3840],
+        ];
+    }
+    public static function getRoutesWithFlashZone()
+    {
+
+        return [
+            ['Категория' => '4', 'Кол-во' => 3,'Ценность' => 50, 'Ценность флеша' => 20 ,'Ценность зоны' => 25],
+            ['Категория' => '5', 'Кол-во' => 3,'Ценность' => 100, 'Ценность флеша' => 30,'Ценность зоны' => 50],
+            ['Категория' => '5+', 'Кол-во' => 2,'Ценность' => 150, 'Ценность флеша' => 40,'Ценность зоны' => 75],
+            ['Категория' => '6A', 'Кол-во' => 2,'Ценность' => 200, 'Ценность флеша' => 60,'Ценность зоны' => 100],
+            ['Категория' => '6A+', 'Кол-во' => 2,'Ценность' => 300, 'Ценность флеша' => 80,'Ценность зоны' => 150],
+            ['Категория' => '6B', 'Кол-во' => 3,'Ценность' => 400, 'Ценность флеша' => 120,'Ценность зоны' => 200],
+            ['Категория' => '6B+', 'Кол-во' => 2,'Ценность' => 600, 'Ценность флеша' => 160,'Ценность зоны' => 300],
+            ['Категория' => '6C', 'Кол-во' => 2,'Ценность' => 800, 'Ценность флеша' => 240,'Ценность зоны' => 400],
+            ['Категория' => '6C+', 'Кол-во' => 2,'Ценность' => 1200, 'Ценность флеша' => 320,'Ценность зоны' => 600],
+            ['Категория' => '7A', 'Кол-во' => 2,'Ценность' => 1600, 'Ценность флеша' => 480,'Ценность зоны' => 800],
+            ['Категория' => '7A+', 'Кол-во' => 2,'Ценность' => 2400, 'Ценность флеша' => 640,'Ценность зоны' => 1200],
+            ['Категория' => '7B', 'Кол-во' => 2,'Ценность' => 3200, 'Ценность флеша' => 960,'Ценность зоны' => 1600],
+            ['Категория' => '7B+', 'Кол-во' => 1,'Ценность' => 4800, 'Ценность флеша' => 1280,'Ценность зоны' => 2400],
+            ['Категория' => '7C', 'Кол-во' => 1,'Ценность' => 6400, 'Ценность флеша' => 1920,'Ценность зоны' => 3200],
+            ['Категория' => '7C+', 'Кол-во' => 1,'Ценность' => 9600, 'Ценность флеша' => 2560,'Ценность зоны' => 4800],
+            ['Категория' => '8A', 'Кол-во' => 0,'Ценность' => 12800, 'Ценность флеша' => 3840,'Ценность зоны' => 6400],
+        ];
+    }
     public static function settings_routes($amount_routes, $routes)
     {
         $res = [];
@@ -110,39 +153,20 @@ class Grades extends Model
             if($route['amount'] != 0) {
                 for ($i = 1; $i <= $route['amount']; $i++) {
                     if ($route_id <= $amount_routes) {
-                        if ($amount_routes <= 20) {
-                            if ($route['grade'] != '8A') {
-                                if (isset($route['value'])) {
-                                    $grades_with_value_flash = Grades::grades_with_value_flash(20);
-                                    $grades = Grades::grades();
-                                    $index = array_search($route['grade'], $grades);
-                                    $flash_value = $grades_with_value_flash[$index];
-                                    if(isset($route['zone'])){
-                                        $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id,'zone' => $route['zone'], 'grade' => $route['grade'], 'value' => $route['value'], 'flash_value' => $flash_value);
-                                    } else {
-                                        $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade'], 'value' => $route['value'], 'flash_value' => $flash_value);
-                                    }
-                                } else {
-                                    $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade']);
-                                }
-                                $route_id++;
+                        if (isset($route['value'])) {
+                            if(isset($route['zone']) && isset($route['flash'])){
+                                $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id,'zone' => $route['zone'], 'grade' => $route['grade'], 'value' => $route['value'], 'flash_value' => $route['flash']);
+                            } elseif(isset($route['zone'])) {
+                                $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id,'zone' => $route['zone'], 'grade' => $route['grade'], 'value' => $route['value']);
+                            } elseif(isset($route['flash'])) {
+                                $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade'], 'value' => $route['value'], 'flash_value' => $route['flash']);
+                            } else {
+                                $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade'], 'value' => $route['value']);
                             }
                         } else {
-                            if (isset($route['value'])) {
-                                $grades_with_value_flash = Grades::grades_with_value_flash(20);
-                                $grades = Grades::grades();
-                                $index = array_search($route['grade'], $grades);
-                                $flash_value = $grades_with_value_flash[$index];
-                                if(isset($route['zone'])){
-                                    $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id,'zone' => $route['zone'], 'grade' => $route['grade'], 'value' => $route['value'], 'flash_value' => $flash_value);
-                                } else {
-                                    $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade'], 'value' => $route['value'], 'flash_value' => $flash_value);
-                                }
-                            } else {
-                                $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade']);
-                            }
-                            $route_id++;
+                            $res[] = array('owner_id' => $route['owner_id'], 'event_id' => $route['event_id'], 'route_id' => $route_id, 'grade' => $route['grade']);
                         }
+                        $route_id++;
                     }
                 }
             }

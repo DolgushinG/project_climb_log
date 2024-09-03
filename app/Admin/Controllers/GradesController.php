@@ -441,7 +441,10 @@ SCRIPT);
 
             $grid->column('grade', 'Категория трассы')->select(Grades::getGrades());
             if($event->mode == 1){
-                $grid->column('value', 'Ценность трассы');
+                $grid->column('value', 'Редпоинт');
+                if($event->is_flash_value){
+                    $grid->column('flash_value', 'Флеш');
+                }
                 if($event->is_zone_show){
                     $grid->column('zone', 'Ценность зоны');
                 }
@@ -533,8 +536,12 @@ SCRIPT);
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
 
 
-        if($event->is_zone_show){
+        if($event->is_zone_show && $event->is_flash_value){
+            $routes = Grades::getRoutesWithFlashZone();
+        } elseif($event->is_zone_show) {
             $routes = Grades::getRoutesWithZone();
+        } elseif($event->is_flash_value) {
+            $routes = Grades::getRoutesWithFlash();
         } else {
             $routes = Grades::getRoutes();
         }
@@ -657,6 +664,9 @@ SCRIPT);
                             $table->text('Ценность')->width('60px');
                             if ($event->is_zone_show) {
                                 $table->text('Ценность зоны')->width('60px');
+                            }
+                            if ($event->is_flash_value) {
+                                $table->text('Ценность флеша')->width('60px');
                             }
                         }
                     } else {

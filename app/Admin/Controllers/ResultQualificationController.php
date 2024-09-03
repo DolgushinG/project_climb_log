@@ -1031,100 +1031,102 @@ class ResultQualificationController extends Controller
                 $result->amount_start_price = $form->input('amount_start_price');
                 $result->save();
             }
-
-            if ($form->input('is_paid') == "0" || $form->input('is_paid') == "1") {
-                $participant = $form->model()->find($id);
-                $event = Event::find($participant->event_id);
-                if (!$participant->amount_start_price && !$event->amount_start_price && $event->options_amount_price) {
-                    $response = [
-                        'status' => false,
-                        'message' => "Перед оплатой надо выбрать сумму оплаты",
-                    ];
-                    return response()->json($response);
-                }
-                $amount_participant = $form->model()->where('event_id', $participant->event_id)->get()->count();
-                $participant->is_paid = $form->input('is_paid');
-                $participant->save();
-                $admin = Admin::user();
-                if ($form->input('is_paid') === "1") {
-                    if ($event->options_amount_price) {
-                        $amounts = [];
-                        $names = [];
-                        $count = 1;
-                        foreach ($event->options_amount_price as $amount) {
-                            if (!$amount['Сумма'] || $amount['Сумма'] < 0) {
-                                $response = [
-                                    'status' => false,
-                                    'message' => "Сумма для оплаты не может быть 0 или меньше 0",
-                                ];
-                                return response()->json($response);
-                            }
-                            $amounts[$count] = $amount['Сумма'];
-                            $names[$count] = $amount['Название'];
-                            $count++;
-                        }
-                        $amounts[0] = '0 р';
-                        $names[0] = 'Не оплачено';
-
-                        $index = $participant->amount_start_price;
-                        $amount_start_price = $amounts[$index];
-                        $amount_name = $names[$index];
-                    } else {
-                        $amount_start_price = $event->amount_start_price;
-                        $amount_name = 'Стартовый взнос';
-                    }
-                    if (!$amount_start_price || $amount_start_price < 0) {
-                        $response = [
-                            'status' => false,
-                            'message' => "Сумма для оплаты не может быть 0 или меньше 0",
-                        ];
-                        return response()->json($response);
-                    }
-
-                    OwnerPaymentOperations::execute_payment_operations($participant, $admin, $amount_start_price, $amount_name);
-                    # Пересчитываем оплату за соревы
-                    OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
-
-                    $user = User::find($participant->user_id);
-                    ResultQualificationClassic::send_confirm_bill($event, $user);
-                }
-                if ($form->input('is_paid') === "0") {
-                    $user_id = $form->model()->find($id)->user_id;
-                    if ($event->is_france_system_qualification) {
-                        $allow_delete = ResultRouteFranceSystemQualification::where('event_id', $event->id)->where('user_id', $user_id)->first();
-                    } else {
-                        $allow_delete = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
-                    }
-                    # Не допускать отмену об оплате если результат уже внесен, так как так можно не платить за сервис
-                    if (!$allow_delete) {
-                        $transaction = OwnerPaymentOperations::where('event_id', $participant->event_id)
-                            ->where('user_id', $participant->user_id)->first();
-                        if ($admin && $transaction) {
-                            $transaction->delete();
-                            # Пересчитываем оплату за соревы
-                            OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
-                        }
-                    } else {
-                        $participant = $form->model()->find($id);
-                        $participant->is_paid = 1;
-                        $participant->save();
-                        $response = [
-                            'status' => false,
-                            'message' => "Отмена оплаты после внесения результатов участника невозможна",
-                        ];
-                        return response()->json($response);
-                    }
-
-                }
-
+            if($form->input('is_paid') != null){
+                return self::execute_is_paid($form, $id);
             }
-            if ($form->input('is_recheck') == "0" || $form->input('is_recheck') == "1") {
+            if($form->input('is_recheck')){
                 $participant = $form->model()->find($id);
                 $participant->is_recheck = $form->input('is_recheck');
                 $participant->save();
             }
         });
+
         return $form;
+    }
+
+    public function execute_is_paid($form, $id)
+    {
+        $admin = Admin::user();
+        $participant = $form->model()->find($id);
+        $event = Event::find($participant->event_id);
+        if (!$participant->amount_start_price && !$event->amount_start_price && $event->options_amount_price) {
+            $response = [
+                'status' => false,
+                'message' => "Перед оплатой надо выбрать сумму оплаты",
+            ];
+            return response()->json($response);
+        }
+        $amount_participant = $form->model()->where('event_id', $participant->event_id)->get()->count();
+        if ($form->input('is_paid') === "1") {
+            if ($event->options_amount_price) {
+                $amounts = [];
+                $names = [];
+                $count = 1;
+                foreach ($event->options_amount_price as $amount) {
+                    if (!$amount['Сумма'] || $amount['Сумма'] < 0) {
+                        $response = [
+                            'status' => false,
+                            'message' => "Сумма для оплаты не может быть 0",
+                        ];
+                        return response()->json($response);
+                    }
+                    $amounts[$count] = $amount['Сумма'];
+                    $names[$count] = $amount['Название'];
+                    $count++;
+                }
+                $amounts[0] = '0 р';
+                $names[0] = 'Не оплачено';
+
+                $index = $participant->amount_start_price;
+                $amount_start_price = $amounts[$index];
+                $amount_name = $names[$index];
+            } else {
+                $amount_start_price = $event->amount_start_price;
+                $amount_name = 'Стартовый взнос';
+            }
+            if (!$amount_start_price || $amount_start_price < 0) {
+                $response = [
+                    'status' => false,
+                    'message' => "Сумма для оплаты не может быть 0",
+                ];
+                return response()->json($response);
+            } else {
+                $participant->is_paid = $form->input('is_paid');
+                $participant->save();
+                OwnerPaymentOperations::execute_payment_operations($participant, $admin, $amount_start_price, $amount_name);
+                # Пересчитываем оплату за соревы
+                OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
+
+                $user = User::find($participant->user_id);
+                ResultQualificationClassic::send_confirm_bill($event, $user);
+            }
+        }
+        if ($form->input('is_paid') === "0") {
+            $user_id = $form->model()->find($id)->user_id;
+            if ($event->is_france_system_qualification) {
+                $allow_delete = ResultRouteFranceSystemQualification::where('event_id', $event->id)->where('user_id', $user_id)->first();
+            } else {
+                $allow_delete = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first();
+            }
+            # Не допускать отмену об оплате если результат уже внесен, так как так можно не платить за сервис
+            if (!$allow_delete) {
+                $transaction = OwnerPaymentOperations::where('event_id', $participant->event_id)
+                    ->where('user_id', $participant->user_id)->first();
+                if ($admin && $transaction) {
+                    $transaction->delete();
+                    $participant->is_paid = $form->input('is_paid');
+                    $participant->save();
+                    # Пересчитываем оплату за соревы
+                    OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
+                }
+            } else {
+                $response = [
+                    'status' => false,
+                    'message' => "Отмена оплаты после внесения результатов участника невозможна",
+                ];
+                return response()->json($response);
+            }
+        }
     }
 
     public function exportQualificationExcel(Request $request)
