@@ -17,7 +17,7 @@ class CreatePointsTable extends Migration
             $table->increments('id');
             $table->integer('event_id');
             $table->integer('owner_id');
-            $table->string('author');
+            $table->string('author')->nullable();
             $table->string('grade');
             $table->string('route_id');
             $table->integer('x');

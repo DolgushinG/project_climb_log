@@ -36,9 +36,9 @@ class MapController extends Controller
                             $column->row($this->grid());
 
                         });
-                        $row->column(10, function (Column $column) use ($event) {
-                            $column->row($this->list_points());
-                        });
+//                        $row->column(10, function (Column $column) use ($event) {
+//                            $column->row($this->list_points());
+//                        });
                     }
                 }
             });
@@ -96,7 +96,7 @@ class MapController extends Controller
             return "<div style='width: 50px; height: 20px; background-color: {$color}; border: 1px solid #ddd;'></div>";
         });
         $grid->disableFilter();
-        $grid->disableBatchActions();
+//        $grid->disableBatchActions();
         $grid->disableColumnSelector();
         $grid->disableExport();
         $grid->disableCreateButton();
@@ -150,5 +150,45 @@ class MapController extends Controller
         $form->hidden('y');
 
         return $form;
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param int $id
+     *
+     */
+    public function update($id, Request $request)
+    {
+        if($id){
+           $point = Point::find($id);
+           if($point){
+               $point->author = $request->input('author');
+               $point->route_id = $request->input('route_id');
+               $point->grade = $request->input('grade');
+               $point->color = $request->input('color');
+               $point->save();
+               return response()->json(['success' => true, 'message' => 'Точка успешно обновлена!']);
+           }
+        }
+        return response()->json(['success' => false, 'message' => 'Ошибка при обновлении точки.']);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     *
+     */
+    public function destroy($id, Request $request)
+    {
+        if($id){
+            $point = Point::find($id);
+            if($point){
+                $point->delete();
+                return response()->json(['success' => true, 'message' => 'Точка успешно удалена!!']);
+            }
+        }
+        return response()->json(['success' => false, 'message' => 'Ошибка при удалении точки.']);
     }
 }
