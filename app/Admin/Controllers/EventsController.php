@@ -565,8 +565,8 @@ class EventsController extends Controller
                 $title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
                 $form->climbing_gym_name_eng =  Helpers::formating_string($climbing_gym_name_eng);
                 $form->title_eng =  Helpers::formating_string($title_eng);
-                $form->link = '/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$title_eng;
-                $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$title_eng;
+                $form->link = '/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.Helpers::formating_string($title_eng);
+                $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.Helpers::formating_string($title_eng);
             }
             if($form->type_event){
                 $form->is_access_user_edit_result = 1;

@@ -43,20 +43,24 @@ class EventsController extends Controller
      */
     public function show(Request $request, $start_date, $climbing_gym, $title){
         $event_public_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-        $event_exist = Event::where('start_date', $start_date)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
+        $event_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
         $pre_show = false;
         $user_id = Auth()->user()->id ?? null;
         if($event_public_exist){
             $event = $event_public_exist;
         } else {
-            if($request->is('admin/event/*')){
+            if($request->is('admin/event/*') && $event_exist){
                 $pre_show = true;
                 $event = $event_exist;
             }
         }
-//        dd($event_exist->title_eng, $title);
+
         $is_show_button_list_pending = false;
         if($event_public_exist || $pre_show){
+            if(!$event){
+                Log::error('MSG - по каким то причинам не смог найти событие'.$title);
+                return view('errors.404');
+            }
             $sets = Set::where('event_id', '=', $event->id)->orderBy('number_set')->get();
             foreach ($sets as $set){
                 if($event->is_france_system_qualification){
@@ -760,9 +764,9 @@ class EventsController extends Controller
         UpdateResultParticipants::dispatch($event_id);
         Helpers::clear_cache($event);
         if ($result) {
-            return response()->json(['success' => true, 'message' => 'Успешная внесение результатов', 'link' => $event->link], 201);
+            return response()->json(['success' => true, 'message' => 'Успешное внесение результатов', 'link' => $event->link], 201);
         } else {
-            return response()->json(['success' => false, 'message' => 'ошибка внесение результатов'], 422);
+            return response()->json(['success' => false, 'message' => 'Ошибка внесение результатов'], 422);
         }
     }
 

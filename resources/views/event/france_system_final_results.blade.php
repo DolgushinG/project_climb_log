@@ -39,7 +39,9 @@
 {{--                                                        <td>{{$res['city']}}</td>--}}
                                                         <td>
                                                             @foreach($routes as $route)
-                                                                <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">М{{$route}}</span>
+                                                                @if(isset($res['amount_try_top_'.$route]) && isset($res['amount_try_zone_'.$route]))
+                                                                    <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">М{{$route}}</span>
+                                                                @endif
                                                             @endforeach
                                                             <br>
                                                             @foreach($routes as $route)
@@ -106,7 +108,9 @@
 {{--                                                    <td>{{$res['city']}}</td>--}}
                                                     <td>
                                                         @foreach($routes as $route)
-                                                            <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">М{{$route}}</span>
+                                                            @if(isset($res['amount_try_top_'.$route]) && isset($res['amount_try_zone_'.$route]))
+                                                                <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">М{{$route}}</span>
+                                                            @endif
                                                         @endforeach
                                                         <br>
                                                         @foreach($routes as $route)
@@ -188,7 +192,9 @@
 {{--                                                        <td>{{$res['city']}}</td>--}}
                                                         <td>
                                                             @foreach($routes as $route)
-                                                                <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">Ж{{$route}}</span>
+                                                                @if(isset($res['amount_try_top_'.$route]) && isset($res['amount_try_zone_'.$route]))
+                                                                    <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">Ж{{$route}}</span>
+                                                                @endif
                                                             @endforeach
                                                             <br>
                                                             @foreach($routes as $route)
@@ -254,7 +260,9 @@
 {{--                                                    <td>{{$res['city']}}</td>--}}
                                                     <td>
                                                         @foreach($routes as $route)
-                                                            <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">Ж{{$route}}</span>
+                                                            @if(isset($res['amount_try_top_'.$route]) && isset($res['amount_try_zone_'.$route]))
+                                                                <span class="bg-dark result-try" style="border-radius: 5px 5px 0 0;">Ж{{$route}}</span>
+                                                            @endif
                                                         @endforeach
                                                         <br>
                                                         @foreach($routes as $route)
