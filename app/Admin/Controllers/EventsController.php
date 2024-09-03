@@ -564,9 +564,10 @@ class EventsController extends Controller
                 $climbing_gym_name_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->climbing_gym_name));
                 $title_eng = str_replace(' ', '-', (new \App\Models\Event)->translate_to_eng($form->title));
                 $form->climbing_gym_name_eng =  Helpers::formating_string($climbing_gym_name_eng);
-                $form->title_eng =  Helpers::formating_string($title_eng);
-                $form->link = '/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.Helpers::formating_string($title_eng);
-                $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.Helpers::formating_string($title_eng);
+                $format_title_eng = Helpers::formating_string($title_eng);
+                $form->title_eng =  $format_title_eng;
+                $form->link = '/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$format_title_eng;
+                $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$format_title_eng;
             }
             if($form->type_event){
                 $form->is_access_user_edit_result = 1;
@@ -580,7 +581,7 @@ class EventsController extends Controller
                     // Сохраните объединенные данные
                     $form->model()->products = $mergedData;
                 } else {
-                    $form->model()->products = $newData;
+                    $form->model()->products = $form->input('products');
                 }
 
             }
