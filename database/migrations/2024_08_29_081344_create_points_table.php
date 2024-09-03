@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateMapTable extends Migration
+class CreatePointsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateMapTable extends Migration
      */
     public function up()
     {
-        Schema::create('Map', function (Blueprint $table) {
+        Schema::create('points', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('event_id');
             $table->integer('owner_id');
@@ -34,6 +34,6 @@ class CreateMapTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Map');
+        Schema::dropIfExists('points');
     }
 }

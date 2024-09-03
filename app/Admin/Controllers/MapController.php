@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\Event;
 use App\Models\Map;
 use App\Http\Controllers\Controller;
+use App\Models\Point;
 use App\Models\Route;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -63,7 +64,7 @@ class MapController extends Controller
 //        $data['author'] = 'Иванов'; // Пример добавления ID текущего пользователя
         $data['event_id'] = $event->id; // Пример добавления ID текущего пользователя
         $data['owner_id'] = $event->owner_id; // Пример добавления ID текущего пользователя
-        $point = Map::create($data);
+        $point = Point::create($data);
 
         return response()->json([
             'success' => true,
@@ -87,7 +88,7 @@ class MapController extends Controller
 
     protected function list_points()
     {
-        $grid = new Grid(new Map);
+        $grid = new Grid(new Point);
         $grid->column('route_id', 'Номер маршрут');
         $grid->column('grade', 'Категория');
         $grid->column('author', 'Автор');
@@ -108,9 +109,9 @@ class MapController extends Controller
      */
     protected function grid()
     {
-        $points = Map::all();
+        $points = Point::all();
         $event = Event::where('owner_id', '=', 2)->where('active', 1)->first();
-        $points_exist = Map::where('event_id', $event->id)->pluck('route_id')->toArray();
+        $points_exist = Point::where('event_id', $event->id)->pluck('route_id')->toArray();
         $routes = Route::where('event_id', $event->id)->get();
         $scheme_climbing_gym = '/storage/'.Admin::user()->map;
         return Admin::component('admin::map', compact(['points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
@@ -137,7 +138,7 @@ class MapController extends Controller
      */
     protected function form()
     {
-        $form = new Form(new Map);
+        $form = new Form(new Point);
 
         $form->hidden('event_id', __('Author'))->rules('required');
         $form->hidden('owner_id', __('Author'))->rules('required');

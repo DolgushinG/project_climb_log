@@ -60,9 +60,25 @@
         <input type="hidden" id="y-coordinate" name="y">
         <input type="hidden" id="event_id" name="event_id">
         <input type="hidden" id="owner_id" name="owner_id">
-        <button class="btn btn-secondary" type="submit">Сохранить</button>
-        <button class="btn btn-secondary" id="btn_close">Закрыть</button>
+        <button class="btn btn-secondary m-1" id="btn_save" type="submit">Сохранить</button><br>
+        <button class="btn btn-secondary m-1" id="btn_close">Закрыть</button>
     </form>
+</div>
+<div id="modal_show" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 20px; border: 1px solid #ddd;">
+    <input type="hidden" id="point-id_show" name="id">
+    <label for="author">Автор:</label>
+    <input class="form-control" type="text" id="author_show" name="author" disabled><br>
+    <label for="route_id">Маршрут:</label>
+    <input class="form-control" type="text" id="route_id_show" name="route_id" disabled><br>
+    <label for="grade_show">Категория:</label>
+    <input class="form-control" type="text" id="grade_show" name="grade_show" disabled><br>
+    <label for="color">Цвет:</label>
+    <input class="form-control" type="color" id="color_show" name="color" disabled required><br>
+    <input type="hidden" id="x-coordinate_show" name="x">
+    <input type="hidden" id="y-coordinate_show" name="y">
+    <input type="hidden" id="event_id" name="event_id">
+    <input type="hidden" id="owner_id" name="owner_id">
+    <button class="btn btn-secondary" id="btn_close_show">Закрыть</button>
 </div>
 
 <script>
@@ -74,8 +90,8 @@
         if (!e.target.classList.contains('point')) {
             isNewPoint = true;
             const rect = this.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = e.clientX - rect.left - 30;
+            const y = e.clientY - rect.top - 30;
 
             // Открываем модальное окно для ввода данных новой точки
             document.getElementById('point-id').value = '';
@@ -85,6 +101,7 @@
             document.getElementById('y-coordinate').value = y;
             document.getElementById('route_id').value = '';
             document.getElementById('modal').style.display = 'block';
+            document.getElementById('btn_save').style.display = 'block'
         }
     });
 
@@ -95,13 +112,16 @@
             const point = e.target.closest('.point');
             if (point) {
                 isNewPoint = false;
-                document.getElementById('point-id').value = point.dataset.id;
-                document.getElementById('author').value = point.dataset.author;
-                document.getElementById('color').value = point.style.backgroundColor;
-                document.getElementById('route_id').value = point.dataset.route_id;
-                document.getElementById('x-coordinate').value = parseInt(point.style.left);
-                document.getElementById('y-coordinate').value = parseInt(point.style.top);
-                document.getElementById('modal').style.display = 'block';
+                document.getElementById('point-id_show').value = point.dataset.id;
+                document.getElementById('author_show').value = point.dataset.author;
+                document.getElementById('color_show').value = point.style.backgroundColor;
+                document.getElementById('route_id_show').value = point.dataset.route_id;
+                document.getElementById('grade_show').value = point.dataset.grade;
+                document.getElementById('x-coordinate_show').value = parseInt(point.style.left);
+                document.getElementById('y-coordinate_show').value = parseInt(point.style.top);
+                document.getElementById('modal_show').style.display = 'block';
+                document.getElementById('btn_save').style.display = 'None'
+
             }
         }
     });
@@ -177,6 +197,13 @@
     if(btn_close){
         btn_close.addEventListener('click', function(event) {
             const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+        });
+    }
+    let btn_close_show = document.getElementById('btn_close_show')
+    if(btn_close_show){
+        btn_close_show.addEventListener('click', function(event) {
+            const modal = document.getElementById('modal_show');
             modal.style.display = 'none';
         });
     }
