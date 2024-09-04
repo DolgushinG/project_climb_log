@@ -79,17 +79,8 @@
         // Проходимся по каждому элементу <img> и добавляем класс 'img-fluid'
         images.forEach((img) => {
             img.classList.add('img-fluid');
-            img.classList.add('custom-img');
         });
     </script>
-    <style>
-        .custom-img {
-            max-width: 100%;
-            height: auto;
-            max-height: 500px; /* например, максимальная высота */
-            object-fit: contain; /* сохраняет пропорции и не обрезает изображение */
-        }
-    </style>
 
     <script type="text/javascript" src="{{ asset('js/like.js') }}"></script>
 @endsection
