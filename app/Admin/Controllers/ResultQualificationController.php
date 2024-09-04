@@ -496,6 +496,7 @@ class ResultQualificationController extends Controller
                 $model->amount_try_top = null;
                 $model->amount_zone = null;
                 $model->amount_try_zone = null;
+                $model->place = null;
                 $model->save();
 
                 $result->result_for_edit_france_system_qualification = null;
@@ -796,9 +797,39 @@ class ResultQualificationController extends Controller
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchExportResultFranceSystemQualification);
             $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
+
             foreach ($categories as $category) {
-                $tools->append(new BatchResultFranceSystemQualification($category));
-                $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category));
+                $script = <<<EOT
+                $(document).on("change", '[data-user-id-{$category->id}="user_id"]', function () {
+                    $('[data-route-id-{$category->id}=route_id]').select2('val', '');
+                    $('select[data-route-id-{$category->id}="route_id"]').next('.select2-container').find('.select2-selection__rendered').text('')
+                    $('[id=amount_try_top]').val('');
+                    $('[id=amount_try_zone]').val('');
+                });
+                // Подобный код для обновления попыток на основе выбранного участника и трассы
+                $(document).on("change", '[data-route-id-{$category->id}=route_id]', function () {
+                    var routeId = $(this).val(); // ID выбранного маршрута
+                    var userId = $('[data-user-id-{$category->id}="user_id"]').select2('val')
+                    var eventId = $('[id=event_id]').val(); // ID выбранного участника
+
+                    // Выполняем AJAX-запрос к эндпоинту для получения данных о попытках
+                    $.get("/admin/api/get_attempts", // URL эндпоинта
+                        {
+                            route_id: routeId,
+                            user_id: userId,
+                            event_id: eventId
+                        }, // Передаем ID маршрута и участника в запросе
+                        function (data) {
+                            // Обновляем поля с количеством попыток
+                            $('[id=amount_try_top]').val(data.amount_try_top);
+                            $('[id=amount_try_zone]').val(data.amount_try_zone);
+                        }
+                    );
+                });
+
+        EOT;
+                $tools->append(new BatchResultFranceSystemQualification($category, $script));
+                $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category, $script));
             }
             $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
             $is_enabled = Grades::where('event_id', $event->id)->first();
@@ -811,7 +842,7 @@ class ResultQualificationController extends Controller
         });
         $grid->actions(function ($actions) {
 //            $actions->disableEdit();
-            $actions->disableDelete();
+//            $actions->disableDelete();
 //            $actions->disableView();
         });
 
@@ -831,7 +862,9 @@ class ResultQualificationController extends Controller
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         $grid->column('user.sport_category', __('Разряд'));
-        $grid->column('user.birthday', __('Год рождения'));
+        $grid->column('user.birthday', __('Возраст'))->display(function ($birthday){
+            return Helpers::calculate_age($birthday);
+        });
         $grid->column('place', __('Место'))->sortable();
         $grid->column('amount_top', __('Кол-во топов'));
         $grid->column('amount_try_top', __('Кол-во попыток на топ'));

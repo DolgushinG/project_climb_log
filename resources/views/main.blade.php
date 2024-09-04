@@ -40,7 +40,7 @@
                     <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
                         <div class="icon-box" data-aos="fade-up" data-aos-delay="300">
                             <div class="icon"><i class="bx bx-tachometer"></i></div>
-                            <h4 class="title"><a href="#event-results">Возможность просмотра результата соревнований</a></h4>
+                            <h4 class="title"><a href="#event-results">Возможность посмотреть результата соревнований</a></h4>
                             <p class="description">Прошедших, предстоящих и текущих по всей России</p>
                         </div>
                     </div>

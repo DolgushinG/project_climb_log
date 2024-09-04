@@ -22,11 +22,13 @@ class BatchResultFranceSystemQualification extends CustomAction
 {
     public $category;
     public $name = 'Внести результат квалификации';
+    private string $script;
 
-    public function __construct(ParticipantCategory $category)
+    public function __construct(ParticipantCategory $category, string $script = 'значение_по_умолчанию')
     {
         $this->initInteractor();
         $this->category = $category;
+        $this->script = $script;
         $this->name = $this->name.' - '.$category->category;
     }
     protected $selector = '.send-add';
@@ -77,21 +79,18 @@ class BatchResultFranceSystemQualification extends CustomAction
                 'Попытки на зону' => intval($results['amount_try_zone_'.$i])
             );
         }
+        $participant = ResultFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
         $result = ResultRouteFranceSystemQualification::where('event_id', $results['event_id']
         )->where('user_id', $results['user_id'])->first();
-        $user = User::find(intval($results['user_id']))->middlename;
-        if($result){
-            return $this->response()->error('Результат уже есть по '.$user);
-        } else {
-            $participant = ResultFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+        if(!$result){
             $participant->active = 1;
-            $participant->result_for_edit_france_system_qualification = $result_for_edit;
-            $participant->save();
-
-            DB::table('result_route_france_system_qualification')->insert($data);
-            Event::refresh_france_system_qualification_counting($event);
-            return $this->response()->success('Результат успешно внесен')->refresh();
         }
+        $participant->result_for_edit_france_system_qualification = $result_for_edit;
+        $participant->save();
+
+        DB::table('result_route_france_system_qualification')->insert($data);
+        Event::refresh_france_system_qualification_counting($event);
+        return $this->response()->success('Результат успешно внесен')->refresh();
 
     }
 
@@ -176,7 +175,7 @@ class BatchResultFranceSystemQualification extends CustomAction
         });
 
         ");
-
+        \Encore\Admin\Facades\Admin::script($this->script);
     }
 
     public function html()

@@ -13,23 +13,25 @@ use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Admin\Extensions\CustomAction;
+use function Symfony\Component\String\s;
+
 class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
 {
     protected $selector = '.result-add-qualification-france-one-route';
 
     public $category;
+    private string $script;
 
-    public function __construct(ParticipantCategory $category)
+    public function __construct(ParticipantCategory $category, string $script = 'значение_по_умолчанию')
     {
         $this->initInteractor();
         $this->category = $category;
+        $this->script = $script;
     }
     public function handle(Request $request)
     {
         $results = $request->toArray();
         $event = Event::find($results['event_id']);
-        $data = array();
-        $result_for_edit = array();
         if(intval($results['amount_try_top']) > 0){
             $amount_top  = 1;
         } else {
@@ -59,45 +61,87 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
         }
         $gender = $participant->gender;
         $owner_id = \Encore\Admin\Facades\Admin::user()->id;
-        $data[] = array('owner_id' => $owner_id,
-            'user_id' => intval($results['user_id']),
-            'event_id' => intval($results['event_id']),
-            'route_id' => intval($results['route_id']),
-            'category_id' => $category_id,
-            'amount_top' => $amount_top,
-            'gender' => $gender,
-            'amount_try_top' => intval($results['amount_try_top']),
-            'amount_zone' => $amount_zone,
-            'amount_try_zone' => intval($results['amount_try_zone']),
-        );
-        $result_for_edit[] = array(
+
+        self::update_france_route_results($owner_id, $category_id, $results, $amount_top, $gender, $amount_zone);
+
+        Event::refresh_france_system_qualification_counting($event);
+        return $this->response()->success('Результат успешно внесен')->refresh();
+    }
+
+    public static function update_france_route_results($owner_id, $category_id, $results, $amount_top, $gender, $amount_zone)
+    {
+        $result_for_edit = [[
             'Номер маршрута' => intval($results['route_id']),
             'Попытки на топ' => intval($results['amount_try_top']),
             'Попытки на зону' => intval($results['amount_try_zone'])
-        );
+        ]];
         $route_id = intval($results['route_id']);
-        $user = User::find(intval($results['user_id']))->middlename;
-
-        $result = ResultRouteFranceSystemQualification::where('event_id', $results['event_id']
-        )->where('user_id', $results['user_id'])->where('route_id', $route_id)->first();
-        if($result){
-            return $this->response()->error('Результат уже есть по '.$user.' и трассе '.$route_id);
-        } else {
-            $existing_result_for_edit = $participant->result_for_edit_france_system_qualification ?? [];
-
-            // Объединяем старые и новые данные
-            $merged_result_for_edit = array_merge($existing_result_for_edit, $result_for_edit);
-            $participant = ResultFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
+        $amount_try_top = intval($results['amount_try_top']);
+        $amount_try_zone = intval($results['amount_try_zone']);
+        $user_id = $results['user_id'];
+        $event_id = $results['event_id'];
+        $participant = ResultFranceSystemQualification::where('event_id', $event_id)
+            ->where('user_id', $user_id)
+            ->first();
+        $result_route = ResultRouteFranceSystemQualification::where('event_id', $event_id)
+            ->where('user_id', $user_id)
+            ->where('route_id', $route_id)
+            ->first();
+        $result_all_route = ResultRouteFranceSystemQualification::where('event_id', $event_id)
+            ->where('user_id', $user_id)
+            ->first();
+        if(!$result_all_route){
             $participant->active = 1;
-            $participant->result_for_edit_france_system_qualification = $merged_result_for_edit;
             $participant->save();
-
-            DB::table('result_route_france_system_qualification')->insert($data);
-            Event::refresh_france_system_qualification_counting($event);
-            return $this->response()->success('Результат успешно внесен')->refresh();
+        }
+        $existing_result_for_edit = $participant->result_for_edit_france_system_qualification ?? [];
+        # Если уже есть результат надо обновить его как в grid - $participant - json for edit так и в $result по трассам
+        if($result_route){
+            $result_route->amount_top = $amount_top;
+            $result_route->amount_try_top = $amount_try_top;
+            $result_route->amount_zone = $amount_zone;
+            $result_route->amount_try_zone = $amount_try_zone;
+            $result_route->save();
+            foreach ($existing_result_for_edit as $index => $res){
+                if($res['Номер маршрута'] == $route_id){
+                    $existing_result_for_edit[$index]['Попытки на топ'] = $amount_try_top;
+                    $existing_result_for_edit[$index]['Попытки на зону'] = $amount_try_zone;
+                }
+            }
+            self::update_results_fsq($participant, $existing_result_for_edit);
+        } else {
+            # Создание результата трассы который еще не было
+            self::create_results_fsq($participant, $existing_result_for_edit, $result_for_edit);
+            $data = [['owner_id' => $owner_id,
+                'user_id' => $user_id,
+                'event_id' => $event_id,
+                'route_id' => $route_id,
+                'category_id' => $category_id,
+                'amount_top' => $amount_top,
+                'gender' => $gender,
+                'amount_try_top' => $amount_try_top,
+                'amount_zone' => $amount_zone,
+                'amount_try_zone' => $amount_try_zone,
+            ]];
+            self::update_results_rrfsq($data);
         }
     }
+    public static function update_results_rrfsq($data)
+    {
+        DB::table('result_route_france_system_qualification')->insert($data);
+    }
 
+    public static function create_results_fsq($participant, $results_old_for_edit, $result_for_edit)
+    {
+        $merged_result_for_edit = array_merge($results_old_for_edit, $result_for_edit);
+        $participant->result_for_edit_france_system_qualification = $merged_result_for_edit;
+        $participant->save();
+    }
+    public static function update_results_fsq($participant, $result_for_edit)
+    {
+        $participant->result_for_edit_france_system_qualification = $result_for_edit;
+        $participant->save();
+    }
     public function custom_form()
     {
         $this->modalSmall();
@@ -135,11 +179,11 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
             $routes[$i] = $i;
         }
 
-        $this->select('user_id', 'Участник')->options($result)->required();
-        $this->hidden('event_id', '')->value($event->id);
-        $this->select('route_id', 'Трасса')->options($routes)->required();
-        $this->integer('amount_try_top', 'Попытки на топ');
-        $this->integer('amount_try_zone', 'Попытки на зону');
+        $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-user-id-'.$this->category->id, 'user_id')->options($result)->required();
+        $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('id', 'event_id')->value($event->id);
+        $this->select('route_id', 'Трасса')->attribute('autocomplete', 'off')->attribute('data-route-id-'.$this->category->id, 'route_id')->options($routes)->required();
+        $this->integer('amount_try_top', 'Попытки на топ')->attribute('autocomplete', 'off');
+        $this->integer('amount_try_zone', 'Попытки на зону')->attribute('autocomplete', 'off');
         Admin::script("// Получаем все элементы с атрибутом modal
         const elementsWithModalAttributeFranceQualification = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfilloneroute\"]');
         const elementsWithIdAttributeFranceQualification = document.querySelectorAll('[id=\"app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfilloneroute\"]');
@@ -187,6 +231,7 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
         });
 
         ");
+        \Encore\Admin\Facades\Admin::script($this->script);
     }
 
     public function html()

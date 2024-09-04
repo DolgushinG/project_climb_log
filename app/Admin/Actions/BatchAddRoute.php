@@ -91,7 +91,7 @@ class BatchAddRoute extends Action
         $this->modalSmall();
         $owner_id = \Encore\Admin\Facades\Admin::user()->id;
         $event = Event::where('owner_id', '=', $owner_id)->where('active', 1)->first();
-        $route_place = $model = RoutesOutdoor::where('event_id', $event->id)->latest()->first();
+        $route_place = RoutesOutdoor::where('event_id', $event->id)->latest()->first();
         if($route_place){
             $this->select('place_routes.id', 'Сектор')->options(PlaceRoute::all()->pluck('name', 'id'))->value($route_place->place_route_id)->required();
         } else {
