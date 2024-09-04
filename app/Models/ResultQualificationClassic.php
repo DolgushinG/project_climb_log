@@ -355,20 +355,36 @@ class ResultQualificationClassic extends Model
         $users = User::query()
             ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
             ->where('result_qualification_classic.event_id', '=', $event_id)
-//            ->where('result_qualification_classic.active', '=', 1)
-            ->where('result_qualification_classic.'.$column_category_id, '=', $category_id)
+            ->where(function($query) {
+                $query->where(function($subQuery) {
+                    // Проверяем значение поля is_other_event в таблице
+                    $subQuery->where('result_qualification_classic.is_other_event', '=', 1)
+                        ->where(function($q) {
+                            $q->where('result_qualification_classic.active', '=', 1)
+                                ->orWhere('result_qualification_classic.active', '=', 0);
+                        });
+                })->orWhere(function($subQuery) {
+                    // Если is_other_event не равно 1, проверяем только active = 1
+                    $subQuery->where('result_qualification_classic.is_other_event', '!=', 1)
+                        ->where('result_qualification_classic.active', '=', 1);
+                });
+            })
+            ->where('result_qualification_classic.' . $column_category_id, '=', $category_id)
+            ->where('result_qualification_classic.gender', '=', $gender)
             ->select(
                 'users.id',
                 'users.city',
-                'result_qualification_classic.'.$column_place,
+                'result_qualification_classic.' . $column_place,
                 'users.middlename',
-                'result_qualification_classic.'.$column_points,
+                'result_qualification_classic.' . $column_points,
                 'result_qualification_classic.owner_id',
                 'result_qualification_classic.gender',
-                'result_qualification_classic.'.$column_category_id,
+                'result_qualification_classic.' . $column_category_id,
                 'result_qualification_classic.number_set_id',
             )
-            ->where('result_qualification_classic.gender', '=', $gender)->get()->sortBy($column_place)->toArray();
+            ->get()
+            ->sortBy($column_place)
+            ->toArray();
         $users_need_sorted = collect($users)->toArray();
         usort($users_need_sorted, function ($a, $b) {
             // Проверяем, если значение 'user_place' пустое, перемещаем его в конец

@@ -73,6 +73,11 @@ class Controller extends BaseController
     }
     public function indexBlog()
     {
-        return view('blog.index');
+        $posts = Posts::all();
+        if(count($posts) > 0){
+            return view('blog.index');
+        } else {
+            return view('error.404');
+        }
     }
 }

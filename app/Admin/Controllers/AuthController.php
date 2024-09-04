@@ -67,6 +67,7 @@ class AuthController extends BaseAuthController
         $form->text('address', trans('admin.address'));
         $form->text('phone', trans('admin.phone'));
         $form->text('city', trans('admin.city'));
+        $form->file('map', 'Карта скалодрома');
         $form->password('password', trans('admin.password'))->rules('confirmed|required');
         $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
             ->default(function ($form) {

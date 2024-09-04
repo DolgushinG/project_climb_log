@@ -86,6 +86,27 @@ class Helpers
         return $array;
     }
 
+    public static function calculate_age($birthdate_str) {
+        // Преобразуем строку в объект даты
+        $birthdate = new DateTime($birthdate_str);
+
+        // Текущая дата
+        $today = new DateTime('today');
+
+        // Вычисляем разницу в годах
+        $age = $today->diff($birthdate)->y;
+        return $age.' '.self::get_age_suffix($age);
+    }
+    public static function get_age_suffix($age) {
+        // Определяем правильное склонение
+        if ($age % 10 == 1 && $age % 100 != 11) {
+            return "год";
+        } elseif ($age % 10 >= 2 && $age % 10 <= 4 && ($age % 100 < 10 || $age % 100 >= 20)) {
+            return "года";
+        } else {
+            return "лет";
+        }
+    }
     public static function formating_string($string)
     {
         return preg_replace('/[^ \w-]/', '', $string);

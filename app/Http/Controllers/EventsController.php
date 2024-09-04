@@ -13,6 +13,7 @@ use App\Models\Event;
 use App\Models\Format;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
+use App\Models\Map;
 use App\Models\MessageForParticipant;
 use App\Models\OwnerPaymentOperations;
 use App\Models\Place;

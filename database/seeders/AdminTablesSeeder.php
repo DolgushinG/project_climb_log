@@ -351,6 +351,12 @@ class AdminTablesSeeder extends Seeder
                     "slug" => "points",
                     "http_method" => "",
                     "http_path" => "/points*"
+                ],
+                [
+                    "name" => "get_attempts",
+                    "slug" => "get_attempts",
+                    "http_method" => "",
+                    "http_path" => "/api/get_attempts*"
                 ]
             ]
         );

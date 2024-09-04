@@ -30,12 +30,29 @@ Route::group([
         $area = \App\Models\Area::find($area_id);
         return \App\Models\PlaceRoute::where('area_id', $area->id)->get(['id', DB::raw('name as text')]);
     });
+    $router->get('/api/get_attempts', function(Request $request) {
+        $routeId = $request->get('route_id');
+        $userId = $request->get('user_id');
+        $eventId = $request->get('event_id');
+        $result = \App\Models\ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
+        if($result){
+            $data = [
+                'amount_try_top' => $result->amount_try_top,
+                'amount_try_zone' => $result->amount_try_zone,
+            ];
+        } else {
+            $data = [];
+        }
+        return response()->json($data);
+    });
+    Route::get('attempt-data', 'YourController@getAttemptData');
     $router->get('/', 'HomeController@index')->name('home');
     Route::middleware(['owner'])->group(function ($router) {
         $router->resource('events', EventsController::class);
         $router->resource('/posts', PostsController::class);
         $router->get('events/clone/{id}', 'EventsController@cloneEvent')->name('cloneEvent');
         $router->resource('result-qualification', ResultQualificationController::class);
+        $router->resource('map', MapController::class);
         $router->resource('analytics', AnalyticsController::class);
         $router->resource('grades', GradesController::class);
         $router->resource('formats', FormatsController::class);
