@@ -34,17 +34,7 @@ Route::group([
         $routeId = $request->get('route_id');
         $userId = $request->get('user_id');
         $eventId = $request->get('event_id');
-        $stage_event = $request->get('stage_event');
-
-        if ($stage_event == 'france_qualification') {
-            $result = \App\Models\ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
-        }
-        if ($stage_event == 'semifinal') {
-            $result = \App\Models\ResultRouteSemiFinalStage::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
-        }
-        if ($stage_event ==  'final'){
-            $result = \App\Models\ResultRouteFinalStage::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
-        }
+        $result = \App\Models\ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
         if($result){
             $data = [
                 'amount_try_top' => $result->amount_try_top,

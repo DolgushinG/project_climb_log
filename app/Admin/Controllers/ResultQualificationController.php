@@ -815,15 +815,13 @@ class ResultQualificationController extends Controller
                     var routeId = $(this).val(); // ID выбранного маршрута
                     var userId = $('[data-user-id-{$category->id}="user_id"]').select2('val')
                     var eventId = $('[id=event_id]').val(); // ID выбранного участника
-                    let stage_event = $('[data-stage-id=stage_event]').val(); // ID выбранного участника
 
                     // Выполняем AJAX-запрос к эндпоинту для получения данных о попытках
                     $.get("/admin/api/get_attempts", // URL эндпоинта
                         {
                             route_id: routeId,
                             user_id: userId,
-                            event_id: eventId,
-                            stage_event: stage_event
+                            event_id: eventId
                         }, // Передаем ID маршрута и участника в запросе
                         function (data) {
                             // Обновляем поля с количеством попыток
