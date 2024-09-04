@@ -762,13 +762,6 @@ h6 {
   .btn-redpoint {
     font-size: 13px;
   }
-.container .img-post {
-    max-width: 100%;
-    height: auto;
-    object-fit: contain; /* Сохранение пропорций */
-    display: block;
-    margin: 0 auto;
-}
   .img-post-fluid {
       width: 100%!important;
   }
