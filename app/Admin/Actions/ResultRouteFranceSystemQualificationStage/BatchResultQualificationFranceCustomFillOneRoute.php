@@ -234,7 +234,6 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
             // Устанавливаем новое значение modal
             element.setAttribute('id', `\${idValueFranceQualification}-\${elementNumberFranceQualification}`);
         });
-
         ");
         \Encore\Admin\Facades\Admin::script($this->script);
     }

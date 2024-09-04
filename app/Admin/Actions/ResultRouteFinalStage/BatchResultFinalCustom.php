@@ -25,11 +25,13 @@ class BatchResultFinalCustom extends CustomAction
     protected $selector = '.result-add';
 
     public $category;
+    private mixed $script;
 
-    public function __construct(ParticipantCategory $category)
+    public function __construct(ParticipantCategory $category, $script)
     {
         $this->initInteractor();
         $this->category = $category;
+        $this->script = $script;
     }
     public function handle(Request $request)
     {
@@ -117,7 +119,7 @@ class BatchResultFinalCustom extends CustomAction
         $result_final = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $user_id => $middlename){
             if($event->is_france_system_qualification) {
-                $category_id = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->category_id;
+                $category_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->category_id;
             } else {
                 if($event->is_open_main_rating && $event->is_auto_categories){
                     $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first()->global_category_id;
@@ -185,7 +187,7 @@ class BatchResultFinalCustom extends CustomAction
             $this->integer('amount_try_top_'.$i, 'Попытки на топ');
             $this->integer('amount_try_zone_'.$i, 'Попытки на зону');
         }
-
+        \Encore\Admin\Facades\Admin::script($this->script);
     }
 
     public function html()

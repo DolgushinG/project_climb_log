@@ -797,14 +797,18 @@ class ResultQualificationController extends Controller
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchExportResultFranceSystemQualification);
             $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
-
-            foreach ($categories as $category) {
+            foreach ($categories as $index => $category) {
+                $index  = $index+1;
                 $script = <<<EOT
                 $(document).on("change", '[data-user-id-{$category->id}="user_id"]', function () {
                     $('[data-route-id-{$category->id}=route_id]').select2('val', '');
                     $('select[data-route-id-{$category->id}="route_id"]').next('.select2-container').find('.select2-selection__rendered').text('')
                     $('[id=amount_try_top]').val('');
                     $('[id=amount_try_zone]').val('');
+                });
+                let btn_close_modal{$category->id} = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
+                $(document).on("click", btn_close_modal{$category->id}, function () {
+                    window.location.reload();
                 });
                 // Подобный код для обновления попыток на основе выбранного участника и трассы
                 $(document).on("change", '[data-route-id-{$category->id}=route_id]', function () {

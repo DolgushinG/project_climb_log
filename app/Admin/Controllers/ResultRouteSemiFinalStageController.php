@@ -147,9 +147,22 @@ class ResultRouteSemiFinalStageController extends Controller
             $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
             if($event->is_sort_group_semifinal){
                 $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
-                foreach ($categories as $category){
-                    $tools->append(new BatchResultSemiFinalCustomFillOneRoute($category));
-                    $tools->append(new BatchResultSemiFinalCustom($category));
+                foreach ($categories as $index => $category){
+                    $index = $index + 1;
+                    $script_one_route = <<<EOT
+                    let btn_close_modal_one_route{$category->id} = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
+                    $(document).on("click", btn_close_modal_one_route{$category->id}, function () {
+                        window.location.reload();
+                    });
+                EOT;
+                    $script_custom = <<<EOT
+                        let btn_close_modal_custom{$category->id} = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustom-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
+                        $(document).on("click", btn_close_modal_custom{$category->id}, function () {
+                            window.location.reload();
+                        });
+                    EOT;
+                    $tools->append(new BatchResultSemiFinalCustomFillOneRoute($category, $script_one_route));
+                    $tools->append(new BatchResultSemiFinalCustom($category, $script_custom));
                 }
             } else {
                 $tools->append(new BatchResultSemiFinal);

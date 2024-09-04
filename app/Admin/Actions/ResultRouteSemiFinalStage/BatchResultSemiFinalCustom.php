@@ -23,11 +23,13 @@ class BatchResultSemiFinalCustom extends CustomAction
     protected $selector = '.result-add';
 
     public $category;
+    private mixed $script;
 
-    public function __construct(ParticipantCategory $category)
+    public function __construct(ParticipantCategory $category, string $script = '')
     {
         $this->initInteractor();
         $this->category = $category;
+        $this->script = $script;
     }
     public function handle(Request $request)
     {
@@ -179,6 +181,7 @@ class BatchResultSemiFinalCustom extends CustomAction
         });
 
         ");
+        \Encore\Admin\Facades\Admin::script($this->script);
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
