@@ -50,7 +50,7 @@ class Controller extends BaseController
         $amount_participant = [];
         $for_amount_events = Event::where('is_public', '=', 1)->get();
         $events = Event::where('is_public', '=', 1)
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('end_date', 'DESC')
             ->paginate(10);
         foreach ($for_amount_events as $event){
             if($event->is_france_system_qualification){
