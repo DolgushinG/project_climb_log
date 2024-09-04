@@ -186,6 +186,7 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
 
         $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-user-id-'.$this->category->id, 'user_id')->options($result)->required();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('id', 'event_id')->value($event->id);
+        $this->hidden('stage_event', '')->attribute('autocomplete', 'off')->attribute('data-stage-id', 'stage_event')->value('france_qualification');
         $this->select('route_id', 'Трасса')->attribute('autocomplete', 'off')->attribute('data-route-id-'.$this->category->id, 'route_id')->options($routes)->required();
         $this->integer('amount_try_top', 'Попытки на топ')->attribute('autocomplete', 'off');
         $this->integer('amount_try_zone', 'Попытки на зону')->attribute('autocomplete', 'off');
@@ -234,7 +235,6 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
             // Устанавливаем новое значение modal
             element.setAttribute('id', `\${idValueFranceQualification}-\${elementNumberFranceQualification}`);
         });
-
         ");
         \Encore\Admin\Facades\Admin::script($this->script);
     }

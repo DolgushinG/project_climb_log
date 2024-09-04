@@ -22,11 +22,13 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
     protected $selector = '.result-add-final-one-route';
 
     public $category;
+    private string $script;
 
-    public function __construct(ParticipantCategory $category)
+    public function __construct(ParticipantCategory $category, string $script = '')
     {
         $this->initInteractor();
         $this->category = $category;
+        $this->script = $script;
     }
     public function handle(Request $request)
     {
@@ -197,6 +199,7 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
         });
 
         ");
+//        \Encore\Admin\Facades\Admin::script($this->script);
     }
 
     public function html()
