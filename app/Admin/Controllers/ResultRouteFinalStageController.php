@@ -114,20 +114,20 @@ class ResultRouteFinalStageController extends Controller
                 $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
                 foreach ($categories as $index => $category){
                     $index = $index + 1;
-//                    $script_one_route = <<<EOT
-//                    let btn_close_modal_one_route{$category->id} = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-//                    $(document).on("click", btn_close_modal_one_route{$category->id}, function () {
-//                        window.location.reload();
-//                    });
-//                EOT;
-//                    $script_custom = <<<EOT
-//                        let btn_close_modal_custom{$category->id} = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustom-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-//                        $(document).on("click", btn_close_modal_custom{$category->id}, function () {
-//                            window.location.reload();
-//                        });
-//                    EOT;
-                    $tools->append(new BatchResultFinalCustomFillOneRoute($category, ''));
-                    $tools->append(new BatchResultFinalCustom($category, ''));
+                    $script_one_route = <<<EOT
+                    let btn_close_modal_one_route{$category->id} = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
+                    $(document).on("click", btn_close_modal_one_route{$category->id}, function () {
+                        window.location.reload();
+                    });
+                EOT;
+                    $script_custom = <<<EOT
+                        let btn_close_modal_custom{$category->id} = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustom-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
+                        $(document).on("click", btn_close_modal_custom{$category->id}, function () {
+                            window.location.reload();
+                        });
+                    EOT;
+                    $tools->append(new BatchResultFinalCustomFillOneRoute($category, $script_one_route));
+                    $tools->append(new BatchResultFinalCustom($category, $script_custom));
                 }
             } else {
                 $tools->append(new BatchResultFinal);
