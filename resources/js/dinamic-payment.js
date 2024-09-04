@@ -1,56 +1,72 @@
 document.addEventListener('DOMContentLoaded', function () {
     const priceElement = document.getElementById('price-value');
-    const current_amount_start_price = document.getElementById('price-value')
+    const currentAmountStartPrice = document.getElementById('price-value');
 
-    if(current_amount_start_price){
-        const att_current_amount_start_price = current_amount_start_price.getAttribute('data-current-amount-start-price');
-    } else {
-        att_current_amount_start_price = null
+    let basePrice = 0;
+    if (currentAmountStartPrice) {
+        const attCurrentAmountStartPrice = currentAmountStartPrice.getAttribute('data-current-amount-start-price');
+        basePrice = attCurrentAmountStartPrice ? parseFloat(attCurrentAmountStartPrice) : 0;
     }
+
+    let finalPrice = basePrice;
+
     const productsContainer = document.getElementById('products');
     const discountsContainer = document.getElementById('discounts');
     const helperContainer = document.getElementById('helper_amount');
 
-    let basePrice = parseFloat(att_current_amount_start_price);
-    let finalPrice = basePrice;
-    if(productsContainer && helperContainer && discountsContainer){
-        productsContainer.addEventListener('change', updateFinalPrice);
-        helperContainer.addEventListener('change', updateFinalPrice);
-        discountsContainer.addEventListener('change', updateFinalPrice);
-    } else {
-        return
+    if (productsContainer || helperContainer || discountsContainer) {
+        if (productsContainer) {
+            productsContainer.addEventListener('change', updateFinalPrice);
+        }
+        if (helperContainer) {
+            helperContainer.addEventListener('change', updateFinalPrice);
+        }
+        if (discountsContainer) {
+            discountsContainer.addEventListener('change', updateFinalPrice);
+        }
     }
-
 
     // Отображаем стартовую цену
     updatePrice(finalPrice);
 
     function updateFinalPrice() {
         finalPrice = basePrice;
-        // Применяем выбранную скидку
-        const selectedDiscount = parseFloat(discountsContainer.value)
-        const selectedHelperContainer = parseFloat(helperContainer.value)
-        // Применяем скидку к цене
-        if (selectedHelperContainer > 0) {
-            finalPrice = finalPrice - (finalPrice - parseInt(selectedHelperContainer));
-        }
-        if (selectedDiscount > 0) {
-            let t = finalPrice * (parseInt(selectedDiscount)/100);
-            finalPrice = finalPrice - t;
-        }
-        // Добавляем стоимость выбранных продуктов
-        const productCheckboxes = productsContainer.querySelectorAll('input[type="checkbox"]');
-        productCheckboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                finalPrice += parseFloat(checkbox.getAttribute('data-price'));
+
+        if (helperContainer) {
+            const selectedHelperValue = parseFloat(helperContainer.value);
+            if (!isNaN(selectedHelperValue) && selectedHelperValue > 0) {
+                finalPrice -= (finalPrice - selectedHelperValue);
             }
-        });
+        }
+
+        if (discountsContainer) {
+            const selectedDiscountValue = parseFloat(discountsContainer.value);
+            if (!isNaN(selectedDiscountValue) && selectedDiscountValue > 0) {
+                finalPrice -= finalPrice * (selectedDiscountValue / 100);
+            }
+        }
+
+        if (productsContainer) {
+            const productCheckboxes = productsContainer.querySelectorAll('input[type="checkbox"]');
+            productCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const productPrice = parseFloat(checkbox.getAttribute('data-price'));
+                    if (!isNaN(productPrice)) {
+                        finalPrice += productPrice;
+                    }
+                }
+            });
+        }
+
         updatePrice(finalPrice);
     }
-    updateFinalPrice()
+
     function updatePrice(price) {
-        if(priceElement){
-            priceElement.textContent = price;
+        if (priceElement) {
+            priceElement.textContent = price.toFixed(2);  // Округление до двух знаков после запятой
         }
     }
+
+    // Вызываем обновление цены при загрузке
+    updateFinalPrice();
 });
