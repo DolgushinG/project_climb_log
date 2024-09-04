@@ -154,7 +154,12 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
         }
         $result = $merged_users->pluck( 'middlename','id');
         $result_final = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
-        $amount_routes = Grades::where('event_id', $event->id)->first()->count_routes;
+        $amount_routes = Grades::where('event_id', $event->id)->first();
+        if($amount_routes){
+            $amount_routes = $amount_routes->count_routes;
+        } else {
+            $amount_routes = 0;
+        }
         foreach ($result as $user_id => $middlename){
             $category_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->category_id;
             $category = ParticipantCategory::find($category_id)->category;
