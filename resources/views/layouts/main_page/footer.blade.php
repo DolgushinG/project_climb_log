@@ -26,7 +26,7 @@
                     <ul>
                         <li><i class="bx bx-chevron-right"></i><a href="#management">Cоздание и управление соревнованиями</a></li>
                         <li><i class="bx bx-chevron-right"></i><a href="#login">Удобная регистрация для участников</a></li>
-                        <li><i class="bx bx-chevron-right"></i><a href="#event-results">Просмотра результата соревнований</a></li>
+                        <li><i class="bx bx-chevron-right"></i><a href="#event-results">Просмотр результата соревнований</a></li>
                         <li><i class="bx bx-chevron-right"></i><a href="#rating">Рейтинг по всей России</a></li>
                     </ul>
                 </div>
@@ -49,7 +49,7 @@
 
     <div class="container py-4">
         <div class="copyright">
-            &copy; Copyright <strong><span>Dolgushin G.V</span></span></strong>. All Rights Reserved
+            &copy; Copyright <strong><span>Dolgushin G.V</span></strong>. All Rights Reserved
         </div>
     </div>
 </footer><!-- End Footer -->
