@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Set extends Model
 {
+    protected $casts = [
+        'allow_years' => 'json',
+    ];
     public static function getParticipantSets($event_id)
     {
         $sets =  Set::where('event_id', $event_id)->pluck('number_set', 'id')->toArray();

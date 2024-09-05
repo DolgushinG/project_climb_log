@@ -13,7 +13,6 @@ use App\Models\Event;
 use App\Models\Format;
 use App\Models\Grades;
 use App\Models\ListOfPendingParticipant;
-use App\Models\Map;
 use App\Models\MessageForParticipant;
 use App\Models\OwnerPaymentOperations;
 use App\Models\Place;
@@ -499,6 +498,17 @@ class EventsController extends Controller
         if($event->is_input_set != 1){
             $number_set = $request->number_set;
             $set = Set::where('number_set', $number_set)->where('event_id', $event->id)->first();
+            if($event->is_input_birthday && count($set->allow_years ?? []) > 0){
+                if($request->birthday && !$user->birthday){
+                    $birthday = $request->birthday;
+                } else {
+                    $birthday = $user->birthday;
+                }
+                $is_valid = Helpers::is_valid_year_for_event($event->id, $number_set, $birthday);
+                if(!$is_valid){
+                    return response()->json(['success' => false, 'message' => 'Извините, ваш возраст не подходит для участия в этом событии.'], 422);
+                }
+            }
             $participant->number_set_id = $set->id;
         }
         if($event->is_auto_categories){
@@ -542,10 +552,22 @@ class EventsController extends Controller
 
     public function changeSet(Request $request) {
         $event = Event::where('id', '=', $request->event_id)->where('is_public', 1)->first();
+        $user = User::find($request->user_id);
         if(!$event || !$event->is_registration_state){
             return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
         }
         $set = Set::where('event_id',$event->id)->where('number_set', $request->number_set)->first();
+
+        if($event->is_input_birthday && count($set->allow_years ?? []) > 0){
+            $number_set = $request->number_set;
+            if(!$user->birthday){
+                return response()->json(['success' => false, 'message' => 'Похоже у вас не указан возраст'], 422);
+            }
+            $is_valid = Helpers::is_valid_year_for_event($event->id, $number_set, $user->birthday);
+            if(!$is_valid){
+                return response()->json(['success' => false, 'message' => 'Извините, ваш возраст не подходит для участия в этом событии.'], 422);
+            }
+        }
         if($event->is_france_system_qualification){
             $participant = ResultFranceSystemQualification::where('user_id',  $request->user_id)->where('event_id', $request->event_id)->first();
             $participants_event = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
