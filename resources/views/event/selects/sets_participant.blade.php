@@ -16,7 +16,7 @@
                         {{$set->time}} (Ваш сет)
                     </option>
                 @else
-                    @if(Auth::user()->birthday && App\Helpers\Helpers::is_valid_year_for_event($event->id, $set->number_set, Auth::user()->birthday))
+                    @if(App\Helpers\Helpers::is_valid_year_for_event($event->id, $set->number_set, Auth::user()->birthday))
                         @if($set->free > 0)
                             <option data-set="" data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
                                 @lang('somewords.'.$set->day_of_week)
