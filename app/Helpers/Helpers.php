@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Models\Event;
 use App\Models\ParticipantCategory;
+use App\Models\Set;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class Helpers
 {
+
 
     public static function clear_cache(Event $event)
     {
@@ -64,6 +66,23 @@ class Helpers
             // if not, return white color.
             return '#FFFFFF';
         }
+    }
+
+    public static function is_valid_year_for_event($event_id, $number_set, $in_year)
+    {
+        $set = Set::where('event_id', $event_id)->where('number_set', $number_set)->first();
+        $event = Event::find($event_id);
+        if($set && $event->is_input_birthday){
+            $allow_years = $set->allow_years;
+            $birthYear = (int)date('Y', strtotime($in_year));
+            // Проверяем, есть ли год в массиве
+            if($allow_years && $birthYear){
+                return in_array($birthYear, $allow_years);
+            } else {
+                return true;
+            }
+        }
+        return true;
     }
 
     public static function valid_email($email)

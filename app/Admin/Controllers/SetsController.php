@@ -6,6 +6,7 @@ use App\Admin\Actions\BatchDisableSets;
 use App\Models\Event;
 use App\Models\Set;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Form;
@@ -17,6 +18,7 @@ use Encore\Admin\Show;
 class SetsController extends Controller
 {
     use HasResourceActions;
+
 
     const DAYS = [
         'Monday' => 'Понедельник',
@@ -122,18 +124,45 @@ class SetsController extends Controller
 //            $filter->disableIdFilter();
 //            $filter->in('day_of_week', 'День слота')->checkbox(self::DAYS);
 //        });
-        $grid->quickCreate(function (Grid\Tools\QuickCreate $create) {
+
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+        $grid->quickCreate(function (Grid\Tools\QuickCreate $create) use ($event) {
             $admin_id = \Encore\Admin\Facades\Admin::user()->id;
             $event_id = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first()->id;
             $create->integer('event_id', $admin_id)->default($event_id)->style('display', 'None');
             $create->integer('owner_id', $admin_id)->default($admin_id)->style('display', 'None');
             $create->text('time', 'Время слота')->placeholder('например 10:00 - 12:00');
+            if($event) {
+                if ($event->is_input_birthday) {
+                    $create->multipleSelect('allow_years', 'Возраста для регистрации')->options(User::ages);
+                }
+            }
             $create->integer('max_participants', 'Максимальное число участников')->placeholder('введите число');
             $create->select('day_of_week', 'День слота')->options(self::DAYS);
             $create->integer('number_set', 'Номер сета')->placeholder('введите номер сета');;
         });
         $grid->column('time', 'Время слота')->editable();
         $grid->column('max_participants', 'Макс. число участников')->editable();
+
+        if($event){
+            if($event->is_input_birthday){
+                $grid->column('allow_years', 'Возраста для сета')->multipleSelect(User::ages);
+                Admin::script(<<<EOT
+                $(document).ready(function() {
+                    $('.ie-trigger-column-allow_years').each(function() {
+                        // Если внутри span нет текста, делаем иконку видимой
+                        if ($(this).find('.ie-display').text().trim() === '') {
+                            $(this).find('i.fa-edit').css('visibility', 'visible');
+                        }
+                    });
+                });
+        EOT
+                );
+            }
+        }
+
+
+
         $grid->column('day_of_week', 'День слота')->help('Дни недели зависят от даты старта соревнований')->select(self::DAYS)->sortable();
         $grid->column('number_set', 'Номер сета')->editable();
 
@@ -153,6 +182,7 @@ class SetsController extends Controller
         $show->id('ID');
         $show->owner_id('owner_id');
         $show->time('time');
+        $show->allow_years('allow_years');
         $show->max_participants('max_participants');
         $show->day_of_week('day_of_week');
         $show->number_set('number_set');
@@ -175,6 +205,7 @@ class SetsController extends Controller
         $form->text('event_id', 'event_id');
         $form->text('owner_id', 'owner_id');
         $form->text('time', 'time');
+        $form->multipleSelect('allow_years', 'allow_years');
         $form->text('max_participants', 'max_participants');
         $form->text('day_of_week', 'day_of_week');
         $form->text('number_set', 'number_set');
