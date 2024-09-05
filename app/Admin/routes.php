@@ -30,7 +30,7 @@ Route::group([
         $area = \App\Models\Area::find($area_id);
         return \App\Models\PlaceRoute::where('area_id', $area->id)->get(['id', DB::raw('name as text')]);
     });
-    $router->get('/api/get_attempts', function(Request $request) {
+    $router->middleware(['throttle:get_attempts'])->get('/api/get_attempts', function(Request $request) {
         $routeId = $request->get('route_id');
         $userId = $request->get('user_id');
         $eventId = $request->get('event_id');
@@ -45,7 +45,6 @@ Route::group([
         }
         return response()->json($data);
     });
-    Route::get('attempt-data', 'YourController@getAttemptData');
     $router->get('/', 'HomeController@index')->name('home');
     Route::middleware(['owner'])->group(function ($router) {
         $router->resource('events', EventsController::class);

@@ -801,14 +801,32 @@ class ResultQualificationController extends Controller
                 $index  = $index+1;
                 $script = <<<EOT
                 $(document).on("change", '[data-user-id-{$category->id}="user_id"]', function () {
-                    $('[data-route-id-{$category->id}=route_id]').select2('val', '');
-                    $('select[data-route-id-{$category->id}="route_id"]').next('.select2-container').find('.select2-selection__rendered').text('')
                     $('[id=amount_try_top]').val('');
                     $('[id=amount_try_zone]').val('');
                 });
                 let btn_close_modal{$category->id} = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
                 $(document).on("click", btn_close_modal{$category->id}, function () {
                     window.location.reload();
+                });
+                $(document).on("change", '[data-user-id-{$category->id}=user_id]', function () {
+                    var routeId = $('[data-route-id-{$category->id}=route_id]').val(); // ID выбранного маршрута
+                    var userId = $('[data-user-id-{$category->id}="user_id"]').select2('val')
+                    var eventId = $('[id=event_id]').val(); // ID выбранного участника
+                    if(routeId){
+                        $.get("/admin/api/get_attempts", // URL эндпоинта
+                            {
+                                route_id: routeId,
+                                user_id: userId,
+                                event_id: eventId
+                            }, // Передаем ID маршрута и участника в запросе
+                            function (data) {
+                                // Обновляем поля с количеством попыток
+                                $('[id=amount_try_top]').val(data.amount_try_top);
+                                $('[id=amount_try_zone]').val(data.amount_try_zone);
+                            }
+                        );
+                    }
+
                 });
                 // Подобный код для обновления попыток на основе выбранного участника и трассы
                 $(document).on("change", '[data-route-id-{$category->id}=route_id]', function () {
