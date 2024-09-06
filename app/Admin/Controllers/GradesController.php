@@ -203,6 +203,15 @@ class GradesController extends Controller
         if($request->name == 'route_id'){
             $route_pk->route_id = $request->value;
             $route_pk->save();
+            if (!$event->is_france_system_qualification && $request->value) {
+                $participants = ResultQualificationClassic::where('event_id', $event->id)->where('active', 0)->where('is_other_event', 0)->get();
+                if($participants){
+                    foreach ($participants as $participant){
+                        $participant->result_for_edit = ResultQualificationClassic::generate_empty_json_result($event->id);
+                        $participant->save();
+                    }
+                }
+            }
         }
         if($request->name == 'value'){
             $route_pk->value = $request->value;
@@ -215,15 +224,23 @@ class GradesController extends Controller
             $route->save();
         }
         if($request->input('grade')){
+            $route->grade = $request->grade;
+            $route->save();
             if (!$event->is_france_system_qualification && $route->grade) {
-                $results = ResultQualificationClassic::where('event_id', $event->id)->first();
+                $results = ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->first();
+                $participants = ResultQualificationClassic::where('event_id', $event->id)->where('active', 0)->where('is_other_event', 0)->get();
                 if($results){
                     # Обновляем категорию трассы у всех участников которые добавили свои результаты
                     UpdateGradeInResultAllParticipant::dispatch($event->id, $route, $request->grade);
                 }
+                # Обновляем номер трасс у всех участников у которых подефолту пустота
+                if($participants){
+                    foreach ($participants as $participant){
+                        $participant->result_for_edit = ResultQualificationClassic::generate_empty_json_result($event->id);
+                        $participant->save();
+                    }
+                }
             }
-            $route->grade = $request->grade;
-            $route->save();
         }
         if($request->count_routes){
             $grade = Grades::where('event_id', $request->event_id)->first();
