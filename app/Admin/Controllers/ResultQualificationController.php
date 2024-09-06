@@ -12,6 +12,7 @@ use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportProto
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportResultFranceSystemQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultFranceSystemQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRoute;
+use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRouteAndOneCategory;
 use App\Exports\ExportCardParticipantFranceSystem;
 use App\Exports\ExportCardParticipantFestival;
 use App\Exports\ExportListParticipant;
@@ -859,6 +860,70 @@ class ResultQualificationController extends Controller
                 $tools->append(new BatchResultFranceSystemQualification($category, $script));
                 $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category, $script));
             }
+            $script = <<<EOT
+                $(document).on("change", '[data-category-id="user_id"]', function () {
+                    $('[id=amount_try_top]').val('');
+                    $('[data-user-id=user_id]').val('');
+                    $('[id=amount_try_zone]').val('');
+                    $.get("/admin/api/get_users_category",
+                            {categoryId: $(this).val(), eventId: $('[data-category-event-id=event_id]').val()},
+                            function (data) {
+                                var model = $('[data-category-user-id=user_id]');
+                                model.empty();
+                                model.append("<option>Выбрать</option>");
+                                $.each(data, function (index, element) {
+                                    model.append("<option data-category-user-id='" + index + "' value='" + index + "'>" + element + "</option>");
+                                });
+                            }
+                    );
+                });
+                let btn_close_modal_category = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfillonerouteandonecategory"] [data-dismiss="modal"][class="btn btn-default"]'
+                $(document).on("click", btn_close_modal_category, function () {
+                    window.location.reload();
+                });
+                $(document).on("change", '[data-category-user-id=user_id]', function () {
+                    var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
+                    var userId = $('[data-category-user-id="user_id"]').select2('val')
+                    var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
+                    if(routeId){
+                        $.get("/admin/api/get_attempts", // URL эндпоинта
+                            {
+                                route_id: routeId,
+                                user_id: userId,
+                                event_id: eventId
+                            }, // Передаем ID маршрута и участника в запросе
+                            function (data) {
+                                // Обновляем поля с количеством попыток
+                                $('[id=amount_try_top]').val(data.amount_try_top);
+                                $('[id=amount_try_zone]').val(data.amount_try_zone);
+                            }
+                        );
+                    }
+
+                });
+                // Подобный код для обновления попыток на основе выбранного участника и трассы
+                $(document).on("change", '[data-category-route-id=route_id]', function () {
+                    var routeId = $(this).val(); // ID выбранного маршрута
+                    var userId = $('[data-category-user-id="user_id"]').select2('val')
+                    var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
+
+                    // Выполняем AJAX-запрос к эндпоинту для получения данных о попытках
+                    $.get("/admin/api/get_attempts", // URL эндпоинта
+                        {
+                            route_id: routeId,
+                            user_id: userId,
+                            event_id: eventId
+                        }, // Передаем ID маршрута и участника в запросе
+                        function (data) {
+                            // Обновляем поля с количеством попыток
+                            $('[id=amount_try_top]').val(data.amount_try_top);
+                            $('[id=amount_try_zone]').val(data.amount_try_zone);
+                        }
+                    );
+                });
+
+        EOT;
+            $tools->append(new BatchResultQualificationFranceCustomFillOneRouteAndOneCategory($script));
             $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
             $is_enabled = Grades::where('event_id', $event->id)->first();
             if ($is_enabled && Admin::user()->username == "Tester2") {
