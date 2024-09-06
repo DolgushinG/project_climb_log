@@ -12,7 +12,6 @@ use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportProto
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportResultFranceSystemQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultFranceSystemQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRoute;
-use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRouteAndOneCategory;
 use App\Exports\ExportCardParticipantFranceSystem;
 use App\Exports\ExportCardParticipantFestival;
 use App\Exports\ExportListParticipant;
@@ -509,13 +508,7 @@ class ResultQualificationController extends Controller
             $result = ResultQualificationClassic::find($id);
             $result_route = ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
             if ($result_route) {
-                ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
-                $participant = ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
-                $participant->result_for_edit = ResultQualificationClassic::generate_empty_json_result($result->event_id);
-                $participant->active = 0;
-                $participant->points = null;
-                $participant->user_place = null;
-                $participant->save();
+                return Helpers::custom_response("Нельзя удалить юзера с результатами");
             } else {
                 ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
             }
@@ -860,70 +853,6 @@ class ResultQualificationController extends Controller
                 $tools->append(new BatchResultFranceSystemQualification($category, $script));
                 $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category, $script));
             }
-            $script = <<<EOT
-                $(document).on("change", '[data-category-id="user_id"]', function () {
-                    $('[id=amount_try_top]').val('');
-                    $('[data-user-id=user_id]').val('');
-                    $('[id=amount_try_zone]').val('');
-                    $.get("/admin/api/get_users_category",
-                            {categoryId: $(this).val(), eventId: $('[data-category-event-id=event_id]').val()},
-                            function (data) {
-                                var model = $('[data-category-user-id=user_id]');
-                                model.empty();
-                                model.append("<option>Выбрать</option>");
-                                $.each(data, function (index, element) {
-                                    model.append("<option data-category-user-id='" + index + "' value='" + index + "'>" + element + "</option>");
-                                });
-                            }
-                    );
-                });
-                let btn_close_modal_category = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfillonerouteandonecategory"] [data-dismiss="modal"][class="btn btn-default"]'
-                $(document).on("click", btn_close_modal_category, function () {
-                    window.location.reload();
-                });
-                $(document).on("change", '[data-category-user-id=user_id]', function () {
-                    var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
-                    var userId = $('[data-category-user-id="user_id"]').select2('val')
-                    var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
-                    if(routeId){
-                        $.get("/admin/api/get_attempts", // URL эндпоинта
-                            {
-                                route_id: routeId,
-                                user_id: userId,
-                                event_id: eventId
-                            }, // Передаем ID маршрута и участника в запросе
-                            function (data) {
-                                // Обновляем поля с количеством попыток
-                                $('[id=amount_try_top]').val(data.amount_try_top);
-                                $('[id=amount_try_zone]').val(data.amount_try_zone);
-                            }
-                        );
-                    }
-
-                });
-                // Подобный код для обновления попыток на основе выбранного участника и трассы
-                $(document).on("change", '[data-category-route-id=route_id]', function () {
-                    var routeId = $(this).val(); // ID выбранного маршрута
-                    var userId = $('[data-category-user-id="user_id"]').select2('val')
-                    var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
-
-                    // Выполняем AJAX-запрос к эндпоинту для получения данных о попытках
-                    $.get("/admin/api/get_attempts", // URL эндпоинта
-                        {
-                            route_id: routeId,
-                            user_id: userId,
-                            event_id: eventId
-                        }, // Передаем ID маршрута и участника в запросе
-                        function (data) {
-                            // Обновляем поля с количеством попыток
-                            $('[id=amount_try_top]').val(data.amount_try_top);
-                            $('[id=amount_try_zone]').val(data.amount_try_zone);
-                        }
-                    );
-                });
-
-        EOT;
-            $tools->append(new BatchResultQualificationFranceCustomFillOneRouteAndOneCategory($script));
             $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
             $is_enabled = Grades::where('event_id', $event->id)->first();
             if ($is_enabled && Admin::user()->username == "Tester2") {
@@ -1084,15 +1013,10 @@ class ResultQualificationController extends Controller
                 $footer->disableCreatingCheck();
             });
             $form->hidden('gender', 'gender');
-            $form->table('result_for_edit', 'Таблица результата', function ($table) use ($event) {
+            $form->table('result_for_edit', 'Таблица результата', function ($table) {
                 $table->text('route_id', 'Номер маршрут')->readonly();
                 $table->text('grade', 'Категория')->readonly();
-                if($event->is_zone_show){
-                    $attempts = [1 => 'FLASH', 2 => 'REDPOINT', 3 => 'ZONE', 0 => 'Не пролез'];
-                } else {
-                    $attempts = [1 => 'FLASH', 2 => 'REDPOINT', 0 => 'Не пролез'];
-                }
-                $table->select('attempt', 'Результат')->attribute('inputmode', 'none')->options($attempts)->width('50px');
+                $table->select('attempt', 'Результат')->attribute('inputmode', 'none')->options([1 => 'FLASH', 2 => 'REDPOINT', 3 => 'ZONE', 0 => 'Не пролез'])->width('50px');
             });
         }
         $form->saving(function (Form $form) use ($type, $id) {
@@ -1100,8 +1024,6 @@ class ResultQualificationController extends Controller
                 $event = Event::find($form->model()->find($id)->event_id);
                 $user_id = $form->model()->find($id)->user_id;
                 $event_id = $form->model()->find($id)->event_id;
-                $owner_id = $form->model()->find($id)->owner_id;
-                $gender = $form->model()->find($id)->gender;
                 if (intval($form->input('category_id')) > 0) {
                     $result = $form->model()->find($id);
                     $result->category_id = $form->input('category_id');
@@ -1121,24 +1043,8 @@ class ResultQualificationController extends Controller
                     $routes = $form->result_for_edit;
                     foreach ($routes as $route) {
                         $result = ResultRouteQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
-                        if($result){
-                            $result->attempt = $route['attempt'];
-                        } else {
-                            $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', $user_id)->first();
-                            $participant->active = 1;
-                            $participant->save();
-
-                            $result = new ResultRouteQualificationClassic;
-                            $result->attempt = $route['attempt'];
-                            $result->route_id = $route['route_id'];
-                            $result->grade = $route['grade'];
-                            $result->gender = $gender;
-                            $result->event_id = $event_id;
-                            $result->owner_id = $owner_id;
-                            $result->user_id = $user_id;
-                        }
+                        $result->attempt = $route['attempt'];
                         $result->save();
-
                     }
                     $amount_users = ResultQualificationClassic::where('event_id', '=', $event_id)->where('active', '=', 1)->count();
                     Event::force_update_category_id($event, $user_id);

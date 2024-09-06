@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\ResultFranceSystemQualification;
-use App\Models\User;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
@@ -31,19 +29,6 @@ Route::group([
         $area_id = $request->get('option');
         $area = \App\Models\Area::find($area_id);
         return \App\Models\PlaceRoute::where('area_id', $area->id)->get(['id', DB::raw('name as text')]);
-    });
-
-    $router->middleware(['throttle:get_users_category'])->get('/api/get_users_category', function(Request $request) {
-        $categoryId = $request->get('categoryId');
-        $eventId = $request->get('eventId');
-        $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->where('category_id', $categoryId)->pluck('user_id')->toArray();
-        $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
-        if($result){
-            $data = $result;
-        } else {
-            $data = [];
-        }
-        return response()->json($data);
     });
     $router->middleware(['throttle:get_attempts'])->get('/api/get_attempts', function(Request $request) {
         $routeId = $request->get('route_id');
