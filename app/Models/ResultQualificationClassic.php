@@ -189,6 +189,16 @@ class ResultQualificationClassic extends Model
         return -1; // Если не найдено
     }
 
+    public static function generate_empty_json_result($event_id)
+    {
+        $result = [];
+        $routes = Route::where('event_id', $event_id)->get();
+        foreach ($routes as $route){
+            $result[] = array('grade' => $route->grade, 'route_id' => $route->route_id, 'attempt'=> 0);
+        }
+        return $result;
+    }
+
     public static function get_place_participant_in_semifinal($event_id, $user_id){
         return ResultSemiFinalStage::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
     }
