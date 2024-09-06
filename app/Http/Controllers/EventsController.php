@@ -525,6 +525,9 @@ class EventsController extends Controller
         }
         $participant->user_id = $request->user_id;
         $participant->owner_id = $event->owner_id;
+        if(!$event->type_event && !$event->is_france_system_qualification){
+            $participant->result_for_edit = ResultQualificationClassic::generate_empty_json_result($event->id);
+        }
         $participant->active = 0;
         $participant->save();
         if($user){
