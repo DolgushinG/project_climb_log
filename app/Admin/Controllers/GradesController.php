@@ -20,6 +20,7 @@ use App\Models\Place;
 use App\Models\PlaceRoute;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultQualificationClassic;
+use App\Models\ResultRouteQualificationClassic;
 use App\Models\Route;
 use App\Models\RoutesOutdoor;
 use Encore\Admin\Controllers\HasResourceActions;
@@ -433,7 +434,12 @@ SCRIPT);
             $grid->column('grade', 'Категория трассы');
             $grid->column('value', 'Ценность трассы');
         } else {
-            $grid->column('route_id', 'Номер трассы')->editable();
+            $results = ResultRouteQualificationClassic::where('event_id', $event->id)->first();
+            if($results){
+                $grid->column('route_id', 'Номер трассы');
+            } else {
+                $grid->column('route_id', 'Номер трассы')->editable();
+            }
             $grid->column('color', __('Цвет трассы'))->select(Grades::colors());
             $grid->column('color_view', __('Цвет в представлении'))->display(function ($color) {
                 return "<div style='width: 50px; height: 20px; background-color: {$color}; border: 1px solid #ddd;'></div>";

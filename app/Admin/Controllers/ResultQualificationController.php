@@ -508,7 +508,13 @@ class ResultQualificationController extends Controller
             $result = ResultQualificationClassic::find($id);
             $result_route = ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
             if ($result_route) {
-                return Helpers::custom_response("Нельзя удалить юзера с результатами");
+                ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+                $participant = ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+                $participant->result_for_edit = ResultQualificationClassic::generate_empty_json_result($result->event_id);
+                $participant->active = 0;
+                $participant->points = null;
+                $participant->user_place = null;
+                $participant->save();
             } else {
                 ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
             }
@@ -1013,10 +1019,15 @@ class ResultQualificationController extends Controller
                 $footer->disableCreatingCheck();
             });
             $form->hidden('gender', 'gender');
-            $form->table('result_for_edit', 'Таблица результата', function ($table) {
+            $form->table('result_for_edit', 'Таблица результата', function ($table) use ($event) {
                 $table->text('route_id', 'Номер маршрут')->readonly();
                 $table->text('grade', 'Категория')->readonly();
-                $table->select('attempt', 'Результат')->attribute('inputmode', 'none')->options([1 => 'FLASH', 2 => 'REDPOINT', 3 => 'ZONE', 0 => 'Не пролез'])->width('50px');
+                if($event->is_zone_show){
+                    $attempts = [1 => 'FLASH', 2 => 'REDPOINT', 3 => 'ZONE', 0 => 'Не пролез'];
+                } else {
+                    $attempts = [1 => 'FLASH', 2 => 'REDPOINT', 0 => 'Не пролез'];
+                }
+                $table->select('attempt', 'Результат')->attribute('inputmode', 'none')->options($attempts)->width('50px');
             });
         }
         $form->saving(function (Form $form) use ($type, $id) {
@@ -1024,6 +1035,8 @@ class ResultQualificationController extends Controller
                 $event = Event::find($form->model()->find($id)->event_id);
                 $user_id = $form->model()->find($id)->user_id;
                 $event_id = $form->model()->find($id)->event_id;
+                $owner_id = $form->model()->find($id)->owner_id;
+                $gender = $form->model()->find($id)->gender;
                 if (intval($form->input('category_id')) > 0) {
                     $result = $form->model()->find($id);
                     $result->category_id = $form->input('category_id');
@@ -1043,8 +1056,24 @@ class ResultQualificationController extends Controller
                     $routes = $form->result_for_edit;
                     foreach ($routes as $route) {
                         $result = ResultRouteQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
-                        $result->attempt = $route['attempt'];
+                        if($result){
+                            $result->attempt = $route['attempt'];
+                        } else {
+                            $participant = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', $user_id)->first();
+                            $participant->active = 1;
+                            $participant->save();
+
+                            $result = new ResultRouteQualificationClassic;
+                            $result->attempt = $route['attempt'];
+                            $result->route_id = $route['route_id'];
+                            $result->grade = $route['grade'];
+                            $result->gender = $gender;
+                            $result->event_id = $event_id;
+                            $result->owner_id = $owner_id;
+                            $result->user_id = $user_id;
+                        }
                         $result->save();
+
                     }
                     $amount_users = ResultQualificationClassic::where('event_id', '=', $event_id)->where('active', '=', 1)->count();
                     Event::force_update_category_id($event, $user_id);
