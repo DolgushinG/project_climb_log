@@ -39,6 +39,9 @@ class User extends Authenticatable
     ];
     const sport_categories = array(
         "б/р",
+        "1 юн.р.",
+        "2 юн.р.",
+        "3 юн.р.",
         "III разряд",
         "II разряд",
         "I разряд",
