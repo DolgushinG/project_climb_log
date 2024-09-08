@@ -408,6 +408,102 @@ class ResultQualificationClassic extends Model
         });
         return collect($users_need_sorted);
     }
+    public static function get_sorted_sex_participant($event_id, $gender)
+    {
+        $column_place = 'user_place';
+        $column_points = 'points';
+        $users = User::query()
+            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+            ->where('result_qualification_classic.event_id', '=', $event_id)
+            ->where(function($query) {
+                $query->where(function($subQuery) {
+                    // Проверяем значение поля is_other_event в таблице
+                    $subQuery->where('result_qualification_classic.is_other_event', '=', 1)
+                        ->where(function($q) {
+                            $q->where('result_qualification_classic.active', '=', 1)
+                                ->orWhere('result_qualification_classic.active', '=', 0);
+                        });
+                })->orWhere(function($subQuery) {
+                    // Если is_other_event не равно 1, проверяем только active = 1
+                    $subQuery->where('result_qualification_classic.is_other_event', '!=', 1)
+                        ->where('result_qualification_classic.active', '=', 1);
+                });
+            })
+            ->where('result_qualification_classic.gender', '=', $gender)
+            ->select(
+                'users.id',
+                'users.city',
+                'result_qualification_classic.' . $column_place,
+                'users.middlename',
+                'result_qualification_classic.' . $column_points,
+                'result_qualification_classic.owner_id',
+                'result_qualification_classic.gender',
+                'result_qualification_classic.number_set_id',
+            )
+            ->get()
+            ->sortBy($column_place)
+            ->toArray();
+        $users_need_sorted = collect($users)->toArray();
+        usort($users_need_sorted, function ($a, $b) {
+            // Проверяем, если значение 'user_place' пустое, перемещаем его в конец
+            if (empty($a['user_place'])) {
+                return 1; // $a должно быть после $b
+            } elseif (empty($b['user_place'])) {
+                return -1; // $a должно быть перед $b
+            } else {
+                return $a['user_place'] <=> $b['user_place'];
+            }
+        });
+        return collect($users_need_sorted);
+    }
+    public static function get_global_sorted_sex_participant($event_id, $gender)
+    {
+        $column_place = 'global_user_place';
+        $column_points = 'global_points';
+        $users = User::query()
+            ->leftJoin('result_qualification_classic', 'users.id', '=', 'result_qualification_classic.user_id')
+            ->where('result_qualification_classic.event_id', '=', $event_id)
+            ->where(function($query) {
+                $query->where(function($subQuery) {
+                    // Проверяем значение поля is_other_event в таблице
+                    $subQuery->where('result_qualification_classic.is_other_event', '=', 1)
+                        ->where(function($q) {
+                            $q->where('result_qualification_classic.active', '=', 1)
+                                ->orWhere('result_qualification_classic.active', '=', 0);
+                        });
+                })->orWhere(function($subQuery) {
+                    // Если is_other_event не равно 1, проверяем только active = 1
+                    $subQuery->where('result_qualification_classic.is_other_event', '!=', 1)
+                        ->where('result_qualification_classic.active', '=', 1);
+                });
+            })
+            ->where('result_qualification_classic.gender', '=', $gender)
+            ->select(
+                'users.id',
+                'users.city',
+                'result_qualification_classic.' . $column_place,
+                'users.middlename',
+                'result_qualification_classic.' . $column_points,
+                'result_qualification_classic.owner_id',
+                'result_qualification_classic.gender',
+                'result_qualification_classic.number_set_id',
+            )
+            ->get()
+            ->sortBy($column_place)
+            ->toArray();
+        $users_need_sorted = collect($users)->toArray();
+        usort($users_need_sorted, function ($a, $b) {
+            // Проверяем, если значение 'user_place' пустое, перемещаем его в конец
+            if (empty($a['global_user_place'])) {
+                return 1; // $a должно быть после $b
+            } elseif (empty($b['global_user_place'])) {
+                return -1; // $a должно быть перед $b
+            } else {
+                return $a['global_user_place'] <=> $b['global_user_place'];
+            }
+        });
+        return collect($users_need_sorted);
+    }
     public static function get_global_sorted_group_participant($event_id, $gender, $category_id)
     {
         $event = Event::find($event_id);

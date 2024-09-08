@@ -46,16 +46,17 @@ class BatchGenerateParticipant extends Action
         if($event->is_auto_categories){
             Generators::prepare_participant_with_owner($owner_id, $event->id, $count, $table_result, $start_number_participant->id);
         } else {
-
             $part_category = ParticipantCategory::where('event_id', $event->id)->get();
             $amount_categories = count($event->categories);
             $parts = intval($count / $amount_categories);
             $next = $parts;
             $start = $start_number_participant->id;
+
             foreach($part_category as $category){
                 Generators::prepare_participant_with_owner($owner_id, $event->id, $next, $table_result, $start, $category->category);
                 $next = $next+$parts;
-                $start = $start+$parts+1;
+                $start = $start+$parts;
+
             }
         }
 
