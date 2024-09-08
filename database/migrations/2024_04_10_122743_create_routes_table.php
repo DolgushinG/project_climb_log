@@ -22,6 +22,8 @@ class CreateRoutesTable extends Migration
             $table->string('zone')->nullable();
             $table->string('value')->nullable();
             $table->string('flash_value')->nullable();
+            $table->string('color')->default("not_set_color");
+            $table->string('color_view')->default("not_set_color");
             $table->timestamps();
         });
     }
