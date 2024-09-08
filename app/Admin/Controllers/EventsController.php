@@ -247,15 +247,21 @@ class EventsController extends Controller
         } else {
             $grid->column('owner_id', 'Owner')->editable();
         }
-        $grid->actions(function ($actions) {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        $grid->actions(function ($actions) use ($event) {
             $actions->disableView();
-            $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
+            
             $actions->append(new ActionExportList($actions->getKey(), 'Список участников'));
             $actions->append(new ActionCloneEvent($actions->getKey(), 'Клонировать'));
-            $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника'));
-            $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника'));
+            $grades = Grades::where('event_id', $event->id)->first();
+            if($grades){
+                $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
+                $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника'));
+                $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника'));
+            }
+           
         });
-        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        
         if($event){
             $grid->tools(function (Grid\Tools $tools) use ($event) {
                 $tools->append(new BatchNotificationOfParticipant);

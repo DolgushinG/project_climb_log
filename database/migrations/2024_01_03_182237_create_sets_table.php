@@ -18,6 +18,7 @@ class CreateSetsTable extends Migration
             $table->integer('owner_id');
             $table->integer('event_id')->nullable();
             $table->string('time');
+            $table->json('allow_years')->nullable();
             $table->integer('max_participants');
             $table->string('day_of_week');
             $table->integer('number_set');
