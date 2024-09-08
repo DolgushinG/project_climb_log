@@ -231,7 +231,7 @@
                                 @endforeach
                                 </tbody>
                             </table>
-                            @if($event->is_access_user_edit_result && $event->is_send_result_state)
+                            @if($event->is_send_result_state)
                                 <div id="mobile-fixed" class="btn-container-desktop-fixed">
                                     <button type="button" id="btn-send-result" data-owner-id="{{$event->owner_id}}"
                                             data-id="{{$event->id}}" data-user-id="{{Auth()->user()->id}}"
