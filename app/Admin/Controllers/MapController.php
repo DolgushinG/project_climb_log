@@ -110,7 +110,8 @@ class MapController extends Controller
     protected function grid()
     {
         $points = Point::all();
-        $event = Event::where('owner_id', '=', 2)->where('active', 1)->first();
+        $owner_id = Admin::user()->id;
+        $event = Event::where('owner_id', '=', $owner_id)->where('active', 1)->first();
         $points_exist = Point::where('event_id', $event->id)->pluck('route_id')->toArray();
         $routes = Route::where('event_id', $event->id)->get();
         $scheme_climbing_gym = '/storage/'.Admin::user()->map;
