@@ -249,27 +249,44 @@ class EventsController extends Controller
                 $result_male = array();
                 $result_female = array();
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
-                foreach ($categories as $category) {
+                if($event->is_sort_group_final){
+                    foreach ($categories as $category) {
+                        if($stats->male + $stats->female > 100){
+                            $result_male_cache = Cache::remember('result_male_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
+                                return ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                            });
+                            $result_female_cache = Cache::remember('result_female_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
+                                return ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                            });
+                        } else {
+                            $result_male_cache = ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                            $result_female_cache =  ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        }
+                        $result_male[] = $result_male_cache;
+                        $result_female[] = $result_female_cache;
+//                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+//                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
+                        $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
+                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                    }
+                } else {
                     if($stats->male + $stats->female > 100){
-                        $result_male_cache = Cache::remember('result_male_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
-                            return ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                        $result_male_cache = Cache::remember('result_male_cache_event_id_'.$event->id, 60 * 60, function () use ($event) {
+                            return ResultQualificationClassic::get_sorted_sex_participant($event->id, 'male')->toArray();
                         });
-                        $result_female_cache = Cache::remember('result_female_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
-                            return ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        $result_female_cache = Cache::remember('result_female_cache_event_id_'.$event->id, 60 * 60, function () use ($event) {
+                            return ResultQualificationClassic::get_sorted_sex_participant($event->id, 'female')->toArray();
                         });
                     } else {
-                        $result_male_cache = ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-                        $result_female_cache =  ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        $result_male_cache = ResultQualificationClassic::get_sorted_sex_participant($event->id, 'male')->toArray();
+                        $result_female_cache =  ResultQualificationClassic::get_sorted_sex_participant($event->id, 'female')->toArray();
                     }
                     $result_male[] = $result_male_cache;
                     $result_female[] = $result_female_cache;
-//                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-//                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
-                    $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
-                    $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
-                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
-                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
                 }
+
                 if($event->is_open_team_result){
                     foreach ($teams as $team){
                         $result_team_cache = ResultQualificationClassic::get_list_team_and_points_participant($event->id, $team);
@@ -337,28 +354,33 @@ class EventsController extends Controller
                 $result_male = array();
                 $result_female = array();
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
-                foreach ($categories as $category) {
-                    if($stats->male + $stats->female > 100){
+                if($event->is_sort_group_final){
+                    foreach ($categories as $category) {
                         $result_male_cache = Cache::rememberForever('global_result_male_cache_'.$category->category.'_event_id_'.$event->id, function () use ($event, $category) {
                             return ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'male', $category->id)->toArray();
                         });
                         $result_female_cache = Cache::rememberForever('global_result_female_cache_'.$category->category.'_event_id_'.$event->id, function () use ($event, $category) {
                             return ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                         });
-                    } else {
-                        $result_male_cache = ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-                        $result_female_cache =  ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        $result_male[] = $result_male_cache;
+                        $result_female[] = $result_female_cache;
+                        $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
+                        $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
+
+                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
+                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
                     }
+                } else {
+                    $result_male_cache = Cache::rememberForever('global_result_male_cache_event_id_'.$event->id, function () use ($event) {
+                        return ResultQualificationClassic::get_global_sorted_sex_participant($event->id, 'male')->toArray();
+                    });
+                    $result_female_cache = Cache::rememberForever('global_result_female_cache_event_id_'.$event->id, function () use ($event) {
+                        return ResultQualificationClassic::get_global_sorted_sex_participant($event->id, 'female')->toArray();
+                    });
                     $result_male[] = $result_male_cache;
                     $result_female[] = $result_female_cache;
-//                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-//                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
-                    $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
-                    $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
-
-                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
-                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
                 }
+
                 if($event->is_open_team_result){
                     foreach ($teams as $team){
                         $result_team_cache = ResultQualificationClassic::get_global_list_team_and_points_participant($event->id, $team);
