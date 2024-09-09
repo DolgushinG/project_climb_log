@@ -105,8 +105,21 @@ class Helpers
         return $array;
     }
 
+    public static function get_year($year)
+    {
+        if(!$year){
+            return '';
+        }
+        $data_time_year = new DateTime($year);
+        return $data_time_year->format('Y');
+
+
+    }
     public static function calculate_age($birthdate_str) {
         // Преобразуем строку в объект даты
+        if(!$birthdate_str){
+            return '';
+        }
         $birthdate = new DateTime($birthdate_str);
 
         // Текущая дата

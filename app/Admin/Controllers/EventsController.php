@@ -257,8 +257,8 @@ class EventsController extends Controller
                 $grades = Grades::where('event_id', $event->id)->first();
                 if($grades){
                     $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
-                    $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника'));
-                    $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника'));
+                    $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника (ФЕСТ)'));
+                    $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника (ТОП БОНУС)'));
                 }
 
             });

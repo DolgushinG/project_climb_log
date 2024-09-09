@@ -79,6 +79,7 @@ Route::group([
         $router->get('exports/events/card-france-system/participant/{id}', 'ResultQualificationController@cardParticipantFranceSystemExcel')->name('cardParticipantFranceSystemExcel');
         $router->get('exports/events/card-festival/participant/{id}', 'ResultQualificationController@cardParticipantFestivalExcel')->name('cardParticipantFestivalExcel');
         $router->get('exports/events/list/participant/{id}', 'ResultQualificationController@listParticipantExcel')->name('listParticipantExcel');
+        $router->get('exports/start-protocol/events/{event_id}/participant/{category_id}', 'ResultQualificationController@startProtocolParticipantExcel')->name('startProtocolParticipantExcel');
         $router->get('exports/events/{event_id}/final/participants', 'ResultRouteFinalStageController@finalParticipantExcel')->name('finalParticipantExcel');
         $router->get('exports/events/{event_id}/semifinal/participants', 'ResultRouteSemiFinalStageController@semifinalParticipantExcel')->name('semifinalParticipantExcel');
         $router->get('exports/events/{event_id}/{stage}/{set_id}/{gender}/{category_id}', 'ResultQualificationController@protocolRouteExcel')->name('protocolRouteExcel');
