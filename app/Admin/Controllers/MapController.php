@@ -56,7 +56,7 @@ class MapController extends Controller
         // Добавляем или изменяем данные
         $data['created_at'] = now(); // Добавляем текущую дату и время
         $data['updated_at'] = now(); // Добавляем текущую дату и время
-        $event = Event::where('owner_id', '=', 2)->where('active', 1)->first();
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $route = Route::where('event_id', $event->id)->where('route_id', $data['route_id'])->first();
         // Вы можете добавить дополнительные данные
         // Например, если вам нужно установить ID пользователя:
