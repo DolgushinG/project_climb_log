@@ -10,6 +10,7 @@ use App\Admin\Actions\BatchMergeResult;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportProtocolRouteParticipantsQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportResultFranceSystemQualification;
+use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportStartProtocolParticipantsQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultFranceSystemQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRoute;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRouteAndOneCategory;
@@ -17,6 +18,7 @@ use App\Exports\ExportCardParticipantFranceSystem;
 use App\Exports\ExportCardParticipantFestival;
 use App\Exports\ExportListParticipant;
 use App\Exports\ExportProtocolRouteParticipant;
+use App\Exports\ExportStartProtocolParticipant;
 use App\Exports\FranceSystemQualificationResultExport;
 use App\Exports\QualificationResultExport;
 use App\Helpers\Helpers;
@@ -559,6 +561,7 @@ class ResultQualificationController extends Controller
         $grid->disableColumnSelector();
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchResultQualification);
+            $tools->append(new BatchExportStartProtocolParticipantsQualification);
             if (!$event->is_registration_state && !$event->is_france_system_qualification) {
                 $tools->append(new BatchMergeResult);
             }
@@ -803,6 +806,7 @@ class ResultQualificationController extends Controller
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchExportResultFranceSystemQualification);
+            $tools->append(new BatchExportStartProtocolParticipantsQualification);
             $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
             foreach ($categories as $index => $category) {
                 $index  = $index+1;
@@ -932,6 +936,7 @@ class ResultQualificationController extends Controller
             $tools->append(new BatchForceRecoutingResultQualificationFranceGender);
             $tools->append(new BatchForceRecoutingResultQualificationFranceGroup);
             $tools->append(new BatchExportProtocolRouteParticipantsQualification);
+
         });
         $grid->actions(function ($actions) {
 //            $actions->disableEdit();
@@ -1309,6 +1314,15 @@ class ResultQualificationController extends Controller
     {
         $file_name = 'Полный список участников.xlsx';
         $result = Excel::download(new ExportListParticipant($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
+    }
+
+    public function startProtocolParticipantExcel(Request $request)
+    {
+        $file_name = 'Стартовый протокол участников.xlsx';
+        $result = Excel::download(new ExportStartProtocolParticipant($request->event_id, $request->category_id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);
