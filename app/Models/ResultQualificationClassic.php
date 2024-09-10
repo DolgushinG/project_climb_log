@@ -82,21 +82,17 @@ class ResultQualificationClassic extends Model
         return $this->belongsTo(User::class);
     }
 
+
+
     public static function number_sets($event_id)
     {
         return Set::where('event_id', $event_id)->pluck('number_set', 'id')->toArray();
     }
     public static function counting_final_place($event_id, $result_final, $type='final'){
-//        dd($result_final);
         // Сортировка по amount_top в убывающем порядке, затем по amount_try_top в возрастающем порядке,
         // затем по amount_zone в убывающем порядке, затем по amount_try_zone в возрастающем порядке
-        usort($result_final, function ($a, $b) {
-            return $b['amount_top'] <=> $a['amount_top']
-                ?: $b['amount_zone'] <=> $a['amount_zone']
-                ?: $a['amount_try_top'] <=> $b['amount_try_top']
-                ?: $a['amount_try_zone'] <=> $b['amount_try_zone'];
-        });
-
+        $event = Event::find($event_id);
+        $result_final = Event::get_type_counting_france_system($result_final, $event->type_counting_france_system);
         // Группировка по ключам amount_top, amount_try_top, amount_zone, amount_try_zone
         $grouped_results = [];
         foreach ($result_final as $item) {

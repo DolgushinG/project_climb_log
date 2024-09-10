@@ -45,7 +45,7 @@ class UpdateSetsParticipants extends Command
     {
         $events = Event::where('is_input_set', 0)->where('active', 1)->where('is_registration_state', 1)->where('is_public', 1)->get();
         foreach ($events as $event){
-            $list = ListOfPendingParticipant::where('event_id', '=', $event->id)->get();
+            $list = ListOfPendingParticipant::where('event_id', '=', $event->id)->orderBy('created_at', 'asc')->get();
             foreach ($list as $job){
                 $number_set = $this->get_free_set($event, $job->number_sets);
                 if($number_set){

@@ -22,6 +22,7 @@ use App\Exports\ExportStartProtocolParticipant;
 use App\Exports\FranceSystemQualificationResultExport;
 use App\Exports\QualificationResultExport;
 use App\Helpers\Helpers;
+use App\Jobs\UpdateGradeInResultAllParticipant;
 use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
 use App\Models\Grades;
@@ -431,7 +432,7 @@ class ResultQualificationController extends Controller
      */
     public function update($id, Request $request)
     {
-
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $type = 'edit';
         if ($request->category_id) {
             $type = 'update';
@@ -459,7 +460,25 @@ class ResultQualificationController extends Controller
         }
         if ($request->gender) {
             $type = 'update';
-            return $this->form($type, $id)->update($id);
+            if (!$event->is_france_system_qualification) {
+                $result = ResultQualificationClassic::find($id);
+                if($result){
+                    $res = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $result->user_id)->get();
+                    foreach ($res as $result_route_qualification){
+                        $result_route_qualification->gender = $request->gender;
+                        $result_route_qualification->save();
+                    }
+                }
+            } else {
+                $result = ResultFranceSystemQualification::find($id);
+                if($result){
+                    $res = ResultRouteFranceSystemQualification::where('event_id', $event->id)->where('user_id', $result->user_id)->get();
+                    foreach ($res as $result_route_qualification){
+                        $result_route_qualification->gender = $request->gender;
+                        $result_route_qualification->save();
+                    }
+                }
+            }
         }
         return $this->form($type, $id)->update($id);
     }
@@ -965,8 +984,8 @@ class ResultQualificationController extends Controller
         });
         $grid->column('place', __('Место'))->sortable();
         $grid->column('amount_top', __('Кол-во топов'));
-        $grid->column('amount_try_top', __('Кол-во попыток на топ'));
         $grid->column('amount_zone', __('Кол-во зон'));
+        $grid->column('amount_try_top', __('Кол-во попыток на топ'));
         $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
         $states = [
             'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
@@ -1123,6 +1142,7 @@ class ResultQualificationController extends Controller
                     $result->save();
                 }
                 if ($form->result_for_edit) {
+
                     $routes = $form->result_for_edit;
                     foreach ($routes as $route) {
                         $result = ResultRouteQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
@@ -1167,10 +1187,10 @@ class ResultQualificationController extends Controller
                         } else {
                             $amount_zone = 0;
                         }
-                        $result->amount_try_top = $route['Попытки на топ'];
+                        $result->amount_try_top = intval($route['Попытки на топ']);
                         $result->amount_top = $amount_top;
                         $result->amount_zone = $amount_zone;
-                        $result->amount_try_zone = $route['Попытки на зону'];
+                        $result->amount_try_zone = intval($route['Попытки на зону']);
                         $result->save();
                     }
                     Event::refresh_france_system_qualification_counting($event);

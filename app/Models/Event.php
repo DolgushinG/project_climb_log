@@ -18,7 +18,8 @@ class Event extends Model
 
     const DEFAULT_SEMIFINAL_PARTICIPANT = 20;
     const DEFAULT_FINAL_PARTICIPANT = 6;
-
+    const INTER = 0;
+    const LOCAL = 1;
     const COST_FOR_EACH_PARTICIPANT = 1;
 
     protected $casts = [
@@ -733,7 +734,7 @@ class Event extends Model
             }
             $result->event_id = $users_sorted[$index]['event_id'];
             $result->user_id = $users_sorted[$index]['user_id'];
-            $result->gender = trans_choice('somewords.' . $users_sorted[$index]['gender'], 10);
+//            $result->gender = trans_choice('somewords.' . $users_sorted[$index]['gender'], 10);
             $result->owner_id = $users_sorted[$index]['owner_id'];
             $result->amount_top = $users_sorted[$index]['amount_top'];
             $result->amount_zone = $users_sorted[$index]['amount_zone'];
@@ -1081,5 +1082,27 @@ class Event extends Model
             $participant->save();
         }
 
+    }
+
+    public static function get_type_counting_france_system(array $results, int $type)
+    {
+        switch ($type) {
+            case self::INTER:
+               usort($results, function ($a, $b) {
+                    return $b['amount_top'] <=> $a['amount_top']
+                        ?: $b['amount_zone'] <=> $a['amount_zone']
+                            ?: $a['amount_try_top'] <=> $b['amount_try_top']
+                                ?: $a['amount_try_zone'] <=> $b['amount_try_zone'];
+                });
+                break;
+            case self::LOCAL:
+                usort($results, function ($a, $b) {
+                    return $b['amount_top'] <=> $a['amount_top']
+                        ?: $a['amount_try_top'] <=> $b['amount_try_top']
+                            ?: $b['amount_zone'] <=> $a['amount_zone']
+                                ?: $a['amount_try_zone'] <=> $b['amount_try_zone'];
+                });
+        }
+        return $results;
     }
 }

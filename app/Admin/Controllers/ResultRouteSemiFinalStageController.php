@@ -12,6 +12,7 @@ use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustom;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustomFillOneRoute;
 use App\Exports\SemiFinalProtocolCardsExport;
 use App\Exports\SemiFinalResultExport;
+use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
@@ -294,10 +295,11 @@ class ResultRouteSemiFinalStageController extends Controller
                     } else {
                         $amount_zone = 0;
                     }
-                    $result->amount_try_top = $route['Попытки на топ'];
+
+                    $result->amount_try_top = intval($route['Попытки на топ']);
                     $result->amount_top = $amount_top;
                     $result->amount_zone = $amount_zone;
-                    $result->amount_try_zone = $route['Попытки на зону'];
+                    $result->amount_try_zone = intval($route['Попытки на зону']);
                     $result->save();
                 }
               Event::refresh_final_points_all_participant_in_semifinal($event_id);
