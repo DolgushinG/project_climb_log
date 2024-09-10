@@ -88,21 +88,62 @@ class ResultQualificationClassic extends Model
     {
         return Set::where('event_id', $event_id)->pluck('number_set', 'id')->toArray();
     }
-    public static function counting_final_place($event_id, $result_final){
+    public static function getRankFromOtherRound($userId, $event, $type) {
+        // Определяем модель для получения результатов в зависимости от флага и этапа
+
+        if($event->is_open_main_rating){
+            $column_place_q = 'global_user_place';
+            $column_place_f = 'global_place';
+        } else {
+            $column_place_q = 'user_place';
+            $column_place_f = 'place';
+        }
+
+        if ($type == 'final') {
+            if ($event->is_semifinal) {
+                $otherRoundResults = ResultSemiFinalStage::where('event_id', $event->id)->pluck('place', 'user_id')->all();
+            } else {
+                $otherRoundResults = $event->is_france_system_qualification
+                    ? ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->pluck($column_place_f, 'user_id')->all()
+                    : ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->pluck($column_place_q, 'user_id')->all();
+            }
+        } elseif ($type == 'semifinal') {
+
+            $otherRoundResults = $event->is_france_system_qualification
+                ? ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->pluck($column_place_f, 'user_id')->all()
+                : ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->pluck($column_place_q, 'user_id')->all();
+        } else {
+            // Если это не финал и не полуфинал, используем текущий этап без изменений
+            return null;
+        }
+
+        // Возвращаем место (ранг) из другого раунда, если оно существует
+        return $otherRoundResults[$userId] ?? null;
+    }
+
+    public static function counting_final_place($event_id, $result_final, $type){
         // Сортировка по amount_top в убывающем порядке, затем по amount_try_top в возрастающем порядке,
         // затем по amount_zone в убывающем порядке, затем по amount_try_zone в возрастающем порядке
         $event = Event::find($event_id);
         $results = Event::get_type_counting_france_system($result_final, $event->type_counting_france_system);
         // Присваивание рангов
         // НОВАЯ РЕАЛИЗАЦИЯ НУЖЕН ТЕСТ
+        // Присваивание рангов с учетом результатов других этапов
         $rank = 1;
         foreach ($results as $index => &$item) {
             if ($index > 0 && (
-                    $item['result']['amount_top'] !== $results[$index - 1]['result']['amount_top'] ||
-                    $item['result']['amount_zone'] !== $results[$index - 1]['result']['amount_zone'] ||
-                    $item['result']['amount_try_top'] !== $results[$index - 1]['result']['amount_try_top'] ||
-                    $item['result']['amount_try_zone'] !== $results[$index - 1]['result']['amount_try_zone']
+                    $item['amount_top'] === $results[$index - 1]['amount_top'] &&
+                    $item['amount_zone'] === $results[$index - 1]['amount_zone'] &&
+                    $item['amount_try_top'] === $results[$index - 1]['amount_try_top'] &&
+                    $item['amount_try_zone'] === $results[$index - 1]['amount_try_zone']
                 )) {
+                // Сравниваем с результатами из другого раунда
+                $rankFromOtherRound = self::getRankFromOtherRound($item['user_id'], $event, $type);
+                $previousRankFromOtherRound = self::getRankFromOtherRound($results[$index - 1]['user_id'], $event, $type);
+                if ($rankFromOtherRound && $previousRankFromOtherRound && $rankFromOtherRound !== $previousRankFromOtherRound) {
+                    $rank = $rankFromOtherRound < $previousRankFromOtherRound ? $index : $index + 1;
+                }
+            } else {
                 $rank = $index + 1;
             }
             $item['place'] = $rank;
@@ -230,13 +271,20 @@ class ResultQualificationClassic extends Model
         return ResultFranceSystemQualification::where('user_id','=', $user_id)->where('event_id', '=', $event_id)->first()->place;
     }
 
-    public static function update_places_in_qualification_classic($event, $participants)
+    public static function update_places_in_qualification_classic($participants)
     {
-        $event_id = $event->id;
-        foreach ($participants as $index => $participant){
-            $participant_result = ResultQualificationClassic::where('event_id', '=', $event_id)->where('user_id', '=', $participant->user_id)->first();
-            $participant_result->user_place = $index+1;
-            $participant_result->save();
+        // Присваиваем места с учетом одинаковых баллов
+        $currentPlace = 1;
+        foreach ($participants as $index => $result) {
+            if ($index > 0 && $result->points == $participants[$index - 1]->points) {
+                // Если баллы одинаковые, присваиваем одинаковое место
+                $result->user_place = $currentPlace;
+            } else {
+                // Если баллы разные, присваиваем новое место
+                $currentPlace = $index + 1;
+                $result->user_place = $currentPlace;
+            }
+            $result->save();
         }
     }
     public static function has_bill($event, $user_id)
