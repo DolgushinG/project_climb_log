@@ -349,15 +349,15 @@ class Event extends Model
                         ->where('category_id', $category->id)
                         ->where('event_id', $event_id)
                         ->where('gender', $gender)
-                        ->orderBy('points', 'DESC')
+                        ->orderByDesc('points')
                         ->get();
-                    ResultQualificationClassic::update_places_in_qualification_classic($event, $participants_for_update);
+                    ResultQualificationClassic::update_places_in_qualification_classic($participants_for_update);
                 }
             }
         } else {
             foreach (['female', 'male'] as $gender){
-                $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('gender', $gender)->orderBy('points', 'DESC')->get();
-                ResultQualificationClassic::update_places_in_qualification_classic($event, $participants_for_update);
+                $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('gender', $gender)->orderByDesc('points')->get();
+                ResultQualificationClassic::update_places_in_qualification_classic($participants_for_update);
             }
         }
     }
@@ -701,7 +701,7 @@ class Event extends Model
             }
         }
 
-        $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result);
+        $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result, $type);
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user) {
