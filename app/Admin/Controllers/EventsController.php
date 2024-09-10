@@ -418,6 +418,15 @@ class EventsController extends Controller
                 })->default(0);
             $form->summernote('info_payment', 'Доп инфа об оплате')->placeholder('Инфа...');
         })->tab('Параметры соревнования', function ($form) use ($id) {
+            $form->html('<h4 style="color: black" >Результаты участников после каждого раунда определяются по
+                следующим критериям:<br>
+                1. число пройденных трасс;<br>
+                2. число достигнутых зон;<br>
+                3. число попыток на пройденных трассах;<br>
+                4. число попыток для достижения зон.</h4>');
+            $form->radio('type_counting_france_system','Настройка критерий для подсчета по французской системе')
+                ->options([0 => '1-2-3-4', 1 => '1-3-2-4'])
+                ->required();
             $form->radio('is_france_system_qualification','Настройка подсчета квалификации')
                 ->options([
                     0 =>'Фестивальная система(Баллы и коэффициенты)',

@@ -204,7 +204,9 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
 
     public function html()
     {
-       return "<a class='result-add-final-one-route btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category} по одной трассе</a>
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+        if($event->amount_the_best_participant_to_go_final > 0){
+            return "<a class='result-add-final-one-route btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category} по одной трассе</a>
                  <style>
                  .result-add-final-one-route {margin-top:8px;}
                  @media screen and (max-width: 767px) {
@@ -212,6 +214,17 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
                     }
                 </style>
             ";
+        } else {
+            return "<a href='#' class='result-add-final-one-route btn btn-sm btn-primary' disabled>Кол-во участников в финал 0</a>
+                 <style>
+                 .result-add-final-one-route {margin-top:8px;}
+                 @media screen and (max-width: 767px) {
+                        .result-add-final-one-route {margin-top:8px;}
+                    }
+                </style>
+            ";
+        }
+
     }
 
 }

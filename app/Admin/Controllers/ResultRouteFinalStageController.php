@@ -12,6 +12,7 @@ use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustomFillOneRoute;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustom;
 use App\Exports\FinalProtocolCardsExport;
 use App\Exports\FinalResultExport;
+use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ParticipantCategory;
@@ -264,8 +265,8 @@ class ResultRouteFinalStageController extends Controller
         });
         $form->table('result_for_edit_final', 'Таблица результата', function ($table) use ($event){
             $table->text('Номер маршрута')->readonly();
-            $table->number('Попытки на топ');
-            $table->number('Попытки на зону');
+            $table->number('Попытки на топ')->required();
+            $table->number('Попытки на зону')->required();
         })->value($arr);
 
         $form->saving(function (Form $form) use ($type, $id) {
@@ -285,10 +286,10 @@ class ResultRouteFinalStageController extends Controller
                     } else {
                         $amount_zone = 0;
                     }
-                    $result->amount_try_top = $route['Попытки на топ'];
+                    $result->amount_try_top = intval($route['Попытки на топ']);
                     $result->amount_top = $amount_top;
                     $result->amount_zone = $amount_zone;
-                    $result->amount_try_zone = $route['Попытки на зону'];
+                    $result->amount_try_zone = intval($route['Попытки на зону']);
                     $result->save();
                 }
                 Event::refresh_final_points_all_participant_in_final($event_id);

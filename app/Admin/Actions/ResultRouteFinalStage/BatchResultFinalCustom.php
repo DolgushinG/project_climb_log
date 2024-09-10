@@ -27,7 +27,7 @@ class BatchResultFinalCustom extends CustomAction
     public $category;
     private mixed $script;
 
-    public function __construct(ParticipantCategory $category, $script)
+    public function __construct(ParticipantCategory $category, $script = '')
     {
         $this->initInteractor();
         $this->category = $category;
