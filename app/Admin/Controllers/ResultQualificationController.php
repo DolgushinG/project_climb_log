@@ -829,7 +829,7 @@ class ResultQualificationController extends Controller
             $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
             foreach ($categories as $index => $category) {
                 $index  = $index+1;
-                $script = <<<EOT
+                $script_one_route = <<<EOT
                 $(document).on("change", '[data-user-id-{$category->id}="user_id"]', function () {
                     $('[id=amount_try_top]').val('');
                     $('[id=amount_try_zone]').val('');
@@ -880,8 +880,14 @@ class ResultQualificationController extends Controller
                 });
 
         EOT;
+                $script = <<<EOT
+                let btn_close_modal_custom_{$category->id} = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultfrancesystemqualification-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
+                $(document).on("click", btn_close_modal_custom_{$category->id}, function () {
+                    window.location.reload();
+                });
+        EOT;
                 $tools->append(new BatchResultFranceSystemQualification($category, $script));
-                $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category, $script));
+                $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category, $script_one_route));
             }
             $script = <<<EOT
                 $(document).on("change", '[data-category-id="user_id"]', function () {
@@ -968,6 +974,7 @@ class ResultQualificationController extends Controller
 
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
+        $grid->column('user.id', __('ID'));
         $grid->column('user.middlename', __('Участник'));
         $grid->column('gender', __('Пол'))
             ->help('Если случается перенос, из одного пола в другой, необходимо обязательно пересчитать результаты')

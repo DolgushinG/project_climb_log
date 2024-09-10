@@ -88,93 +88,121 @@ class ResultQualificationClassic extends Model
     {
         return Set::where('event_id', $event_id)->pluck('number_set', 'id')->toArray();
     }
-    public static function counting_final_place($event_id, $result_final, $type='final'){
+    public static function counting_final_place($event_id, $result_final){
         // Сортировка по amount_top в убывающем порядке, затем по amount_try_top в возрастающем порядке,
         // затем по amount_zone в убывающем порядке, затем по amount_try_zone в возрастающем порядке
         $event = Event::find($event_id);
-        $result_final = Event::get_type_counting_france_system($result_final, $event->type_counting_france_system);
+        $results = Event::get_type_counting_france_system($result_final, $event->type_counting_france_system);
+        // Присваивание рангов
+        // НОВАЯ РЕАЛИЗАЦИЯ НУЖЕН ТЕСТ
+        $rank = 1;
+        foreach ($results as $index => &$item) {
+            if ($index > 0 && (
+                    $item['result']['amount_top'] !== $results[$index - 1]['result']['amount_top'] ||
+                    $item['result']['amount_zone'] !== $results[$index - 1]['result']['amount_zone'] ||
+                    $item['result']['amount_try_top'] !== $results[$index - 1]['result']['amount_try_top'] ||
+                    $item['result']['amount_try_zone'] !== $results[$index - 1]['result']['amount_try_zone']
+                )) {
+                $rank = $index + 1;
+            }
+            $item['place'] = $rank;
+        }
+
+        # ВНИЗУ СТАРАЯ РЕАЛИЗАЦИЯ
+
         // Группировка по ключам amount_top, amount_try_top, amount_zone, amount_try_zone
-        $grouped_results = [];
-        foreach ($result_final as $item) {
-            $key = "{$item['amount_top']}_{$item['amount_try_top']}_{$item['amount_zone']}_{$item['amount_try_zone']}";
-            $grouped_results[$key][] = $item;
-        }
-//        dd($grouped_results);
-// Фильтрация групп, оставляем только те, где количество элементов больше 1 (т.е., где есть дубликаты)
-        $duplicate_groups = array_filter($grouped_results, function ($group) {
-            return count($group) > 1;
-        });
-
-// Преобразование групп в одномерный массив
-        $duplicate_arrays = array_reduce($duplicate_groups, 'array_merge', []);
-
-        $user_places = array();
-        foreach ($duplicate_arrays as $index => $d_array){
-            $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->pluck('user_id')->toArray();
-            if($type == 'final'){
-                $event = Event::find($event_id);
-                if($event->is_semifinal){
-                    $place = ResultQualificationClassic::get_place_participant_in_semifinal($event_id, $d_array['user_id']);
-                } else {
-                    if($event->is_france_system_qualification){
-                        $place = ResultQualificationClassic::get_place_participant_in_france_system_qualification($event_id, $d_array['user_id']);
-                    } else {
-                        $gender = User::find($d_array['user_id'])->gender;
-                        $category_id = ResultQualificationClassic::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
-                        $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter, $d_array['user_id'], $gender, $category_id, true);
-                    }
-                }
-            } else {
-                $gender = User::find($d_array['user_id'])->gender;
-                if($type == "france_system_qualification"){
-                    $place = ResultQualificationClassic::get_place_participant_in_france_system_qualification($event_id, $d_array['user_id']);
-                } else {
-                    $category_id = ResultQualificationClassic::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
-                    $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter, $d_array['user_id'], $gender, $category_id, true);
-                }
-
-            }
-            $index_user_final_in_res = self::findIndexBy($result_final, $d_array['user_id'], 'user_id');
-            $user_places[] = array('user_id' => $d_array['user_id'], 'place' => $place, 'index' => $index_user_final_in_res);
-
-        }
-       # Если есть дубликаты то в $user_places будут сортированы результаты
-        if($user_places != []) {
-            usort($user_places, function ($a, $b) {
-                return $a['index'] <=> $b['index'];
-            });
-            $start_replace_in_result = $user_places[0]['index'];
-            $count_replace_el_in_result = count($user_places);
-            usort($user_places, function ($a, $b) {
-                return $a['place'] <=> $b['place'];
-            });
-            $index = 0;
-            $temp_array_for_result = array();
-
-            for ($i = $start_replace_in_result; $i < $count_replace_el_in_result; $i++) {
-                $temp_array_for_result[] = $result_final[$user_places[$index]['index']];
-                $index++;
-            }
-            $x = 0;
-            for ($i = $start_replace_in_result; $i < $count_replace_el_in_result; $i++) {
-                $result_final[$i] = $temp_array_for_result[$x];
-                $x++;
-            }
-            # Расставляем места
-            foreach ($user_places as $index => $user_place) {
-                $result_final[$user_place['index']]['place'] = $user_place['index'] + 1;
-            }
-        }
-//        // Расставляем места в зависимости от результатов квалификации
-        foreach ($result_final as $index => $result){
-            if (!$result['place']){
-                $result_final[$index]['place'] = $index+1;
-            }
-        }
-        usort($result_final, function ($a, $b) {
+//        $grouped_results = [];
+//        foreach ($result_final as $item) {
+//            $key = "{$item['amount_top']}_{$item['amount_try_top']}_{$item['amount_zone']}_{$item['amount_try_zone']}";
+//            $grouped_results[$key][] = $item;
+//        }
+////        dd($grouped_results);
+//// Фильтрация групп, оставляем только те, где количество элементов больше 1 (т.е., где есть дубликаты)
+//        $duplicate_groups = array_filter($grouped_results, function ($group) {
+//            return count($group) > 1;
+//        });
+//
+//// Преобразование групп в одномерный массив
+//        $duplicate_arrays = array_reduce($duplicate_groups, 'array_merge', []);
+//
+//        $user_places = array();
+//        foreach ($duplicate_arrays as $index => $d_array){
+//            $users_for_filter = ResultQualificationClassic::where('event_id', $event_id)->pluck('user_id')->toArray();
+//            if($type == 'final'){
+//                $event = Event::find($event_id);
+//                if($event->is_semifinal){
+//                    $place = ResultQualificationClassic::get_place_participant_in_semifinal($event_id, $d_array['user_id']);
+//                } else {
+//                    if($event->is_france_system_qualification){
+//                        $place = ResultQualificationClassic::get_place_participant_in_france_system_qualification($event_id, $d_array['user_id']);
+//                    } else {
+//                        $gender = User::find($d_array['user_id'])->gender;
+//                        $category_id = ResultQualificationClassic::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
+//                        $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter, $d_array['user_id'], $gender, $category_id, true);
+//                    }
+//                }
+//            } else {
+//                $gender = User::find($d_array['user_id'])->gender;
+//                if($type == "france_system_qualification"){
+//                    $place = ResultQualificationClassic::get_place_participant_in_france_system_qualification($event_id, $d_array['user_id']);
+//                } else {
+//                    $category_id = ResultQualificationClassic::where('user_id', '=', $d_array['user_id'])->where('event_id', '=', $event_id)->first()->category_id;
+//                    $place = ResultQualificationClassic::get_places_participant_in_qualification($event_id, $users_for_filter, $d_array['user_id'], $gender, $category_id, true);
+//                }
+//
+//            }
+//            $index_user_final_in_res = self::findIndexBy($result_final, $d_array['user_id'], 'user_id');
+//            $user_places[] = array('user_id' => $d_array['user_id'], 'place' => $place, 'index' => $index_user_final_in_res);
+//
+//        }
+//       # Если есть дубликаты то в $user_places будут сортированы результаты
+//        if($user_places != []) {
+//            usort($user_places, function ($a, $b) {
+//                return $a['index'] <=> $b['index'];
+//            });
+//            $start_replace_in_result = $user_places[0]['index'];
+//            $count_replace_el_in_result = count($user_places);
+//            usort($user_places, function ($a, $b) {
+//                return $a['place'] <=> $b['place'];
+//            });
+//            $index = 0;
+//            $temp_array_for_result = array();
+//
+//            for ($i = $start_replace_in_result; $i < $count_replace_el_in_result; $i++) {
+//                $temp_array_for_result[] = $result_final[$user_places[$index]['index']];
+//                $index++;
+//            }
+//            $x = 0;
+//            for ($i = $start_replace_in_result; $i < $count_replace_el_in_result; $i++) {
+//                $result_final[$i] = $temp_array_for_result[$x];
+//                $x++;
+//            }
+//            dd($result_final, $user_places);
+//            if($type == "france_system_qualification"){
+//                # Расставляем места дублированных результатов
+//                # Только расставляем места по первому индексу
+//                # То есть если индексу 5 - 6 место то результаты след будут одинаковые
+//                # и соответственно 6 7 8 места но так как одиковое месте берем только 6 место для всех
+//                foreach ($user_places as $user_place) {
+//                    $result_final[$user_place['index']]['place'] = $user_places[0]['index'] + 1;
+//                }
+//            } else {
+//                foreach ($user_places as $user_place) {
+//                    $result_final[$user_place['index']]['place'] = $user_place['index'] + 1;
+//                }
+//            }
+//        }
+////        // Расставляем места в зависимости от результатов квалификации
+//        foreach ($result_final as $index => $result){
+//            if (!$result['place']){
+////                dd($result_final);
+//                $result_final[$index]['place'] = $index+1;
+//            }
+//        }
+        usort($results, function ($a, $b) {
             return $a['place'] <=> $b['place'];
         });
-       return $result_final;
+       return $results;
     }
     public static function findIndexBy($array, $element, $needle) {
         foreach ($array as $key => $item) {

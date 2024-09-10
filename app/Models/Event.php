@@ -701,7 +701,7 @@ class Event extends Model
             }
         }
 
-        $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result, $type);
+        $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result);
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user) {

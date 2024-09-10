@@ -196,7 +196,7 @@ class BatchResultSemiFinalCustom extends CustomAction
     {
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        if($event->is_semifinal){
+        if($event->is_semifinal && $event->amount_the_best_participant > 0){
             return "<a class='result-add btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category}</a>
                  <style>
                  .result-add {margin-top:8px;}

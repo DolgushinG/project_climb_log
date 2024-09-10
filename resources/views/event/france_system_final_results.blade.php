@@ -204,8 +204,6 @@
                                                                     @else
                                                                         <span class="bg-danger result-try">-</span>
                                                                     @endif
-                                                                @else
-                                                                    <span class="bg-danger result-try">-</span>
                                                                 @endisset
                                                             @endforeach
                                                             <br>
@@ -216,8 +214,6 @@
                                                                     @else
                                                                         <span class="bg-danger result-try" style="color:white; border-radius: 0 0 5px 5px;">-</span>
                                                                     @endif
-                                                                @else
-                                                                    <span class="bg-danger result-try">-</span>
                                                                 @endisset
                                                             @endforeach
                                                             {{$res['amount_top']}}T{{$res['amount_try_top']}}z {{$res['amount_zone']}} {{$res['amount_try_zone']}}
