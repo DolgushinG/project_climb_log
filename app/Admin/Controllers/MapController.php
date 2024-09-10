@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\Map;
 use App\Http\Controllers\Controller;
@@ -115,6 +116,9 @@ class MapController extends Controller
         $points_exist = Point::where('event_id', $event->id)->pluck('route_id')->toArray();
         $routes = Route::where('event_id', $event->id)->get();
         $scheme_climbing_gym = '/storage/'.Admin::user()->map;
+        foreach ($points as $index => $point){
+            $points[$index]['font_background'] = Helpers::getTextColorAndBorder($point->color ?? '');
+        }
         return Admin::component('admin::map', compact(['points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
     }
 

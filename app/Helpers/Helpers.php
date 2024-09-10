@@ -280,4 +280,48 @@ class Helpers
         }
 
     }
+
+    public static function hexToRgb($hex) {
+        if(!$hex){
+            return '';
+        }
+        $hex = str_replace("#", "", $hex);
+
+        if(strlen($hex) == 3) {
+            $r = hexdec(str_repeat(substr($hex, 0, 1), 2));
+            $g = hexdec(str_repeat(substr($hex, 1, 1), 2));
+            $b = hexdec(str_repeat(substr($hex, 2, 1), 2));
+        } else {
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+        }
+
+        return array($r, $g, $b);
+    }
+
+    public static function getBrightness($r, $g, $b) {
+        return (0.299 * $r + 0.587 * $g + 0.114 * $b);
+    }
+    public static function getTextColorAndBorder($backgroundColor) {
+        if(!$backgroundColor){
+            return '';
+        }
+        // Преобразуем HEX цвет в RGB
+        list($r, $g, $b) = self::hexToRgb($backgroundColor);
+
+        // Вычисляем яркость
+        $brightness = self::getBrightness($r, $g, $b);
+
+        // Устанавливаем цвет текста и границу на основе яркости
+        if ($brightness > 186) {
+            $textColor = "black";  // Светлый фон, делаем текст черным
+            $border = "1px solid black"; // Добавляем черную границу
+        } else {
+            $textColor = "white";  // Темный фон, делаем текст белым
+            $border = "none"; // Убираем границу
+        }
+
+        return array($textColor, $border);
+    }
 }

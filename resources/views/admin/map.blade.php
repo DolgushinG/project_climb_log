@@ -39,7 +39,8 @@
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
-                    color: white;
+                    color:  {{ $point->font_background[0] ?? 'white' }};
+                    border: {{ $point->font_background[1] ?? ''}};
                     font-size: 10px;
                     text-align: center;"
              data-id="{{ $point->id }}"
@@ -115,7 +116,8 @@
         } else {
             document.getElementById('point-id').value = point.id;
             document.getElementById('author').value = point.author;
-            document.getElementById('color').value = point.color;
+            let rgbArray = point.color.match(/\d+/g).map(Number);
+            document.getElementById('color').value = rgbToHex(rgbArray[0], rgbArray[1], rgbArray[2]);
             document.getElementById('x-coordinate').value = point.x;
             document.getElementById('y-coordinate').value = point.y;
             document.getElementById('route_id').value = point.route_id;
@@ -124,7 +126,9 @@
 
         modal.style.display = 'block';
     }
-
+    function rgbToHex(r, g, b) {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+    }
     // Закрытие любого модального окна
     function closeModal(modalId) {
         document.getElementById(modalId).style.display = 'none';
@@ -225,7 +229,7 @@
         element.style.flexDirection = 'column';
         element.style.alignItems = 'center';
         element.style.justifyContent = 'center';
-        element.style.color = 'white';
+        element.dataset.color = element.dataset.font_background[0];
         element.style.fontSize = '10px';
         element.style.textAlign = 'center';
         element.dataset.id = point.id;
