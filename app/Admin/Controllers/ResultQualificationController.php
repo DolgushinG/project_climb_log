@@ -1035,7 +1035,7 @@ class ResultQualificationController extends Controller
                             route_id: routeId,
                             user_id: userId,
                             event_id: eventId
-                        }, // Передаем ID маршрута и участника в запросе
+                        },
                         function (data) {
                             // Обновляем поля с количеством попыток
                             $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
