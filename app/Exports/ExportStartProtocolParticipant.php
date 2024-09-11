@@ -175,7 +175,8 @@ class ExportStartProtocolParticipant implements WithCustomStartCell, ShouldAutoS
             $export[$index]['index'] = $index+1;
             $set = Set::find($user['number_set_id']);
             $export[$index]['set'] = $set->number_set ?? '';
-            $export[$index]['middlename'] = $user['middlename'] ?? '';
+
+            $export[$index]['middlename'] = implode(' ', array_reverse(explode(' ', $user['middlename'], 2)));
             $export[$index]['gender'] = $user['gender'] == 'male' ? 'М': 'Ж';
             $export[$index]['birthday'] = Helpers::get_year($user['birthday'] ?? '');
             $export[$index]['city'] = $user['city'] ?? '';

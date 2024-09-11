@@ -86,7 +86,8 @@ class ProtocolCards implements WithTitle, WithCustomStartCell, ShouldAutoSize, W
                     $participants = array();
                     foreach ($merged_users as $user){
                         if($user['gender'] == $this->gender){
-                            $participants[] = $user['middlename'];
+
+                            $participants[] = implode(' ', array_reverse(explode(' ', $user['middlename'], 2)));;
                         }
                     }
                     foreach($participants as $participant){

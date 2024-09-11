@@ -383,6 +383,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $users[$index]['user_place'] = $place;
                 $set = Set::find($user['number_set_id']);
                 $users[$index]['number_set_id'] = $set->number_set ?? '';
+                $users[$index]['middlename'] = implode(' ', array_reverse(explode(' ', $users[$index]['middlename'], 2)));
                 $users[$index]['amount_passed_routes'] = $amount_passed_routes;
                 if($event->is_flash_value){
                     $users[$index]['amount_passed_flash'] = $amount_passed_flash;
@@ -478,6 +479,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             } else {
                 $new_last_points_after_merged = str_replace("null", 'Нет участвовал(а)', $users[$index]['last_points_after_merged']);
                 $users[$index]['last_points_after_merged'] = $new_last_points_after_merged;
+                $users[$index]['middlename'] = implode(' ', array_reverse(explode(' ', $users[$index]['middlename'], 2)));;
                 $users[$index] = collect($users[$index])->except('id', 'owner_id');
             }
 
@@ -542,11 +544,13 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 } else {
                     $route_id = $result->route_id;
                 }
+
                 $users[$index]['amount_top_'.$route_id] = $result->amount_top;
                 $users[$index]['amount_try_top_'.$route_id] = $result->amount_try_top;
                 $users[$index]['amount_zone_'.$route_id] = $result->amount_zone;
                 $users[$index]['amount_try_zone_'.$route_id] = $result->amount_try_zone;
             }
+            $users[$index]['middlename'] = implode(' ', array_reverse(explode(' ', $users[$index]['middlename'], 2)));
             $users[$index] = collect($users[$index])->except('id', 'category_id');
         }
         return collect($users);

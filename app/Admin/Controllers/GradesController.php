@@ -350,7 +350,7 @@ class GradesController extends Controller
                     });
                 });
             });
-SCRIPT);
+            SCRIPT);
                     $tools->append(new BatchAddPlace);
                     $tools->append(new BatchAddArea);
                     $tools->append(new BatchAddPlaceRoutes);

@@ -611,7 +611,9 @@ class ResultQualificationController extends Controller
             $filter->disableIdFilter();
             $filter->like('user.middlename', 'Участник');
         });
-        $grid->column('user.middlename', __('Участник'));
+        $grid->column('user.middlename', __('Участник'))->display(function ($name) {
+            return implode(' ', array_reverse(explode(' ', $name, 2)));
+        });
         $grid->column('user.birthday', __('Дата Рождения'));
         $grid->column('gender', __('Пол'))
             ->help('Если случается перенос, из одного пола в другой, необходимо обязательно пересчитать результаты')
@@ -834,6 +836,18 @@ class ResultQualificationController extends Controller
             $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
+            Admin::script(<<<SCRIPT
+            $('body').on('shown.bs.modal', '.modal', function() {
+            $(this).find('select').each(function() {
+                var dropdownParent = $(document.body);
+                if ($(this).parents('.modal.in:first').length !== 0)
+                    dropdownParent = $(this).parents('.modal.in:first');
+                    $(this).select2({
+                        dropdownParent: dropdownParent
+                    });
+                });
+            });
+            SCRIPT);
             $tools->append(new BatchExportResultFranceSystemQualification);
             $tools->append(new BatchExportStartProtocolParticipantsQualification);
             $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
@@ -963,25 +977,23 @@ class ResultQualificationController extends Controller
                                     allAttemptsInput.value = currentValue - 1;
                                 }
                             });
-                        }
-                });
 
-                $(document).on("change", '[data-category-id="user_id"]', function () {
-                    $('[data-all-attempts-id=all-attempts]').val('');
-                    $('[id=amount_try_top]').val('');
-                    $('[data-user-id=user_id]').val('');
-                    $('[id=amount_try_zone]').val('');
-                    $.get("/admin/api/get_users_category",
-                            {categoryId: $(this).val(), eventId: $('[data-category-event-id=event_id]').val()},
-                            function (data) {
-                                var model = $('[data-category-user-id=user_id]');
-                                model.empty();
-                                model.append("<option>Выбрать</option>");
-                                $.each(data, function (index, element) {
-                                    model.append("<option data-category-user-id='" + index + "' value='" + index + "'>" + element + "</option>");
-                                });
-                            }
-                    );
+                            $('[data-all-attempts-id=all-attempts]').val('');
+                            $('[id=amount_try_top]').val('');
+                            $('[data-user-id=user_id]').val('');
+                            $('[id=amount_try_zone]').val('');
+                            $.get("/admin/api/get_users",
+                                    {eventId: $('[data-category-event-id=event_id]').val()},
+                                    function (data) {
+                                        var model = $('[data-category-user-id=user_id]');
+                                        model.empty();
+                                        model.append("<option>Выбрать</option>");
+                                        $.each(data, function (index, element) {
+                                            model.append("<option data-category-user-id='" + index + "' value='" + index + "'>" + element + "</option>");
+                                        });
+                                    }
+                            );
+                        }
                 });
                 let btn_close_modal_category = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfillonerouteandonecategory"] [data-dismiss="modal"][class="btn btn-default"]'
                 $(document).on("click", btn_close_modal_category, function () {
@@ -1057,7 +1069,9 @@ class ResultQualificationController extends Controller
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->column('user.id', __('ID'));
-        $grid->column('user.middlename', __('Участник'));
+        $grid->column('user.middlename', __('Участник'))->display(function ($name) {
+            return implode(' ', array_reverse(explode(' ', $name, 2)));
+        });
         $grid->column('gender', __('Пол'))
             ->help('Если случается перенос, из одного пола в другой, необходимо обязательно пересчитать результаты')
             ->select(['male' => 'Муж', 'female' => 'Жен']);

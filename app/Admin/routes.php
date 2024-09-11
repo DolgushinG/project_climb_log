@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Grades;
 use App\Models\ResultFranceSystemQualification;
+use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\User;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
@@ -33,13 +35,39 @@ Route::group([
         return \App\Models\PlaceRoute::where('area_id', $area->id)->get(['id', DB::raw('name as text')]);
     });
 
-    $router->middleware(['throttle:get_users_category'])->get('/api/get_users_category', function(Request $request) {
-        $categoryId = $request->get('categoryId');
+    $router->middleware(['throttle:get_users'])->get('/api/get_users', function(Request $request) {
         $eventId = $request->get('eventId');
-        $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->where('category_id', $categoryId)->pluck('user_id')->toArray();
+        $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->pluck('user_id')->toArray();
         $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
-        if($result){
-            $data = $result;
+        $amount_routes = Grades::where('event_id', $eventId)->first();
+        if($amount_routes){
+            $amount_routes = $amount_routes->count_routes;
+        } else {
+            $amount_routes = 0;
+        }
+        // Преобразуем формат и сортируем по алфавиту
+        $sortedUsers = $result->mapWithKeys(function ($middlename, $id) use($eventId, $amount_routes) {
+            // Предположим, что middlename содержит 'фамилия имя'
+            $result_user = ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('user_id', $id);
+            $routes = $result_user->pluck('route_id')->toArray();
+            $string_version = '';
+            foreach ($routes as $value) {
+                $string_version .= $value . ', ';
+            }
+            if($result_user->get()->count() == $amount_routes){
+                $str = ' [Добавлены все трассы]';
+            } else {
+                $str =  '[Трассы: '.$string_version.']';
+            }
+            $parts = explode(' ', $middlename, 2);
+            $surname = $parts[0] ?? '';
+            $name = $parts[1] ?? '';
+            return [$id => $name . ' ' . $surname. $str ];
+        })->toArray();
+
+        asort($sortedUsers);
+        if($sortedUsers){
+            $data = $sortedUsers;
         } else {
             $data = [];
         }
