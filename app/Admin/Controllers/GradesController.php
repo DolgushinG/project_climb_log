@@ -370,6 +370,9 @@ SCRIPT);
         $grid->actions(function ($actions) use ($event) {
             $actions->disableView();
             $actions->disableEdit();
+            if(Admin::user()->is_delete_result == 0){
+                $actions->disableDelete();
+            }
         });
         $grid->disableFilter();
         $grid->disableBatchActions();

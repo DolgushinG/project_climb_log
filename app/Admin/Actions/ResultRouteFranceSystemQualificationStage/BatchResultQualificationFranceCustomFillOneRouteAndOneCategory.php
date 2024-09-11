@@ -79,6 +79,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         $amount_try_zone = intval($results['amount_try_zone']);
         $user_id = $results['user_id'];
         $event_id = $results['event_id'];
+        $all_attempts = $results['all_attempts'];
         $participant = ResultFranceSystemQualification::where('event_id', $event_id)
             ->where('user_id', $user_id)
             ->first();
@@ -96,6 +97,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         $existing_result_for_edit = $participant->result_for_edit_france_system_qualification ?? [];
         # Если уже есть результат надо обновить его как в grid - $participant - json for edit так и в $result по трассам
         if($result_route){
+            $result_route->all_attempts = $all_attempts;
             $result_route->amount_top = $amount_top;
             $result_route->amount_try_top = $amount_try_top;
             $result_route->amount_zone = $amount_zone;
@@ -118,6 +120,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
                 'category_id' => $category_id,
                 'amount_top' => $amount_top,
                 'gender' => $gender,
+                'all_attempts' => $all_attempts,
                 'amount_try_top' => $amount_try_top,
                 'amount_zone' => $amount_zone,
                 'amount_try_zone' => $amount_try_zone,
@@ -161,11 +164,42 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-category-user-id', 'user_id')->required();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-category-event-id', 'event_id')->value($event->id);
         $this->select('route_id', 'Трасса')->attribute('autocomplete', 'off')->attribute('data-category-route-id', 'route_id')->options($routes)->required();
+        $this->integer('all_attempts', 'Все попытки')
+            ->attribute('autocomplete', 'off')
+            ->attribute('data-all-attempts-id', 'all-attempts');
         $this->integer('amount_try_top', 'Попытки на топ')->attribute('autocomplete', 'off');
         $this->integer('amount_try_zone', 'Попытки на зону')->attribute('autocomplete', 'off');
+        Admin::style('
+                    .input-group {
+                    display: flex;
+                    align-items: center;
+                }
+
+                .form-control {
+                    margin-right: -1px; /* Небольшой выступ для кнопки */
+                }
+
+                .input-group-append {
+                    margin-top: 10px;
+                    margin-left: 5px; /* Убираем отступ слева */
+                }
+
+                .btn-outline-secondary {
+                    background-color: #28a745; /* Зеленый фон */
+                    border-color: #28a745; /* Цвет границы совпадает с фоном */
+                    color: #fff; /* Белый цвет текста */
+                     margin-left: 5px;
+                }
+
+                .btn-outline-secondary:hover {
+                    background-color: #218838; /* Темнее зеленый при наведении */
+                    border-color: #1e7e34; /* Темнее граница при наведении */
+                     margin-left: 5px;
+                }
+
+        ');
         \Encore\Admin\Facades\Admin::script($this->script);
     }
-
     public function html()
     {
        return "<a class='result-add-qualification-france-one-route-one-category btn btn-sm btn-warning'><i class='fa fa-plus-circle'></i> По одной трассе с выбором категории</a>

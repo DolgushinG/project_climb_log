@@ -49,9 +49,11 @@ Route::group([
         $routeId = $request->get('route_id');
         $userId = $request->get('user_id');
         $eventId = $request->get('event_id');
+        $all_attempts = $request->get('all_attempts');
         $result = \App\Models\ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
         if($result){
             $data = [
+                'all_attempts' => $result->all_attempts,
                 'amount_try_top' => $result->amount_try_top,
                 'amount_try_zone' => $result->amount_try_zone,
             ];

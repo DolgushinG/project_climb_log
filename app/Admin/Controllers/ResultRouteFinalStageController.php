@@ -149,6 +149,9 @@ class ResultRouteFinalStageController extends Controller
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
         });
         $grid->actions(function ($actions) {
+            if(Admin::user()->is_delete_result == 0){
+                $actions->disableDelete();
+            }
 //            $actions->disableEdit();
             $actions->disableView();
         });
