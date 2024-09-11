@@ -203,6 +203,11 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
                     border-color: #1e7e34; /* Темнее граница при наведении */
                      margin-left: 5px;
                 }
+                body.modal-dialog {
+                    overflow: hidden;
+                    position: fixed;
+                    width: 100%;
+                }
 
         ');
         \Encore\Admin\Facades\Admin::script($this->script);
