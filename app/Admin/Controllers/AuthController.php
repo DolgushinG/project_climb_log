@@ -51,7 +51,10 @@ class AuthController extends BaseAuthController
     protected function settingForm()
     {
         $class = config('admin.database.users_model');
-
+        $state_btn = [
+            'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
+            'off' => ['value' => 0, 'text' => 'Нет', 'color' => 'default'],
+        ];
         $form = new Form(new $class());
         $form->footer(function ($footer) {
             $footer->disableReset();
@@ -68,6 +71,7 @@ class AuthController extends BaseAuthController
         $form->text('phone', trans('admin.phone'));
         $form->text('city', trans('admin.city'));
         $form->file('map', 'Карта скалодрома');
+        $form->switch('is_delete_result', 'Разрешить удалять сеты, результаты, участников')->states($state_btn);
         $form->password('password', trans('admin.password'))->rules('confirmed|required');
         $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
             ->default(function ($form) {

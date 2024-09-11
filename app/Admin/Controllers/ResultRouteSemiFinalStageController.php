@@ -186,6 +186,9 @@ class ResultRouteSemiFinalStageController extends Controller
 //            $actions->disableEdit();
 //            $actions->disableDelete();
             $actions->disableView();
+            if(Admin::user()->is_delete_result == 0){
+                $actions->disableDelete();
+            }
         });
 
         $grid->disableFilter();

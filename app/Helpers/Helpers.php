@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Models\Event;
 use App\Models\ParticipantCategory;
 use App\Models\Set;
+use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -323,5 +324,22 @@ class Helpers
         }
 
         return array($textColor, $border);
+    }
+
+    public static function is_valid_date_for_delete($startDateString)
+    {
+        // Преобразуйте строку в объект Carbon
+        $startDate = Carbon::createFromFormat('Y-m-d', $startDateString);
+
+        // Получите текущую дату
+        $currentDate = Carbon::now()->startOfDay(); // Убедитесь, что сравнение происходит на уровне дней
+
+        // Сравните текущую дату с датой старта
+        dd($currentDate->greaterThanOrEqualTo($startDate));
+        if ($currentDate->greaterThanOrEqualTo($startDate)) {
+            return false;
+        }
+
+        return true;
     }
 }

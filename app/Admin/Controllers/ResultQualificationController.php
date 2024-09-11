@@ -35,6 +35,7 @@ use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\Route;
 use App\Models\Set;
+use App\Models\UpdateParticipantResult;
 use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -524,7 +525,10 @@ class ResultQualificationController extends Controller
                 $result->result_for_edit_france_system_qualification = null;
                 $result->save();
             } else {
-                ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+                $model = ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+                if(UpdateParticipantResult::is_validate_access_delete($model, $result->user_id, $result->event_id)){
+                    $model->delete();
+                }
             }
         } else {
             $result = ResultQualificationClassic::find($id);
@@ -538,7 +542,11 @@ class ResultQualificationController extends Controller
                 $participant->user_place = null;
                 $participant->save();
             } else {
-                ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+                $model = ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+                if(UpdateParticipantResult::is_validate_access_delete($model, $result->user_id, $result->event_id)){
+                    $model->delete();
+                }
+
             }
 
         }
@@ -595,7 +603,9 @@ class ResultQualificationController extends Controller
 //            $actions->disableEdit();
 //            $actions->append(new ActionRejectBill($actions->getKey(), $event->id));
 //            $actions->disableView();
-//            $actions->disableDelete();
+            if(Admin::user()->is_delete_result == 0){
+              $actions->disableDelete();
+            }
         });
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -890,7 +900,74 @@ class ResultQualificationController extends Controller
                 $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category, $script_one_route));
             }
             $script = <<<EOT
+                         $(document).on("click", '[modal="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfillonerouteandonecategory"]', function () {
+                        const allAttemptsInput = document.getElementById('all_attempts');
+
+                        // Проверяем, существуют ли уже кнопки
+                        const incrementBtn = document.getElementById('increment-btn');
+                        const decrementBtn = document.getElementById('decrement-btn');
+
+                        if (!incrementBtn && !decrementBtn) {
+                            // Создаем элемент для группы ввода
+                            const inputGroupAppend = document.createElement('div');
+                            inputGroupAppend.className = 'input-group-append';
+
+                            // Создаем кнопку для увеличения
+                            const newIncrementBtn = document.createElement('button');
+                            newIncrementBtn.type = 'button';
+                            newIncrementBtn.className = 'btn btn-outline-secondary';
+                            newIncrementBtn.id = 'increment-btn';
+
+                            // Создаем иконку для увеличения
+                            const incrementIcon = document.createElement('i');
+                            incrementIcon.className = 'fa fa-plus';
+
+                            // Создаем текст для увеличения
+                            const incrementText = document.createElement('span');
+                            incrementText.textContent = ' Попытка'; // Текст "Попытка"
+
+                            // Добавляем иконку и текст в кнопку увеличения
+                            newIncrementBtn.appendChild(incrementIcon);
+                            newIncrementBtn.appendChild(incrementText);
+
+                            // Создаем кнопку для удаления
+                            const newDecrementBtn = document.createElement('button');
+                            newDecrementBtn.type = 'button';
+                            newDecrementBtn.className = 'btn btn-danger';
+                            newDecrementBtn.id = 'decrement-btn';
+
+                            // Создаем иконку для удаления
+                            const decrementIcon = document.createElement('i');
+                            decrementIcon.className = 'fa fa-minus';
+
+                            // Добавляем иконку в кнопку удаления
+                            newDecrementBtn.appendChild(decrementIcon);
+
+                            // Добавляем кнопки в группу ввода
+                            inputGroupAppend.appendChild(newDecrementBtn);
+                            inputGroupAppend.appendChild(newIncrementBtn);
+
+                            // Находим родительский элемент и добавляем группу ввода после поля
+                            allAttemptsInput.parentNode.appendChild(inputGroupAppend);
+
+                            // Обработчик клика на кнопку увеличения
+                            newIncrementBtn.addEventListener('click', function () {
+                                let currentValue = parseInt(allAttemptsInput.value) || 0;
+                                allAttemptsInput.value = currentValue + 1;
+                            });
+
+                            // Обработчик клика на кнопку удаления
+                            newDecrementBtn.addEventListener('click', function () {
+                                let currentValue = parseInt(allAttemptsInput.value) || 0;
+                                if (currentValue > 0) {
+                                    allAttemptsInput.value = currentValue - 1;
+                                }
+                            });
+                        }
+                });
+
                 $(document).on("change", '[data-category-id="user_id"]', function () {
+                    $('[data-all-attempts-id=all-attempts]').val('');
                     $('[id=amount_try_top]').val('');
                     $('[data-user-id=user_id]').val('');
                     $('[id=amount_try_zone]').val('');
@@ -925,6 +1002,7 @@ class ResultQualificationController extends Controller
                                 // Обновляем поля с количеством попыток
                                 $('[id=amount_try_top]').val(data.amount_try_top);
                                 $('[id=amount_try_zone]').val(data.amount_try_zone);
+                                $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
                             }
                         );
                     }
@@ -945,6 +1023,7 @@ class ResultQualificationController extends Controller
                         }, // Передаем ID маршрута и участника в запросе
                         function (data) {
                             // Обновляем поля с количеством попыток
+                            $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
                             $('[id=amount_try_top]').val(data.amount_try_top);
                             $('[id=amount_try_zone]').val(data.amount_try_zone);
                         }
@@ -966,6 +1045,9 @@ class ResultQualificationController extends Controller
         $grid->actions(function ($actions) {
 //            $actions->disableEdit();
 //            $actions->disableDelete();
+            if(Admin::user()->is_delete_result == 0){
+                $actions->disableDelete();
+            }
 //            $actions->disableView();
         });
 

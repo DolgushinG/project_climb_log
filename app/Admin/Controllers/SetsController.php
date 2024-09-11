@@ -115,6 +115,9 @@ class SetsController extends Controller
         $grid->actions(function ($actions) {
             $actions->disableEdit();
             $actions->disableView();
+            if(Admin::user()->is_delete_result == 0){
+                $actions->disableDelete();
+            }
         });
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchDisableSets);
