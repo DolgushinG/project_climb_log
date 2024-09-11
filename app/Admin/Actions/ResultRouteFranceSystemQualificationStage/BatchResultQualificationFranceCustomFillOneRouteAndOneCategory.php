@@ -30,6 +30,10 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
     public function handle(Request $request)
     {
         $results = $request->toArray();
+        $amount_try_top = intval($results['amount_try_top']);
+        $amount_try_zone = intval($results['amount_try_zone']);
+        $all_attempts = intval($results['all_attempts']);
+
         $event = Event::find($results['event_id']);
         if(intval($results['amount_try_top']) > 0){
             $amount_top  = 1;
@@ -40,6 +44,11 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
             $amount_zone  = 1;
         } else {
             $amount_zone  = 0;
+        }
+        $max_attempts = Helpers::find_max_attempts($amount_try_top, $amount_try_zone);
+        if(Helpers::validate_amount_sum_top_and_zone_and_attempts($all_attempts, $amount_try_top, $amount_try_zone)){
+            return $this->response()->error(
+                'У трассы '.$results['route_id'].' Максимальное кол-во попыток '.$max_attempts.' а в поле все попытки - '. $all_attempts);
         }
 
         # Если есть ТОП то зона не может быть 0
@@ -79,7 +88,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         $amount_try_zone = intval($results['amount_try_zone']);
         $user_id = $results['user_id'];
         $event_id = $results['event_id'];
-        $all_attempts = $results['all_attempts'];
+        $all_attempts = intval($results['all_attempts']);
         $participant = ResultFranceSystemQualification::where('event_id', $event_id)
             ->where('user_id', $user_id)
             ->first();
@@ -149,7 +158,6 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         $this->modalSmall();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $participant_categories = ParticipantCategory::where('event_id',$event->id)->pluck('category', 'id')->toArray();
         $amount_routes = Grades::where('event_id', $event->id)->first();
         if($amount_routes){
             $amount_routes = $amount_routes->count_routes;
@@ -160,7 +168,6 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         for($i = 1; $i <= $amount_routes; $i++){
             $routes[$i] = $i;
         }
-        $this->select('category_name', 'Категория участника')->attribute('autocomplete', 'off')->attribute('data-category-id', 'user_id')->options($participant_categories)->required();
         $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-category-user-id', 'user_id')->required();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-category-event-id', 'event_id')->value($event->id);
         $this->select('route_id', 'Трасса')->attribute('autocomplete', 'off')->attribute('data-category-route-id', 'route_id')->options($routes)->required();
@@ -202,7 +209,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
     }
     public function html()
     {
-       return "<a class='result-add-qualification-france-one-route-one-category btn btn-sm btn-warning'><i class='fa fa-plus-circle'></i> По одной трассе с выбором категории</a>
+       return "<a class='result-add-qualification-france-one-route-one-category btn btn-sm btn-warning'><i class='fa fa-plus-circle'></i> Все участники по одной трассе </a>
                  <style>
                  .result-add-qualification-france-one-route-one-category {margin-top:8px;}
                  @media screen and (max-width: 767px) {

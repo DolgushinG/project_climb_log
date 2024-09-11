@@ -370,7 +370,7 @@ class AdminTablesSeeder extends Seeder
                     "name" => "get_users_category",
                     "slug" => "get_users_category",
                     "http_method" => "",
-                    "http_path" => "/api/get_users_category*"
+                    "http_path" => "/api/get_users*"
                 ]
             ]
         );

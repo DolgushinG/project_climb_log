@@ -162,7 +162,9 @@ class ResultRouteFinalStageController extends Controller
         $grid->disableColumnSelector();
         $grid->disablePagination();
         $grid->disablePerPageSelector();
-        $grid->column('user.middlename', __('Участник'));
+        $grid->column('user.middlename', __('Участник'))->display(function ($name) {
+            return implode(' ', array_reverse(explode(' ', $name, 2)));
+        });
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
         });
