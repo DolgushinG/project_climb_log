@@ -1024,7 +1024,6 @@ class ResultQualificationController extends Controller
                     }
 
                 });
-                // Подобный код для обновления попыток на основе выбранного участника и трассы
                 $(document).on("change", '[data-category-route-id=route_id]', function () {
                     var routeId = $(this).val(); // ID выбранного маршрута
                     var userId = $('[data-category-user-id="user_id"]').select2('val')
