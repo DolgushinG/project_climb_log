@@ -999,6 +999,10 @@ class ResultQualificationController extends Controller
                 $(document).on("click", btn_close_modal_category, function () {
                     window.location.reload();
                 });
+                let btn_close_icon_modal_category = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfillonerouteandonecategory"] [data-dismiss="modal"][class="close"]'
+                $(document).on("click", btn_close_icon_modal_category, function () {
+                    window.location.reload();
+                });
                 $(document).on("change", '[data-category-user-id=user_id]', function () {
                     var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
                     var userId = $('[data-category-user-id="user_id"]').select2('val')

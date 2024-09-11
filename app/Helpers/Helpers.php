@@ -12,6 +12,8 @@ use DateTime;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use function Symfony\Component\String\s;
+
 class Helpers
 {
 
@@ -158,6 +160,22 @@ class Helpers
             $percent = $diff / $a * 100;
         }
         return intval($percent);
+    }
+    public static function find_max_attempts($amount_try_top, $amount_try_zone)
+    {
+        if($amount_try_top){
+            $result_for_compare = $amount_try_top;
+        } else if ($amount_try_zone){
+            $result_for_compare = $amount_try_zone;
+        } else {
+            return false;
+        }
+        return $result_for_compare;
+    }
+
+    public static function validate_amount_sum_top_and_zone_and_attempts($all_attempts, $amount_try_top, $amount_try_zone)
+    {
+        return intval($all_attempts) != self::find_max_attempts($amount_try_top, $amount_try_zone);
     }
     public static function validate_amount_top_and_zone($amount_top, $amount_zone)
     {

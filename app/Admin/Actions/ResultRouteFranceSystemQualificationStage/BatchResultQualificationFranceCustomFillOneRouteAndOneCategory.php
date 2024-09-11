@@ -30,6 +30,10 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
     public function handle(Request $request)
     {
         $results = $request->toArray();
+        $amount_try_top = intval($results['amount_try_top']);
+        $amount_try_zone = intval($results['amount_try_zone']);
+        $all_attempts = intval($results['all_attempts']);
+
         $event = Event::find($results['event_id']);
         if(intval($results['amount_try_top']) > 0){
             $amount_top  = 1;
@@ -40,6 +44,11 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
             $amount_zone  = 1;
         } else {
             $amount_zone  = 0;
+        }
+        $max_attempts = Helpers::find_max_attempts($amount_try_top, $amount_try_zone);
+        if(Helpers::validate_amount_sum_top_and_zone_and_attempts($all_attempts, $amount_try_top, $amount_try_zone)){
+            return $this->response()->error(
+                'У трассы '.$results['route_id'].' Максимальное кол-во попыток '.$max_attempts.' а в поле все попытки - '. $all_attempts);
         }
 
         # Если есть ТОП то зона не может быть 0
@@ -79,7 +88,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         $amount_try_zone = intval($results['amount_try_zone']);
         $user_id = $results['user_id'];
         $event_id = $results['event_id'];
-        $all_attempts = $results['all_attempts'];
+        $all_attempts = intval($results['all_attempts']);
         $participant = ResultFranceSystemQualification::where('event_id', $event_id)
             ->where('user_id', $user_id)
             ->first();
