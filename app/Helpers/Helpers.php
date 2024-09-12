@@ -175,6 +175,9 @@ class Helpers
 
     public static function validate_amount_sum_top_and_zone_and_attempts($all_attempts, $amount_try_top, $amount_try_zone)
     {
+        if($amount_try_top == 0 && $amount_try_zone == 0){
+            return false;
+        }
         return intval($all_attempts) != self::find_max_attempts($amount_try_top, $amount_try_zone);
     }
     public static function validate_amount_top_and_zone($amount_top, $amount_zone)

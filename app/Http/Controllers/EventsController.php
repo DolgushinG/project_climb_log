@@ -676,21 +676,38 @@ class EventsController extends Controller
             $grade = $result[2];  # "6C"
             $status_route_id_route_name = explode('-', $status); # ["failed", "17","Боулдер"]
             $route_id = $status_route_id_route_name[1];
+            $route_name = $status_route_id_route_name[2];
             if (str_contains($status, 'flash') && $bool == "true") {
                 $attempt = 1;
-                $data[] = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
+                $prepare_data = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
+                if($event->type_event){
+                    $prepare_data['route_name'] = $route_name;
+                }
+                $data[] = $prepare_data;
             }
             if (str_contains($status, 'redpoint') && $bool == "true") {
                 $attempt = 2;
-                $data[] = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $prepare_data = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                if($event->type_event){
+                    $prepare_data['route_name'] = $route_name;
+                }
+                $data[] = $prepare_data;
             }
             if (str_contains($status, 'zone') && $bool == "true") {
                 $attempt = 3;
-                $data[] = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $prepare_data = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                if($event->type_event){
+                    $prepare_data['route_name'] = $route_name;
+                }
+                $data[] = $prepare_data;
             }
             if (str_contains($status, 'failed') && $bool == "true") {
                 $attempt = 0;
-                $data[] = array('grade' => $grade, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $prepare_data = array('grade' => $grade, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                if($event->type_event){
+                    $prepare_data['route_name'] = $route_name;
+                }
+                $data[] = $prepare_data;
             }
         }
         $final_data = array();

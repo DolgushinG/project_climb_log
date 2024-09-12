@@ -301,6 +301,7 @@
                                     </div>
                                 </div>
                             @endforeach
+                        @endforeach
                             <div
                                 id="mobile-fixed"
                                 class="btn-container-desktop-fixed">
@@ -314,7 +315,6 @@
                                     Внести
                                 </button>
                             </div>
-                        @endforeach
                     </div>
                 </div>
             </div>

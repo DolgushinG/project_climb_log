@@ -499,16 +499,15 @@ class GradesController extends Controller
         $grid->actions(function ($actions) {
             $actions->disableView();
             $actions->disableEdit();
-            $actions->disableDelete();
-            $actions->append(<<<EOT
-<a href="javascript:void(0);" data-id="route-{$actions->getKey()}" class="grid-row-delete btn btn-xs btn-danger">
-    <i class="fa fa-trash"></i> Удалить
-</a>
-EOT
-            );
-
+//            $actions->disableDelete();
         });
+
         Admin::script(<<<SCRIPT
+            let elements = document.querySelectorAll('a[data-id="133"]');
+            elements.forEach(function(element) {
+                element.setAttribute('data-id', 'route-133');
+            });
+
             $('body').on('shown.bs.modal', '.modal', function() {
             $(this).find('select').each(function() {
                 var dropdownParent = $(document.body);
@@ -537,6 +536,9 @@ SCRIPT);
         if($event->type_event){
             $grid->column('route_id', 'Номер')->editable();
             $grid->column('route_name', 'Трасса');
+            $grid->column('place.name', 'Регион');
+            $grid->column('area.name', 'Район');
+            $grid->column('place_route.name', 'Сектор');
             $grid->column('type', 'Тип');
             $grid->column('image', 'Картинка')->image('', 200, 200);
             $grid->column('grade', 'Категория трассы')->editable('select', Grades::getGrades());

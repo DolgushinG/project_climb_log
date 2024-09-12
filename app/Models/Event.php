@@ -988,8 +988,14 @@ class Event extends Model
     {
         $result_with_routes = Route::where('event_id', $event_id)->get();
         $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
+        $event = Event::find($event_id);
+        if($event->type_event){
+            $column = 'route_name';
+        } else {
+            $column = 'route_id';
+        }
         foreach ($result_with_routes as $routes){
-            $record = EventAndCoefficientRoute::where('event_id', '=', $event_id)->where('route_id', '=', $routes->route_id)->first();
+            $record = EventAndCoefficientRoute::where('event_id', '=', $event_id)->where($column, '=', $routes->route_id)->first();
             if ($record === null) {
                 $event_and_coefficient_route = new EventAndCoefficientRoute;
             } else {
