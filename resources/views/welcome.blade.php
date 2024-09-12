@@ -102,6 +102,7 @@
                                                     @include('event.selects.sets_take_part')
                                                 @endif
                                                 @include('event.buttons.take_part')
+                                                @include('event.buttons.take_part_group')
                                             @else
                                                 @include('event.buttons.reg-close')
                                             @endif

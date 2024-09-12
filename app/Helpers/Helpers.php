@@ -96,6 +96,9 @@ class Helpers
         if(str_contains($email, 'vkontakte')){
             return false;
         }
+        if(str_contains($email, 'group')){
+            return false;
+        }
         return true;
     }
 

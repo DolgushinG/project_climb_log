@@ -10,6 +10,8 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
@@ -58,5 +60,56 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         return redirect(RouteServiceProvider::HOME);
+    }
+
+    public function group_registration(Request $request)
+    {
+        dd($request);
+        $new_users = $request->new_users;
+        $event_id = $request->event_id;
+        $messages = array(
+            'firstname.string' => 'Поле Имя нужно вводить только текст',
+            'lastname.string' => 'Поле Фамилия нужно вводить только текст',
+            'email.string' => 'Поле email не корректно',
+            'email.email' => 'Поле email не корректно',
+            'email.max:255' => 'Поле email не корректно',
+            'email.unique' => 'Этот email уже зарегистрирован, возможно вы уже имеете аккаунт с этой почтой',
+        );
+        $validator = Validator::make($request->all(), [
+            'firstname' => 'string',
+            'lastname' => 'string',
+            'email' => [
+                'email',
+                'string',
+                // Исключаем текущего пользователя из проверки уникальности email
+                Rule::unique('users')->ignore(Auth()->user()->id),
+            ],
+        ], $messages);
+        if ($validator->fails())
+        {
+            return response()->json(['error' => true,'message'=> $validator->errors()->all()],422);
+        }
+        foreach ($new_users as $user){
+            $request->validate([
+                'firstname' => ['required', 'string', 'max:255'],
+                'lastname' => ['required', 'string', 'max:255'],
+                'gender' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users'],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            ]);
+            User::create([
+                'firstname' => $request->firstname,
+                'middlename' => $request->firstname.' '.$request->lastname,
+                'lastname' => $request->lastname,
+                'gender' => $request->gender,
+                'city' => $request->city,
+                'birthday' => $request->birthday,
+                'team' => $request->team,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Группа успешно создана и зарегистрирована на соревнование'], 201);
     }
 }

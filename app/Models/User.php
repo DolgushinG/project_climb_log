@@ -4,12 +4,9 @@ namespace App\Models;
 
 use App\Helpers\Helpers;
 use App\Notifications\CustomResetPasswordNotification;
-use Encore\Admin\Facades\Admin;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
@@ -170,7 +167,6 @@ class User extends Authenticatable
             if(env('APP_ENV') == 'prod'){
                 Mail::to($user->email)->queue(new \App\Mail\AuthNewDevice($details));
             }
-
         }
     }
     public static function send_auth_socialize($user, $socialize)
