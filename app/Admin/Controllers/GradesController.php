@@ -503,11 +503,11 @@ class GradesController extends Controller
         });
 
         Admin::script(<<<SCRIPT
-            let elements = document.querySelectorAll('a[data-id="133"]');
+            let elements = document.querySelectorAll('a.grid-row-delete.btn.btn-xs.btn-danger[data-id]');
             elements.forEach(function(element) {
-                element.setAttribute('data-id', 'route-133');
+                let currentId = element.getAttribute('data-id');
+                element.setAttribute('data-id', 'route-' + currentId);
             });
-
             $('body').on('shown.bs.modal', '.modal', function() {
             $(this).find('select').each(function() {
                 var dropdownParent = $(document.body);
