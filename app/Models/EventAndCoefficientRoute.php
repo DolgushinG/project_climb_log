@@ -15,13 +15,7 @@ class EventAndCoefficientRoute extends Model
     }
 
     public function update_coefficitient($event_id, $route_id, $owner_id, $gender){
-        $event = Event::find($event_id);
-        if($event->type_event){
-            $column = 'route_name';
-        } else {
-            $column = 'route_id';
-        }
-        $record = EventAndCoefficientRoute::where('event_id', '=', $event_id)->where($column, '=', $route_id)->first();
+        $record = EventAndCoefficientRoute::where('event_id', '=', $event_id)->where('route_id', '=', $route_id)->first();
         $active_participant = ResultQualificationClassic::participant_with_result($event_id, $gender);
         if ($record === null) {
             $event_and_coefficient_route = new EventAndCoefficientRoute;

@@ -1254,12 +1254,7 @@ class ResultQualificationController extends Controller
 
                     $routes = $form->result_for_edit;
                     foreach ($routes as $route) {
-                        if($event->type_event){
-                            $column = 'route_name';
-                        } else {
-                            $column = 'route_id';
-                        }
-                        $result = ResultRouteQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $column)->first();
+                        $result = ResultRouteQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
                         if($result){
                             $result->attempt = $route['attempt'];
                         } else {

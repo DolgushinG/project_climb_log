@@ -164,7 +164,6 @@ class Service
                             if(preg_match('/["\']|([^\d\.,])/', $route->name)){
                                 if(strlen($route->name) < 2 && str_contains($route->name, "'")){
                                     $list_guides[] = array(
-                                        'route_id' => $route_id,
                                         'name' => 'Без названия',
                                         'type' => $type,
                                         'grade' => $matches[0] ?? null,
@@ -172,7 +171,6 @@ class Service
                                     );
                                 } else {
                                     $list_guides[] = array(
-                                        'route_id' => $route_id,
                                         'name' => $route->name,
                                         'type' => $type,
                                         'grade' => $matches[0] ?? null,
@@ -181,7 +179,6 @@ class Service
                                 }
                             } else {
                                 $list_guides[] = array(
-                                    'route_id' => $route_id,
                                     'name' => 'Без названия',
                                     'type' => $type,
                                     'grade' => $matches[0] ?? null,
