@@ -503,11 +503,20 @@ class GradesController extends Controller
         });
 
         Admin::script(<<<SCRIPT
-            let elements = document.querySelectorAll('a.grid-row-delete.btn.btn-xs.btn-danger[data-id]');
-            elements.forEach(function(element) {
-                let currentId = element.getAttribute('data-id');
-                element.setAttribute('data-id', 'route-' + currentId);
-            });
+                let routeIdColumns = document.querySelectorAll('td.column-route_id');
+                routeIdColumns.forEach(function(routeIdColumn) {
+                    let parentRow = routeIdColumn.closest('tr');
+                    if (parentRow) {
+                        let actionsColumn = parentRow.querySelector('td.column-__actions__');
+                        if (actionsColumn) {
+                            let deleteButton = actionsColumn.querySelector('a.grid-row-delete');
+                            if (deleteButton) {
+                                let currentId = deleteButton.getAttribute('data-id');
+                                deleteButton.setAttribute('data-id', 'route-' + currentId);
+                            }
+                        }
+                    }
+                });
             $('body').on('shown.bs.modal', '.modal', function() {
             $(this).find('select').each(function() {
                 var dropdownParent = $(document.body);
