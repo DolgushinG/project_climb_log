@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
+use App\Models\Event;
+use App\Models\ListOfPendingParticipant;
+use App\Models\ResultFranceSystemQualification;
+use App\Models\ResultQualificationClassic;
+use App\Models\Set;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use DateTime;
@@ -61,7 +67,48 @@ class RegisteredUserController extends Controller
 
         return redirect(RouteServiceProvider::HOME);
     }
+    public function index_group_registration(Request $request)
+    {
+        $event = Event::find($request->event_id);
+        $sets = Set::where('event_id', '=', $event->id)->orderBy('number_set')->get();
+        foreach ($sets as $set){
+            if($event->is_france_system_qualification){
+                $participants_event = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
+//                    $participant = ResultFranceSystemQualification::where('event_id','=',$event->id)->where('user_id','=',$user_id)->first();
+            } else {
+                $participants_event = ResultQualificationClassic::where('event_id','=',$event->id)->where('owner_id','=',$event->owner_id)->where('number_set_id', '=', $set->id)->count();
+//                    $participant = ResultQualificationClassic::where('event_id','=',$event->id)->where('user_id','=',$user_id)->first();
+            }
+            $set->free = $set->max_participants - $participants_event;
+            if($set->free <= 0){
+                $is_show_button_list_pending = true;
+            }
+            $a = $set->max_participants;
+            $b = $set->free;
 
+            if ($a === $b) {
+                $percent = 0;
+            } elseif ($a < $b) {
+                $diff = $b - $a;
+                if($b != 0){
+                    $percent = $diff / $b * 100;
+                } else {
+                    $percent = 0;
+                }
+            } else {
+                $diff = $a - $b;
+                if( $a != 0){
+                    $percent = $diff / $a * 100;
+                } else {
+                    $percent = 0;
+                }
+            }
+            $set->procent = intval($percent);
+            $set->date = Helpers::getDatesByDayOfWeek($event->start_date, $event->end_date);
+        }
+        $sport_categories = User::sport_categories;
+        return view('auth.group-register', compact(['event', 'sets', 'sport_categories']));
+    }
     public function group_registration(Request $request)
     {
         dd($request);

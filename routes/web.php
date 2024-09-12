@@ -15,7 +15,7 @@ use Laravel\Socialite\Facades\Socialite;
 */
 
 Route::get('/', [App\Http\Controllers\Controller::class, 'main'])->name('main');
-Route::get('/group-register', [App\Http\Controllers\Auth\RegisteredUserController::class, 'group_registration'])->name('group_registration');
+
 Route::get('/list_events', [App\Http\Controllers\Controller::class, 'list_events'])->name('list_events');
 Route::get('/auth/telegram/callback', [App\Http\Controllers\SocialiteController::class, 'callback_telegram']);
 Route::get('/auth/vkontakte/callback', [App\Http\Controllers\SocialiteController::class, 'callback_vkontakte']);
@@ -64,6 +64,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/change-password', [App\Http\Controllers\ProfileController::class,'changePassword'])->name('changePassword');
     Route::get('/getProfileEvents', [App\Http\Controllers\ProfileController::class, 'getTabContentEvents'])->name('getTabContentEvents');
     Route::post('/takePart', [App\Http\Controllers\EventsController::class, 'store'])->name('takePart');
+    Route::get('/group-register/event/{event_id}', [App\Http\Controllers\Auth\RegisteredUserController::class, 'index_group_registration'])->name('index_group_registration');
+    Route::post('/group-register/event/{event_id}', [App\Http\Controllers\Auth\RegisteredUserController::class, 'group_registration'])->name('group_registration');
     Route::post('/addToListPending', [App\Http\Controllers\EventsController::class, 'addToListPending'])->name('addToListPending');
     Route::post('/removeFromListPending', [App\Http\Controllers\EventsController::class, 'removeFromListPending'])->name('removeFromListPending');
     Route::post('/cancelTakePartParticipant', [App\Http\Controllers\EventsController::class, 'cancelTakePartParticipant'])->name('cancelTakePartParticipant');
