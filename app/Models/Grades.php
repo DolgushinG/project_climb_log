@@ -23,7 +23,6 @@ class Grades extends Model
     const MIDDLE = 'middle';
     const PRO = 'pro';
 
-
     public static function getRoutes()
     {
 

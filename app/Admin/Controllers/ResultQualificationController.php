@@ -1216,6 +1216,9 @@ class ResultQualificationController extends Controller
             $form->hidden('gender', 'gender');
             $form->table('result_for_edit', 'Таблица результата', function ($table) use ($event) {
                 $table->text('route_id', 'Номер маршрут')->readonly();
+                if($event->type_event){
+                    $table->text('route_name', 'Название')->readonly();
+                }
                 $table->text('grade', 'Категория')->readonly();
                 if($event->is_zone_show){
                     $attempts = [1 => 'FLASH', 2 => 'REDPOINT', 3 => 'ZONE', 0 => 'Не пролез'];

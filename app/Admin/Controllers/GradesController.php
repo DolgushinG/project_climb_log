@@ -499,16 +499,24 @@ class GradesController extends Controller
         $grid->actions(function ($actions) {
             $actions->disableView();
             $actions->disableEdit();
-            $actions->disableDelete();
-            $actions->append(<<<EOT
-<a href="javascript:void(0);" data-id="route-{$actions->getKey()}" class="grid-row-delete btn btn-xs btn-danger">
-    <i class="fa fa-trash"></i> Удалить
-</a>
-EOT
-            );
-
+//            $actions->disableDelete();
         });
+
         Admin::script(<<<SCRIPT
+                let routeIdColumns = document.querySelectorAll('td.column-route_id');
+                routeIdColumns.forEach(function(routeIdColumn) {
+                    let parentRow = routeIdColumn.closest('tr');
+                    if (parentRow) {
+                        let actionsColumn = parentRow.querySelector('td.column-__actions__');
+                        if (actionsColumn) {
+                            let deleteButton = actionsColumn.querySelector('a.grid-row-delete');
+                            if (deleteButton) {
+                                let currentId = deleteButton.getAttribute('data-id');
+                                deleteButton.setAttribute('data-id', 'route-' + currentId);
+                            }
+                        }
+                    }
+                });
             $('body').on('shown.bs.modal', '.modal', function() {
             $(this).find('select').each(function() {
                 var dropdownParent = $(document.body);
@@ -537,6 +545,9 @@ SCRIPT);
         if($event->type_event){
             $grid->column('route_id', 'Номер')->editable();
             $grid->column('route_name', 'Трасса');
+            $grid->column('place.name', 'Регион');
+            $grid->column('area.name', 'Район');
+            $grid->column('place_route.name', 'Сектор');
             $grid->column('type', 'Тип');
             $grid->column('image', 'Картинка')->image('', 200, 200);
             $grid->column('grade', 'Категория трассы')->editable('select', Grades::getGrades());
