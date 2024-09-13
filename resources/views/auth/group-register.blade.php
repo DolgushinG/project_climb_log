@@ -59,20 +59,20 @@
 
             <div class="form-group col-md-3 col-12 m-1">
                   <label for="firstname">Фамилия</label>
-                <input type="text" class="form-control" name="participants[${participantCount - 1}][firstname]" required>
+                <input type="text" class="form-control" name="participants[${participantCount}][firstname]" required>
             </div>
 
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="lastname">Имя</label>
-                <input type="text" class="form-control" name="participants[${participantCount - 1}][lastname]" required>
+                <input type="text" class="form-control" name="participants[${participantCount}][lastname]" required>
             </div>
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="dob">Дата рождения (опционально)</label>
-                <input type="date" id="dob${participantCount}" data-event-id="{{$event->id}}" class="form-control" name="participants[${participantCount - 1}][dob]">
+                <input type="date" id="dob${participantCount}" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]">
             </div>
             <div class="form-group col-md-3 col-12 m-1">
               <label for="gender" class="control-label">Пол</label>
-                <select class="form-select" name="participants[${participantCount - 1}][gender]" id="gender" required>
+                <select class="form-select" name="participants[${participantCount}][gender]" id="gender" required>
                     <option selected disabled value="">Укажите пол...</option>
                     <option id="male" value="male">
                         М
@@ -85,7 +85,7 @@
             @if($event->is_need_sport_category)
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="sport_categories">Разряд</label>
-                <select class="form-select" name="participants[${participantCount - 1}][sport_categories]" id="sport_categories"
+                <select class="form-select" name="participants[${participantCount}][sport_categories]" id="sport_categories"
                         aria-label="Floating label select example" autocomplete="off" required>
                     <option selected disabled value="">Открыть для выбора разряда
                     </option>
@@ -97,12 +97,12 @@
             @endif
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="team">Команда/Тренер (опционально)</label>
-                <input type="text" class="form-control" name="participants[${participantCount - 1}][team]">
+                <input type="text" class="form-control" name="participants[${participantCount}][team]">
             </div>
             @if(!$event->is_input_set)
                 <div class="form-group col-md-3 col-12 m-1">
                         <label for="sets">Выбрать время для сета</label>
-                    <select class="form-select" id="sets" name="participants[${participantCount - 1}][sets]"
+                    <select class="form-select" id="sets${participantCount}" name="participants[${participantCount}][sets]"
                         aria-label="Floating label select example" required>
                         @if($event->is_input_birthday)
                             <option selected disabled value="">Установите дату рождения</option>
@@ -134,7 +134,7 @@
             @endif
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="email">Email (опционально)</label>
-                <input type="email" class="form-control" name="participants[${participantCount - 1}][email]">
+                <input type="email" class="form-control" name="participants[${participantCount}][email]">
             </div>
             <div class="form-group col-12 m-1">
                 <button type="button" class="btn btn-danger remove-participant mt-2">Удалить участника</button>
@@ -143,14 +143,6 @@
     `;
 
             document.getElementById('participants').insertAdjacentHTML('beforeend', participantForm);
-        });
-
-        // Обработчик для удаления форм участников
-        document.getElementById('participants').addEventListener('click', function (event) {
-            if (event.target.classList.contains('remove-participant')) {
-                event.target.closest('.participant-form').remove();
-            }
-            const participantCount = document.querySelectorAll('.participant-form').length + 1 ;
             let selector = '[id=dob'+participantCount + ']'
             const dob = document.querySelector(selector);
             let debounceTimeout;
@@ -166,7 +158,8 @@
 
                     debounceTimeout = setTimeout(function () {
                         const dob_send = dob.value;
-                        const eventId = dob.getAttribute('data-event-id');
+                        let event_sel = 'data-event-id' + participantCount
+                        const eventId = dob.getAttribute(event_sel);
                         if (lastController) {
                             lastController.abort(); // Отменяем предыдущий запрос
                         }
@@ -182,8 +175,8 @@
                                     return response.json(); // Первый вызов .then()
                                 })
                                 .then(data => {
-
-                                    const setsSelect = document.querySelector(`[id=sets]`);
+                                    let sets_id = '[id=sets'+participantCount+']'
+                                    const setsSelect = document.querySelector(sets_id);
                                     setsSelect.innerHTML = '<option value="">Выберите сет</option>';
 
                                     if (data.availableSets && data.availableSets.length > 0) {
@@ -206,6 +199,13 @@
                         }
                     }, 500); // Задержка 500 мс перед выполнением запроса
                 });
+            }
+        });
+
+        // Обработчик для удаления форм участников
+        document.getElementById('participants').addEventListener('click', function (event) {
+            if (event.target.classList.contains('remove-participant')) {
+                event.target.closest('.participant-form').remove();
             }
         });
 

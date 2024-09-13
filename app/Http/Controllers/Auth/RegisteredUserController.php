@@ -111,49 +111,48 @@ class RegisteredUserController extends Controller
     }
     public function group_registration(Request $request)
     {
-        dd($request);
-        $new_users = $request->new_users;
+        $new_users = $request->participants;
         $event_id = $request->event_id;
-        $messages = array(
-            'firstname.string' => 'Поле Имя нужно вводить только текст',
-            'lastname.string' => 'Поле Фамилия нужно вводить только текст',
-            'email.string' => 'Поле email не корректно',
-            'email.email' => 'Поле email не корректно',
-            'email.max:255' => 'Поле email не корректно',
-            'email.unique' => 'Этот email уже зарегистрирован, возможно вы уже имеете аккаунт с этой почтой',
-        );
+        $email_person = $request->email_person;
+        $messages = [
+            'participants.*.firstname.string' => 'Поле Имя нужно вводить только текст',
+            'participants.*.lastname.string' => 'Поле Фамилия нужно вводить только текст',
+            'participants.*.email.string' => 'Поле email не корректно',
+            'participants.*.email.email' => 'Поле email не корректно',
+            'participants.*.email.max' => 'Поле email должно содержать не более 255 символов',
+            'participants.*.email.unique' => 'Этот email уже зарегистрирован, возможно вы уже имеете аккаунт с этой почтой',
+        ];
+
         $validator = Validator::make($request->all(), [
-            'firstname' => 'string',
-            'lastname' => 'string',
-            'email' => [
+            'participants.*.firstname' => 'required|string|max:255',
+            'participants.*.lastname' => 'required|string|max:255',
+            'participants.*.dob' => 'required|date',
+            'participants.*.gender' => 'required|in:male,female',
+            'participants.*.team' => 'nullable|string|max:255',
+            'participants.*.sets' => 'required|integer',
+            'participants.*.email' => [
+                'required',
                 'email',
                 'string',
-                // Исключаем текущего пользователя из проверки уникальности email
-                Rule::unique('users')->ignore(Auth()->user()->id),
+                'max:255',
+                Rule::unique('users', 'email'), // Проверяем уникальность email среди пользователей
             ],
         ], $messages);
         if ($validator->fails())
         {
             return response()->json(['error' => true,'message'=> $validator->errors()->all()],422);
         }
-        foreach ($new_users as $user){
-            $request->validate([
-                'firstname' => ['required', 'string', 'max:255'],
-                'lastname' => ['required', 'string', 'max:255'],
-                'gender' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users'],
-                'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            ]);
+        foreach ($new_users as $index => $user){
             User::create([
-                'firstname' => $request->firstname,
-                'middlename' => $request->firstname.' '.$request->lastname,
-                'lastname' => $request->lastname,
-                'gender' => $request->gender,
-                'city' => $request->city,
-                'birthday' => $request->birthday,
-                'team' => $request->team,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'firstname' => $user['firstname'],
+                'middlename' => $user['firstname'].' '.$user['lastname'],
+                'lastname' => $user['lastname'],
+                'gender' => $user['gender'],
+                'birthday' => $user['dob'],
+                'team' => $user['team'],
+                'contact' => $email_person,
+                'email' => $user['email'] ?? $index.$email_person,
+                'password' => Auth::user()->getAuthPassword(),
             ]);
         }
 
