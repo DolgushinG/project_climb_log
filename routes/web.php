@@ -66,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/takePart', [App\Http\Controllers\EventsController::class, 'store'])->name('takePart');
     Route::get('/group-register/event/{event_id}', [App\Http\Controllers\Auth\RegisteredUserController::class, 'index_group_registration'])->name('index_group_registration');
     Route::post('/group-register/event/{event_id}', [App\Http\Controllers\Auth\RegisteredUserController::class, 'group_registration'])->name('group_registration');
+    Route::get('/get-available-sets', [App\Http\Controllers\EventsController::class, 'getAvailableSets']);
     Route::post('/addToListPending', [App\Http\Controllers\EventsController::class, 'addToListPending'])->name('addToListPending');
     Route::post('/removeFromListPending', [App\Http\Controllers\EventsController::class, 'removeFromListPending'])->name('removeFromListPending');
     Route::post('/cancelTakePartParticipant', [App\Http\Controllers\EventsController::class, 'cancelTakePartParticipant'])->name('cancelTakePartParticipant');

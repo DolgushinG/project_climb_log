@@ -1060,4 +1060,18 @@ class EventsController extends Controller
             'routes' => $stats,
         ]);
     }
+
+    public function getAvailableSets(Request $request)
+    {
+        $event_id = $request->event_id;
+        $dob = $request->dob;
+        $available_sets = [];
+        $sets = Set::where('event_id', $event_id)->get();
+        foreach ($sets as $set){
+            if(Helpers::is_valid_year_for_event($event_id, $set->number_set, $dob)){
+                $available_sets[] = $set;
+            }
+        }
+        return response()->json(['availableSets' => $available_sets]);
+    }
 }

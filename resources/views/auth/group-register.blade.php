@@ -68,7 +68,7 @@
             </div>
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="dob">Дата рождения (опционально)</label>
-                <input type="date" class="form-control" name="participants[${participantCount - 1}][dob]">
+                <input type="date" id="dob${participantCount}" data-event-id="{{$event->id}}" class="form-control" name="participants[${participantCount - 1}][dob]">
             </div>
             <div class="form-group col-md-3 col-12 m-1">
               <label for="gender" class="control-label">Пол</label>
@@ -82,6 +82,7 @@
                     </option>
                 </select>
             </div>
+            @if($event->is_need_sport_category)
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="sport_categories">Разряд</label>
                 <select class="form-select" name="participants[${participantCount - 1}][sport_categories]" id="sport_categories"
@@ -92,48 +93,45 @@
                 <option value="{{$category}}">{{$category}}</option>
                     @endforeach
                 </select>
-
             </div>
+            @endif
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="team">Команда/Тренер (опционально)</label>
                 <input type="text" class="form-control" name="participants[${participantCount - 1}][team]">
             </div>
-            <div class="form-group col-md-3 col-12 m-1">
-                    <label for="sets">Выбрать время для сета</label>
-                  <select class="form-select" id="sets" name="participants[${participantCount - 1}][sets]"
-                aria-label="Floating label select example" required>
-            <option selected disabled value="">Открыть для выбора сета</option>
-            @foreach($sets as $set)
-                @if($set->free > 0)
-                    <option data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
-                @lang('somewords.'.$set->day_of_week)
-                @isset($set->date[$set->day_of_week])
-                    {{$set->date[$set->day_of_week]}}
-                @endisset
-                {{$set->time}} (еще мест {{$set->free}})
-                    </option>
-                @else
-                @if($set->free > 0)
-                    <option data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
-                @lang('somewords.'.$set->day_of_week)
-                @isset($set->date[$set->day_of_week])
-                    {{$set->date[$set->day_of_week]}}
-                @endisset
-                {{$set->time}} (еще мест {{$set->free}})
-                    </option>
+            @if(!$event->is_input_set)
+                <div class="form-group col-md-3 col-12 m-1">
+                        <label for="sets">Выбрать время для сета</label>
+                    <select class="form-select" id="sets" name="participants[${participantCount - 1}][sets]"
+                        aria-label="Floating label select example" required>
+                        @if($event->is_input_birthday)
+                            <option selected disabled value="">Установите дату рождения</option>
                         @else
-                    <option disabled data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
-                @lang('somewords.'.$set->day_of_week)
-                @isset($set->date[$set->day_of_week])
-                    {{$set->date[$set->day_of_week]}}
-                @endisset
-                {{$set->time}} (мест нет)  </option>
+                             <option selected disabled value="">Выберите сет</option>
+                             @foreach($sets as $set)
+                                @if($set->free > 0)
+                                     <option data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
+                                         @lang('somewords.'.$set->day_of_week)
+                                    @isset($set->date[$set->day_of_week])
+                                        {{$set->date[$set->day_of_week]}}
+                                    @endisset
+                                    {{$set->time}} (еще
+                                        мест {{$set->free}})
+                                       </option>
+                                @else
+                                    <option disabled data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
+                                    @lang('somewords.'.$set->day_of_week)
+                                    @isset($set->date[$set->day_of_week])
+                                    {{$set->date[$set->day_of_week]}}
+                                    @endisset
+                                    {{$set->time}} (мест нет)
+                                                </option>
+                                @endif
+                            @endforeach
                         @endif
-                @endif
-            @endforeach
-            </select>
-
-            </div>
+                    </select>
+                </div>
+            @endif
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="email">Email (опционально)</label>
                 <input type="email" class="form-control" name="participants[${participantCount - 1}][email]">
@@ -152,7 +150,65 @@
             if (event.target.classList.contains('remove-participant')) {
                 event.target.closest('.participant-form').remove();
             }
+            const participantCount = document.querySelectorAll('.participant-form').length + 1 ;
+            let selector = '[id=dob'+participantCount + ']'
+            const dob = document.querySelector(selector);
+            let debounceTimeout;
+            let lastController = null; // Для хранения текущего AbortController
+
+            // Проверяем, есть ли элемент dob и не привязан ли уже обработчик
+            if (dob && !dob.hasAttribute('data-listener-attached')) {
+                // Устанавливаем атрибут, чтобы избежать множественного привязывания обработчика
+                dob.setAttribute('data-listener-attached', 'true');
+
+                dob.addEventListener('input', function () {
+                    clearTimeout(debounceTimeout); // Сбросить предыдущий таймер
+
+                    debounceTimeout = setTimeout(function () {
+                        const dob_send = dob.value;
+                        const eventId = dob.getAttribute('data-event-id');
+                        if (lastController) {
+                            lastController.abort(); // Отменяем предыдущий запрос
+                        }
+                        lastController = new AbortController();
+                        const signal = lastController.signal;
+
+                        if (dob_send) {
+                            fetch(`/get-available-sets?dob=${dob_send}&event_id=${eventId}`, { signal })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Ошибка сети');
+                                    }
+                                    return response.json(); // Первый вызов .then()
+                                })
+                                .then(data => {
+
+                                    const setsSelect = document.querySelector(`[id=sets]`);
+                                    setsSelect.innerHTML = '<option value="">Выберите сет</option>';
+
+                                    if (data.availableSets && data.availableSets.length > 0) {
+                                        data.availableSets.forEach(set => {
+                                            const option = document.createElement('option');
+                                            option.value = set.id;
+                                            option.textContent = set.time;
+                                            setsSelect.appendChild(option);
+                                        });
+                                    } else {
+                                        const option = document.createElement('option');
+                                        option.value = '';
+                                        option.textContent = 'Нет доступных сетов';
+                                        setsSelect.appendChild(option);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Ошибка при запросе сетов:', error);
+                                });
+                        }
+                    }, 500); // Задержка 500 мс перед выполнением запроса
+                });
+            }
         });
+
 
     </script>
     <script type="text/javascript" src="{{ asset('js/ddata.js') }}"></script>

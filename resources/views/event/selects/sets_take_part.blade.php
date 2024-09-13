@@ -4,7 +4,6 @@
                 aria-label="Floating label select example" required>
             <option selected disabled value="">Открыть для выбора сета</option>
             @foreach($sets as $set)
-
                 @if(Auth::user()->birthday)
                     @if(App\Helpers\Helpers::is_valid_year_for_event($event->id, $set->number_set, Auth::user()->birthday))
                         @if($set->free > 0)
