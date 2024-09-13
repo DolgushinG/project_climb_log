@@ -6,6 +6,7 @@ use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\ListOfPendingParticipant;
+use App\Models\ParticipantCategory;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultQualificationClassic;
 use App\Models\Set;
@@ -111,16 +112,20 @@ class RegisteredUserController extends Controller
     }
     public function group_registration(Request $request)
     {
+
         $new_users = $request->participants;
         $event_id = $request->event_id;
-        $email_person = $request->email_person;
+        $event = Event::find($event_id);
+        if(!$event || !$event->is_registration_state){
+            return response()->json(['success' => false, 'message' => 'Ошибка регистрации'], 422);
+        }
+        $person = User::find(Auth::user()->getAuthIdentifier());
+        if(!Helpers::valid_email($person->email)){
+            return response()->json(['success' => false, 'message' => 'Ошибка регистрации, укажите существующий email в профиле'], 422);
+        }
         $messages = [
             'participants.*.firstname.string' => 'Поле Имя нужно вводить только текст',
             'participants.*.lastname.string' => 'Поле Фамилия нужно вводить только текст',
-            'participants.*.email.string' => 'Поле email не корректно',
-            'participants.*.email.email' => 'Поле email не корректно',
-            'participants.*.email.max' => 'Поле email должно содержать не более 255 символов',
-            'participants.*.email.unique' => 'Этот email уже зарегистрирован, возможно вы уже имеете аккаунт с этой почтой',
         ];
 
         $validator = Validator::make($request->all(), [
@@ -130,32 +135,78 @@ class RegisteredUserController extends Controller
             'participants.*.gender' => 'required|in:male,female',
             'participants.*.team' => 'nullable|string|max:255',
             'participants.*.sets' => 'required|integer',
-            'participants.*.email' => [
-                'required',
-                'email',
-                'string',
-                'max:255',
-                Rule::unique('users', 'email'), // Проверяем уникальность email среди пользователей
-            ],
         ], $messages);
         if ($validator->fails())
         {
             return response()->json(['error' => true,'message'=> $validator->errors()->all()],422);
         }
         foreach ($new_users as $index => $user){
-            User::create([
+            $new_user = User::create([
                 'firstname' => $user['firstname'],
                 'middlename' => $user['firstname'].' '.$user['lastname'],
                 'lastname' => $user['lastname'],
                 'gender' => $user['gender'],
-                'birthday' => $user['dob'],
-                'team' => $user['team'],
-                'contact' => $email_person,
-                'email' => $user['email'] ?? $index.$email_person,
+                'category_id' => $user['category_id'] ?? null,
+                'sport_category' => $user['sport_category'] ?? null,
+                'birthday' => $user['dob'] ?? null,
+                'team' => $user['team'] ?? null,
+                'contact' => $person->contact,
+                'email' => $user['email'] ?? (new \App\Models\Event)->translate_to_eng($user['firstname']).'-group-'.$person->email,
                 'password' => Auth::user()->getAuthPassword(),
             ]);
+            $user_id = $new_user->id;
+            $participant_categories = ParticipantCategory::where('event_id', '=', $event_id)->where('category', '=', $user['category_id'])->first();
+            if($event->is_france_system_qualification){
+                $participant = ResultFranceSystemQualification::where('user_id',  $event_id)->where('event_id', $event_id)->first();
+                if($participant){
+                    return response()->json(['success' => false, 'message' => 'ошибка регистрации'], 422);
+                }
+                $participant = new ResultFranceSystemQualification;
+            } else {
+                $participant = ResultQualificationClassic::where('user_id',  $user_id)->where('event_id', $event_id)->first();
+                if($participant){
+                    return response()->json(['success' => false, 'message' => 'Ошибка регистрации'], 422);
+                }
+                $participant = new ResultQualificationClassic;
+            }
+            if($event->is_input_set != 1){
+                $number_set_id = $user['sets'];
+                $set = Set::where('id', $number_set_id)->where('event_id', $event_id)->first();
+                $participant->number_set_id = $set->id;
+            }
+            if($event->is_auto_categories){
+                $participant->category_id = 0;
+            } else {
+                $participant->category_id = $participant_categories->id;
+            }
+
+            $participant->event_id = $event_id;
+            if($user['gender']){
+                $participant->gender = $user['gender'];
+            } else {
+                $participant->gender = $user->gender;
+            }
+            $participant->user_id = $user_id;
+            $participant->owner_id = $event->owner_id;
+            if(!$event->type_event && !$event->is_france_system_qualification){
+                $participant->result_for_edit = ResultQualificationClassic::generate_empty_json_result($event_id);
+            }
+            $participant->active = 0;
+            $participant->save();
+            if($user){
+                if($user['gender']){
+                    $new_user->gender = $user['gender'];
+                }
+                if($user['sport_category'] ?? null){
+                    $new_user->sport_category = $user['sport_category'];
+                }
+                if($user['dob'] ?? null){
+                    $new_user->birthday = $user['dob'];
+                }
+                $new_user->save();
+            }
         }
 
-        return response()->json(['success' => true, 'message' => 'Группа успешно создана и зарегистрирована на соревнование'], 201);
+        return response()->json(['success' => true, 'message' => 'Группа успешно создана и зарегистрирована на соревнование в письме все подробности']);
     }
 }

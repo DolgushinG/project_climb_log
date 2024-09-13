@@ -15,9 +15,9 @@
                             <h1> Оформление заявки для группы</h1>
                         </section>
                             @auth
-                            <form method="POST" action="{{route('group_registration', [$event->id])}}">
+                            <form id="group-registration-form" method="POST" action="{{route('group_registration', [$event->id])}}">
                                 @csrf
-                                <h3>Данные заявителя </h3>
+                                <h3>Данные заявителя</h3>
                                 <div class="row" style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
                                     <!-- Фамилия -->
                                     <div class="form-group col-md-4 col-12">
@@ -29,7 +29,6 @@
                                         <label for="lastname">Имя</label>
                                         <input type="text" class="form-control" id="lastname" value="{{ auth()->user()->lastname }}" readonly>
                                     </div>
-
                                     <!-- Email -->
                                     <div class="form-group col-md-4 col-12">
                                         <label for="email">Email</label>
@@ -41,7 +40,25 @@
                                 <button type="button" id="add-participant" class="btn btn-primary m-3">Добавить участника</button>
                                 <button type="submit" class="btn btn-success">Отправить</button>
                             </form>
-                            @endauth
+
+                            <div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="responseModalLabel">Результат регистрации</h5>
+                                            <button type="button" class="btn-close" aria-label="Close" onclick="closeModal()"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p id="response-message"></p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" onclick="closeModal()">Закрыть</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        @endauth
                     </div>
                 </div>
         </section>
@@ -82,6 +99,19 @@
                     </option>
                 </select>
             </div>
+            @if(!$event->is_auto_categories)
+            <div class="form-group col-md-3 col-12 m-1">
+                 <label for="category_id">Категория участника</label>
+                 <select class="form-select" id="category_id"
+                         aria-label="Floating label select" name="participants[${participantCount}][category_id]" autocomplete="off" required>
+                     <option selected disabled value="">Открыть для выбора категории
+                     </option>
+                    @foreach($event->categories as $category)
+                        <option value="{{$category}}">{{$category}}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             @if($event->is_need_sport_category)
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="sport_categories">Разряд</label>
@@ -208,7 +238,86 @@
                 event.target.closest('.participant-form').remove();
             }
         });
+        function openModal() {
+            const responseModal = document.getElementById('responseModal');
 
+            // Добавляем классы для отображения модального окна
+            responseModal.classList.add('show');
+            responseModal.style.display = 'block';
+            responseModal.setAttribute('aria-modal', 'true');
+            responseModal.removeAttribute('aria-hidden');
+
+            // Блокируем прокрутку страницы
+            document.body.classList.add('modal-open');
+            const backdrop = document.createElement('div');
+            backdrop.classList.add('modal-backdrop', 'fade', 'show');
+            document.body.appendChild(backdrop);
+        }
+
+        function closeModal() {
+            const responseModal = document.getElementById('responseModal');
+
+            // Убираем классы для закрытия модального окна
+            responseModal.classList.remove('show');
+            responseModal.style.display = 'none';
+            responseModal.setAttribute('aria-hidden', 'true');
+            responseModal.removeAttribute('aria-modal');
+
+            // Убираем блокировку прокрутки и фон
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        }
+        function clear_form() {
+            const participantForms = document.querySelectorAll('.participant-form');
+            participantForms.forEach(function (form, index) {
+                form.remove();
+            });
+
+            // Очищаем все поля первой формы
+            const initialForm = document.querySelector('.participant-form');
+            initialForm.querySelectorAll('input').forEach(function (input) {
+                if (input.type !== 'hidden' && input.type !== 'email') { // Не трогаем read-only поля
+                    input.value = ''; // Сброс значений
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('group-registration-form');
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Отменить стандартное поведение формы (перенаправление)
+
+                const formData = new FormData(form);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest' // Чтобы Laravel определил, что это AJAX-запрос
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Открыть модальное окно с результатом
+                            document.getElementById('response-message').textContent = data.message;
+                            clear_form();
+                            openModal();
+                        } else {
+                            // Если ошибка, показать соответствующее сообщение
+                            document.getElementById('response-message').textContent = data.message;
+                            openModal();
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('response-message').textContent = data.message;
+                        openModal();
+                    });
+            });
+        });
 
     </script>
     <script type="text/javascript" src="{{ asset('js/ddata.js') }}"></script>
