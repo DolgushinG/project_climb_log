@@ -479,7 +479,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             } else {
                 $new_last_points_after_merged = str_replace("null", 'Нет участвовал(а)', $users[$index]['last_points_after_merged']);
                 $users[$index]['last_points_after_merged'] = $new_last_points_after_merged;
-                $users[$index]['middlename'] = implode(' ', array_reverse(explode(' ', $users[$index]['middlename'], 2)));;
+                $users[$index]['middlename'] = implode(' ', array_reverse(explode(' ', $users[$index]['middlename'], 2)));
                 $users[$index] = collect($users[$index])->except('id', 'owner_id');
             }
 

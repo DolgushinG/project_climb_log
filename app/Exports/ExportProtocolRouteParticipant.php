@@ -132,7 +132,7 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
             case 'qualification':
                 $table = 'result_france_system_qualification';
                 if($this->category_id == "not_category"){
-                    return User::query()
+                    $users = User::query()
                         ->leftJoin($table, 'users.id', '=', $table.'.user_id')
                         ->where($table.'.event_id', '=', $this->event->id)
                         ->where($table.'.number_set_id', '=', $this->number_set_id)
@@ -141,7 +141,7 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
                             'users.middlename',
                         )->pluck('middlename')->toArray();
                 } else {
-                    return User::query()
+                    $users = User::query()
                         ->leftJoin($table, 'users.id', '=', $table.'.user_id')
                         ->where($table.'.event_id', '=', $this->event->id)
                         ->where($table.'.category_id', '=', $this->category_id)
@@ -151,6 +151,11 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
                             'users.middlename',
                         )->pluck('middlename')->toArray();
                 }
+                foreach ($users as $index => $user){
+                    $users[$index] = implode(' ', array_reverse(explode(' ', $user, 2)));
+                }
+                asort($users);
+                return $users;
             case 'semifinal':
                 if($this->category_id == 'not_category'){
                     $category = null;
@@ -159,7 +164,12 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
                 }
                 $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
                 $merged_users = ResultSemiFinalStage::get_participant_semifinal($this->event, $amount_the_best_participant, $category);
-                return $merged_users->pluck( 'middlename')->toArray();
+                $users = $merged_users->pluck( 'middlename')->toArray();
+                foreach ($users as $index => $user){
+                    $users[$index] = implode(' ', array_reverse(explode(' ', $user, 2)));
+                }
+                asort($users);
+                return $users;
             case 'final':
                 if($this->category_id == 'not_category'){
                     $category = null;
@@ -167,7 +177,12 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
                     $category = ParticipantCategory::find($this->category_id);
                 }
                 $merged_users = ResultFinalStage::get_final_participant($this->event, $category);
-                return $merged_users->pluck( 'middlename')->toArray();
+                $users = $merged_users->pluck( 'middlename')->toArray();
+                foreach ($users as $index => $user){
+                    $users[$index] = implode(' ', array_reverse(explode(' ', $user, 2)));
+                }
+                asort($users);
+                return $users;
         }
 
     }

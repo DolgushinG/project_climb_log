@@ -33,7 +33,7 @@ class BatchExportProtocolRouteParticipantsQualification extends Action
         $sets = Set::where('event_id', $event->id)->get()->sortBy('number_set');
         $sets_for = array();
         foreach ($sets as $set){
-            $sets_for[$set->id] = $set->number_set.' ['.$set->time.']['.$set->day_of_week.']';
+            $sets_for[$set->id] = $set->number_set.' ['.$set->time.']['.trans_choice('somewords.' . $set->day_of_week, 10).']';
         }
         $this->select('set_id', 'Из какого сета брать список участников?')->options($sets_for)->required();
         $this->select('gender', 'Пол')->options(['male' => 'Муж', 'female' => 'Жен'])->required();

@@ -189,6 +189,7 @@ class ExportStartProtocolParticipant implements WithCustomStartCell, ShouldAutoS
             $age = Helpers::calculate_age($user['birthday']) ?? '';
             $export[$index]['age'] = $age;
         }
+        asort($export);
         return $export;
 
     }

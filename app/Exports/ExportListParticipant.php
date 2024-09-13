@@ -91,17 +91,17 @@ class ExportListParticipant implements WithCustomStartCell, ShouldAutoSize, With
         } else {
             $table = 'result_qualification_classic';
         }
-        $names = User::query()
+        $users = User::query()
             ->leftJoin($table, 'users.id', '=', $table.'.user_id')
             ->where($table.'.event_id', '=', $this->event->id)
             ->select(
                 'users.middlename',
             )->pluck('middlename')->toArray();
-
-        return array_map(function ($name) {
-            $parts = explode(' ', $name, 2);
-            return isset($parts[1]) ? $parts[1] . ' ' . $parts[0] : $name;
-        }, $names);
+        foreach ($users as $index => $user){
+            $users[$index] = implode(' ', array_reverse(explode(' ', $user, 2)));
+        }
+        asort($users);
+        return $users;
     }
 
 }

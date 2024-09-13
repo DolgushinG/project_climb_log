@@ -90,6 +90,7 @@ class ProtocolCards implements WithTitle, WithCustomStartCell, ShouldAutoSize, W
                             $participants[] = implode(' ', array_reverse(explode(' ', $user['middlename'], 2)));;
                         }
                     }
+
                     foreach($participants as $participant){
                         $sheet->mergeCells('A'.$set_cell.':C'.$set_cell);
                         $sheet->setCellValue('A'.$set_cell, $participant);
