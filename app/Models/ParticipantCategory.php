@@ -31,7 +31,6 @@ class ParticipantCategory extends Model
         return $categories;
     }
 
-
     public static function get_increase_category($user_model, $format_transfer_category){
 
         $categories_for_increase = array();

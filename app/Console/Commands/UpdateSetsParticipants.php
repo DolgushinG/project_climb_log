@@ -67,6 +67,7 @@ class UpdateSetsParticipants extends Command
                     $participants_event->owner_id = $event->owner_id;
                     $participants_event->event_id = $job->event_id;
                     $participants_event->gender = $user->gender;
+                    $participants_event->sport_category = $user->sport_category;
                     $participants_event->number_set_id = $number_set->id;
                     $participants_event->active = 0;
                     $participants_event->is_paid = 0;

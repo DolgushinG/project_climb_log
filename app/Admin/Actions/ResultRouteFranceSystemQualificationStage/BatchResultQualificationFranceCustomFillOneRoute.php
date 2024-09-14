@@ -134,6 +134,10 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
     public static function create_results_fsq($participant, $results_old_for_edit, $result_for_edit)
     {
         $merged_result_for_edit = array_merge($results_old_for_edit, $result_for_edit);
+        // Сортируем массив по "Номеру маршрута"
+        usort($merged_result_for_edit, function ($a, $b) {
+            return $a['Номер маршрута'] <=> $b['Номер маршрута'];
+        });
         $participant->result_for_edit_france_system_qualification = $merged_result_for_edit;
         $participant->save();
     }
@@ -161,10 +165,9 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
             $amount_routes = 0;
         }
         foreach ($result as $user_id => $middlename){
-            $new_middlename = implode(' ', array_reverse(explode(' ', $middlename, 2)));
             $category_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->category_id;
             $category = ParticipantCategory::find($category_id)->category;
-            $result[$user_id] = $new_middlename.' ['.$category.']';
+            $result[$user_id] = $middlename.' ['.$category.']';
             if(in_array($user_id, $result_final)){
                 $result_user = ResultRouteFranceSystemQualification::where('event_id', $event->id)->where('user_id', $user_id);
                 $routes = $result_user->pluck('route_id')->toArray();
@@ -173,9 +176,9 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
                     $string_version .= $value . ', ';
                 }
                 if($result_user->get()->count() == $amount_routes){
-                    $result[$user_id] = $new_middlename.' ['.$category.']'.' [Добавлены все трассы]';
+                    $result[$user_id] = $middlename.' ['.$category.']'.' [Добавлены все трассы]';
                 } else {
-                    $result[$user_id] = $new_middlename.' ['.$category.']'.' [Трассы: '.$string_version.']';
+                    $result[$user_id] = $middlename.' ['.$category.']'.' [Трассы: '.$string_version.']';
                 }
             }
         }
