@@ -152,7 +152,7 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
         } else {
             $merged_users = ResultFranceSystemQualification::get_qualification_france_participants($event, $this->category);
         }
-        $result = $merged_users->pluck( 'middlename','id');
+        $result = $merged_users->pluck( 'middlename','id')->toArray();
         $result_final = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         $amount_routes = Grades::where('event_id', $event->id)->first();
         if($amount_routes){
@@ -161,9 +161,10 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
             $amount_routes = 0;
         }
         foreach ($result as $user_id => $middlename){
+            $new_middlename = implode(' ', array_reverse(explode(' ', $middlename, 2)));
             $category_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->category_id;
             $category = ParticipantCategory::find($category_id)->category;
-            $result[$user_id] = $middlename.' ['.$category.']';
+            $result[$user_id] = $new_middlename.' ['.$category.']';
             if(in_array($user_id, $result_final)){
                 $result_user = ResultRouteFranceSystemQualification::where('event_id', $event->id)->where('user_id', $user_id);
                 $routes = $result_user->pluck('route_id')->toArray();
@@ -172,13 +173,13 @@ class BatchResultQualificationFranceCustomFillOneRoute extends CustomAction
                     $string_version .= $value . ', ';
                 }
                 if($result_user->get()->count() == $amount_routes){
-                    $result[$user_id] = $middlename.' ['.$category.']'.' [Добавлены все трассы]';
+                    $result[$user_id] = $new_middlename.' ['.$category.']'.' [Добавлены все трассы]';
                 } else {
-                    $result[$user_id] = $middlename.' ['.$category.']'.' [Трассы: '.$string_version.']';
+                    $result[$user_id] = $new_middlename.' ['.$category.']'.' [Трассы: '.$string_version.']';
                 }
             }
         }
-
+        asort($result);
         $routes = [];
         for($i = 1; $i <= $amount_routes; $i++){
             $routes[$i] = $i;
