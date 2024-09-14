@@ -15,30 +15,37 @@
                             <h1> Оформление заявки для группы</h1>
                         </section>
                             @auth
-                            <form id="group-registration-form" method="POST" action="{{route('group_registration', [$event->id])}}">
-                                @csrf
                                 <h3>Данные заявителя</h3>
                                 <div class="row" style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
                                     <!-- Фамилия -->
                                     <div class="form-group col-md-4 col-12">
                                         <label for="firstname">Фамилия</label>
-                                        <input type="text" class="form-control" id="firstname" value="{{ auth()->user()->firstname }}" readonly>
+                                        <p>{{ auth()->user()->firstname }}</p>
                                     </div>
                                     <!-- Имя -->
                                     <div class="form-group col-md-4 col-12">
                                         <label for="lastname">Имя</label>
-                                        <input type="text" class="form-control" id="lastname" value="{{ auth()->user()->lastname }}" readonly>
+                                        <p>{{ auth()->user()->lastname }}</p>
                                     </div>
                                     <!-- Email -->
                                     <div class="form-group col-md-4 col-12">
                                         <label for="email">Email</label>
-                                        <input type="email" class="form-control" id="email" value="{{ auth()->user()->email }}" readonly>
+                                        <p>{{ auth()->user()->email }}</p>
                                     </div>
+                                    <div class="form-group col-md-4 col-12">
+                                        <label for="email">Контактные данные</label>
+                                        <p>{{ auth()->user()->contact ?? "Не заполнены заполните у себя в личном кабинете" }} </p>
+                                    </div>
+                                    <p> Если у участников не заполнены поля Email, то они будут сгенерированы автоматически </p>
+                                    <p> Контактные данные участников будут заполнены контактными данными заявителя </p>
+                                    <p> В письме после отправки,  будут все данные для входа в личный кабинет заявленных участников</p>
                                 </div>
+                            <form id="group-registration-form" method="POST" action="{{route('group_registration', [$event->id])}}">
+                                @csrf
                                 <div id="participants">
                                 </div>
                                 <button type="button" id="add-participant" class="btn btn-primary m-3">Добавить участника</button>
-                                <button type="submit" class="btn btn-success">Отправить</button>
+                                <button type="submit" id="btn-send" class="btn btn-success" disabled>Отправить</button>
                             </form>
 
                             <div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
@@ -68,7 +75,9 @@
 
         document.getElementById('add-participant').addEventListener('click', function () {
             const participantCount = document.querySelectorAll('.participant-form').length + 1 ;
-
+            if(participantCount >= 1){
+                document.getElementById('btn-send').disabled = false
+            }
             // Структура формы с использованием Bootstrap Grid
             let participantForm = `
         <div class="participant-form row" style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
@@ -236,7 +245,12 @@
         document.getElementById('participants').addEventListener('click', function (event) {
             if (event.target.classList.contains('remove-participant')) {
                 event.target.closest('.participant-form').remove();
+
+                if(document.querySelectorAll('.participant-form').length < 1){
+                    document.getElementById('btn-send').disabled = true
+                }
             }
+
         });
         function openModal() {
             const responseModal = document.getElementById('responseModal');
@@ -304,8 +318,8 @@
                         if (data.success) {
                             // Открыть модальное окно с результатом
                             document.getElementById('response-message').textContent = data.message;
-                            clear_form();
                             openModal();
+                            clear_form();
                         } else {
                             // Если ошибка, показать соответствующее сообщение
                             document.getElementById('response-message').textContent = data.message;
