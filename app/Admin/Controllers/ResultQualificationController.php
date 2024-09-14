@@ -513,17 +513,18 @@ class ResultQualificationController extends Controller
             $result = ResultFranceSystemQualification::find($id);
             $result_route = ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
             if ($result_route) {
-                ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
                 $model = ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
                 $model->amount_top = null;
                 $model->amount_try_top = null;
                 $model->amount_zone = null;
                 $model->amount_try_zone = null;
                 $model->place = null;
-                $model->save();
-
                 $result->result_for_edit_france_system_qualification = null;
-                $result->save();
+                if(UpdateParticipantResult::is_validate_access_delete($model, $result->user_id, $result->event_id)){
+                    ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+                    $model->save();
+                    $result->save();
+                }
             } else {
                 $model = ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
                 if(UpdateParticipantResult::is_validate_access_delete($model, $result->user_id, $result->event_id)){
@@ -534,13 +535,16 @@ class ResultQualificationController extends Controller
             $result = ResultQualificationClassic::find($id);
             $result_route = ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
             if ($result_route) {
-                ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
                 $participant = ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
                 $participant->result_for_edit = ResultQualificationClassic::generate_empty_json_result($result->event_id);
                 $participant->active = 0;
                 $participant->points = null;
                 $participant->user_place = null;
-                $participant->save();
+                if(UpdateParticipantResult::is_validate_access_delete($participant, $result->user_id, $result->event_id)){
+                    ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+                    $participant->save();
+                }
+
             } else {
                 $model = ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
                 if(UpdateParticipantResult::is_validate_access_delete($model, $result->user_id, $result->event_id)){
@@ -1070,10 +1074,11 @@ class ResultQualificationController extends Controller
             }
 //            $actions->disableView();
         });
-
+        if(Admin::user()->is_delete_result == 0){
+            $grid->disableBatchActions();
+        }
         $grid->disableExport();
         $grid->disableFilter();
-
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->column('user.id', __('ID'));

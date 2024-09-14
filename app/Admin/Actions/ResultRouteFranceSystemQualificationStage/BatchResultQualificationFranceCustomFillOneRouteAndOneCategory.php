@@ -45,11 +45,11 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         } else {
             $amount_zone  = 0;
         }
-//        $max_attempts = Helpers::find_max_attempts($amount_try_top, $amount_try_zone);
-//        if(Helpers::validate_amount_sum_top_and_zone_and_attempts($all_attempts, $amount_try_top, $amount_try_zone)){
-//            return $this->response()->error(
-//                'У трассы '.$results['route_id'].' Максимальное кол-во попыток '.$max_attempts.' а в поле все попытки - '. $all_attempts);
-//        }
+        $max_attempts = Helpers::find_max_attempts($amount_try_top, $amount_try_zone);
+        if(Helpers::validate_amount_sum_top_and_zone_and_attempts($all_attempts, $amount_try_top, $amount_try_zone)){
+            return $this->response()->error(
+                'У трассы '.$results['route_id'].' Максимальное кол-во попыток '.$max_attempts.' а в поле все попытки - '. $all_attempts);
+        }
 
         # Если есть ТОП то зона не может быть 0
         if(Helpers::validate_amount_top_and_zone($amount_top, $amount_zone)){
