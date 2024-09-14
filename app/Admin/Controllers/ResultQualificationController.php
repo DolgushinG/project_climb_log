@@ -439,6 +439,10 @@ class ResultQualificationController extends Controller
             $type = 'update';
             return $this->form($type, $id)->update($id);
         }
+        if ($request->sport_category) {
+            $type = 'update';
+            return $this->form($type, $id)->update($id);
+        }
         if ($request->number_set_id) {
             $type = 'update';
             return $this->form($type, $id)->update($id);
@@ -615,9 +619,7 @@ class ResultQualificationController extends Controller
             $filter->disableIdFilter();
             $filter->like('user.middlename', 'Участник');
         });
-        $grid->column('user.middlename', __('Участник'))->display(function ($name) {
-            return implode(' ', array_reverse(explode(' ', $name, 2)));
-        });
+        $grid->column('user.middlename', __('Участник'));
         $grid->column('user.birthday', __('Дата Рождения'));
         $grid->column('gender', __('Пол'))
             ->help('Если случается перенос, из одного пола в другой, необходимо обязательно пересчитать результаты')
@@ -1082,9 +1084,7 @@ class ResultQualificationController extends Controller
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->column('user.id', __('ID'));
-        $grid->column('user.middlename', __('Участник'))->display(function ($name) {
-            return implode(' ', array_reverse(explode(' ', $name, 2)));
-        });
+        $grid->column('user.middlename', __('Участник'));
         $grid->column('gender', __('Пол'))
             ->help('Если случается перенос, из одного пола в другой, необходимо обязательно пересчитать результаты')
             ->select(['male' => 'Муж', 'female' => 'Жен']);
@@ -1094,7 +1094,26 @@ class ResultQualificationController extends Controller
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-        $grid->column('user.sport_category', __('Разряд'));
+
+        $grid->column('sport_category', 'Категория')->display(function ($sport_category) use ($grid){
+            if(!$sport_category){
+                return 'не установлен';
+            } else {
+                return $sport_category;
+            }
+
+        })->select(User::sport_categories_select);
+        Admin::script(<<<EOT
+                $(document).ready(function() {
+                    $('.ie-trigger-column-sport_category').each(function() {
+                        // Если внутри span нет текста, делаем иконку видимой
+                        if ($(this).find('.ie-display').text().trim() === '') {
+                            $(this).find('i.fa-edit').css('visibility', 'visible');
+                        }
+                    });
+                });
+        EOT
+        );
         $grid->column('user.birthday', __('Возраст'))->display(function ($birthday){
             return Helpers::calculate_age($birthday);
         });
@@ -1258,6 +1277,11 @@ class ResultQualificationController extends Controller
                 if ($form->input('gender')) {
                     $result = $form->model()->find($id);
                     $result->gender = $form->input('gender');
+                    $result->save();
+                }
+                if ($form->input('sport_category')) {
+                    $result = $form->model()->find($id);
+                    $result->sport_category = $form->input('sport_category');
                     $result->save();
                 }
                 if ($form->result_for_edit) {

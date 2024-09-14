@@ -598,6 +598,8 @@ class Event extends Model
 
     public static function get_france_system_result($table, $event_id, $gender, $category = null)
     {
+        $event = Event::find($event_id);
+        $max_routes = Grades::where('event_id', $event->id)->first()->count_routes ?? 0;
         $users = User::query()
             ->leftJoin($table, 'users.id', '=', $table . '.user_id')
             ->where($table . '.event_id', '=', $event_id)
@@ -643,6 +645,15 @@ class Event extends Model
                 $users[$index]['amount_try_top_' . $route_id] = $result->amount_try_top;
                 $users[$index]['amount_zone_' . $route_id] = $result->amount_zone;
                 $users[$index]['amount_try_zone_' . $route_id] = $result->amount_try_zone;
+            }
+            // Заполняем 0 для трасс, которые не были добавлены
+            for ($i = 1; $i <= $max_routes; $i++) {
+                if (!isset($users[$index]['amount_top_' . $i])) {
+                    $users[$index]['amount_top_' . $i] = 0;
+                    $users[$index]['amount_try_top_' . $i] = 0;
+                    $users[$index]['amount_zone_' . $i] = 0;
+                    $users[$index]['amount_try_zone_' . $i] = 0;
+                }
             }
             $users[$index] = collect($users[$index])->except('id');
         }
@@ -775,7 +786,11 @@ class Event extends Model
             $participant = new ResultFinalStage;
             $new_result_for_edit = $result_for_edit;
         } else {
+            // Сортируем массив по "Номеру маршрута"
             $new_result_for_edit = array_merge($participant->result_for_edit_final, $result_for_edit);
+            usort($new_result_for_edit, function ($a, $b) {
+                return $a['Номер маршрута'] <=> $b['Номер маршрута'];
+            });
         }
         $participant->owner_id = $owner_id;
         $participant->event_id = $event_id;
@@ -793,7 +808,11 @@ class Event extends Model
             $new_result_for_edit = $result_for_edit;
         } else {
             $new_result_for_edit = array_merge($participant->result_for_edit_semifinal, $result_for_edit);
+            usort($new_result_for_edit, function ($a, $b) {
+                return $a['Номер маршрута'] <=> $b['Номер маршрута'];
+            });
         }
+
         $participant->owner_id = $owner_id;
         $participant->event_id = $event_id;
         $participant->user_id = $user_id;

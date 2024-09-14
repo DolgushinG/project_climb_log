@@ -47,7 +47,6 @@ Route::group([
         }
         // Преобразуем формат и сортируем по алфавиту
         $sortedUsers = $result->mapWithKeys(function ($middlename, $id) use($eventId, $amount_routes) {
-            // Предположим, что middlename содержит 'фамилия имя'
             $result_user = ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('user_id', $id);
             $routes = $result_user->pluck('route_id')->toArray();
             $string_version = '';
@@ -57,12 +56,9 @@ Route::group([
             if($result_user->get()->count() == $amount_routes){
                 $str = ' [Добавлены все трассы]';
             } else {
-                $str =  '[Трассы: '.$string_version.']';
+                $str =  ' [Трассы: '.$string_version.']';
             }
-            $parts = explode(' ', $middlename, 2);
-            $surname = $parts[0] ?? '';
-            $name = $parts[1] ?? '';
-            return [$id => $name . ' ' . $surname. $str ];
+            return [$id => $middlename. $str ];
         })->toArray();
 
         return response()->json($sortedUsers ?? []);

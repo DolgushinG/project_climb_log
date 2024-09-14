@@ -97,9 +97,6 @@ class ExportListParticipant implements WithCustomStartCell, ShouldAutoSize, With
             ->select(
                 'users.middlename',
             )->pluck('middlename')->toArray();
-        foreach ($users as $index => $user){
-            $users[$index] = implode(' ', array_reverse(explode(' ', $user, 2)));
-        }
         asort($users);
         return $users;
     }

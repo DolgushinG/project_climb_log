@@ -145,6 +145,10 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
     public static function create_results_fsq($participant, $results_old_for_edit, $result_for_edit)
     {
         $merged_result_for_edit = array_merge($results_old_for_edit, $result_for_edit);
+        // Сортируем массив по "Номеру маршрута"
+        usort($merged_result_for_edit, function ($a, $b) {
+            return $a['Номер маршрута'] <=> $b['Номер маршрута'];
+        });
         $participant->result_for_edit_france_system_qualification = $merged_result_for_edit;
         $participant->save();
     }

@@ -87,48 +87,48 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                         $sheet->setCellValue('A1', $this->title());
                         $sheet->getStyle('A1')->applyFromArray($style);
                         $merge_cells = [
-                            1 => ["G","J"],
-                            2 => ["K", "N"],
-                            3 => ["O", "R"],
-                            4 => ["S", "V"],
-                            5 => ["W", "Z"],
-                            6 => ["AA", "AD"],
-                            7 => ["AE", "AH"],
-                            8 => ["AI", "AL"],
-                            9 => ["AM", "AP"],
-                            10 => ["AQ", "AT"],
-                            11 => ["AU", "AX"],
-                            12 => ["AY", "BB"],
-                            13 => ["BC", "BF"],
-                            14 => ["BG", "BJ"],
-                            15 => ["BK", "BN"],
-                            16 => ["BO", "BR"],
-                            17 => ["BS", "BV"],
-                            18 => ["BW", "BZ"],
-                            19 => ["CA", "CD"],
-                            20 => ["CE", "CH"],
+                            1 => ["H","K"],
+                            2 => ["L", "O"],
+                            3 => ["P", "S"],
+                            4 => ["T", "W"],
+                            5 => ["X", "AA"],
+                            6 => ["AB", "AE"],
+                            7 => ["AF", "AI"],
+                            8 => ["AJ", "AM"],
+                            9 => ["AN", "AQ"],
+                            10 => ["AR", "AU"],
+                            11 => ["AV", "AY"],
+                            12 => ["AZ", "BC"],
+                            13 => ["BD", "BG"],
+                            14 => ["BH", "BK"],
+                            15 => ["BL", "BO"],
+                            16 => ["BP", "BS"],
+                            17 => ["BT", "BW"],
+                            18 => ["BX", "CA"],
+                            19 => ["CB", "CE"],
+                            20 => ["CF", "CH"],
                         ];
                         $cell_title = [
-                            1 => "I",
-                            2 => "M",
-                            3 => "Q",
-                            4 => "U",
-                            5 => "Y",
-                            6 => "AC",
-                            7 => "AG",
-                            8 => "AK",
-                            9 => "AO",
-                            10 => "AS",
-                            11 => "AW",
-                            12 => "BA",
-                            13 => "BE",
-                            14 => "BI",
-                            15 => "BM",
-                            16 => "BQ",
-                            17 => "BU",
-                            18 => "BY",
-                            19 => "CC",
-                            20 => "CG",
+                            1 => "J",
+                            2 => "N",
+                            3 => "R",
+                            4 => "V",
+                            5 => "Z",
+                            6 => "AD",
+                            7 => "AH",
+                            8 => "AL",
+                            9 => "AP",
+                            10 => "AT",
+                            11 => "AX",
+                            12 => "BB",
+                            13 => "BF",
+                            14 => "BJ",
+                            15 => "BN",
+                            16 => "BR",
+                            17 => "BV",
+                            18 => "BZ",
+                            19 => "CD",
+                            20 => "CH",
                         ];
                         switch ($this->type){
                             case 'Final':
@@ -192,11 +192,18 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $france_system_qualification = [
                     'Место',
                     'Участник(Фамилия Имя)',
+                ];
+                $event = Event::find($this->event_id);
+                if ($event->is_need_sport_category) {
+                    $france_system_qualification[] = 'Разряд';
+                }
+                $france_system_qualification = array_merge($france_system_qualification, [
                     'Сумма TOP',
                     'Сумма попыток на TOP',
                     'Сумма ZONE',
                     'Сумма попыток на ZONE',
-                ];
+                ]);
+
                 $count = ResultRouteFranceSystemQualification::count_route_in_qualification_final($this->event_id);
                 for($i = 1; $i <= $count; $i++){
                     $france_system_qualification[] = 'TOP';
@@ -209,6 +216,9 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $event = Event::find($this->event_id);
                 $qualification[] = 'Место';
                 $qualification[] = 'Участник(Фамилия Имя)';
+                if($event->is_need_sport_category) {
+                    $qualification[] = 'Разряд';
+                }
                 $qualification[] = 'Баллы';
                 if(!$event->is_input_set) {
                     $qualification[] = 'Сет';
@@ -303,6 +313,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 'users.id',
                 'result_qualification_classic.user_place',
                 'users.middlename',
+                'result_qualification_classic.sport_category',
                 'result_qualification_classic.points',
                 'result_qualification_classic.owner_id',
                 'result_qualification_classic.number_set_id',
@@ -317,6 +328,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             "id" => "",
             "user_place" => "",
             "middlename" => "",
+            "sport_category" => "",
             "points" => "",
             "owner_id" => "",
             "number_set_id" => "",
@@ -327,6 +339,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $count = Grades::where('event_id', $this->event_id)->first()->count_routes;
                 $users[$index]['user_place'] = '';
                 $users[$index]['number_set_id'] = '';
+                $users[$index]['sport_category'] = '';
                 $users[$index]['amount_passed_routes'] = '';
                 if($event->is_flash_value){
                     $users[$index]['amount_passed_flash'] = '';
@@ -338,7 +351,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $users[$index]['amount_passed_redpoint'] = 'Коэффициент трасс';
                     $coefficient = EventAndCoefficientRoute::where('event_id', $this->event_id)->select('route_id', 'coefficient_' . $this->gender)->pluck('coefficient_' . $this->gender, 'route_id');
                     for ($i = 1; $i <= $count; $i++) {
-                        $users[$index]['route_result_' . $i] = $coefficient[$i];
+                        $users[$index]['route_result_' . $i] = $coefficient[$i] ?? '';
                     }
                 } else {
                     if($event->is_flash_value && $event->is_zone_show){
@@ -383,7 +396,6 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $users[$index]['user_place'] = $place;
                 $set = Set::find($user['number_set_id']);
                 $users[$index]['number_set_id'] = $set->number_set ?? '';
-                $users[$index]['middlename'] = implode(' ', array_reverse(explode(' ', $users[$index]['middlename'], 2)));
                 $users[$index]['amount_passed_routes'] = $amount_passed_routes;
                 if($event->is_flash_value){
                     $users[$index]['amount_passed_flash'] = $amount_passed_flash;
@@ -479,7 +491,6 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             } else {
                 $new_last_points_after_merged = str_replace("null", 'Нет участвовал(а)', $users[$index]['last_points_after_merged']);
                 $users[$index]['last_points_after_merged'] = $new_last_points_after_merged;
-                $users[$index]['middlename'] = implode(' ', array_reverse(explode(' ', $users[$index]['middlename'], 2)));
                 $users[$index] = collect($users[$index])->except('id', 'owner_id');
             }
 
@@ -510,6 +521,8 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
     }
 
     public function get_final($table){
+        $event = Event::find($this->event_id);
+        $max_routes = Grades::where('event_id', $event->id)->first()->count_routes ?? 0;
         $users = User::query()
             ->leftJoin($table, 'users.id', '=', $table.'.user_id')
             ->where($table.'.event_id', '=', $this->event_id)
@@ -517,6 +530,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $table.'.place',
                 'users.id',
                 'users.middlename',
+                $table.'.sport_category',
                 $table.'.category_id',
                 $table.'.amount_top',
                 $table.'.amount_try_top',
@@ -549,9 +563,19 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $users[$index]['amount_try_top_'.$route_id] = $result->amount_try_top;
                 $users[$index]['amount_zone_'.$route_id] = $result->amount_zone;
                 $users[$index]['amount_try_zone_'.$route_id] = $result->amount_try_zone;
+                // Заполняем 0 для трасс, которые не были добавлены
+                for ($i = 1; $i <= $max_routes; $i++) {
+                    if (!isset($users[$index]['amount_top_' . $i])) {
+                        $users[$index]['amount_top_' . $i] = 0;
+                        $users[$index]['amount_try_top_' . $i] = 0;
+                        $users[$index]['amount_zone_' . $i] = 0;
+                        $users[$index]['amount_try_zone_' . $i] = 0;
+                    }
+                }
+
             }
-            $users[$index]['middlename'] = implode(' ', array_reverse(explode(' ', $users[$index]['middlename'], 2)));
-            $users[$index] = collect($users[$index])->except('id', 'category_id');
+            $except = $event->is_need_sport_category ? ['id', 'category_id'] : ['id', 'category_id', 'sport_category'];
+            $users[$index] = collect($users[$index])->except($except);
         }
         return collect($users);
     }

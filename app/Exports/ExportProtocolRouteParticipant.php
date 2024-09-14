@@ -151,9 +151,6 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
                             'users.middlename',
                         )->pluck('middlename')->toArray();
                 }
-                foreach ($users as $index => $user){
-                    $users[$index] = implode(' ', array_reverse(explode(' ', $user, 2)));
-                }
                 asort($users);
                 return $users;
             case 'semifinal':
@@ -165,9 +162,6 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
                 $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
                 $merged_users = ResultSemiFinalStage::get_participant_semifinal($this->event, $amount_the_best_participant, $category);
                 $users = $merged_users->pluck( 'middlename')->toArray();
-                foreach ($users as $index => $user){
-                    $users[$index] = implode(' ', array_reverse(explode(' ', $user, 2)));
-                }
                 asort($users);
                 return $users;
             case 'final':
@@ -178,9 +172,6 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
                 }
                 $merged_users = ResultFinalStage::get_final_participant($this->event, $category);
                 $users = $merged_users->pluck( 'middlename')->toArray();
-                foreach ($users as $index => $user){
-                    $users[$index] = implode(' ', array_reverse(explode(' ', $user, 2)));
-                }
                 asort($users);
                 return $users;
         }

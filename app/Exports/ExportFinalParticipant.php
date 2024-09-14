@@ -91,17 +91,12 @@ class ExportFinalParticipant implements WithCustomStartCell, ShouldAutoSize, Wit
         } else {
             $table = 'result_qualification_classic';
         }
-        $names = User::query()
+        return User::query()
             ->leftJoin($table, 'users.id', '=', $table.'.user_id')
             ->where($table.'.event_id', '=', $this->event->id)
             ->select(
                 'users.middlename',
             )->pluck('middlename')->toArray();
-        return array_map(function ($name) {
-            $parts = explode(' ', $name, 2);
-            return isset($parts[1]) ? $parts[1] . ' ' . $parts[0] : $name;
-        }, $names);
-
     }
 
 }

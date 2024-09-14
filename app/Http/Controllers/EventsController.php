@@ -419,7 +419,6 @@ class EventsController extends Controller
                 foreach ($event->categories as $category) {
                     $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
                     $users_female2 = Event::get_france_system_result('result_france_system_qualification', $event->id, 'female', $category)->toArray();
-
                     $users_male2 = Event::get_france_system_result('result_france_system_qualification', $event->id, 'male', $category)->toArray();
                     $result_each_routes['female'][$category->id] = $users_female2;
                     $result_each_routes['male'][$category->id] = $users_male2;
@@ -539,11 +538,8 @@ class EventsController extends Controller
         }
 
         $participant->event_id = $request->event_id;
-        if($request->gender){
-            $participant->gender = $request->gender;
-        } else {
-            $participant->gender = $user->gender;
-        }
+        $participant->gender = $request->gender ?? $user->gender;
+        $participant->sport_category = $request->sport_category ?? $user->sport_category;
         $participant->user_id = $request->user_id;
         $participant->owner_id = $event->owner_id;
         if(!$event->type_event && !$event->is_france_system_qualification){
@@ -950,7 +946,6 @@ class EventsController extends Controller
             }
             $list_pending->user_id = $request->user_id;
             $list_pending->event_id = $request->event_id;
-            $list_pending->number_sets = $request->number_sets;
             $user = User::find($request->user_id);
             if($user){
                 if($request->gender){
