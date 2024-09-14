@@ -65,13 +65,7 @@ Route::group([
             return [$id => $name . ' ' . $surname. $str ];
         })->toArray();
 
-        asort($sortedUsers);
-        if($sortedUsers){
-            $data = $sortedUsers;
-        } else {
-            $data = [];
-        }
-        return response()->json($data);
+        return response()->json($sortedUsers ?? []);
     });
     $router->middleware(['throttle:get_attempts'])->get('/api/get_attempts', function(Request $request) {
         $routeId = $request->get('route_id');

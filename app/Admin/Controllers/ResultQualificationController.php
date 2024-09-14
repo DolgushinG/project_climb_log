@@ -988,9 +988,14 @@ class ResultQualificationController extends Controller
                                         var model = $('[data-category-user-id=user_id]');
                                         model.empty();
                                         model.append("<option>Выбрать</option>");
-                                        $.each(data, function (index, element) {
-                                            model.append("<option data-category-user-id='" + index + "' value='" + index + "'>" + element + "</option>");
-                                        });
+                                        var sortedData = Object.entries(data).sort(function (a, b) {
+                                                return a[1].localeCompare(b[1]); // сортируем по значению (имя пользователя)
+                                            });
+                                        $.each(sortedData, function (i, item) {
+                                                var userId = item[0];
+                                                var userName = item[1];
+                                                model.append("<option data-category-user-id='" + userId + "' value='" + userId + "'>" + userName + "</option>");
+                                            });
                                     }
                             );
                         }

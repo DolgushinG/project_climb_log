@@ -101,21 +101,22 @@ class BatchResultFranceSystemQualification extends CustomAction
             ->where('active', '=', 1)->first();
 
         $participant_users_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('category_id', $this->category->id)->pluck('user_id')->toArray();
-        $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
+        $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id')->toArray();
         $result_france_system_qualification = ResultRouteFranceSystemQualification::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
         foreach ($result as $user_id => $middlename){
+            $new_middlename = implode(' ', array_reverse(explode(' ', $middlename, 2)));
             $res_fra = ResultFranceSystemQualification::where('event_id', $event->id)->where('user_id', $user_id)->first();
             if(!$res_fra){
                 Log::error('Category id not found -event_id - '.$event->id.'user_id'.$user_id);
             }
             $category_id = $res_fra->category_id;
             $category = ParticipantCategory::find($category_id)->category;
-            $result[$user_id] = $middlename.' ['.$category.']';
+            $result[$user_id] = $new_middlename.' ['.$category.']';
             if(in_array($user_id, $result_france_system_qualification)){
-                $result[$user_id] = $middlename.' ['.$category.']'.' [Уже добавлен]';
+                $result[$user_id] = $new_middlename.' ['.$category.']'.' [Уже добавлен]';
             }
         }
-
+        asort($result);
         $this->hidden('event_id', '')->value($event->id);
         $this->hidden('event_for_style', '')->value($event->id);
         $this->select('user_id', 'Участник')->options($result)->required(true);
