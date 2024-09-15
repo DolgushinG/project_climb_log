@@ -631,6 +631,25 @@ class ResultQualificationController extends Controller
                 ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
                 ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         }
+        $grid->column('sport_category', 'Категория')->display(function ($sport_category) use ($grid){
+            if(!$sport_category){
+                return 'не установлен';
+            } else {
+                return $sport_category;
+            }
+
+        })->select(User::sport_categories_select);
+        Admin::script(<<<EOT
+                $(document).ready(function() {
+                    $('.ie-trigger-column-sport_category').each(function() {
+                        // Если внутри span нет текста, делаем иконку видимой
+                        if ($(this).find('.ie-display').text().trim() === '') {
+                            $(this).find('i.fa-edit').css('visibility', 'visible');
+                        }
+                    });
+                });
+        EOT
+        );
         if(!$event->is_open_main_rating){
             $grid->column('user.id', 'Лучшие трассы')->display(function ($id) use ($event) {
                 if($event){
