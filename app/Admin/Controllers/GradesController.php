@@ -692,7 +692,7 @@ SCRIPT);
                     $table->disableButton();
                 })->value($routes_lead_boulder);
             } else {
-                $form->tableamount('grade_and_amount', '', function ($table) use ($event) {
+                $form->tablecustom('grade_and_amount', '', function ($table) use ($event) {
                     $grades = Grades::getGrades();
                     $table->select('Категория')->attribute('inputmode', 'none')->options($grades)->readonly();
                     if (!$event->type_event) {
