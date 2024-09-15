@@ -631,7 +631,7 @@ class ResultQualificationController extends Controller
                 ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
                 ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         }
-        $grid->column('sport_category', 'Категория')->display(function ($sport_category) use ($grid){
+        $grid->column('sport_category', 'Разряд')->display(function ($sport_category) use ($grid){
             if(!$sport_category){
                 return 'не установлен';
             } else {
