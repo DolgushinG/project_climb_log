@@ -200,6 +200,14 @@ class GradesController extends Controller
         if($route){
             $grade = Grades::where('event_id', $route->event_id)->first();
         }
+        if($request->name == 'route_name'){
+            $route_pk->route_name = $request->value;
+            $route_pk->save();
+        }
+        if($request->name == 'grade'){
+            $route_pk->grade = $request->value;
+            $route_pk->save();
+        }
         if($request->name == 'route_id'){
             $route_pk->route_id = $request->value;
             $route_pk->save();
