@@ -216,9 +216,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $event = Event::find($this->event_id);
                 $qualification[] = 'Место';
                 $qualification[] = 'Участник(Фамилия Имя)';
-                if($event->is_need_sport_category) {
-                    $qualification[] = 'Разряд';
-                }
+                $qualification[] = 'Разряд';
                 $qualification[] = 'Баллы';
                 if(!$event->is_input_set) {
                     $qualification[] = 'Сет';
@@ -324,15 +322,6 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             return collect([]);
         }
         $event = Event::find($this->event_id);
-        $users['empty_row'] = array(
-            "id" => "",
-            "user_place" => "",
-            "middlename" => "",
-            "sport_category" => "",
-            "points" => "",
-            "owner_id" => "",
-            "number_set_id" => "",
-        );
         $users_for_filter = ResultQualificationClassic::where('event_id', $this->event_id)->pluck('user_id')->toArray();
         foreach ($users as $index => $user) {
             if ($index == 'empty_row') {
@@ -404,32 +393,33 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $users[$index]['amount_passed_zone'] = $amount_passed_zone;
                 }
                 $users[$index]['amount_passed_redpoint'] = $amount_passed_redpoint;
-                $routes_event_value = Route::where('event_id', $this->event_id)->pluck('value', 'route_id')->toArray();
-                if($event->is_zone_show){
-                    $routes_event_zone = Route::where('event_id', $this->event_id)->pluck('zone', 'route_id')->toArray();
+                $query = $event->type_event ? RoutesOutdoor::where('event_id', $this->event_id) : Route::where('event_id', $this->event_id);
+                $routes_event_value = $query->pluck('value', 'route_id')->toArray();
+                if($event->is_zone_show) {
+                    $routes_event_zone = $query->pluck('zone', 'route_id')->toArray();
                 }
-                if($event->is_flash_value){
-                    $routes_event_flash_value = Route::where('event_id', $this->event_id)->pluck('flash_value', 'route_id')->toArray();
+                if($event->is_flash_value) {
+                    $routes_event_flash_value = $query->pluck('flash_value', 'route_id')->toArray();
                 }
                 foreach ($qualification_result as $result){
                     switch ($result->attempt){
                         case ResultRouteQualificationClassic::STATUS_PASSED_FLASH:
                             if($event->mode == Format::N_ROUTE || $event->mode == Format::ALL_ROUTE_WITH_POINTS){
-                                $attempt = $routes_event_value[$result->route_id] + $routes_event_flash_value[$result->route_id] ?? 0;
+                                $attempt = $routes_event_value[$result->route_id] + $routes_event_flash_value[$result->route_id] ?? 'не найдено';
                             } else {
                                 $attempt = 'F';
                             }
                             break;
                         case ResultRouteQualificationClassic::STATUS_PASSED_REDPOINT:
                             if($event->mode == Format::N_ROUTE || $event->mode == Format::ALL_ROUTE_WITH_POINTS ){
-                                $attempt = $routes_event_value[$result->route_id];
+                                $attempt = $routes_event_value[$result->route_id] ?? 'не найдено';
                             } else {
                                 $attempt = 'R';
                             }
                             break;
                         case ResultRouteQualificationClassic::STATUS_ZONE:
                             if($event->mode == Format::N_ROUTE || $event->mode == Format::ALL_ROUTE_WITH_POINTS && $event->is_zone_show){
-                                $attempt = $routes_event_zone[$result->route_id];
+                                $attempt = $routes_event_zone[$result->route_id] ?? '-';
                             }
                             break;
                         case 0:
