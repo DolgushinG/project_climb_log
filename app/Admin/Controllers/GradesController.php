@@ -544,7 +544,7 @@ SCRIPT);
         });
         if($event->type_event){
             $grid->column('route_id', 'Номер')->editable();
-            $grid->column('route_name', 'Трасса');
+            $grid->column('route_name', 'Трасса')->editable();
             $grid->column('place.name', 'Регион');
             $grid->column('area.name', 'Район');
             $grid->column('place_route.name', 'Сектор');
