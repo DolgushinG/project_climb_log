@@ -528,11 +528,23 @@ class ResultQualificationController extends Controller
                     ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
                     $model->save();
                     $result->save();
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => "Удаление результата или регистрации участника невозможна так как есть оплата и внесенный результат",
+                    ];
+                    return response()->json($response);
                 }
             } else {
                 $model = ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
                 if(UpdateParticipantResult::is_validate_access_delete($model, $result->user_id, $result->event_id)){
                     $model->delete();
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => "Удаление регистрации участника невозможна так как есть оплата",
+                    ];
+                    return response()->json($response);
                 }
             }
         } else {
@@ -547,12 +559,24 @@ class ResultQualificationController extends Controller
                 if(UpdateParticipantResult::is_validate_access_delete($participant, $result->user_id, $result->event_id)){
                     ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
                     $participant->save();
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => "Удаление результата или регистрации участника невозможна так как есть оплата и внесенный результат",
+                    ];
+                    return response()->json($response);
                 }
 
             } else {
                 $model = ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
                 if(UpdateParticipantResult::is_validate_access_delete($model, $result->user_id, $result->event_id)){
                     $model->delete();
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => "Удаление регистрации участника невозможна так как есть оплата",
+                    ];
+                    return response()->json($response);
                 }
 
             }
