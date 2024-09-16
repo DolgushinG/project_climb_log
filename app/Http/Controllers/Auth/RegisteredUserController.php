@@ -131,15 +131,16 @@ class RegisteredUserController extends Controller
         $validator = Validator::make($request->all(), [
             'participants.*.firstname' => 'required|string|max:255',
             'participants.*.lastname' => 'required|string|max:255',
-            'participants.*.dob' => 'required|date',
-            'participants.*.gender' => 'required|in:male,female',
+            'participants.*.dob' => 'nullable|date',
+            'participants.*.gender' => 'in:male,female',
             'participants.*.team' => 'nullable|string|max:255',
-            'participants.*.sets' => 'required|integer',
+            'participants.*.sets' => 'integer',
         ], $messages);
         if ($validator->fails())
         {
             return response()->json(['error' => true,'message'=> $validator->errors()->all()],422);
         }
+        $created_users = [];
         foreach ($new_users as $index => $user){
             $new_user = User::create([
                 'firstname' => $user['firstname'],
@@ -152,9 +153,11 @@ class RegisteredUserController extends Controller
                 'team' => $user['team'] ?? null,
                 'contact' => $person->contact,
                 'email' => $user['email'] ?? (new \App\Models\Event)->translate_to_eng($user['firstname']).'-group-'.$person->email,
-                'password' => Auth::user()->getAuthPassword(),
+                'password' => Auth::user()->getAuthPassword() ?? Hash::make(Auth::user()->lastname),
             ]);
             $user_id = $new_user->id;
+            $created_users[] = $new_user;
+            $number_sets = [];
             $participant_categories = ParticipantCategory::where('event_id', '=', $event_id)->where('category', '=', $user['category_id'])->first();
             if($event->is_france_system_qualification){
                 $participant = ResultFranceSystemQualification::where('user_id',  $event_id)->where('event_id', $event_id)->first();
@@ -171,8 +174,9 @@ class RegisteredUserController extends Controller
             }
             if($event->is_input_set != 1){
                 $number_set_id = $user['sets'];
-                $set = Set::where('id', $number_set_id)->where('event_id', $event_id)->first();
+                $set = Set::where('number_set', $number_set_id)->where('event_id', $event_id)->first();
                 $participant->number_set_id = $set->id;
+                $number_sets[$new_user->id] = $set->number_set;
             }
             if($event->is_auto_categories){
                 $participant->category_id = 0;
@@ -206,7 +210,10 @@ class RegisteredUserController extends Controller
                 $new_user->save();
             }
         }
-
+        foreach ($created_users as $index => $user){
+            $created_users[$index]['number_set'] = $number_sets[$user->id] ?? '-';
+        }
+        ResultQualificationClassic::send_main_about_group_take_part($event, $person, $created_users);
         return response()->json(['success' => true, 'message' => 'Группа успешно создана и зарегистрирована на соревнование в письме все подробности']);
     }
 }

@@ -44,8 +44,18 @@
                                 @csrf
                                 <div id="participants">
                                 </div>
-                                <button type="button" id="add-participant" class="btn btn-primary m-3">Добавить участника</button>
-                                <button type="submit" id="btn-send" class="btn btn-success" disabled>Отправить</button>
+                                @if(\Illuminate\Support\Facades\Auth::user()->contact)
+                                    <button type="button" id="add-participant" class="btn btn-primary m-3">Добавить участника</button>
+                                    <button type="submit" id="btn-send" class="btn btn-success" disabled>Отправить</button>
+                                @else
+                                    <div
+                                         class="alert alert-danger alert-dismissible fade show"
+                                         role="alert">
+                                        <p> Для регистрации группы на соревнование, необходимы контакты для быстрой связи</a></p>
+                                        <p> Добавьте контактные данные для быстрой связи в вашем <a href="{{route('profile')}}">профиле</a></p>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
                             </form>
 
                             <div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
@@ -316,19 +326,40 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Открыть модальное окно с результатом
-                            document.getElementById('response-message').textContent = data.message;
-                            openModal();
-                            clear_form();
+                            let btn = $('#btn-send');
+                            btn.text('').append('<i id="spinner" style="margin-left: 10px;\n' +
+                                '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+                            setTimeout(function () {
+                                btn.text(data.message)
+                            }, 2000);
+                            setTimeout(function () {
+                                btn.text('Отправить')
+                                clear_form();
+                            }, 5000);
+
                         } else {
                             // Если ошибка, показать соответствующее сообщение
-                            document.getElementById('response-message').textContent = data.message;
-                            openModal();
+                            let btn = $('#btn-send');
+                            btn.text('').append('<i id="spinner" style="margin-left: 10px;\n' +
+                                '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+                            setTimeout(function () {
+                                btn.text(data.message)
+                            }, 3000);
+                            setTimeout(function () {
+                                btn.text('Отправить')
+                            }, 4000);
                         }
                     })
                     .catch(error => {
-                        document.getElementById('response-message').textContent = data.message;
-                        openModal();
+                        let btn = $('#btn-send');
+                        btn.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
+                            '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')
+                        setTimeout(function () {
+                            btn.text(error.message)
+                        }, 3000);
+                        setTimeout(function () {
+                            btn.text('Отправить')
+                        }, 4000);
                     });
             });
         });
