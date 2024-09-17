@@ -102,6 +102,9 @@
                                                     @include('event.selects.sets_take_part')
                                                 @endif
                                                 @include('event.buttons.take_part')
+                                                @if($event->is_group_registration)
+                                                    @include('event.buttons.take_part_group')
+                                                @endif
                                             @else
                                                 @include('event.buttons.reg-close')
                                             @endif

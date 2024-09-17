@@ -718,6 +718,8 @@ class ResultQualificationClassic extends Model
                 }
                 $details['img_payment'] = $event->img_payment;
                 $details['info_payment'] = $event->info_payment;
+            } else {
+                $details['info_payment'] = $event->info_payment;
             }
             $details['image'] = $event->image;
             if(env('APP_ENV') == 'prod'){
@@ -727,6 +729,31 @@ class ResultQualificationClassic extends Model
 
     }
 
+    public static function send_main_about_group_take_part($event, $user_to_send, $created_users)
+    {
+        if (Helpers::valid_email($user_to_send->email)) {
+            $details = array();
+            $details['title'] = $event->title;
+            $details['event_start_date'] = $event->start_date;
+            $details['event_url'] = env('APP_URL').$event->link;
+            if($event->is_need_pay_for_reg){
+                $details['is_need_pay_for_reg'] = true;
+                $details['link_payment'] = $event->link_payment;
+                if($event->registration_time_expired){
+                    $details['pay_time_expired'] = $event->registration_time_expired;
+                }
+                $details['img_payment'] = $event->img_payment;
+                $details['info_payment'] = $event->info_payment;
+            } else {
+                $details['info_payment'] = $event->info_payment;
+            }
+            $details['image'] = $event->image;
+            if(env('APP_ENV') == 'prod'){
+                Mail::to($user_to_send->email)->queue(new \App\Mail\GroupTakePart($details, $created_users));
+            }
+        }
+
+    }
     public static function send_main_about_list_pending($event, $user, $job)
     {
         if (Helpers::valid_email($user->email)) {

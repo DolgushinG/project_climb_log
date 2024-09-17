@@ -76,6 +76,7 @@ class Helpers
         $set = Set::where('event_id', $event_id)->where('number_set', $number_set)->first();
         $event = Event::find($event_id);
         if($set && $event->is_input_birthday){
+
             $allow_years = $set->allow_years;
             $birthYear = (int)date('Y', strtotime($in_year));
             // Проверяем, есть ли год в массиве
@@ -94,6 +95,9 @@ class Helpers
             return false;
         }
         if(str_contains($email, 'vkontakte')){
+            return false;
+        }
+        if(str_contains($email, 'group')){
             return false;
         }
         return true;
