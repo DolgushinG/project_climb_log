@@ -247,7 +247,7 @@
                                             <div class="col-lg-4">
                                                 <div class="section-title">
                                                     <h2>Контакты</h2>
-                                                    <p>{{$event->contact}}</p>
+                                                    <p style="white-space: nowrap; font-size: 13px;">{!! $event->contact !!}}</p>
                                                 </div>
                                             </div>
                                             <div class="col-lg-4">
