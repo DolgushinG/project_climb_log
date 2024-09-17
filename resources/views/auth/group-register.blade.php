@@ -82,7 +82,6 @@
         </div>
     </main>
     <script>
-
         document.getElementById('add-participant').addEventListener('click', function () {
             const participantCount = document.querySelectorAll('.participant-form').length + 1 ;
             if(participantCount >= 1){
@@ -104,7 +103,11 @@
             </div>
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="dob">Дата рождения (опционально)</label>
-                <input type="date" id="dob${participantCount}" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]">
+                @if($event->is_input_birthday)
+                    <input type="date" id="dob${participantCount}" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]">
+                @else
+                    <input type="date" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]">
+                @endif
             </div>
             <div class="form-group col-md-3 col-12 m-1">
               <label for="gender" class="control-label">Пол</label>

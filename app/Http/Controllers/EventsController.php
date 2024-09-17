@@ -137,36 +137,26 @@ class EventsController extends Controller
     public function get_participants(Request $request, $start_date, $climbing_gym, $title){
         $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
         if($event) {
-            if($event->is_france_system_qualification){
-                $table = 'result_france_system_qualification';
-                $participants = User::query()
-                    ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-                    ->where($table.'.event_id', '=', $event->id)
-                    ->select(
-                        'users.id',
-                        'users.middlename',
-                        'users.city',
-                        'users.team',
-                        $table.'.gender',
-                        $table.'.number_set_id',
-                        $table.'.category_id',
-                    )->get()->toArray();
-            } else {
-                $table = 'result_qualification_classic';
-                $participants = User::query()
-                    ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-                    ->where($table.'.event_id', '=', $event->id)
-                    ->where($table.'.is_other_event', '=', 0)
-                    ->select(
-                        'users.id',
-                        'users.middlename',
-                        'users.city',
-                        'users.team',
-                        $table.'.gender',
-                        $table.'.number_set_id',
-                        $table.'.category_id',
-                    )->get()->toArray();
+            $table = $event->is_france_system_qualification ? 'result_france_system_qualification' : 'result_qualification_classic';
+            $query = User::query()
+                ->leftJoin($table, 'users.id', '=', $table . '.user_id')
+                ->where($table . '.event_id', $event->id)
+                ->select(
+                    'users.id',
+                    'users.middlename',
+                    'users.city',
+                    'users.team',
+                    'users.birthday',
+                    $table . '.gender',
+                    $table . '.sport_category',
+                    $table . '.number_set_id',
+                    $table . '.category_id'
+                );
+            if (!$event->is_france_system_qualification) {
+                $query->where($table . '.is_other_event', 0);
             }
+
+            $participants = $query->get()->toArray();
             if($event->is_input_set != 1){
                 $days = Set::where('event_id', '=', $event->id)->select('day_of_week')->distinct()->get();
                 $sets = Set::where('event_id', '=', $event->id)->get();
@@ -222,7 +212,6 @@ class EventsController extends Controller
         } else {
             return view('errors.404');
         }
-//        dd($days, $participants, $sets);
         return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
     }
 

@@ -50,6 +50,8 @@
                                                                     <th scope="col">Группа</th>
                                                                 @endif
                                                                 <th scope="col">Город</th>
+                                                                <th scope="col">День рождения</th>
+                                                                <th scope="col">Разряд</th>
                                                                 <th scope="col">Команда</th>
                                                             </tr>
                                                             </thead>
@@ -63,6 +65,8 @@
                                                                                <td>{{$participant['category']}}</td>
                                                                            @endif
                                                                            <td>{{$participant['city']}}</td>
+                                                                           <td>{{$participant['birthday'] ?? ''}}</td>
+                                                                           <td>{{$participant['sport_category'] ?? ''}}</td>
                                                                            <td>{{$participant['team']}}</td>
                                                                        </tr>
                                                                    @endif
@@ -115,6 +119,8 @@
                                                             <th scope="col">Группа</th>
                                                         @endif
                                                         <th scope="col">Город</th>
+                                                        <th scope="col">День рождения</th>
+                                                        <th scope="col">Разряд</th>
                                                         <th scope="col">Команда</th>
                                                     </tr>
                                                     </thead>
@@ -128,6 +134,8 @@
                                                                     <td>{{$participant['category']}}</td>
                                                                 @endif
                                                                 <td>{{$participant['city']}}</td>
+                                                                <td>{{$participant['birthday'] ?? ''}}</td>
+                                                                <td>{{$participant['sport_category'] ?? ''}}</td>
                                                                 <td>{{$participant['team']}}</td>
                                                             </tr>
 

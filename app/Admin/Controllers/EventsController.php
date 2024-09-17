@@ -508,7 +508,9 @@ class EventsController extends Controller
 
         })->tab('Управление соревнованием', function ($form) use ($id){
             $form->switch('is_registration_state', 'Регистрация ')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
-            $form->switch('is_group_registration', 'Возможность регистрировать группу')->help('У зарегистрированного пользователя появляется возможность регистрировать группу')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            if(env('IS_TESTING') === true) {
+                $form->switch('is_group_registration', 'Возможность регистрировать группу')->help('У зарегистрированного пользователя появляется возможность регистрировать группу')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            }
             $form->switch('is_need_pay_for_reg', 'Включить оплату для регистрации')
                 ->help('Например оплата будет происходит в другом месте или оплачивается только вход')
                 ->states(self::STATES_BTN)->default(1);
