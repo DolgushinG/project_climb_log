@@ -234,7 +234,7 @@
                                     if (data.availableSets && data.availableSets.length > 0) {
                                         data.availableSets.forEach(set => {
                                             const option = document.createElement('option');
-                                            option.value = set.id;
+                                            option.value = set.number_set;
                                             option.textContent = set.time;
                                             setsSelect.appendChild(option);
                                         });
