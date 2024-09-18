@@ -371,6 +371,18 @@ class AdminTablesSeeder extends Seeder
                     "slug" => "get_users_category",
                     "http_method" => "",
                     "http_path" => "/api/get_users*"
+                ],
+                [
+                    "name" => "get_attempts_final",
+                    "slug" => "get_attempts_final",
+                    "http_method" => "",
+                    "http_path" => "/api/final/get_attempts*"
+                ],
+                [
+                    "name" => "get_attempts_semifinal",
+                    "slug" => "get_attempts_semifinal",
+                    "http_method" => "",
+                    "http_path" => "/api/semifinal/get_attempts*"
                 ]
             ]
         );
