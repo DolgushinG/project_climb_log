@@ -6,8 +6,10 @@ use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ParticipantCategory;
+use App\Models\ResultFinalStage;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFranceSystemQualification;
+use App\Models\ResultSemiFinalStage;
 use App\Models\User;
 use Encore\Admin\Admin;
 use Illuminate\Http\Request;
@@ -78,20 +80,24 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
 
     public static function update_france_route_results($owner_id, $category_id, $results, $amount_top, $gender, $amount_zone)
     {
-        $result_for_edit = [[
-            'Номер маршрута' => intval($results['route_id']),
-            'Попытки на топ' => intval($results['amount_try_top']),
-            'Попытки на зону' => intval($results['amount_try_zone'])
-        ]];
-        $route_id = intval($results['route_id']);
         $amount_try_top = intval($results['amount_try_top']);
         $amount_try_zone = intval($results['amount_try_zone']);
+        $route_id = intval($results['route_id']);
+
+        $result_for_edit = [[
+            'Номер маршрута' => $route_id,
+            'Попытки на топ' => $amount_try_top,
+            'Попытки на зону' => $amount_try_zone
+        ]];
+
         $user_id = $results['user_id'];
         $event_id = $results['event_id'];
         $all_attempts = intval($results['all_attempts']);
+
         $participant = ResultFranceSystemQualification::where('event_id', $event_id)
             ->where('user_id', $user_id)
             ->first();
+
         $result_route = ResultRouteFranceSystemQualification::where('event_id', $event_id)
             ->where('user_id', $user_id)
             ->where('route_id', $route_id)
@@ -99,6 +105,8 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         $result_all_route = ResultRouteFranceSystemQualification::where('event_id', $event_id)
             ->where('user_id', $user_id)
             ->first();
+
+
         if(!$result_all_route){
             $participant->active = 1;
             $participant->save();
@@ -134,12 +142,12 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
                 'amount_zone' => $amount_zone,
                 'amount_try_zone' => $amount_try_zone,
             ]];
-            self::update_results_rrfsq($data);
+            self::update_results_rrfsq($data, 'result_route_france_system_qualification');
         }
     }
-    public static function update_results_rrfsq($data)
+    public static function update_results_rrfsq($data, $table)
     {
-        DB::table('result_route_france_system_qualification')->insert($data);
+        DB::table($table)->insert($data);
     }
 
     public static function create_results_fsq($participant, $results_old_for_edit, $result_for_edit)

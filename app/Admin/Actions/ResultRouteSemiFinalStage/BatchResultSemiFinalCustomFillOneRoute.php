@@ -8,11 +8,9 @@ use App\Models\Event;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFranceSystemQualification;
-use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultRouteSemiFinalStage;
 use App\Models\ResultSemiFinalStage;
 use App\Models\User;
-use Encore\Admin\Actions\Action;
 use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,20 +31,32 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
     public function handle(Request $request)
     {
         $results = $request->toArray();
-        $event = Event::find($results['event_id']);
-        $data = array();
-        $result_for_edit = array();
-        if(intval($results['amount_try_top']) > 0){
+        $amount_try_top = intval($results['amount_try_top']);
+        $amount_try_zone = intval($results['amount_try_zone']);
+        $all_attempts = intval($results['all_attempts']);
+        $event_id = intval($results['event_id']);
+        $event = Event::find($event_id);
+        $final_route_id = intval($results['final_route_id']);
+
+        if($amount_try_top > 0){
             $amount_top  = 1;
         } else {
             $amount_top  = 0;
         }
-        if(intval($results['amount_try_zone']) > 0){
+        if($amount_try_zone > 0){
             $amount_zone  = 1;
         } else {
             $amount_zone  = 0;
         }
+        if($final_route_id == 0){
+            return $this->response()->error('Вы не выбрали номер маршрута');
+        }
 
+        $max_attempts = Helpers::find_max_attempts($amount_try_top, $amount_try_zone);
+        if(Helpers::validate_amount_sum_top_and_zone_and_attempts($all_attempts, $amount_try_top, $amount_try_zone)){
+            return $this->response()->error(
+                'У трассы '.$final_route_id.' Максимальное кол-во попыток '.$max_attempts.' а в поле все попытки - '. $all_attempts);
+        }
         # Если есть ТОП то зона не может быть 0
         if(Helpers::validate_amount_top_and_zone($amount_top, $amount_zone)){
             return $this->response()->error('У трассы '.$results['final_route_id'].' отмечен ТОП, и получается зона не может быть 0');
@@ -69,35 +79,9 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
         }
         $gender = $participant->gender;
         $owner_id = \Encore\Admin\Facades\Admin::user()->id;
-        $data[] = array('owner_id' => $owner_id,
-            'user_id' => intval($results['user_id']),
-            'event_id' => intval($results['event_id']),
-            'final_route_id' => intval($results['final_route_id']),
-            'category_id' => $category_id,
-            'amount_top' => $amount_top,
-            'gender' => $gender,
-            'amount_try_top' => intval($results['amount_try_top']),
-            'amount_zone' => $amount_zone,
-            'amount_try_zone' => intval($results['amount_try_zone']),
-        );
-        $result_for_edit[] = array(
-            'Номер маршрута' => intval($results['final_route_id']),
-            'Попытки на топ' => intval($results['amount_try_top']),
-            'Попытки на зону' => intval($results['amount_try_zone'])
-        );
-        $final_route_id = intval($results['final_route_id']);
-        $user = User::find(intval($results['user_id']))->middlename;
-
-        $result = ResultRouteSemiFinalStage::where('event_id', $results['event_id']
-        )->where('user_id', $results['user_id'])->where('final_route_id', $final_route_id)->first();
-        if($result){
-            return $this->response()->error('Результат уже есть по '.$user.' и трассе '.$final_route_id);
-        } else {
-            DB::table('result_route_semifinal_stage')->insert($data);
-            Event::send_result_semifinal(intval($results['event_id']), $owner_id, intval($results['user_id']), $category_id, $result_for_edit, $gender);
-            Event::refresh_final_points_all_participant_in_semifinal($event->id);
-            return $this->response()->success('Результат успешно внесен')->refresh();
-        }
+        self::update_semifinal_route_results($owner_id, $category_id, $results, $amount_top,$gender, $amount_zone);
+        Event::refresh_final_points_all_participant_in_semifinal($event->id);
+        return $this->response()->success('Результат успешно внесен')->refresh();
     }
 
     public function custom_form()
@@ -186,16 +170,49 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
         });
 
         ");
+        Admin::style('
+                    .input-group {
+                    display: flex;
+                    align-items: center;
+                }
+
+                .form-control {
+                    margin-right: -1px; /* Небольшой выступ для кнопки */
+                }
+
+                .input-group-append {
+                    margin-top: 10px;
+                    margin-left: 5px; /* Убираем отступ слева */
+                }
+
+                .btn-outline-secondary {
+                    background-color: #28a745; /* Зеленый фон */
+                    border-color: #28a745; /* Цвет границы совпадает с фоном */
+                    color: #fff; /* Белый цвет текста */
+                     margin-left: 5px;
+                }
+
+                .btn-outline-secondary:hover {
+                    background-color: #218838; /* Темнее зеленый при наведении */
+                    border-color: #1e7e34; /* Темнее граница при наведении */
+                     margin-left: 5px;
+                }
+
+        ');
         \Encore\Admin\Facades\Admin::script($this->script);
         $routes = [];
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
             $routes[$i] = $i;
         }
-        $this->select('user_id', 'Участник')->options($result)->required();
-        $this->hidden('event_id', '')->value($event->id);
-        $this->select('final_route_id', 'Трасса')->attribute('id', 'final_route_id')->options($routes)->required();
-        $this->integer('amount_try_top', 'Попытки на топ');
-        $this->integer('amount_try_zone', 'Попытки на зону');
+        $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-user-id'.$this->category->id, 'user_id')->options($result)->required();
+        $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-event-id'.$this->category->id, 'event_id')->value($event->id);
+        $this->select('final_route_id', 'Трасса')->attribute('autocomplete', 'off')->attribute('data-semifinal-route-id'.$this->category->id, 'final_route_id')->options($routes)->required();
+        $this->integer('all_attempts', 'Все попытки')
+            ->attribute('autocomplete', 'off')
+            ->attribute('id', 'all_attempts-'.$this->category->id)
+            ->attribute('data-all-attempts-id'.$this->category->id, 'all-attempts');
+        $this->integer('amount_try_top', 'Попытки на топ')->attribute('data-amount_try_top'.$this->category->id, 'top');
+        $this->integer('amount_try_zone', 'Попытки на зону')->attribute('data-amount_try_zone'.$this->category->id, 'zone');
     }
 
     public function html()
@@ -215,5 +232,92 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
             return "<a disabled class='result-add-one-route btn btn-sm btn-warning' style='display: none'><i class='fa fa-info-circle'></i></a>";
         }
     }
+    public static function update_semifinal_route_results($owner_id, $category_id, $results, $amount_top, $gender, $amount_zone)
+    {
+        $amount_try_top = intval($results['amount_try_top']);
+        $amount_try_zone = intval($results['amount_try_zone']);
+        $route_id = intval($results['final_route_id']);
+
+        $result_for_edit = [[
+            'Номер маршрута' => $route_id,
+            'Попытки на топ' => $amount_try_top,
+            'Попытки на зону' => $amount_try_zone
+        ]];
+
+        $user_id = $results['user_id'];
+        $event_id = $results['event_id'];
+        $all_attempts = intval($results['all_attempts']);
+
+        $participant = ResultSemiFinalStage::where('event_id', $event_id)
+            ->where('user_id', $user_id)
+            ->first();
+        if(!$participant){
+            $participant = new ResultSemiFinalStage;
+        }
+
+        $result_route = ResultRouteSemiFinalStage::where('event_id', $event_id)
+            ->where('user_id', $user_id)
+            ->where('final_route_id', $route_id)
+            ->first();
+
+        $existing_result_for_edit = $participant->result_for_edit_semifinal ?? [];
+        # Если уже есть результат надо обновить его как в grid - $participant - json for edit так и в $result по трассам
+        if($result_route){
+            $result_route->all_attempts = $all_attempts;
+            $result_route->amount_top = $amount_top;
+            $result_route->amount_try_top = $amount_try_top;
+            $result_route->amount_zone = $amount_zone;
+            $result_route->amount_try_zone = $amount_try_zone;
+            $result_route->save();
+            foreach ($existing_result_for_edit as $index => $res){
+                if($res['Номер маршрута'] == $route_id){
+                    $existing_result_for_edit[$index]['Попытки на топ'] = $amount_try_top;
+                    $existing_result_for_edit[$index]['Попытки на зону'] = $amount_try_zone;
+                }
+            }
+            self::update_results_semifinal($participant, $existing_result_for_edit);
+        } else {
+            # Создание результата трассы который еще не было
+            self::create_results_semifinal($owner_id, $event_id, $user_id, $gender, $category_id, $participant, $existing_result_for_edit, $result_for_edit);
+            $data = [['owner_id' => $owner_id,
+                'user_id' => $user_id,
+                'event_id' => $event_id,
+                'final_route_id' => $route_id,
+                'category_id' => $category_id,
+                'amount_top' => $amount_top,
+                'gender' => $gender,
+                'all_attempts' => $all_attempts,
+                'amount_try_top' => $amount_try_top,
+                'amount_zone' => $amount_zone,
+                'amount_try_zone' => $amount_try_zone,
+            ]];
+            self::update_results_route_semifinal($data, 'result_route_semifinal_stage');
+        }
+    }
+    public static function update_results_semifinal($participant, $result_for_edit)
+    {
+        $participant->result_for_edit_semifinal = $result_for_edit;
+        $participant->save();
+    }
+    public static function update_results_route_semifinal($data, $table)
+    {
+        DB::table($table)->insert($data);
+    }
+    public static function create_results_semifinal($owner_id, $event_id, $user_id, $gender, $category_id, $participant, $results_old_for_edit, $result_for_edit)
+    {
+        $merged_result_for_edit = array_merge($results_old_for_edit, $result_for_edit);
+        usort($merged_result_for_edit, function ($a, $b) {
+            return $a['Номер маршрута'] <=> $b['Номер маршрута'];
+        });
+        $participant->owner_id = $owner_id;
+        $participant->event_id = $event_id;
+        $participant->user_id = $user_id;
+        $participant->gender = $gender;
+        $participant->category_id = $category_id;
+        $participant->result_for_edit_semifinal = $merged_result_for_edit;
+        $participant->save();
+    }
+
+
 
 }

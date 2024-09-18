@@ -151,11 +151,92 @@ class ResultRouteSemiFinalStageController extends Controller
                 foreach ($categories as $index => $category){
                     $index = $index + 1;
                     $script_one_route = <<<EOT
-                    let btn_close_modal_one_route{$category->id} = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-                    $(document).on("click", btn_close_modal_one_route{$category->id}, function () {
-                        window.location.reload();
-                    });
-                EOT;
+                             $(document).on("click", '[modal="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute-$index"]', function () {
+                                            const allAttemptsInput = document.getElementById('all_attempts-$category->id');
+                                            const incrementBtn = document.getElementById('increment-btn');
+                                            const decrementBtn = document.getElementById('decrement-btn');
+                                            if (!incrementBtn && !decrementBtn) {
+                                                const inputGroupAppend = document.createElement('div');
+                                                inputGroupAppend.className = 'input-group-append';
+                                                const newIncrementBtn = document.createElement('button');
+                                                newIncrementBtn.type = 'button';
+                                                newIncrementBtn.className = 'btn btn-outline-secondary';
+                                                newIncrementBtn.id = 'increment-btn';
+                                                const incrementIcon = document.createElement('i');
+                                                incrementIcon.className = 'fa fa-plus';
+                                                const incrementText = document.createElement('span');
+                                                incrementText.textContent = ' Попытка'; // Текст "Попытка"
+                                                newIncrementBtn.appendChild(incrementIcon);
+                                                newIncrementBtn.appendChild(incrementText);
+                                                const newDecrementBtn = document.createElement('button');
+                                                newDecrementBtn.type = 'button';
+                                                newDecrementBtn.className = 'btn btn-danger';
+                                                newDecrementBtn.id = 'decrement-btn';
+                                                const decrementIcon = document.createElement('i');
+                                                decrementIcon.className = 'fa fa-minus';
+                                                newDecrementBtn.appendChild(decrementIcon);
+                                                inputGroupAppend.appendChild(newDecrementBtn);
+                                                inputGroupAppend.appendChild(newIncrementBtn);
+                                                allAttemptsInput.parentNode.appendChild(inputGroupAppend);
+                                                newIncrementBtn.addEventListener('click', function () {
+                                                    let currentValue = parseInt(allAttemptsInput.value) || 0;
+                                                    allAttemptsInput.value = currentValue + 1;
+                                                });
+                                                newDecrementBtn.addEventListener('click', function () {
+                                                    let currentValue = parseInt(allAttemptsInput.value) || 0;
+                                                    if (currentValue > 0) {
+                                                        allAttemptsInput.value = currentValue - 1;
+                                                    }
+                                                });
+                                                $('[data-all-attempts-id{$category->id}=all-attempts]').val('');
+                                                $('[data-amount_try_top{$category->id}=amount_try_top]').val('');
+                                                $('[data-amount_try_zone{$category->id}=amount_try_top]').val('');
+                                                $('[data-user-id{$category->id}=user_id]').val('');
+                                            }
+                                    });
+                                        $(document).on("change", '[data-user-id{$category->id}=user_id]', function () {
+                                    var routeId = $('[data-semifinal-route-id{$category->id}=final_route_id]').val(); // ID выбранного маршрута
+                                    var userId = $('[data-user-id{$category->id}="user_id"]').select2('val')
+                                    var eventId = $('[data-event-id{$category->id}=event_id]').val(); // ID выбранного участника
+                                    if(routeId){
+                                        $.get("/admin/api/semifinal/get_attempts", // URL эндпоинта
+                                            {
+                                                route_id: routeId,
+                                                user_id: userId,
+                                                event_id: eventId
+                                            }, // Передаем ID маршрута и участника в запросе
+                                            function (data) {
+                                                // Обновляем поля с количеством попыток
+                                                $('[id=amount_try_top]').val(data.amount_try_top);
+                                                $('[id=amount_try_zone]').val(data.amount_try_zone);
+                                                $('[data-all-attempts-id{$category->id}=all-attempts]').val(data.all_attempts);
+                                            }
+                                        );
+                                    }
+                                });
+                                $(document).on("change", '[data-semifinal-route-id{$category->id}=final_route_id]', function () {
+                                    var routeId = $(this).val(); // ID выбранного маршрута
+                                    var userId = $('[data-user-id{$category->id}="user_id"]').select2('val')
+                                    var eventId = $('[data-event-id{$category->id}=event_id]').val(); // ID выбранного участника
+                                    $.get("/admin/api/semifinal/get_attempts", // URL эндпоинта
+                                        {
+                                            route_id: routeId,
+                                            user_id: userId,
+                                            event_id: eventId
+                                        },
+                                        function (data) {
+                                            // Обновляем поля с количеством попыток
+                                            $('[data-all-attempts-id{$category->id}=all-attempts]').val(data.all_attempts);
+                                            $('[id=amount_try_top]').val(data.amount_try_top);
+                                            $('[id=amount_try_zone]').val(data.amount_try_zone);
+                                        }
+                                    );
+                                });
+                                let btn_close_modal_one_route{$category->id} = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
+                                    $(document).on("click", btn_close_modal_one_route{$category->id}, function () {
+                                        window.location.reload();
+                                    });
+                        EOT;
                     $script_custom = <<<EOT
                         let btn_close_modal_custom{$category->id} = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustom-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
                         $(document).on("click", btn_close_modal_custom{$category->id}, function () {
