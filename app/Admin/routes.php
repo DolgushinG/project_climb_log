@@ -79,6 +79,38 @@ Route::group([
         }
         return response()->json($data);
     });
+    $router->middleware(['throttle:get_attempts'])->get('/api/final/get_attempts', function(Request $request) {
+        $routeId = $request->get('route_id');
+        $userId = $request->get('user_id');
+        $eventId = $request->get('event_id');
+        $result = \App\Models\ResultRouteFinalStage::where('event_id', $eventId)->where('final_route_id', $routeId)->where('user_id', $userId)->first();
+        if($result){
+            $data = [
+                'all_attempts' => $result->all_attempts,
+                'amount_try_top' => $result->amount_try_top,
+                'amount_try_zone' => $result->amount_try_zone,
+            ];
+        } else {
+            $data = [];
+        }
+        return response()->json($data);
+    });
+    $router->middleware(['throttle:get_attempts'])->get('/api/semifinal/get_attempts', function(Request $request) {
+        $routeId = $request->get('route_id');
+        $userId = $request->get('user_id');
+        $eventId = $request->get('event_id');
+        $result = \App\Models\ResultRouteSemiFinalStage::where('event_id', $eventId)->where('final_route_id', $routeId)->where('user_id', $userId)->first();
+        if($result){
+            $data = [
+                'all_attempts' => $result->all_attempts,
+                'amount_try_top' => $result->amount_try_top,
+                'amount_try_zone' => $result->amount_try_zone,
+            ];
+        } else {
+            $data = [];
+        }
+        return response()->json($data);
+    });
     $router->get('/', 'HomeController@index')->name('home');
     Route::middleware(['owner'])->group(function ($router) {
         $router->resource('events', EventsController::class);
