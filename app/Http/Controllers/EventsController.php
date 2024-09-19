@@ -41,9 +41,14 @@ class EventsController extends Controller
     /**
      * @throws \Exception
      */
-    public function show(Request $request, $start_date, $climbing_gym, $title){
-        $event_public_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-        $event_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
+    public function show(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event_public_exist = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+            $event_exist = Event::find($request->event_id);
+        } else {
+            $event_public_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+            $event_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
+        }
         $pre_show = false;
         $user_id = Auth()->user()->id ?? null;
         if($event_public_exist){
@@ -100,7 +105,6 @@ class EventsController extends Controller
             $owner = DB::table('admin_users')->find($event->owner_id);
             $event['climbing_gym_name_image'] = $owner->avatar;
             $is_show_button_final = boolval(ResultFinalStage::where('event_id', $event->id)->first());
-
             $is_add_to_list_pending = boolval(ListOfPendingParticipant::where('event_id', $event->id)->where('user_id', $user_id)->first());
             $list_pending = ListOfPendingParticipant::where('event_id', $event->id)->where('user_id', $user_id)->first();
             $is_show_button_semifinal = boolval(ResultSemiFinalStage::where('event_id', $event->id)->first());
@@ -134,8 +138,12 @@ class EventsController extends Controller
         $current_amount_start_price = OwnerPaymentOperations::current_amount_start_price_before_date($event);
         return view('event.tab.payment', compact(['current_amount_start_price','participant_products_and_discounts','event']));
     }
-    public function get_participants(Request $request, $start_date, $climbing_gym, $title){
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function get_participants(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event) {
             $table = $event->is_france_system_qualification ? 'result_france_system_qualification' : 'result_qualification_classic';
             $query = User::query()
@@ -215,10 +223,12 @@ class EventsController extends Controller
         return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
     }
 
-    public function get_qualification_classic_results(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-//        $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
+    public function get_qualification_classic_results(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event){
             if(!$event->is_france_system_qualification){
 //                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
@@ -299,9 +309,12 @@ class EventsController extends Controller
         return view('event.qualification_classic_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats']));
     }
 
-    public function get_qualification_classic_global_results(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function get_qualification_classic_global_results(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event){
             if(!$event->is_france_system_qualification){
                 $user_male_ids = ResultQualificationClassic::where(function($query) {
@@ -328,7 +341,6 @@ class EventsController extends Controller
                     ->where('global_category_id', '!=', 0)
                     ->pluck('user_id')
                     ->toArray();
-
                 $stats = new stdClass();
                 if($event->is_open_team_result){
                     $user_team_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('active','=', 1)->pluck('user_id')->toArray();
@@ -393,9 +405,12 @@ class EventsController extends Controller
         return view('event.qualification_classic_global_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats']));
     }
 
-    public function get_qualification_france_system_results(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function get_qualification_france_system_results(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event){
             $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
             $routes_amount = Grades::where('event_id', $event->id)->first()->count_routes;
@@ -419,9 +434,12 @@ class EventsController extends Controller
         return view('event.france_system_qualification_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
 
-    public function get_semifinal_france_system_results(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function get_semifinal_france_system_results(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event){
             $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
             $routes = array();
@@ -449,9 +467,12 @@ class EventsController extends Controller
         return view('event.france_system_semifinal_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
 
-    public function get_final_france_system_results(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function get_final_france_system_results(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event){
             $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
             $routes = array();
@@ -813,14 +834,18 @@ class EventsController extends Controller
         UpdateResultParticipants::dispatch($event_id);
         Helpers::clear_cache($event);
         if ($result) {
-            return response()->json(['success' => true, 'message' => 'Успешное внесение результатов', 'link' => $event->link], 201);
+            return response()->json(['success' => true, 'message' => 'Успешное внесение результатов', 'link' => $event->new_link ?? $event->link], 201);
         } else {
             return response()->json(['success' => false, 'message' => 'Ошибка внесение результатов'], 422);
         }
     }
 
-    public function listRoutesEvent(Request $request, $start_date, $climbing_gym, $title) {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function listRoutesEvent(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if(!$event){
             return view('errors.404');
         }
@@ -893,12 +918,12 @@ class EventsController extends Controller
             $details = array();
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
-            $details['event_url'] = env('APP_URL').$event->link;
+            $details['event_url'] = env('APP_URL').$event->new_link ?? $event->link;
             $details['event_id'] = $event->id;
             if(env('APP_ENV') == 'prod'){
                 Mail::to($request->email)->queue(new \App\Mail\AllResultExcelFIle($details));
             }
-
+            Mail::to($request->email)->queue(new \App\Mail\AllResultExcelFIle($details));
             return response()->json(['success' => true, 'message' => 'Успешная отправка'], 200);
         } catch (Exception $e) {
             Log::error($e->getMessage());
@@ -935,6 +960,7 @@ class EventsController extends Controller
             }
             $list_pending->user_id = $request->user_id;
             $list_pending->event_id = $request->event_id;
+            $list_pending->number_sets = $request->number_sets;
             $user = User::find($request->user_id);
             if($user){
                 if($request->gender){
@@ -1029,13 +1055,12 @@ class EventsController extends Controller
 
 
     }
-    public function index_analytics(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)
-            ->where('title_eng', '=', $title)
-            ->where('climbing_gym_name_eng', '=', $climbing_gym)
-            ->where('is_public', 1)
-            ->first();
+    public function index_analytics(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if(!$event) {
             if (!$event->is_open_public_analytics) {
                 return view('errors.404');

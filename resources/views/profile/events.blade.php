@@ -43,7 +43,7 @@
 
                         @if(!$event->is_send_result_state && $event->is_open_public_analytics)
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="{{route('index_analytics', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('index_analytics', [$event->id])}}"
                                    class="btn btn-warning rounded-pill">Статистика</a>
                             </li>
                         @endif
@@ -55,7 +55,7 @@
                             @endif
                         @endif
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{{$event->link}}" class="btn btn-success rounded-pill">Перейти на страницу с соревнованием</a>
+                            <a href="{{$event->new_link ?? $event->link}}" class="btn btn-success rounded-pill">Перейти на страницу с соревнованием</a>
                         </li>
                     </ul><!-- End List With badges -->
                 </div>

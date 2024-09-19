@@ -14,7 +14,7 @@
             </div>
             <div class="modal-footer">
                 <button id="btn_cancel_take_part_participant" data-event-id="{{$event->id}}"
-                        data-link="{{$event->link}}"
+                        data-link="{{$event->new_link ?? $event->link}}"
                         data-user-id="{{Auth()->user()->id}}"
                         class="btn btn-danger rounded-pill">Отменить регистрацию</button>
             </div>
