@@ -146,33 +146,33 @@
                                 @endif
 
                             @endif
-                            <a href="{{route('participants', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                            <a href="{{route('participants', [$event->id])}}"
                                class="btn btn-primary rounded-pill">Список участников</a>
 
                             @if(!$event->is_france_system_qualification)
-                                <a href="{{route('get_qualification_classic_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('get_qualification_classic_results',[$event->id])}}"
                                    class="btn btn-primary rounded-pill">Предварительные результаты</a>
                                 @if($event->is_open_main_rating)
-                                    <a href="{{route('get_qualification_classic_global_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                    <a href="{{route('get_qualification_classic_global_results',[$event->id])}}"
                                        class="btn btn-dark rounded-pill">Совмещенные результаты</a>
                                 @endif
                             @else
-                                <a href="{{route('get_qualification_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('get_qualification_france_system_results',[$event->id])}}"
                                    class="btn btn-primary rounded-pill">Предварительные результаты</a>
                             @endif
                             @if($event->is_semifinal && $is_show_button_semifinal)
-                                <a href="{{route('get_semifinal_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('get_semifinal_france_system_results',[$event->id])}}"
                                    class="btn btn-success rounded-pill">Результаты полуфинала</a>
                             @endif
                             @if($is_show_button_final)
-                                <a href="{{route('get_final_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('get_final_france_system_results',[$event->id])}}"
                                    class="btn btn-success rounded-pill">Результаты финала</a>
                             @endif
                             @if(!$event->is_send_result_state && $event->is_open_send_result_state)
                                 @include('event.get_all_result_to_email')
                             @endif
                             @if(!$event->is_send_result_state && $event->is_open_public_analytics)
-                                <a href="{{route('index_analytics', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('index_analytics', [$event->id])}}"
                                    class="btn btn-warning rounded-pill">Статистика</a>
                             @endif
                         </div>

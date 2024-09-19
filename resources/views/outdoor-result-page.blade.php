@@ -427,7 +427,7 @@
             e.preventDefault()
             $.ajax({
                 type: 'POST',
-                url: '/sendResultParticipant',
+                url: '/send-result-participant',
                 data: {'result': results, 'event_id': event_id, 'user_id': user_id, 'owner_id': owner_id},
                 success: function (xhr, status, error) {
                     button.text('').append('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Почти почти...')

@@ -88,9 +88,9 @@ class UpdateSetsParticipants extends Command
         $sets = Set::whereIn('number_set', $number_sets)->where('owner_id', '=', $event->owner_id)->get();
         foreach ($sets as $set) {
             if ($event->is_france_system_qualification) {
-                $participants_event = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('owner_id', '=', $event->owner_id)->where('number_set_id', '=', $set->id)->count();
+                $participants_event = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('number_set_id', '=', $set->id)->count();
             } else {
-                $participants_event = ResultQualificationClassic::where('event_id', '=', $event->id)->where('owner_id', '=', $event->owner_id)->where('number_set_id', '=', $set->id)->count();
+                $participants_event = ResultQualificationClassic::where('event_id', '=', $event->id)->where('number_set_id', '=', $set->id)->count();
             }
             $free = $set->max_participants - $participants_event;
             if($free > 0){

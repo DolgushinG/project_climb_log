@@ -7,6 +7,7 @@ use App\Models\Posts;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultQualificationClassic;
 use App\Models\User;
+use App\Scopes\EventScope;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;

@@ -502,6 +502,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         $event = Event::find($this->event_id);
         $user_team_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('active','=', 1)->pluck('user_id')->toArray();
         $teams = User::whereIn('id', $user_team_ids)->where('team','!=', null)->distinct()->pluck('team')->toArray();
+        $result_team = [];
         foreach ($teams as $team){
             $result_team_cache = ResultQualificationClassic::get_list_team_and_points_participant($event->id, $team);
             $result_team[$team] = $result_team_cache;

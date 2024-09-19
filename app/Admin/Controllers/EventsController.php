@@ -272,6 +272,8 @@ class EventsController extends Controller
         $grid->column('title', 'Название');
         $grid->column('link', 'Ссылка для всех')->link();
         $grid->column('admin_link', 'Ссылка на предпросмотр')->link();
+        $grid->column('new_link', 'Ссылка для всех(короче)')->link();
+        $grid->column('new_admin_link', 'Ссылка на предпросмотр(короче)')->link();
         $grid->column('is_registration_state', 'Регистрация')->using([0 => 'Закрыта', 1 => 'Открыта'])->display(function ($title, $column) {
             If ($this->is_registration_state == 0) {
                 return $column->label('default');
@@ -582,8 +584,6 @@ class EventsController extends Controller
                 $form->climbing_gym_name_eng =  Helpers::formating_string($climbing_gym_name_eng);
                 $format_title_eng = Helpers::formating_string($title_eng);
                 $form->title_eng =  $format_title_eng;
-                $form->link = '/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$format_title_eng;
-                $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$format_title_eng;
             }
             if($form->type_event){
                 $form->is_access_user_edit_result = 1;
@@ -669,6 +669,24 @@ class EventsController extends Controller
         });
         $form->saved(function (Form $form)  use ($type, $id){
             if($type != 'active') {
+                // После сохранения у нас есть ID, можно теперь сгенерировать ссылку с ID
+                $event = \App\Models\Event::find($form->model()->id);
+
+                if ($event) {
+                    $climbing_gym_name_eng = $event->climbing_gym_name_eng;
+                    $format_title_eng = $event->title_eng;
+
+                    // Создаем ссылку с ID
+                    $event->new_link = '/event/'.$event->id;
+                    $event->new_admin_link = '/admin/event/'.$event->id;
+
+                    // Старый формат тоже оставляем
+                    $event->link = '/event/'.$event->start_date.'/'.$climbing_gym_name_eng.'/'.$format_title_eng;
+                    $event->admin_link = '/admin/event/'.$event->start_date.'/'.$climbing_gym_name_eng.'/'.$format_title_eng;
+
+                    // Сохраняем обновленную модель
+                    $event->save();
+                }
 //                if(!$form->options_amount_price){
 //                    $event = $form->model()->find($id);
 //                    $event_amount = $event->options_amount_price ?? null;

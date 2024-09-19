@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\Helpers;
+use App\Scopes\EventScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,12 @@ class ResultQualificationClassic extends Model
 {
     use HasFactory;
     public $timestamps = true;
+
+//    protected static function booted()
+//    {
+//        $eventId = session('event_id');
+//        static::addGlobalScope(new EventScope($eventId));
+//    }
 
     protected $table = 'result_qualification_classic';
 
@@ -709,7 +716,7 @@ class ResultQualificationClassic extends Model
             }
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
-            $details['event_url'] = env('APP_URL').$event->link;
+            $details['event_url'] = env('APP_URL').$event->new_link ?? $event->link;
             if($event->is_need_pay_for_reg){
                 $details['is_need_pay_for_reg'] = true;
                 $details['link_payment'] = $event->link_payment;
@@ -735,7 +742,7 @@ class ResultQualificationClassic extends Model
             $details = array();
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
-            $details['event_url'] = env('APP_URL').$event->link;
+            $details['event_url'] = env('APP_URL').$event->new_link ?? $event->link;
             if($event->is_need_pay_for_reg){
                 $details['is_need_pay_for_reg'] = true;
                 $details['link_payment'] = $event->link_payment;
@@ -761,7 +768,7 @@ class ResultQualificationClassic extends Model
             $details['title'] = $event->title;
             $details['number_sets'] = $job->number_sets;
             $details['event_start_date'] = $event->start_date;
-            $details['event_url'] = env('APP_URL').$event->link;
+            $details['event_url'] = env('APP_URL').$event->new_link ?? $event->link;
             if(env('APP_ENV') == 'prod'){
                 Mail::to($user->email)->queue(new \App\Mail\ListPending($details));
             }
@@ -776,7 +783,7 @@ class ResultQualificationClassic extends Model
             $details = array();
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
-            $details['event_url'] = env('APP_URL').$event->link;
+            $details['event_url'] = env('APP_URL').$event->new_link ?? $event->link;
 //            $details['image'] = $event->image;
             if(env('APP_ENV') == 'prod'){
                 Mail::to($user->email)->queue(new \App\Mail\ConfirmBill($details));

@@ -55,12 +55,56 @@
                 </div>
             </div>
         </section><!-- End Featured Services Section -->
+    @if(count($events) > 0)
+        <!-- ======= Portfolio Section ======= -->
+        <section id="portfolio" class="portfolio">
+            <div class="container" data-aos="fade-up">
+                <div class="section-title">
+                    <h2>Текущие соревнования</h2>
+                </div>
+                <div class="row" data-aos="fade-up" data-aos-delay="100">
+                    <div class="col-lg-12 d-flex justify-content-center">
+                        <ul id="portfolio-flters">
+                            <li data-filter="*" class="filter-active">Все города</li>
+                            @foreach($cities as $city)
+                                <li data-filter=".filter-{{$city['name']}}">{{$city['name']}}<span style="margin-left: 7px; font-size: 10px;" class="badge rounded-pill bg-primary ml-5">{{$city['count_event']}}</span></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <div class="row portfolio-container" data-aos="fade-up" data-aos-delay="200">
+                    @foreach($events as $event)
+                        <div class="col-lg-4 col-md-6 portfolio-item filter-{{$event->city}}">
+                            <a href="{{$event->new_link ?? $event->link}}" class="details-link" title="More Details">
+                                <img src="storage/{{$event->image}}" class="img-fluid" alt="">
+                            </a>
+                            <div class="portfolio-info">
+                                <h4>{{$event->city}} {{date("d/m/Y", strtotime($event->start_date))}}</h4>
+                                <a href="storage/{{$event->image}}" data-gallery="portfolioGallery"
+                                   class="portfolio-lightbox preview-link"><i class="bx bx-plus"></i></a>
+                                <a href="{{$event->new_link ?? $event->link}}" class="details-link" title="More Details"><i
+                                        class="bx bx-link"></i></a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section><!-- End Portfolio Section -->
+    @else
+        <section id="portfolio" class="portfolio">
+            <div class="container" data-aos="fade-up">
+                <div class="section-title">
+                    <h2>Список прошлых соревнований можно найти тут <a style="font-size: 12px" href="{{route('list_events')}}" class="btn btn-outline-primary"> перейти </a></h2>
+                </div>
+            </div>
+        </section>
+    @endif
     <!-- ======= About Section ======= -->
     <section id="login" class="about section-bg"  style="background-color: #fff;!important;">
         <div class="container" data-aos="fade-up">
 
             <div class="section-title">
-                <h2>Регистрация и логин через соц сети</h2>
+                <a href="{{route('register')}}"><h2>Регистрация и логин через соц сети</h2></a>
                 <p>Регистрация и вход через социальные сети, такие как Yandex, Telegram и ВКонтакте, предлагают удобный и быстрый способ доступа к вашему аккаунту на нашем сервисе.</p>
             </div>
 
@@ -347,50 +391,7 @@
             </div>
         </div>
     </section><!-- End About Section -->
-    @if(count($events) > 0)
-        <!-- ======= Portfolio Section ======= -->
-        <section id="portfolio" class="portfolio">
-            <div class="container" data-aos="fade-up">
-                <div class="section-title">
-                    <h2>Текущие соревнования</h2>
-                </div>
-                <div class="row" data-aos="fade-up" data-aos-delay="100">
-                    <div class="col-lg-12 d-flex justify-content-center">
-                        <ul id="portfolio-flters">
-                            <li data-filter="*" class="filter-active">Все города</li>
-                            @foreach($cities as $city)
-                                <li data-filter=".filter-{{$city['name']}}">{{$city['name']}}<span style="margin-left: 7px; font-size: 10px;" class="badge rounded-pill bg-primary ml-5">{{$city['count_event']}}</span></li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-                <div class="row portfolio-container" data-aos="fade-up" data-aos-delay="200">
-                @foreach($events as $event)
-                        <div class="col-lg-4 col-md-6 portfolio-item filter-{{$event->city}}">
-                            <a href="{{$event->link}}" class="details-link" title="More Details">
-                                <img src="storage/{{$event->image}}" class="img-fluid" alt="">
-                            </a>
-                            <div class="portfolio-info">
-                                <h4>{{$event->city}} {{date("d/m/Y", strtotime($event->start_date))}}</h4>
-                                <a href="storage/{{$event->image}}" data-gallery="portfolioGallery"
-                                   class="portfolio-lightbox preview-link"><i class="bx bx-plus"></i></a>
-                                <a href="{{$event->link}}" class="details-link" title="More Details"><i
-                                        class="bx bx-link"></i></a>
-                            </div>
-                        </div>
-                @endforeach
-                </div>
-            </div>
-        </section><!-- End Portfolio Section -->
-        @else
-            <section id="portfolio" class="portfolio">
-                <div class="container" data-aos="fade-up">
-                    <div class="section-title">
-                        <h2>Список прошлых соревнований можно найти тут <a style="font-size: 12px" href="{{route('list_events')}}" class="btn btn-outline-primary"> перейти </a></h2>
-                    </div>
-                </div>
-            </section>
-        @endif
+
     @if($info_climbing_events)
         <section id="counts" class="counts">
         <div class="container" data-aos="fade-up">
