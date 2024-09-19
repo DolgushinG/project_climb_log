@@ -923,7 +923,6 @@ class EventsController extends Controller
             if(env('APP_ENV') == 'prod'){
                 Mail::to($request->email)->queue(new \App\Mail\AllResultExcelFIle($details));
             }
-            Mail::to($request->email)->queue(new \App\Mail\AllResultExcelFIle($details));
             return response()->json(['success' => true, 'message' => 'Успешная отправка'], 200);
         } catch (Exception $e) {
             Log::error($e->getMessage());
