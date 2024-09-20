@@ -79,6 +79,37 @@ Route::group([
         }
         return response()->json($data);
     });
+    $router->middleware(['throttle:set_attempts'])->get('/api/set_attempts', function(Request $request) {
+        $routeId = $request->get('route_id');
+        $userId = $request->get('user_id');
+        $eventId = $request->get('event_id');
+        $attempt = $request->get('attempt');
+        $result_reg = ResultFranceSystemQualification::where('event_id', $eventId)->where('user_id', $userId)->first();
+
+        $result = \App\Models\ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
+        if(!$result){
+            $result = new ResultRouteFranceSystemQualification;
+            $result->event_id = $eventId;
+            $result->owner_id = $result_reg->owner_id;
+            $result->gender = $result_reg->gender;
+            $result->route_id = $routeId;
+            $result->category_id = $result_reg->category_id ?? null;
+            $result->number_set_id = $result_reg->number_set_id ?? null;
+            $result->user_id = $userId;
+            $result->amount_top = 0;
+            $result->amount_try_top = 0;
+            $result->amount_zone = 0;
+            $result->amount_try_zone = 0;
+        }
+        $result->all_attempts = $attempt;
+        $result->save();
+        $data = [
+            'all_attempts' => $result->all_attempts,
+            'amount_try_top' => $result->amount_try_top,
+            'amount_try_zone' => $result->amount_try_zone,
+        ];
+        return response()->json($data);
+    });
     $router->middleware(['throttle:get_attempts'])->get('/api/final/get_attempts', function(Request $request) {
         $routeId = $request->get('route_id');
         $userId = $request->get('user_id');
@@ -121,6 +152,7 @@ Route::group([
         $router->resource('analytics', AnalyticsController::class);
         $router->resource('grades', GradesController::class);
         $router->resource('formats', FormatsController::class);
+        $router->resource('colors', ColorController::class);
         $router->resource('semifinal-stage', ResultRouteSemiFinalStageController::class);
         $router->resource('final-stage', ResultRouteFinalStageController::class);
         $router->resource('sets', SetsController::class);

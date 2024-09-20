@@ -11,6 +11,7 @@ use App\Admin\CustomAction\ActionExportCardParticipantFestival;
 use App\Admin\CustomAction\ActionExportList;
 use App\Exports\AllResultExport;
 use App\Helpers\Helpers;
+use App\Models\Color;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
 use App\Models\EventAndCoefficientRoute;
@@ -742,6 +743,10 @@ class EventsController extends Controller
                     if (!$exist_sets) {
                         $this->install_set(Admin::user()->id, $form->model()->id);
                     }
+                    $exist_colors = Color::where('owner_id', '=', Admin::user()->id)->first();
+                    if (!$exist_colors) {
+                        $this->install_colors(Admin::user()->id);
+                    }
                     return back()->isRedirect('events');
                 }
             }
@@ -850,6 +855,20 @@ class EventsController extends Controller
             ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 5],
         );
         DB::table('sets')->insert($sets);
+    }
+    public function install_colors($owner_id)
+    {
+        $colors = [];
+        $colorData = Color::colors;
+        foreach ($colorData as $color => $name) {
+            $colors[] = [
+                'owner_id' => $owner_id,
+                'color' => $color,
+                'color_name' => $name
+            ];
+        }
+
+        DB::table('colors')->insert($colors);
     }
 
     public function install_admin_script()

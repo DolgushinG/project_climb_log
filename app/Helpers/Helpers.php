@@ -199,7 +199,7 @@ class Helpers
     }
     public static function save_qr_code($event)
     {
-        $link = $event->new_link ?? $event->link.'/routes';
+        $link = route('listRoutesEvent', [$event->id]);
         $image = QrCode::format('png')
             ->size(150)
             ->generate($link);

@@ -9,8 +9,10 @@ use App\Admin\Actions\BatchAddRoute;
 use App\Admin\Actions\BatchHideGrades;
 use App\Admin\Actions\BatchUpdateOutdoorRoutes;
 use App\Helpers\AllClimbService\Service;
+use App\Helpers\Helpers;
 use App\Jobs\UpdateGradeInResultAllParticipant;
 use App\Models\Area;
+use App\Models\Color;
 use App\Models\Country;
 use App\Models\Event;
 use App\Models\Grades;
@@ -73,7 +75,7 @@ class GradesController extends Controller
                             });
                         }
                         $row->column($column_width_routes, function (Column $column) use ($event) {
-                            $column->row($this->event_routes());
+//                            $column->row($this->event_routes());
                             if($event->type_event){
                                 $column->row($this->ready_outdoor_routes());
                             } else {
@@ -87,53 +89,8 @@ class GradesController extends Controller
     protected function colors()
     {
         // Определите массив цветов
-        $colors = [
-            '#FF0000' => 'Красный',
-            '#FF4500' => 'Оранжевый',
-            '#FFD700' => 'Золотой',
-            '#FFFF00' => 'Жёлтый',
-            '#ADFF2F' => 'Зелёный жёлтый',
-            '#00FF00' => 'Лаймовый',
-            '#32CD32' => 'Лаймовый зелёный',
-            '#008000' => 'Зелёный',
-            '#006400' => 'Тёмно-зелёный',
-            '#00FA9A' => 'Морской зелёный',
-            '#00FFFF' => 'Циан',
-            '#40E0D0' => 'Бирюзовый',
-            '#4682B4' => 'Стальной синий',
-            '#0000FF' => 'Синий',
-            '#00008B' => 'Тёмно-синий',
-            '#8A2BE2' => 'Синевато-фиолетовый',
-            '#A020F0' => 'Фиолетовый',
-            '#FF00FF' => 'Фуксия',
-            '#DDA0DD' => 'Пастельный фиолетовый',
-            '#C71585' => 'Малиновый',
-            '#C0C0C0' => 'Серебристый',
-            '#808080' => 'Серый',
-            '#A9A9A9' => 'Тёмно-серый',
-            '#800000' => 'Коричневый',
-            '#8B4513' => 'Сэд',
-            '#D2691E' => 'Шоколадный',
-            '#F4A460' => 'Светло-коричневый',
-            '#808000' => 'Оливковый',
-            '#6B8E23' => 'Оливковый зелёный',
-            '#BDB76B' => 'Тёмно-зелёный оливковый',
-            '#F0E68C' => 'Хаки',
-            '#FF6347' => 'Томатный',
-            '#FF7F50' => 'Коралловый',
-            '#FF1493' => 'Горячий розовый',
-            '#FFC0CB' => 'Розовый',
-            '#D3D3D3' => 'Светло-серый',
-            '#DCDCDC' => 'Очень светло-серый',
-            '#FFFFFF' => 'Белый',
-            '#F5F5F5' => 'Светло-серый белый',
-            '#000000' => 'Чёрный',
-            '#A52A2A' => 'Коричневый',
-            '#F5DEB3' => 'Пшеничный',
-            '#B0C4DE' => 'Светло-голубой',
-            '#E6E6FA' => 'Лаванда'
-        ];
 
+        $colors = Color::where('owner_id', Admin::user()->id)->pluck('color_name', 'color')->toArray();
         // Сформируйте HTML-код для отображения цветов
         $html = '<table class="table table-striped">';
         $html .= '<thead><tr><th>Цвет</th><th>Название</th></tr></thead>';
@@ -278,6 +235,17 @@ class GradesController extends Controller
      */
     public function store(Request $request)
     {
+        if($request->input('route_id')){
+            $route = new Route;
+            $route->event_id =  $request->input('event_id');
+//            dd($request->input('owner_id'));
+            $route->owner_id = $request->input('owner_id');
+            $route->route_id = $request->input('route_id');
+            $route->color = $request->input('color');
+            $route->grade = $request->input('grade');
+            $route->save();
+            return Helpers::custom_response('Успешно создано', true);
+        }
         return $this->form()->store();
     }
 
@@ -446,7 +414,14 @@ class GradesController extends Controller
             $query->has('event.routes');
         });
         $grid->disableFilter();
-        $grid->disableActions();
+//        $grid->disableActions();
+        $grid->actions(function ($actions) {
+            if(Admin::user()->is_delete_result == 0){
+                $actions->disableDelete();
+            }
+            $actions->disableEdit();
+            $actions->disableView();
+        });
         $grid->disableBatchActions();
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
@@ -455,20 +430,56 @@ class GradesController extends Controller
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchHideGrades);
         });
-
+        Admin::script(<<<SCRIPT
+                let routeIdColumns = document.querySelectorAll('td.column-route_id');
+                routeIdColumns.forEach(function(routeIdColumn) {
+                    let parentRow = routeIdColumn.closest('tr');
+                    if (parentRow) {
+                        let actionsColumn = parentRow.querySelector('td.column-__actions__');
+                        if (actionsColumn) {
+                            let deleteButton = actionsColumn.querySelector('a.grid-row-delete');
+                            if (deleteButton) {
+                                let currentId = deleteButton.getAttribute('data-id');
+                                deleteButton.setAttribute('data-id', 'route-' + currentId);
+                            }
+                        }
+                    }
+                });
+        SCRIPT);
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         if($event->type_event){
             $grid->column('route_name', 'Трасса');
             $grid->column('grade', 'Категория трассы');
             $grid->column('value', 'Ценность трассы');
         } else {
+
             $results = ResultRouteQualificationClassic::where('event_id', $event->id)->first();
             if($results){
                 $grid->column('route_id', 'Номер трассы');
             } else {
+                $grid->quickCreate(function (Grid\Tools\QuickCreate $create) use ($event){
+                    $create->integer('owner_id')->style('display', 'None')->value($event->owner_id);
+                    $create->integer('event_id')->style('display', 'None')->value($event->id);
+                    $create->integer('route_id', 'Трасса')->placeholder('номер');
+                    $create->select('grade', 'Категория трассы')->options(Grades::getGrades());
+                    $colors = Color::where('owner_id', Admin::user()->id)->pluck('color_name', 'color')->toArray();
+                    $colors['not_set_color'] = 'Не установлен';
+                    $create->select('color', 'Цвет')->options($colors);
+                    if($event->mode == 1) {
+                        $create->text('value', 'Редпоинт');
+                        if ($event->is_flash_value) {
+                            $create->integer('flash_value', 'Флеш');
+                        }
+                        if ($event->is_zone_show) {
+                            $create->integer('zone', 'Ценность зоны');
+                        }
+                    }
+                });
                 $grid->column('route_id', 'Номер трассы')->editable();
             }
-            $grid->column('color', __('Цвет трассы'))->select(Grades::colors());
+            $colors = Color::where('owner_id', Admin::user()->id)->pluck('color_name', 'color')->toArray();
+            $colors['not_set_color'] = 'Не установлен';
+            $grid->column('color', __('Цвет трассы'))->select($colors);
             $grid->column('color_view', __('Цвет в представлении'))->display(function ($color) {
                 return "<div style='width: 50px; height: 20px; background-color: {$color}; border: 1px solid #ddd;'></div>";
             });

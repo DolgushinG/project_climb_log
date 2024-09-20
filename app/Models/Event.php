@@ -95,6 +95,10 @@ class Event extends Model
     {
         return $this->hasOne(Grades::class);
     }
+    public function colors()
+    {
+        return $this->hasOne(Color::class);
+    }
 
     public function result_semifinal_stage()
     {
