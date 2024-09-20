@@ -399,14 +399,6 @@ class ResultQualificationController extends Controller
                 })->unescape();
         }
 
-
-
-
-
-
-
-
-
         return $show;
     }
 
@@ -1017,6 +1009,26 @@ class ResultQualificationController extends Controller
                             newIncrementBtn.addEventListener('click', function () {
                                 let currentValue = parseInt(allAttemptsInput.value) || 0;
                                 allAttemptsInput.value = currentValue + 1;
+                                var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
+                                var userId = $('[data-category-user-id="user_id"]').select2('val')
+                                var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
+                                var attempt = $('[data-all-attempts-id=all-attempts]').val();
+                                if(routeId){
+                                    $.get("/admin/api/set_attempts",
+                                        {
+                                            route_id: routeId,
+                                            user_id: userId,
+                                            event_id: eventId,
+                                            attempt: attempt
+                                        },
+                                        function (data) {
+                                            $('[id=amount_try_top]').val(data.amount_try_top);
+                                            $('[id=amount_try_zone]').val(data.amount_try_zone);
+                                            $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
+                                        }
+                                    );
+                                }
+
                             });
 
                             // Обработчик клика на кнопку удаления
@@ -1228,8 +1240,13 @@ class ResultQualificationController extends Controller
     protected function form($type, $id = null)
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+
         if ($event->is_france_system_qualification) {
             $form = new Form(new ResultFranceSystemQualification);
+            $user_id = ResultFranceSystemQualification::find($id)->user_id;
+            $user = User::find($user_id);
+            $empty = '';
+            $form->html('<h1><b>'.$user->middlename ?? $empty.'</b></h1>');
             Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
                 display: None;
                 }
@@ -1263,6 +1280,9 @@ class ResultQualificationController extends Controller
             })->value($arr);
         } else {
             $form = new Form(new ResultQualificationClassic);
+            $user_id = ResultQualificationClassic::find($id)->user_id;
+            $user = User::find($user_id);
+            $form->html('<h1><b>'.$user->middlename.'</b></h1>');
             Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
                 display: None;
                 }

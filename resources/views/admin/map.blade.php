@@ -70,7 +70,15 @@
             @endforeach
         </select><br>
         <label for="color">Цвет:</label>
-        <input class="form-control" type="color" id="color" name="color" required><br>
+        @if($colors)
+            <select id="color" name="color" class="form-select" autocomplete="off">
+                @foreach($colors as $color_list)
+                    <option data-color="{{$color_list->color}}" value="{{$color_list->color}}">{{$color_list->color_name}}</option>
+                @endforeach
+            </select><br>
+{{--            <input class="form-control" type="color" id="color" name="color" required><br>--}}
+        @endif
+
         <input type="hidden" id="x-coordinate" name="x">
         <input type="hidden" id="y-coordinate" name="y">
         <input type="hidden" id="event_id" name="event_id">

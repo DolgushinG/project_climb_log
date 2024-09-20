@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Helpers\Helpers;
+use App\Models\Color;
 use App\Models\Event;
 use App\Models\Map;
 use App\Http\Controllers\Controller;
@@ -119,7 +120,8 @@ class MapController extends Controller
         foreach ($points as $index => $point){
             $points[$index]['font_background'] = Helpers::getTextColorAndBorder($point->color ?? '');
         }
-        return Admin::component('admin::map', compact(['points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
+        $colors = Color::where('owner_id', Admin::user()->id)->get()->sortByDesc('color_name');
+        return Admin::component('admin::map', compact(['colors','points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
     }
 
     /**

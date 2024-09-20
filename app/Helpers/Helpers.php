@@ -199,13 +199,26 @@ class Helpers
     }
     public static function save_qr_code($event)
     {
-        $link = $event->new_link ?? $event->link.'/routes';
+        $link = route('listRoutesEvent', [$event->id]);
         $image = QrCode::format('png')
             ->size(150)
             ->generate($link);
         $output_file = '/img/qr-code/img-' . time() . '.png';
         Storage::disk('admin')->put($output_file, $image); //storage/app/public/img/qr-code/img-1557309130.png
         return 'storage'.$output_file;
+    }
+
+    public static function isRussianOnly($string, $event) {
+
+        if(!$string){
+            return false;
+        }
+        if($event->is_need_to_russian_names){
+            // Регулярное выражение для проверки на русские символы и пробелы
+            return preg_match('/^[а-яА-ЯёЁ\s]+$/u', $string);
+        } else {
+            return true;
+        }
     }
 
     /**
