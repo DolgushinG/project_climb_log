@@ -5,11 +5,14 @@ namespace App\Admin\Controllers;
 use App\Models\Color;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\Grades;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
+use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
+use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
 
 class ColorController extends Controller
@@ -25,7 +28,16 @@ class ColorController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->body($this->grid());
+            ->row(function(Row $row) {
+                $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+                if($event){
+                    if(!$event->is_france_system_qualification){
+                        $row->column(10, function (Column $column) use ($event) {
+                            $column->row($this->grid());
+                        });
+                    }
+                }
+            });
     }
 
     /**
@@ -99,7 +111,7 @@ class ColorController extends Controller
         $grid->column('color', __('Цвет в представлении'))->display(function ($color) {
             return "<div style='width: 50px; height: 20px; background-color: {$color}; border: 1px solid #ddd;'></div>";
         });
-        $grid->column('color_name', 'Название');
+        $grid->column('color_name', 'Название')->sortable();
 
         return $grid;
     }

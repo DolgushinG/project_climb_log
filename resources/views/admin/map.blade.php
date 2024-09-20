@@ -76,7 +76,7 @@
                     <option data-color="{{$color_list->color}}" value="{{$color_list->color}}">{{$color_list->color_name}}</option>
                 @endforeach
             </select><br>
-            <input class="form-control" type="color" id="color" name="color" required><br>
+{{--            <input class="form-control" type="color" id="color" name="color" required><br>--}}
         @endif
 
         <input type="hidden" id="x-coordinate" name="x">

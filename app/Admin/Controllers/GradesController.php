@@ -18,6 +18,7 @@ use App\Models\Event;
 use App\Models\Grades;
 use App\Http\Controllers\Controller;
 use App\Models\GuidRoutesOutdoor;
+use App\Models\ParticipantCategory;
 use App\Models\Place;
 use App\Models\PlaceRoute;
 use App\Models\ResultFranceSystemQualification;
@@ -75,11 +76,14 @@ class GradesController extends Controller
                             });
                         }
                         $row->column($column_width_routes, function (Column $column) use ($event) {
-//                            $column->row($this->event_routes());
-                            if($event->type_event){
-                                $column->row($this->ready_outdoor_routes());
-                            } else {
-                                $column->row($this->ready_routes());
+                            $column->row($this->event_routes());
+                            $grades = Grades::where('event_id', $event->id)->first();
+                            if($grades){
+                                if($event->type_event){
+                                    $column->row($this->ready_outdoor_routes());
+                                } else {
+                                    $column->row($this->ready_routes());
+                                }
                             }
                         });
                     }
@@ -90,7 +94,7 @@ class GradesController extends Controller
     {
         // Определите массив цветов
 
-        $colors = Color::where('owner_id', Admin::user()->id)->pluck('color_name', 'color')->toArray();
+        $colors = Color::where('owner_id', Admin::user()->id)->get()->sortBy('color_name')->pluck('color_name', 'color')->toArray();
         // Сформируйте HTML-код для отображения цветов
         $html = '<table class="table table-striped">';
         $html .= '<thead><tr><th>Цвет</th><th>Название</th></tr></thead>';
@@ -238,12 +242,17 @@ class GradesController extends Controller
         if($request->input('route_id')){
             $route = new Route;
             $route->event_id =  $request->input('event_id');
-//            dd($request->input('owner_id'));
             $route->owner_id = $request->input('owner_id');
             $route->route_id = $request->input('route_id');
             $route->color = $request->input('color');
+            $route->color_view = $request->input('color');
             $route->grade = $request->input('grade');
             $route->save();
+
+            $grades = Grades::where('event_id', $request->input('event_id'))->first();
+            $get_count = Route::where('event_id', $request->input('event_id'))->get()->count();
+            $grades->count_routes = $get_count;
+            $grades->save();
             return Helpers::custom_response('Успешно создано', true);
         }
         return $this->form()->store();
@@ -268,7 +277,11 @@ class GradesController extends Controller
                 }
                 $route->delete();
                 $grades = Grades::where('event_id', $event->id)->first();
-                $get_count = RoutesOutdoor::where('event_id', $event->id)->get()->count();
+                if($event->type_event){
+                    $get_count = RoutesOutdoor::where('event_id', $event->id)->get()->count();
+                } else {
+                    $get_count = Route::where('event_id', $event->id)->get()->count();
+                }
                 if($grades){
                     $grades->count_routes = $get_count;
                     $grades->save();
@@ -413,7 +426,12 @@ class GradesController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.routes');
         });
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
         $grid->disableFilter();
+        $grid->selector(function (Grid\Tools\Selector $selector) use ($event) {
+            $selector->select('grade', 'Категория', Grades::getGrades());
+            $selector->select('color', 'Цвет', Color::colors);
+        });
 //        $grid->disableActions();
         $grid->actions(function ($actions) {
             if(Admin::user()->is_delete_result == 0){
@@ -446,16 +464,15 @@ class GradesController extends Controller
                     }
                 });
         SCRIPT);
-        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+
         if($event->type_event){
             $grid->column('route_name', 'Трасса');
             $grid->column('grade', 'Категория трассы');
             $grid->column('value', 'Ценность трассы');
         } else {
-
             $results = ResultRouteQualificationClassic::where('event_id', $event->id)->first();
             if($results){
-                $grid->column('route_id', 'Номер трассы');
+                $grid->column('route_id', 'Номер трассы')->help('Если уже есть результат от участников, редактировать нельзя');
             } else {
                 $grid->quickCreate(function (Grid\Tools\QuickCreate $create) use ($event){
                     $create->integer('owner_id')->style('display', 'None')->value($event->owner_id);
@@ -477,7 +494,7 @@ class GradesController extends Controller
                 });
                 $grid->column('route_id', 'Номер трассы')->editable();
             }
-            $colors = Color::where('owner_id', Admin::user()->id)->pluck('color_name', 'color')->toArray();
+            $colors = Color::where('owner_id', Admin::user()->id)->get()->sortByDesc('color_name')->pluck('color_name', 'color')->toArray();
             $colors['not_set_color'] = 'Не установлен';
             $grid->column('color', __('Цвет трассы'))->select($colors);
             $grid->column('color_view', __('Цвет в представлении'))->display(function ($color) {

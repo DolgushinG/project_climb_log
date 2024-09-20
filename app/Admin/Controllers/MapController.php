@@ -120,7 +120,7 @@ class MapController extends Controller
         foreach ($points as $index => $point){
             $points[$index]['font_background'] = Helpers::getTextColorAndBorder($point->color ?? '');
         }
-        $colors = Color::where('owner_id', Admin::user()->id)->get();
+        $colors = Color::where('owner_id', Admin::user()->id)->get()->sortByDesc('color_name');
         return Admin::component('admin::map', compact(['colors','points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
     }
 

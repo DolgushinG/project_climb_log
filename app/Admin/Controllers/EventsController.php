@@ -508,6 +508,7 @@ class EventsController extends Controller
             }
             $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states(self::STATES_BTN);
             $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states(self::STATES_BTN);
+            $form->switch('is_need_to_russian_names', 'Регистрация участников только с русскими(кириллицей) Имя И Фамилия')->states(self::STATES_BTN);
 
         })->tab('Управление соревнованием', function ($form) use ($id){
             $form->switch('is_registration_state', 'Регистрация ')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
@@ -860,6 +861,7 @@ class EventsController extends Controller
     {
         $colors = [];
         $colorData = Color::colors;
+        ksort($colorData);
         foreach ($colorData as $color => $name) {
             $colors[] = [
                 'owner_id' => $owner_id,
