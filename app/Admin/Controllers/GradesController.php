@@ -433,14 +433,15 @@ class GradesController extends Controller
             $selector->select('color', 'Цвет', Color::colors);
         });
 //        $grid->disableActions();
-        $grid->actions(function ($actions) {
+        $grid->actions(function ($actions) use ($grid) {
             if(Admin::user()->is_delete_result == 0){
                 $actions->disableDelete();
+                $grid->disableBatchActions();
             }
             $actions->disableEdit();
             $actions->disableView();
         });
-        $grid->disableBatchActions();
+
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->disableExport();

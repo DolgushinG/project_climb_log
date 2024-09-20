@@ -94,10 +94,10 @@ class ColorController extends Controller
 //        $grid->model()->where(function ($query) {
 //            $query->has('event.colors');
 //        });
-        $grid->actions(function ($actions) {
+        $grid->actions(function ($actions) use ($grid) {
             if(Admin::user()->is_delete_result == 0){
                 $actions->disableDelete();
-                $actions->disableBatchActions();
+                $grid->disableBatchActions();
             }
 //            $actions->disableEdit();
             $actions->disableView();

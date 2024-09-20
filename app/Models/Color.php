@@ -50,7 +50,7 @@ class Color extends Model
             '#8B4513' => 'Сэд',
             '#DCDCDC' => 'Очень светло-серый'
         ];
-public function event()
+    public function event()
     {
         return $this->belongsTo(Event::class)->where('active', 1);
     }
