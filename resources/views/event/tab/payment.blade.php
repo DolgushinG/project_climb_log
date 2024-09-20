@@ -356,10 +356,10 @@
     @endauth
     @guest
         @if($event->amount_start_price)
-            <div class="container text-center pt-2 pb-2">
-                <label> Стартовый взнос: </label>
-                <span class="badge bg-success" style="font-size: 22px">{{$event->amount_start_price}}</span> руб.<br>
-            </div>
+{{--            <div class="container text-center pt-2 pb-2">--}}
+{{--                <label> Стартовый взнос: </label>--}}
+{{--                <span class="badge bg-success" style="font-size: 22px">{{$event->amount_start_price}}</span> руб.<br>--}}
+{{--            </div>--}}
             @if($event->info_payment)
                 <p>{!! $event->info_payment !!}</p>
             @endif
