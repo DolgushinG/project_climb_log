@@ -912,7 +912,7 @@ class ResultQualificationController extends Controller
                             {
                                 route_id: routeId,
                                 user_id: userId,
-                                event_id: eventId
+                                event_id: eventId,
                             }, // Передаем ID маршрута и участника в запросе
                             function (data) {
                                 // Обновляем поля с количеством попыток
@@ -928,6 +928,7 @@ class ResultQualificationController extends Controller
                     var routeId = $(this).val(); // ID выбранного маршрута
                     var userId = $('[data-user-id-{$category->id}="user_id"]').select2('val')
                     var eventId = $('[id=event_id]').val(); // ID выбранного участника
+
 
                     // Выполняем AJAX-запрос к эндпоинту для получения данных о попытках
                     $.get("/admin/api/get_attempts", // URL эндпоинта
@@ -1087,8 +1088,10 @@ class ResultQualificationController extends Controller
                             $('[id=amount_try_top_category]').val('');
                             $('[data-user-id=user_id]').val('');
                             $('[id=amount_try_zone_category]').val('');
+                            $('[id=user_gender]').val('');
+                            $('[id=category]').val('');
                             $.get("/admin/api/get_users",
-                                    {eventId: $('[data-category-event-id=event_id]').val()},
+                                    {eventId: $('[data-category-event-id=event_id]').val(), numberSetId: $('[id=number_set_id]').val()},
                                     function (data) {
                                         var model = $('[data-category-user-id=user_id]');
                                         model.empty();
@@ -1100,6 +1103,8 @@ class ResultQualificationController extends Controller
                                                 var userId = item[0];
                                                 var userName = item[1];
                                                 model.append("<option data-category-user-id='" + userId + "' value='" + userId + "'>" + userName + "</option>");
+                                                const user_gender = document.createElement('span');
+                                                user_gender.textContent = 'Зона'; // Текст "Попытка"
                                             });
                                     }
                             );
@@ -1113,6 +1118,27 @@ class ResultQualificationController extends Controller
                 let btn_close_icon_modal_category = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfillonerouteandonecategory"] [data-dismiss="modal"][class="close"]'
                 $(document).on("click", btn_close_icon_modal_category, function () {
                     window.location.reload();
+                });
+                $(document).on("change", '[data-category-number-set-id=number_set_id]', function () {
+                    var numberSetId = $('[data-category-number-set-id=number_set_id]').select2('val')
+                    var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
+                    $.get("/admin/api/get_users",
+                            {eventId: $('[data-category-event-id=event_id]').val(), numberSetId: numberSetId},
+                            function (data) {
+                                var model = $('[data-category-user-id=user_id]');
+                                model.empty();
+                                model.append("<option>Выбрать</option>");
+                                var sortedData = Object.entries(data).sort(function (a, b) {
+                                        return a[1].localeCompare(b[1]); // сортируем по значению (имя пользователя)
+                                    });
+                                $.each(sortedData, function (i, item) {
+                                        var userId = item[0];
+                                        var userName = item[1];
+                                        model.append("<option data-category-user-id='" + userId + "' value='" + userId + "'>" + userName + "</option>");
+                                    });
+                            }
+                    );
+
                 });
                 $(document).on("change", '[data-category-user-id=user_id]', function () {
                     var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
@@ -1133,7 +1159,19 @@ class ResultQualificationController extends Controller
                             }
                         );
                     }
-
+                    if(userId){
+                        $.get("/admin/api/get_user_info", // URL эндпоинта
+                            {
+                                user_id: userId,
+                                event_id: eventId
+                            },
+                            function (data) {
+                                // Обновляем поля с количеством попыток
+                                $('[id="user_gender"]').val(data.gender);
+                                $('[id="category"]').val(data.category);
+                            }
+                        );
+                    }
                 });
                 $(document).on("change", '[data-category-route-id=route_id]', function () {
                     var routeId = $(this).val(); // ID выбранного маршрута

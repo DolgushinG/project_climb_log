@@ -10,6 +10,7 @@ use App\Models\ResultFinalStage;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultSemiFinalStage;
+use App\Models\Set;
 use App\Models\User;
 use Encore\Admin\Admin;
 use Illuminate\Http\Request;
@@ -110,20 +111,32 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         for($i = 1; $i <= $amount_routes; $i++){
             $routes[$i] = $i;
         }
+        $sets = Set::where('event_id', $event->id)->pluck('number_set', 'id')->toArray();
+        $this->multipleSelect('number_set_id', 'Сеты')->attribute('autocomplete', 'off')->attribute('data-category-number-set-id', 'number_set_id')->options($sets);
         $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-category-user-id', 'user_id')->required();
+        $this->text('user_gender', 'Пол')->attribute('autocomplete', 'off')->readonly();
+        $this->text('category', 'Группа')->attribute('autocomplete', 'off')->readonly();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-category-event-id', 'event_id')->value($event->id);
         $this->select('route_id', 'Трасса')->attribute('autocomplete', 'off')->attribute('data-category-route-id', 'route_id')->options($routes)->required();
         $this->integer('all_attempts', 'Все попытки')
             ->attribute('autocomplete', 'off')
             ->attribute('data-all-attempts-id', 'all-attempts');
-        $this->integer('amount_try_top_category', 'Попытки на топ')->attribute('autocomplete', 'off');
         $this->integer('amount_try_zone_category', 'Попытки на зону')->attribute('autocomplete', 'off');
+        $this->integer('amount_try_top_category', 'Попытки на топ')->attribute('autocomplete', 'off');
         Admin::style('
                     .input-group {
                     display: flex;
                     align-items: center;
                 }
-
+                #increment-btn{
+                    font-size: 20px;
+                }
+                #zone-btn {
+                    font-size: 20px;
+                }
+                #top-btn {
+                    font-size: 20px;
+                }
                 .form-control {
                     margin-right: -1px; /* Небольшой выступ для кнопки */
                 }
@@ -145,7 +158,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
                  <style>
                  .result-add-qualification-france-one-route-one-category {margin-top:8px;}
                  @media screen and (max-width: 767px) {
-                        .result-add-qualification-france-one-route-one-category {margin-top:8px;}
+                        .result-add-qualification-france-one-route-one-category {margin-top:8px; margin-left: 0px!important;}
                     }
                 </style>
             ";

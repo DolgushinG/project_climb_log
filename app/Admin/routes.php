@@ -37,7 +37,12 @@ Route::group([
 
     $router->middleware(['throttle:get_users'])->get('/api/get_users', function(Request $request) {
         $eventId = $request->get('eventId');
-        $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->pluck('user_id')->toArray();
+        $numberSetId = $request->get('numberSetId');
+        if($numberSetId){
+            $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->whereIn('number_set_id', $numberSetId)->pluck('user_id')->toArray();
+        } else {
+            $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->pluck('user_id')->toArray();
+        }
         $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
         $amount_routes = Grades::where('event_id', $eventId)->first();
         if($amount_routes){
@@ -62,6 +67,26 @@ Route::group([
         })->toArray();
 
         return response()->json($sortedUsers ?? []);
+    });
+    $router->middleware(['throttle:get_attempts'])->get('/api/get_user_info', function(Request $request) {
+        $userId = $request->get('user_id');
+        $eventId = $request->get('event_id');
+        $event = \App\Models\Event::find($eventId);
+        if($event->is_france_system_qualification){
+            $result = \App\Models\ResultFranceSystemQualification::where('event_id', $eventId)->where('user_id', $userId)->first();
+        } else {
+            $result = \App\Models\ResultQualificationClassic::where('event_id', $eventId)->where('user_id', $userId)->first();
+        }
+        $category = \App\Models\ParticipantCategory::find($result->category_id ?? null);
+        if($result){
+            $data = [
+                'gender' => $result->gender== 'female' ? 'Жен': 'Муж',
+                'category' => $category->category
+            ];
+        } else {
+            $data = [];
+        }
+        return response()->json($data);
     });
     $router->middleware(['throttle:get_attempts'])->get('/api/get_attempts', function(Request $request) {
         $routeId = $request->get('route_id');

@@ -403,6 +403,12 @@ class AdminTablesSeeder extends Seeder
                     "slug" => "set_attempts",
                     "http_method" => "",
                     "http_path" => "/api/set_attempts*"
+                ],
+                [
+                    "name" => "get_user_info",
+                    "slug" => "get_user_info",
+                    "http_method" => "",
+                    "http_path" => "/api/get_user_info*"
                 ]
             ]
         );
