@@ -954,18 +954,52 @@ class ResultQualificationController extends Controller
                 $tools->append(new BatchResultFranceSystemQualification($category, $script));
                 $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category, $script_one_route));
             }
-            $script = <<<EOT
+            $script_category = <<<EOT
+                        function set_attempt(){
+                            var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
+                            var userId = $('[data-category-user-id="user_id"]').select2('val')
+                            var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
+                            var attempt = $('[data-all-attempts-id=all-attempts]').val();
+                            var amount_try_top = $('[id=amount_try_top_category]').val();
+                            var amount_try_zone = $('[id=amount_try_zone_category]').val();
+                            if(routeId){
+                                $.get("/admin/api/set_attempts",
+                                    {
+                                        route_id: routeId,
+                                        user_id: userId,
+                                        event_id: eventId,
+                                        attempt: attempt,
+                                        amount_try_top: amount_try_top,
+                                        amount_try_zone: amount_try_zone
+                                    },
+                                    function (data) {
+                                        $('[id=amount_try_top_category]').val(data.amount_try_top);
+                                        $('[id=amount_try_zone_category]').val(data.amount_try_zone);
+                                        $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
+                                    }
+                                );
+                            }
+
+                        }
                          $(document).on("click", '[modal="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfillonerouteandonecategory"]', function () {
+
                         const allAttemptsInput = document.getElementById('all_attempts');
+                        const topInput = document.getElementById('amount_try_top_category');
+                        const zoneInput = document.getElementById('amount_try_zone_category');
 
                         // Проверяем, существуют ли уже кнопки
                         const incrementBtn = document.getElementById('increment-btn');
                         const decrementBtn = document.getElementById('decrement-btn');
-
-                        if (!incrementBtn && !decrementBtn) {
+                        const zoneBtn = document.getElementById('zone-btn');
+                        const topBtn = document.getElementById('top-btn');
+                        if (!incrementBtn && !decrementBtn && !zoneBtn && !topBtn) {
                             // Создаем элемент для группы ввода
                             const inputGroupAppend = document.createElement('div');
+                            const inputGroupAppend2 = document.createElement('div');
+                            const inputGroupAppend3 = document.createElement('div');
                             inputGroupAppend.className = 'input-group-append';
+                            inputGroupAppend2.className = 'input-group-append';
+                            inputGroupAppend3.className = 'input-group-append';
 
                             // Создаем кнопку для увеличения
                             const newIncrementBtn = document.createElement('button');
@@ -973,17 +1007,31 @@ class ResultQualificationController extends Controller
                             newIncrementBtn.className = 'btn btn-outline-secondary';
                             newIncrementBtn.id = 'increment-btn';
 
+                            const newZoneBtn = document.createElement('button');
+                            newZoneBtn.type = 'button';
+                            newZoneBtn.className = 'btn btn-success';
+                            newZoneBtn.id = 'zone-btn';
+                            const newTopBtn = document.createElement('button');
+                            newTopBtn.type = 'button';
+                            newTopBtn.className = 'btn btn-success';
+                            newTopBtn.id = 'zone-btn';
                             // Создаем иконку для увеличения
                             const incrementIcon = document.createElement('i');
                             incrementIcon.className = 'fa fa-plus';
 
                             // Создаем текст для увеличения
                             const incrementText = document.createElement('span');
-                            incrementText.textContent = ' Попытка'; // Текст "Попытка"
+                            const zoneText = document.createElement('span');
+                            const topText = document.createElement('span');
+                            zoneText.textContent = 'Зона'; // Текст "Попытка"
+                            incrementText.textContent = 'Попытка'; // Текст "Попытка"
+                            topText.textContent = 'Топ'; // Текст "Попытка"
 
                             // Добавляем иконку и текст в кнопку увеличения
                             newIncrementBtn.appendChild(incrementIcon);
                             newIncrementBtn.appendChild(incrementText);
+                            newZoneBtn.appendChild(zoneText);
+                            newTopBtn.appendChild(topText);
 
                             // Создаем кнопку для удаления
                             const newDecrementBtn = document.createElement('button');
@@ -1001,34 +1049,29 @@ class ResultQualificationController extends Controller
                             // Добавляем кнопки в группу ввода
                             inputGroupAppend.appendChild(newDecrementBtn);
                             inputGroupAppend.appendChild(newIncrementBtn);
+                            inputGroupAppend2.appendChild(newZoneBtn);
+                            inputGroupAppend3.appendChild(newTopBtn);
 
                             // Находим родительский элемент и добавляем группу ввода после поля
                             allAttemptsInput.parentNode.appendChild(inputGroupAppend);
+                            zoneInput.parentNode.appendChild(inputGroupAppend2);
+                            topInput.parentNode.appendChild(inputGroupAppend3);
 
+                            newZoneBtn.addEventListener('click', function () {
+                                let currentValue = parseInt(allAttemptsInput.value) || 0;
+                                 $('[id=amount_try_zone_category]').val(currentValue);
+                                 set_attempt()
+                            });
+                            newTopBtn.addEventListener('click', function () {
+                                let currentValue = parseInt(allAttemptsInput.value) || 0;
+                                 $('[id=amount_try_top_category]').val(currentValue);
+                                 set_attempt()
+                            });
                             // Обработчик клика на кнопку увеличения
                             newIncrementBtn.addEventListener('click', function () {
                                 let currentValue = parseInt(allAttemptsInput.value) || 0;
                                 allAttemptsInput.value = currentValue + 1;
-                                var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
-                                var userId = $('[data-category-user-id="user_id"]').select2('val')
-                                var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
-                                var attempt = $('[data-all-attempts-id=all-attempts]').val();
-                                if(routeId){
-                                    $.get("/admin/api/set_attempts",
-                                        {
-                                            route_id: routeId,
-                                            user_id: userId,
-                                            event_id: eventId,
-                                            attempt: attempt
-                                        },
-                                        function (data) {
-                                            $('[id=amount_try_top]').val(data.amount_try_top);
-                                            $('[id=amount_try_zone]').val(data.amount_try_zone);
-                                            $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
-                                        }
-                                    );
-                                }
-
+                                set_attempt()
                             });
 
                             // Обработчик клика на кнопку удаления
@@ -1037,12 +1080,13 @@ class ResultQualificationController extends Controller
                                 if (currentValue > 0) {
                                     allAttemptsInput.value = currentValue - 1;
                                 }
+                                set_attempt()
                             });
 
                             $('[data-all-attempts-id=all-attempts]').val('');
-                            $('[id=amount_try_top]').val('');
+                            $('[id=amount_try_top_category]').val('');
                             $('[data-user-id=user_id]').val('');
-                            $('[id=amount_try_zone]').val('');
+                            $('[id=amount_try_zone_category]').val('');
                             $.get("/admin/api/get_users",
                                     {eventId: $('[data-category-event-id=event_id]').val()},
                                     function (data) {
@@ -1061,6 +1105,7 @@ class ResultQualificationController extends Controller
                             );
                         }
                 });
+
                 let btn_close_modal_category = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfillonerouteandonecategory"] [data-dismiss="modal"][class="btn btn-default"]'
                 $(document).on("click", btn_close_modal_category, function () {
                     window.location.reload();
@@ -1082,8 +1127,8 @@ class ResultQualificationController extends Controller
                             }, // Передаем ID маршрута и участника в запросе
                             function (data) {
                                 // Обновляем поля с количеством попыток
-                                $('[id=amount_try_top]').val(data.amount_try_top);
-                                $('[id=amount_try_zone]').val(data.amount_try_zone);
+                                $('[id=amount_try_top_category]').val(data.amount_try_top);
+                                $('[id=amount_try_zone_category]').val(data.amount_try_zone);
                                 $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
                             }
                         );
@@ -1105,14 +1150,14 @@ class ResultQualificationController extends Controller
                         function (data) {
                             // Обновляем поля с количеством попыток
                             $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
-                            $('[id=amount_try_top]').val(data.amount_try_top);
-                            $('[id=amount_try_zone]').val(data.amount_try_zone);
+                            $('[id=amount_try_top_category]').val(data.amount_try_top);
+                            $('[id=amount_try_zone_category]').val(data.amount_try_zone);
                         }
                     );
                 });
 
         EOT;
-            $tools->append(new BatchResultQualificationFranceCustomFillOneRouteAndOneCategory($script));
+            $tools->append(new BatchResultQualificationFranceCustomFillOneRouteAndOneCategory($script_category));
             $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
             $is_enabled = Grades::where('event_id', $event->id)->first();
             if ($is_enabled && Admin::user()->username == "Tester2") {

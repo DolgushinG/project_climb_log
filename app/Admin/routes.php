@@ -48,7 +48,7 @@ Route::group([
         // Преобразуем формат и сортируем по алфавиту
         $sortedUsers = $result->mapWithKeys(function ($middlename, $id) use($eventId, $amount_routes) {
             $result_user = ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('user_id', $id);
-            $routes = $result_user->pluck('route_id')->toArray();
+            $routes = $result_user->get()->sortBy('route_id')->pluck('route_id')->toArray();
             $string_version = '';
             foreach ($routes as $value) {
                 $string_version .= $value . ', ';
@@ -84,25 +84,34 @@ Route::group([
         $userId = $request->get('user_id');
         $eventId = $request->get('event_id');
         $attempt = $request->get('attempt');
-        $result_reg = ResultFranceSystemQualification::where('event_id', $eventId)->where('user_id', $userId)->first();
-
-        $result = \App\Models\ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
-        if(!$result){
-            $result = new ResultRouteFranceSystemQualification;
-            $result->event_id = $eventId;
-            $result->owner_id = $result_reg->owner_id;
-            $result->gender = $result_reg->gender;
-            $result->route_id = $routeId;
-            $result->category_id = $result_reg->category_id ?? null;
-            $result->number_set_id = $result_reg->number_set_id ?? null;
-            $result->user_id = $userId;
-            $result->amount_top = 0;
-            $result->amount_try_top = 0;
-            $result->amount_zone = 0;
-            $result->amount_try_zone = 0;
+        $amount_try_top = intval($request->get('amount_try_top'));
+        $amount_try_zone = intval($request->get('amount_try_zone'));
+        if($amount_try_top > 0){
+            $amount_top  = 1;
+        } else {
+            $amount_top  = 0;
         }
-        $result->all_attempts = $attempt;
-        $result->save();
+        if($amount_try_zone > 0){
+            $amount_zone  = 1;
+        } else {
+            $amount_zone  = 0;
+        }
+        $result_reg = ResultFranceSystemQualification::where('event_id', $eventId)->where('user_id', $userId)->first();
+        ResultFranceSystemQualification::update_france_route_results(
+            owner_id: $result_reg->owner_id,
+            event_id: $eventId,
+            category_id: $result_reg->category_id ?? null,
+            route_id: $routeId,
+            user_id: $userId,
+            amount_try_top: $amount_try_top,
+            amount_try_zone: $amount_try_zone,
+            amount_top: $amount_top,
+            amount_zone: $amount_zone,
+            gender: $result_reg->gender,
+            all_attempts: $attempt,
+            number_set_id: $result_reg->number_set_id ?? null
+        );
+        $result = \App\Models\ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
         $data = [
             'all_attempts' => $result->all_attempts,
             'amount_try_top' => $result->amount_try_top,
