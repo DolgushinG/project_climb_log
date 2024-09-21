@@ -1004,7 +1004,7 @@ class ResultQualificationController extends Controller
                             // Создаем кнопку для увеличения
                             const newIncrementBtn = document.createElement('button');
                             newIncrementBtn.type = 'button';
-                            newIncrementBtn.className = 'btn btn-outline-secondary';
+                            newIncrementBtn.className = 'btn btn-warning';
                             newIncrementBtn.id = 'increment-btn';
 
                             const newZoneBtn = document.createElement('button');
@@ -1024,7 +1024,7 @@ class ResultQualificationController extends Controller
                             const zoneText = document.createElement('span');
                             const topText = document.createElement('span');
                             zoneText.textContent = 'Зона'; // Текст "Попытка"
-                            incrementText.textContent = 'Попытка'; // Текст "Попытка"
+                            incrementText.textContent = ' Попытка'; // Текст "Попытка"
                             topText.textContent = 'Топ'; // Текст "Попытка"
 
                             // Добавляем иконку и текст в кнопку увеличения

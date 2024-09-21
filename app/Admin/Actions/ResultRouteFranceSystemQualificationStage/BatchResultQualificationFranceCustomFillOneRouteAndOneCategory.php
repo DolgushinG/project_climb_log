@@ -132,18 +132,8 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
                     margin-top: 10px;
                     margin-left: 5px; /* Убираем отступ слева */
                 }
-
-                .btn-outline-secondary {
-                    background-color: #28a745; /* Зеленый фон */
-                    border-color: #28a745; /* Цвет границы совпадает с фоном */
-                    color: #fff; /* Белый цвет текста */
-                     margin-left: 5px;
-                }
-
-                .btn-outline-secondary:hover {
-                    background-color: #218838; /* Темнее зеленый при наведении */
-                    border-color: #1e7e34; /* Темнее граница при наведении */
-                     margin-left: 5px;
+                .btn-warning {
+                    margin-left: 5px;
                 }
 
         ');
