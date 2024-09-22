@@ -877,19 +877,6 @@ class ResultQualificationController extends Controller
             $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
-//            Admin::script(<<<SCRIPT
-//            $('body').on('shown.bs.modal', '.modal', function() {
-//                $(this).find('select').each(function() {
-//                    var dropdownParent = $(document.body);
-//                    if ($(this).parents('.modal.in:first').length !== 0)
-//                        dropdownParent = $(this).parents('.modal.in:first');
-//                        $(this).select2({
-//                            dropdownParent: dropdownParent
-//                        });
-//                    });
-//
-//            });
-//            SCRIPT);
             $tools->append(new BatchExportResultFranceSystemQualification);
             $tools->append(new BatchExportStartProtocolParticipantsQualification);
             $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
