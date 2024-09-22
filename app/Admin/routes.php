@@ -39,7 +39,11 @@ Route::group([
         $eventId = $request->get('eventId');
         $numberSetId = $request->get('numberSetId');
         if($numberSetId){
-            $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->where('number_set_id', $numberSetId)->pluck('user_id')->toArray();
+            if(gettype($numberSetId) == 'array'){
+                $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->whereIn('number_set_id', $numberSetId)->pluck('user_id')->toArray();
+            } else {
+                $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->where('number_set_id', $numberSetId)->pluck('user_id')->toArray();
+            }
         } else {
             $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->pluck('user_id')->toArray();
         }

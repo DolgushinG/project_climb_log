@@ -877,84 +877,32 @@ class ResultQualificationController extends Controller
             $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
-            Admin::script(<<<SCRIPT
-            $('body').on('shown.bs.modal', '.modal', function() {
-            $(this).find('select').each(function() {
-                var dropdownParent = $(document.body);
-                if ($(this).parents('.modal.in:first').length !== 0)
-                    dropdownParent = $(this).parents('.modal.in:first');
-                    $(this).select2({
-                        dropdownParent: dropdownParent
-                    });
-                });
-            });
-            SCRIPT);
+//            Admin::script(<<<SCRIPT
+//            $('body').on('shown.bs.modal', '.modal', function() {
+//                $(this).find('select').each(function() {
+//                    var dropdownParent = $(document.body);
+//                    if ($(this).parents('.modal.in:first').length !== 0)
+//                        dropdownParent = $(this).parents('.modal.in:first');
+//                        $(this).select2({
+//                            dropdownParent: dropdownParent
+//                        });
+//                    });
+//
+//            });
+//            SCRIPT);
             $tools->append(new BatchExportResultFranceSystemQualification);
             $tools->append(new BatchExportStartProtocolParticipantsQualification);
-//            $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
-//            foreach ($categories as $index => $category) {
-//                $index  = $index+1;
-//                $script_one_route = <<<EOT
-//                $(document).on("change", '[data-user-id-{$category->id}="user_id"]', function () {
-//                    $('[id=amount_try_top]').val('');
-//                    $('[id=amount_try_zone]').val('');
-//                });
-//                let btn_close_modal{$category->id} = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-//                $(document).on("click", btn_close_modal{$category->id}, function () {
-//                    window.location.reload();
-//                });
-//                $(document).on("change", '[data-user-id-{$category->id}=user_id]', function () {
-//                    var routeId = $('[data-route-id-{$category->id}=route_id]').val(); // ID выбранного маршрута
-//                    var userId = $('[data-user-id-{$category->id}="user_id"]').select2('val')
-//                    var eventId = $('[id=event_id]').val(); // ID выбранного участника
-//                    if(routeId){
-//                        $.get("/admin/api/get_attempts", // URL эндпоинта
-//                            {
-//                                route_id: routeId,
-//                                user_id: userId,
-//                                event_id: eventId,
-//                            }, // Передаем ID маршрута и участника в запросе
-//                            function (data) {
-//                                // Обновляем поля с количеством попыток
-//                                $('[id=amount_try_top]').val(data.amount_try_top);
-//                                $('[id=amount_try_zone]').val(data.amount_try_zone);
-//                            }
-//                        );
-//                    }
-//
-//                });
-//                // Подобный код для обновления попыток на основе выбранного участника и трассы
-//                $(document).on("change", '[data-route-id-{$category->id}=route_id]', function () {
-//                    var routeId = $(this).val(); // ID выбранного маршрута
-//                    var userId = $('[data-user-id-{$category->id}="user_id"]').select2('val')
-//                    var eventId = $('[id=event_id]').val(); // ID выбранного участника
-//
-//
-//                    // Выполняем AJAX-запрос к эндпоинту для получения данных о попытках
-//                    $.get("/admin/api/get_attempts", // URL эндпоинта
-//                        {
-//                            route_id: routeId,
-//                            user_id: userId,
-//                            event_id: eventId
-//                        }, // Передаем ID маршрута и участника в запросе
-//                        function (data) {
-//                            // Обновляем поля с количеством попыток
-//                            $('[id=amount_try_top]').val(data.amount_try_top);
-//                            $('[id=amount_try_zone]').val(data.amount_try_zone);
-//                        }
-//                    );
-//                });
-//
-//        EOT;
-//                $script = <<<EOT
-//                let btn_close_modal_custom_{$category->id} = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultfrancesystemqualification-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-//                $(document).on("click", btn_close_modal_custom_{$category->id}, function () {
-//                    window.location.reload();
-//                });
-//        EOT;
-//                $tools->append(new BatchResultFranceSystemQualification($category, $script));
-//                $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category, $script_one_route));
-//            }
+            $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
+            foreach ($categories as $index => $category) {
+                $index  = $index+1;
+                $script = <<<EOT
+                    let btn_close_modal_custom_{$category->id} = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultfrancesystemqualification-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
+                    $(document).on("click", btn_close_modal_custom_{$category->id}, function () {
+                        window.location.reload();
+                    });
+                 EOT;
+                $tools->append(new BatchResultFranceSystemQualification($category, $script));
+            }
             $script_category = <<<EOT
                         function set_attempt(){
                             var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
@@ -982,20 +930,11 @@ class ResultQualificationController extends Controller
                             }
 
                         }
-                         $(document).on("click", '[modal="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfillonerouteandonecategory"]', function () {
+                         $(document).on("click", '#result-all-user', function () {
 
                         const allAttemptsInput = document.getElementById('all_attempts');
                         const topInput = document.getElementById('amount_try_top_category');
                         const zoneInput = document.getElementById('amount_try_zone_category');
-
-                            $('[data-all-attempts-id=all-attempts]').val('');
-                            $('[id=amount_try_top_category]').val('');
-                            $('[data-user-id=user_id]').val('');
-                            $('[id=amount_try_zone_category]').val('');
-                            $('[id=user_gender]').val('');
-                            $('[id=category]').val('');
-                            $('[data-category-number-set-id=number_set_id]').val('');
-
                         // Проверяем, существуют ли уже кнопки
                         const incrementBtn = document.getElementById('increment-btn');
                         const decrementBtn = document.getElementById('decrement-btn');
@@ -1091,31 +1030,6 @@ class ResultQualificationController extends Controller
                                 }
                                 set_attempt()
                             });
-
-                            $('[data-all-attempts-id=all-attempts]').val('');
-                            $('[id=amount_try_top_category]').val('');
-                            $('[data-user-id=user_id]').val('');
-                            $('[id=amount_try_zone_category]').val('');
-                            $('[id=user_gender]').val('');
-                            $('[id=category]').val('');
-                            $.get("/admin/api/get_users",
-                                    {eventId: $('[data-category-event-id=event_id]').val(), numberSetId: $('[id=number_set_id]').val()},
-                                    function (data) {
-                                        var model = $('[data-category-user-id=user_id]');
-                                        model.empty();
-                                        model.append("<option>Выбрать</option>");
-                                        var sortedData = Object.entries(data).sort(function (a, b) {
-                                                return a[1].localeCompare(b[1]); // сортируем по значению (имя пользователя)
-                                            });
-                                        $.each(sortedData, function (i, item) {
-                                                var userId = item[0];
-                                                var userName = item[1];
-                                                model.append("<option data-category-user-id='" + userId + "' value='" + userId + "'>" + userName + "</option>");
-                                                const user_gender = document.createElement('span');
-                                                user_gender.textContent = 'Зона'; // Текст "Попытка"
-                                            });
-                                    }
-                            );
                         }
                 });
 

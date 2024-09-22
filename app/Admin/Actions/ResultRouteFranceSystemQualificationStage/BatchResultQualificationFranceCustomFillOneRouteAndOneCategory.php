@@ -111,9 +111,34 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         for($i = 1; $i <= $amount_routes; $i++){
             $routes[$i] = $i;
         }
+        $eventId = $event->id;
+        $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->pluck('user_id')->toArray();
+        $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
+        $amount_routes = Grades::where('event_id', $eventId)->first();
+        if($amount_routes){
+            $amount_routes = $amount_routes->count_routes;
+        } else {
+            $amount_routes = 0;
+        }
+        // Преобразуем формат и сортируем по алфавиту
+        $sortedUsers = $result->mapWithKeys(function ($middlename, $id) use($eventId, $amount_routes) {
+            $result_user = ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('user_id', $id);
+            $routes = $result_user->get()->sortBy('route_id')->pluck('route_id')->toArray();
+            $string_version = '';
+            foreach ($routes as $value) {
+                $string_version .= $value . ', ';
+            }
+            if($result_user->get()->count() == $amount_routes){
+                $str = ' [Добавлены все трассы]';
+            } else {
+                $str =  ' [Трассы: '.$string_version.']';
+            }
+            return [$id => $middlename. $str ];
+        })->toArray();
         $sets = Set::where('event_id', $event->id)->pluck('number_set', 'id')->toArray();
-//        $this->select('number_set_id', 'Сеты')->attribute('autocomplete', 'off')->attribute('data-category-number-set-id', 'number_set_id')->options($sets);
-        $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-category-user-id', 'user_id')->required();
+        $this->multipleSelect('number_set_id', 'Сеты')->attribute('autocomplete', 'off')->attribute('data-category-number-set-id', 'number_set_id')->options($sets);
+        $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-category-user-id', 'user_id')->options($sortedUsers);
+
         $this->text('user_gender', 'Пол')->attribute('autocomplete', 'off')->readonly();
         $this->text('category', 'Группа')->attribute('autocomplete', 'off')->readonly();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-category-event-id', 'event_id')->value($event->id);
@@ -154,7 +179,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
     }
     public function html()
     {
-       return "<a class='result-add-qualification-france-one-route-one-category btn btn-sm btn-warning'><i class='fa fa-plus-circle'></i> Все участники по одной трассе </a>
+       return "<a id='result-all-user' class='result-add-qualification-france-one-route-one-category btn btn-sm btn-warning'><i class='fa fa-plus-circle'></i> Все участники по одной трассе </a>
                  <style>
                  .result-add-qualification-france-one-route-one-category {margin-top:8px;}
                  @media screen and (max-width: 767px) {
