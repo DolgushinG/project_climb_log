@@ -112,7 +112,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
             $routes[$i] = $i;
         }
         $sets = Set::where('event_id', $event->id)->pluck('number_set', 'id')->toArray();
-//        $this->multipleSelect('number_set_id', 'Сеты')->attribute('autocomplete', 'off')->attribute('data-category-number-set-id', 'number_set_id')->options($sets);
+        $this->select('number_set_id', 'Сеты')->attribute('autocomplete', 'off')->attribute('data-category-number-set-id', 'number_set_id')->options($sets);
         $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-category-user-id', 'user_id')->required();
         $this->text('user_gender', 'Пол')->attribute('autocomplete', 'off')->readonly();
         $this->text('category', 'Группа')->attribute('autocomplete', 'off')->readonly();

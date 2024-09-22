@@ -988,6 +988,14 @@ class ResultQualificationController extends Controller
                         const topInput = document.getElementById('amount_try_top_category');
                         const zoneInput = document.getElementById('amount_try_zone_category');
 
+                            $('[data-all-attempts-id=all-attempts]').val('');
+                            $('[id=amount_try_top_category]').val('');
+                            $('[data-user-id=user_id]').val('');
+                            $('[id=amount_try_zone_category]').val('');
+                            $('[id=user_gender]').val('');
+                            $('[id=category]').val('');
+                            $('[data-category-number-set-id=number_set_id]').val('');
+
                         // Проверяем, существуют ли уже кнопки
                         const incrementBtn = document.getElementById('increment-btn');
                         const decrementBtn = document.getElementById('decrement-btn');
