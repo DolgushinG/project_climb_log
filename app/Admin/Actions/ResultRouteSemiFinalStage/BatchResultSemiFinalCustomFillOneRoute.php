@@ -139,9 +139,7 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
                 }
             }
         }
-        Admin::js('resource_admin/js/add_result_semifinal_one_route.js');
-        Admin::css('resource_admin/css/add_result.css');
-        \Encore\Admin\Facades\Admin::script($this->script);
+
         $routes = [];
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
             $routes[$i] = $i;
@@ -155,7 +153,36 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
             ->attribute('data-all-attempts-id-'.$this->category->id, 'all-attempts');
         $this->integer('amount_try_zone', 'Попытки на зону')->attribute('id', 'amount_try_zone_'.$this->category->id)->attribute('data-amount-try-zone-'.$this->category->id, 'amount_try_zone');
         $this->integer('amount_try_top', 'Попытки на топ')->attribute('id', 'amount_try_top_'.$this->category->id)->attribute('data-amount-try-top-'.$this->category->id, 'amount_try_top');
+        \Encore\Admin\Facades\Admin::script($this->script);
+        $script = <<<EOT
+                        const elementsWithModalAttribute2 = document.querySelectorAll('[modal="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute"]');
+                        const elementsWithIdAttribute2 = document.querySelectorAll('[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute"]');
 
+                        const modalCounters2 = {};
+                        const idCounters2 = {};
+                        elementsWithModalAttribute2.forEach(element => {
+                            const modalValue2 = element.getAttribute('modal');
+                            if (modalValue2 in modalCounters2) {
+                                modalCounters2[modalValue2]++;
+                            } else {
+                                modalCounters2[modalValue2] = 1;
+                            }
+                            const elementNumber2 = modalCounters2[modalValue2];
+                            element.setAttribute('modal', modalValue2 + '-' + elementNumber2);
+                        });
+                        elementsWithIdAttribute2.forEach(element => {
+                            const idValue2 = element.getAttribute('id');
+                            if (idValue2 in idCounters2) {
+                                idCounters2[idValue2]++;
+                            } else {
+                                idCounters2[idValue2] = 1;
+                            }
+                            const elementNumber2 = idCounters2[idValue2];
+                            element.setAttribute('id', idValue2 + '-' + elementNumber2);
+                        });
+                    EOT;
+        Admin::script($script);
+        Admin::css('/resource_admin/css/add_result.css');
     }
 
     public function html()

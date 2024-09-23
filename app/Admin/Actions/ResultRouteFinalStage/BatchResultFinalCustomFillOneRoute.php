@@ -150,7 +150,36 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
             ->attribute('data-all-attempts-id-'.$this->category->id, 'all-attempts');
         $this->integer('amount_try_zone', 'Попытки на зону')->attribute('id', 'amount_try_zone_'.$this->category->id)->attribute('data-amount-try-zone-'.$this->category->id, 'amount_try_zone');
         $this->integer('amount_try_top', 'Попытки на топ')->attribute('id', 'amount_try_top_'.$this->category->id)->attribute('data-amount-try-top-'.$this->category->id, 'amount_try_top');
-        \Encore\Admin\Facades\Admin::js('/resource_admin/js/add_result_final_one_route.js');
+        $script = <<<EOT
+                        const elementsWithModalAttribute = document.querySelectorAll('[modal="app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute"]');
+                        const elementsWithIdAttribute = document.querySelectorAll('[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute"]');
+                        const modalCounters= {};
+                        const idCounters = {};
+
+                        // Перебираем найденные элементы
+                        elementsWithModalAttribute.forEach(element => {
+                            const modalValue = element.getAttribute('modal');
+                            if (modalValue in modalCounters) {
+                                modalCounters[modalValue]++;
+                            } else {
+                                modalCounters[modalValue] = 1;
+                            }
+                            const elementNumber = modalCounters[modalValue];
+                            element.setAttribute('modal', modalValue + '-' + elementNumber);
+                        });
+                        elementsWithIdAttribute.forEach(element => {
+                            const idValue = element.getAttribute('id');
+                            if (idValue in idCounters) {
+                                idCounters[idValue]++;
+                            } else {
+                                idCounters[idValue] = 1;
+                            }
+                            const elementNumber = idCounters[idValue];
+                            element.setAttribute('id', idValue + '-' + elementNumber);
+                        });
+
+                    EOT;
+        Admin::script($script);
         \Encore\Admin\Facades\Admin::css('/resource_admin/css/add_result.css');
         \Encore\Admin\Facades\Admin::script($this->script);
     }
