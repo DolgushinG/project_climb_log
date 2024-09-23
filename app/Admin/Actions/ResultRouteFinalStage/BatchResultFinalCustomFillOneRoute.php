@@ -81,7 +81,8 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
         $gender = $participant->gender;
         $owner_id = \Encore\Admin\Facades\Admin::user()->id;
 
-        ResultRouteFinalStage::update_final_route_results(
+        ResultRouteFinalStage::update_semi_or_final_route_results(
+            stage: 'final',
             owner_id: $owner_id,
             event_id: $event_id,
             category_id: $category_id,
@@ -124,7 +125,7 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
             $result[$user_id] = $middlename.' ['.$category.']';
             if(in_array($user_id, $result_final)){
                 $result_user = ResultRouteFinalStage::where('event_id', $event->id)->where('user_id', $user_id);
-                $routes = $result_user->pluck('final_route_id')->toArray();
+                $routes = $result_user->get()->sortBy('final_route_id')->pluck('final_route_id')->toArray();
                 $string_version = '';
                 foreach ($routes as $value) {
                     $string_version .= $value . ', ';
