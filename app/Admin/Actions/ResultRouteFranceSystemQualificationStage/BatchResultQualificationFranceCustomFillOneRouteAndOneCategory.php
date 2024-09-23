@@ -142,8 +142,8 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
             ->attribute('data-all-attempts-id', 'all-attempts');
         $this->integer('amount_try_zone_category', 'Попытки на зону')->attribute('autocomplete', 'off');
         $this->integer('amount_try_top_category', 'Попытки на топ')->attribute('autocomplete', 'off');
-        \Encore\Admin\Facades\Admin::css('/admin/css/add_result.css');
-        \Encore\Admin\Facades\Admin::js('/admin/js/add_result_qualification_france_system.js');
+        \Encore\Admin\Facades\Admin::css('resource_admin/css/add_result.css');
+        \Encore\Admin\Facades\Admin::js('resource_admin/js/add_result_qualification_france_system.js');
     }
     public function html()
     {

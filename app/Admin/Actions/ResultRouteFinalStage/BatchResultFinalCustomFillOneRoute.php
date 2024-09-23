@@ -33,12 +33,11 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
     public function handle(Request $request)
     {
         $results = $request->toArray();
-        $amount_try_top = intval($results['amount_try_top_final_'.$this->category->id]);
-        $amount_try_zone = intval($results['amount_try_zone_final_'.$this->category->id]);
+        $amount_try_top = intval($results['amount_try_top']);
+        $amount_try_zone = intval($results['amount_try_zone']);
         $all_attempts = intval($results['all_attempts']);
         $event_id = intval($results['event_id']);
         $user_id = intval($results['user_id']);
-        $route_id = intval($results['route_id']);
         $event = Event::find($event_id);
         $final_route_id = intval($results['final_route_id']);
         if($amount_try_top > 0){
@@ -86,7 +85,7 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
             owner_id: $owner_id,
             event_id: $event_id,
             category_id: $category_id,
-            route_id: $route_id,
+            route_id: $final_route_id,
             user_id: $user_id,
             amount_try_top: $amount_try_top,
             amount_try_zone: $amount_try_zone,
@@ -148,10 +147,10 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
             ->attribute('autocomplete', 'off')
             ->attribute('id', 'all_attempts-'.$this->category->id)
             ->attribute('data-all-attempts-id-'.$this->category->id, 'all-attempts');
-        $this->integer('amount_try_top_final_'.$this->category->id, 'Попытки на топ')->attribute('data-amount_try_top-'.$this->category->id, 'top');
-        $this->integer('amount_try_zone_final_'.$this->category->id, 'Попытки на зону')->attribute('data-amount_try_zone-'.$this->category->id, 'zone');
-        \Encore\Admin\Facades\Admin::js('/admin/js/add_result_final_one_route.js');
-        \Encore\Admin\Facades\Admin::css('/admin/css/add_result.css');
+        $this->integer('amount_try_zone', 'Попытки на зону')->attribute('id', 'amount_try_zone_'.$this->category->id)->attribute('data-amount-try-zone-'.$this->category->id, 'amount_try_zone');
+        $this->integer('amount_try_top', 'Попытки на топ')->attribute('id', 'amount_try_top_'.$this->category->id)->attribute('data-amount-try-top-'.$this->category->id, 'amount_try_top');
+        \Encore\Admin\Facades\Admin::js('/resource_admin/js/add_result_final_one_route.js');
+        \Encore\Admin\Facades\Admin::css('/resource_admin/css/add_result.css');
         \Encore\Admin\Facades\Admin::script($this->script);
     }
 

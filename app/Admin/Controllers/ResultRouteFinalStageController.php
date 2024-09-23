@@ -116,13 +116,13 @@ class ResultRouteFinalStageController extends Controller
                 foreach ($categories as $index => $category){
                     $index = $index + 1;
                     $script_one_route = <<<EOT
-                            function set_attempt(){
+                            function set_attempt_$category->id(){
                                 var routeId = $('[data-final-route-id-$category->id=final_route_id]').val(); // ID выбранного маршрута
                                 var userId = $('[data-final-user-id-$category->id="user_id"]').select2('val')
                                 var eventId = $('[data-final-event-id-$category->id=event_id]').val(); // ID выбранного участника
                                 var attempt = $('[data-all-attempts-id-$category->id=all-attempts]').val();
-                                var amount_try_top = $('[id=amount_try_top_final_$category->id]').val();
-                                var amount_try_zone = $('[id=amount_try_zone_final_$category->id]').val();
+                                var amount_try_top = $('[id=amount_try_top_$category->id]').val();
+                                var amount_try_zone = $('[id=amount_try_zone_$category->id]').val();
                                 if(routeId){
                                     $.get("/admin/api/final/set_attempts",
                                         {
@@ -134,8 +134,8 @@ class ResultRouteFinalStageController extends Controller
                                             amount_try_zone: amount_try_zone
                                         },
                                         function (data) {
-                                            $('[id=amount_try_top_final_$category->id]').val(data.amount_try_top);
-                                            $('[id=amount_try_zone_final_$category->id]').val(data.amount_try_zone);
+                                            $('[data-amount_try_top-$category->id=amount_try_top]').val(data.amount_try_top);
+                                            $('[data-amount_try_zone-$category->id=amount_try_zone]').val(data.amount_try_zone);
                                             $('[data-all-attempts-id-$category->id=all-attempts]').val(data.all_attempts);
                                         }
                                     );
@@ -145,8 +145,8 @@ class ResultRouteFinalStageController extends Controller
                             const allAttemptsInput = document.getElementById('all_attempts-$category->id');
                             const incrementBtn = document.getElementById('increment-btn-$category->id');
                             const decrementBtn = document.getElementById('decrement-btn-$category->id');
-                            const topInput = document.getElementById('amount_try_top_final_$category->id');
-                            const zoneInput = document.getElementById('amount_try_zone_final_$category->id');
+                            const topInput = document.getElementById('amount_try_top_$category->id');
+                            const zoneInput = document.getElementById('amount_try_zone_$category->id');
                             const zoneBtn = document.getElementById('zone-btn-final-$category->id');
                             const topBtn = document.getElementById('top-btn-final-$category->id');
 
@@ -216,19 +216,19 @@ class ResultRouteFinalStageController extends Controller
 
                                     newZoneBtn.addEventListener('click', function () {
                                         let currentValue = parseInt(allAttemptsInput.value) || 0;
-                                        $('[id=amount_try_zone_final_$category->id]').val(currentValue);
-                                        set_attempt()
+                                         $('[data-amount-try-zone-$category->id=amount_try_zone]').val(currentValue);
+                                        set_attempt_$category->id()
                                     });
                                     newTopBtn.addEventListener('click', function () {
                                         let currentValue = parseInt(allAttemptsInput.value) || 0;
-                                        $('[id=amount_try_top_final_$category->id]').val(currentValue);
-                                        set_attempt()
+                                         $('[data-amount-try-top-$category->id=amount_try_top]').val(currentValue);
+                                        set_attempt_$category->id()
                                     });
                                     // Обработчик клика на кнопку увеличения
                                     newIncrementBtn.addEventListener('click', function () {
                                         let currentValue = parseInt(allAttemptsInput.value) || 0;
                                         allAttemptsInput.value = currentValue + 1;
-                                        set_attempt()
+                                        set_attempt_$category->id()
                                     });
 
                                     // Обработчик клика на кнопку удаления
@@ -237,18 +237,18 @@ class ResultRouteFinalStageController extends Controller
                                         if (currentValue > 0) {
                                             allAttemptsInput.value = currentValue - 1;
                                         }
-                                        set_attempt()
+                                        set_attempt_$category->id()
                                     });
                                     $('[data-all-attempts-id-$category->id=all-attempts]').val('');
-                                    $('[data-amount_try_top-$category->id=amount_try_top]').val('');
-                                    $('[data-amount_try_zone-$category->id=amount_try_top]').val('');
-                                    $('[data-user-id-$category->id=user_id]').val('');
+                                    $('[data-amount-try-top-$category->id=amount_try_top]').val('');
+                                    $('[data-amount-try-zone-$category->id=amount_try_zone]').val('');
+                                    $('[data-final-user-id-$category->id=user_id]').val('');
                                 }
                             });
                             $(document).on("change", '[data-user-id-$category->id=user_id]', function () {
                                 var routeId = $('[data-final-route-id-$category->id=final_route_id]').val(); // ID выбранного маршрута
-                                var userId = $('[data-user-id-$category->id="user_id"]').select2('val')
-                                var eventId = $('[data-event-id-$category->id=event_id]').val(); // ID выбранного участника
+                                var userId = $('[data-final-user-id-$category->id="user_id"]').select2('val')
+                                var eventId = $('[data-final-event-id-$category->id=event_id]').val(); // ID выбранного участника
                                 if(routeId){
                                     $.get("/admin/api/final/get_attempts", // URL эндпоинта
                                         {
@@ -258,8 +258,8 @@ class ResultRouteFinalStageController extends Controller
                                         }, // Передаем ID маршрута и участника в запросе
                                         function (data) {
                                             // Обновляем поля с количеством попыток
-                                            $('[id=amount_try_top_final-$category->id]').val(data.amount_try_top);
-                                            $('[id=amount_try_zone_final-$category->id]').val(data.amount_try_zone);
+                                            $('[data-amount-try-top-$category->id=amount_try_top]').val(data.amount_try_top);
+                                            $('[data-amount-try-zone-$category->id=amount_try_zone]').val(data.amount_try_zone);
                                             $('[data-all-attempts-id-$category->id=all-attempts]').val(data.all_attempts);
                                         }
                                     );
@@ -267,8 +267,8 @@ class ResultRouteFinalStageController extends Controller
                             });
                             $(document).on("change", '[data-final-route-id-$category->id=final_route_id]', function () {
                                 var routeId = $(this).val(); // ID выбранного маршрута
-                                var userId = $('[data-user-id-$category->id="user_id"]').select2('val')
-                                var eventId = $('[data-event-id-$category->id=event_id]').val(); // ID выбранного участника
+                                var userId = $('[data-final-user-id-$category->id="user_id"]').select2('val')
+                                var eventId = $('[data-final-event-id-$category->id=event_id]').val(); // ID выбранного участника
                                 $.get("/admin/api/final/get_attempts", // URL эндпоинта
                                     {
                                         route_id: routeId,
@@ -278,8 +278,8 @@ class ResultRouteFinalStageController extends Controller
                                     function (data) {
                                         // Обновляем поля с количеством попыток
                                         $('[data-all-attempts-id-$category->id=all-attempts]').val(data.all_attempts);
-                                        $('[id=amount_try_top_final_$category->id]').val(data.amount_try_top);
-                                        $('[id=amount_try_zone_final_$category->id]').val(data.amount_try_zone);
+                                        $('[data-amount-try-top-$category->id=amount_try_top]').val(data.amount_try_top);
+                                        $('[data-amount-try-zone-$category->id=amount_try_zone]').val(data.amount_try_zone);
                                     }
                                 );
                             });

@@ -2,6 +2,7 @@
 
 use App\Models\Grades;
 use App\Models\ResultFranceSystemQualification;
+use App\Models\ResultQualificationClassic;
 use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\User;
 use Encore\Admin\Facades\Admin;
@@ -152,6 +153,7 @@ Route::group([
         $routeId = $request->get('route_id');
         $userId = $request->get('user_id');
         $eventId = $request->get('event_id');
+        $event = \App\Models\Event::find($eventId);
         $attempt = $request->get('attempt');
         $amount_try_top = intval($request->get('amount_try_top'));
         $amount_try_zone = intval($request->get('amount_try_zone'));
@@ -165,8 +167,12 @@ Route::group([
         } else {
             $amount_zone  = 0;
         }
-        $result_reg = ResultFranceSystemQualification::where('event_id', $eventId)->where('user_id', $userId)->first();
-        ResultFranceSystemQualification::update_france_route_results(
+        if($event->is_france_system_qualification){
+            $result_reg = ResultFranceSystemQualification::where('event_id', $eventId)->where('user_id', $userId)->first();
+        } else {
+            $result_reg = ResultQualificationClassic::where('event_id', $eventId)->where('user_id', $userId)->first();
+        }
+        \App\Models\ResultRouteFinalStage::update_final_route_results(
             owner_id: $result_reg->owner_id,
             event_id: $eventId,
             category_id: $result_reg->category_id ?? null,
@@ -178,9 +184,8 @@ Route::group([
             amount_zone: $amount_zone,
             gender: $result_reg->gender,
             all_attempts: $attempt,
-            number_set_id: $result_reg->number_set_id ?? null
         );
-        $result = \App\Models\ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
+        $result = \App\Models\ResultRouteFinalStage::where('event_id', $eventId)->where('final_route_id', $routeId)->where('user_id', $userId)->first();
         $data = [
             'all_attempts' => $result->all_attempts,
             'amount_try_top' => $result->amount_try_top,

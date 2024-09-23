@@ -655,7 +655,7 @@ class ResultQualificationController extends Controller
             }
 
         })->select(User::sport_categories_select);
-        Admin::js('/admin/js/sport_category_visible.js');
+        Admin::js('/resource_admin/js/sport_category_visible.js');
         if(!$event->is_open_main_rating){
             $grid->column('user.id', 'Лучшие трассы')->display(function ($id) use ($event) {
                 if($event){
@@ -908,7 +908,7 @@ class ResultQualificationController extends Controller
             }
 
         })->select(User::sport_categories_select);
-        Admin::js('/admin/js/sport_category_visible.js');
+        Admin::js('/resource_admin/js/sport_category_visible.js');
 
 
         $grid->column('user.birthday', __('Возраст'))->display(function ($birthday){
