@@ -139,8 +139,8 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
                 }
             }
         }
-        Admin::js('/resource_admin/js/add_result_semifinal_one_route.js');
-        Admin::css('/resource_admin/css/add_result.css');
+        Admin::js('resource_admin/js/add_result_semifinal_one_route.js');
+        Admin::css('resource_admin/css/add_result.css');
         \Encore\Admin\Facades\Admin::script($this->script);
         $routes = [];
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
@@ -152,9 +152,10 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
         $this->integer('all_attempts', 'Все попытки')
             ->attribute('autocomplete', 'off')
             ->attribute('id', 'all_attempts-'.$this->category->id)
-            ->attribute('data-all-attempts-id'.$this->category->id, 'all-attempts');
-        $this->integer('amount_try_top', 'Попытки на топ')->attribute('id', 'amount_try_top_'.$this->category->id)->attribute('data-amount-try-top'.$this->category->id, 'amount_try_top');
-        $this->integer('amount_try_zone', 'Попытки на зону')->attribute('id', 'amount_try_zone_'.$this->category->id)->attribute('data-amount-try-zone'.$this->category->id, 'amount_try_zone');
+            ->attribute('data-all-attempts-id-'.$this->category->id, 'all-attempts');
+        $this->integer('amount_try_zone', 'Попытки на зону')->attribute('id', 'amount_try_zone_'.$this->category->id)->attribute('data-amount-try-zone-'.$this->category->id, 'amount_try_zone');
+        $this->integer('amount_try_top', 'Попытки на топ')->attribute('id', 'amount_try_top_'.$this->category->id)->attribute('data-amount-try-top-'.$this->category->id, 'amount_try_top');
+
     }
 
     public function html()
