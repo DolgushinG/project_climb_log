@@ -22,13 +22,9 @@ use function Symfony\Component\String\s;
 class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends CustomAction
 {
     protected $selector = '.result-add-qualification-france-one-route-one-category';
-
-    private string $script;
-
-    public function __construct(string $script = 'значение_по_умолчанию')
+    public function __construct()
     {
         $this->initInteractor();
-        $this->script = $script;
     }
     public function handle(Request $request)
     {
@@ -120,7 +116,6 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         } else {
             $amount_routes = 0;
         }
-        // Преобразуем формат и сортируем по алфавиту
         $sortedUsers = $result->mapWithKeys(function ($middlename, $id) use($eventId, $amount_routes) {
             $result_user = ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('user_id', $id);
             $routes = $result_user->get()->sortBy('route_id')->pluck('route_id')->toArray();
@@ -138,7 +133,6 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
         $sets = Set::where('event_id', $event->id)->pluck('number_set', 'id')->toArray();
         $this->multipleSelect('number_set_id', 'Сеты')->attribute('autocomplete', 'off')->attribute('data-category-number-set-id', 'number_set_id')->options($sets);
         $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-category-user-id', 'user_id')->options($sortedUsers);
-
         $this->text('user_gender', 'Пол')->attribute('autocomplete', 'off')->readonly();
         $this->text('category', 'Группа')->attribute('autocomplete', 'off')->readonly();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-category-event-id', 'event_id')->value($event->id);
@@ -148,45 +142,14 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
             ->attribute('data-all-attempts-id', 'all-attempts');
         $this->integer('amount_try_zone_category', 'Попытки на зону')->attribute('autocomplete', 'off');
         $this->integer('amount_try_top_category', 'Попытки на топ')->attribute('autocomplete', 'off');
-        Admin::style('
-                    .input-group {
-                    display: flex;
-                    align-items: center;
-                }
-                #increment-btn{
-                    font-size: 20px;
-                }
-                #zone-btn {
-                    font-size: 20px;
-                }
-                #top-btn {
-                    font-size: 20px;
-                }
-                .form-control {
-                    margin-right: -1px; /* Небольшой выступ для кнопки */
-                }
-
-                .input-group-append {
-                    margin-top: 10px;
-                    margin-left: 5px; /* Убираем отступ слева */
-                }
-                .btn-warning {
-                    margin-left: 5px;
-                }
-
-        ');
-        \Encore\Admin\Facades\Admin::script($this->script);
+        \Encore\Admin\Facades\Admin::css('/admin/css/add_result.css');
+        \Encore\Admin\Facades\Admin::js('/admin/js/add_result_qualification_france_system.js');
     }
     public function html()
     {
-       return "<a id='result-all-user' class='result-add-qualification-france-one-route-one-category btn btn-sm btn-warning'><i class='fa fa-plus-circle'></i> Все участники по одной трассе </a>
-                 <style>
-                 .result-add-qualification-france-one-route-one-category {margin-top:8px;}
-                 @media screen and (max-width: 767px) {
-                        .result-add-qualification-france-one-route-one-category {margin-top:8px; margin-left: 0px!important;}
-                    }
-                </style>
-            ";
+       return "<a id='result-all-user' class='result-add-qualification-france-one-route-one-category btn btn-sm btn-warning'>
+                <i class='fa fa-plus-circle'></i> Все участники по одной трассе </a>
+                ";
     }
 
 }
