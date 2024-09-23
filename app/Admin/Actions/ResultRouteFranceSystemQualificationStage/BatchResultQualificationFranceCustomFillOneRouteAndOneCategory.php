@@ -142,14 +142,50 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
             ->attribute('data-all-attempts-id', 'all-attempts');
         $this->integer('amount_try_zone_category', 'Попытки на зону')->attribute('autocomplete', 'off');
         $this->integer('amount_try_top_category', 'Попытки на топ')->attribute('autocomplete', 'off');
-        \Encore\Admin\Facades\Admin::css('resource_admin/css/add_result.css');
+        Admin::style('
+            .input-group {
+                display: flex;
+                align-items: center;
+            }
+
+            #increment-btn {
+                font-size: 20px;
+            }
+
+            #zone-btn {
+                font-size: 20px;
+            }
+
+            #top-btn {
+                font-size: 20px;
+            }
+
+            .form-control {
+                margin-right: -1px; /* Небольшой выступ для кнопки */
+            }
+
+            .input-group-append {
+                margin-top: 10px;
+                margin-left: 5px; /* Убираем отступ слева */
+            }
+
+            .btn-warning {
+                margin-left: 5px;
+            }
+
+        ');
         \Encore\Admin\Facades\Admin::js('resource_admin/js/add_result_qualification_france_system.js');
     }
     public function html()
     {
-       return "<a id='result-all-user' class='result-add-qualification-france-one-route-one-category btn btn-sm btn-warning'>
-                <i class='fa fa-plus-circle'></i> Все участники по одной трассе </a>
-                ";
+        return "<a id='result-all-user' class='result-add-qualification-france-one-route-one-category btn btn-sm btn-warning'><i class='fa fa-plus-circle'></i> Все участники по одной трассе </a>
+                 <style>
+                 .result-add-qualification-france-one-route-one-category {margin-top:8px;}
+                 @media screen and (max-width: 767px) {
+                        .result-add-qualification-france-one-route-one-category {margin-top:8px; margin-left: 0px!important;}
+                    }
+                </style>
+            ";
     }
 
 }

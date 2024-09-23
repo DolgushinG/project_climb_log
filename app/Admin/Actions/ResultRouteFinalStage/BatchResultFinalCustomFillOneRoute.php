@@ -180,6 +180,39 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
 
                     EOT;
         Admin::script($script);
+        Admin::style('
+            .input-group {
+                display: flex;
+                align-items: center;
+            }
+
+            #increment-btn {
+                font-size: 20px;
+            }
+
+            #zone-btn {
+                font-size: 20px;
+            }
+
+            #top-btn {
+                font-size: 20px;
+            }
+
+            .form-control {
+                margin-right: -1px; /* Небольшой выступ для кнопки */
+            }
+
+            .input-group-append {
+                margin-top: 10px;
+                margin-left: 5px; /* Убираем отступ слева */
+            }
+
+            .btn-warning {
+                margin-left: 5px;
+            }
+
+        ');
+
         \Encore\Admin\Facades\Admin::css('/resource_admin/css/add_result.css');
         \Encore\Admin\Facades\Admin::script($this->script);
     }
@@ -189,9 +222,21 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         if($event->amount_the_best_participant_to_go_final > 0){
             return "<a class='result-add-final-one-route btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category} по одной трассе</a>
+                 <style>
+                 .result-add-final-one-route {margin-top:8px;}
+                 @media screen and (max-width: 767px) {
+                        .result-add-final-one-route {margin-top:8px;}
+                    }
+                </style>
             ";
         } else {
             return "<a href='#' class='result-add-final-one-route btn btn-sm btn-primary' disabled>Кол-во участников в финал 0</a>
+                 <style>
+                 .result-add-final-one-route {margin-top:8px;}
+                 @media screen and (max-width: 767px) {
+                        .result-add-final-one-route {margin-top:8px;}
+                    }
+                </style>
             ";
         }
 

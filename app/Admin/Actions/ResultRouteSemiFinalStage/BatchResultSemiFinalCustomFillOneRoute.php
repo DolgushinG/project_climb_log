@@ -182,7 +182,38 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
                         });
                     EOT;
         Admin::script($script);
-        Admin::css('/resource_admin/css/add_result.css');
+        Admin::style('
+            .input-group {
+                display: flex;
+                align-items: center;
+            }
+
+            #increment-btn {
+                font-size: 20px;
+            }
+
+            #zone-btn {
+                font-size: 20px;
+            }
+
+            #top-btn {
+                font-size: 20px;
+            }
+
+            .form-control {
+                margin-right: -1px; /* Небольшой выступ для кнопки */
+            }
+
+            .input-group-append {
+                margin-top: 10px;
+                margin-left: 5px; /* Убираем отступ слева */
+            }
+
+            .btn-warning {
+                margin-left: 5px;
+            }
+
+        ');
     }
 
     public function html()
@@ -191,6 +222,12 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
             ->where('active', '=', 1)->first();
         if($event->is_semifinal && $event->amount_the_best_participant > 0){
             return "<a class='result-add-one-route btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category} по одной трассе</a>
+                 <style>
+                  .result-add-one-route {margin-top:8px;}
+                 @media screen and (max-width: 767px) {
+                        .result-add-one-route {margin-top:8px;}
+                    }
+                </style>
             ";
         } else {
             return "<a disabled class='result-add-one-route btn btn-sm btn-warning' style='display: none'><i class='fa fa-info-circle'></i></a>";
