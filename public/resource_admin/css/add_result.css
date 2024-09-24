@@ -1,0 +1,60 @@
+.input-group {
+    display: flex;
+    align-items: center;
+}
+
+#increment-btn {
+    font-size: 20px;
+}
+
+#zone-btn {
+    font-size: 20px;
+}
+
+#top-btn {
+    font-size: 20px;
+}
+
+.form-control {
+    margin-right: -1px; /* Небольшой выступ для кнопки */
+}
+
+.input-group-append {
+    margin-top: 10px;
+    margin-left: 5px; /* Убираем отступ слева */
+}
+
+.btn-warning {
+    margin-left: 5px;
+}
+
+.result-add-qualification-france-one-route-one-category {
+    margin-top: 8px;
+}
+
+@media screen and (max-width: 767px) {
+    .result-add-qualification-france-one-route-one-category {
+        margin-top: 8px;
+        margin-left: 0px !important;
+    }
+}
+
+.result-add-final-one-route {
+    margin-top: 8px;
+}
+
+@media screen and (max-width: 767px) {
+    .result-add-final-one-route {
+        margin-top: 8px;
+    }
+}
+
+.result-add-one-route {
+    margin-top: 8px;
+}
+
+@media screen and (max-width: 767px) {
+    .result-add-one-route {
+        margin-top: 8px;
+    }
+}
