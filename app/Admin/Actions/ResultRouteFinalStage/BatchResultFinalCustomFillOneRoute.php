@@ -212,8 +212,6 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
             }
 
         ');
-
-        \Encore\Admin\Facades\Admin::css('/resource_admin/css/add_result.css');
         \Encore\Admin\Facades\Admin::script($this->script);
     }
 
