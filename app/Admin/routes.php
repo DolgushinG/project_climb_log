@@ -172,7 +172,8 @@ Route::group([
         } else {
             $result_reg = ResultQualificationClassic::where('event_id', $eventId)->where('user_id', $userId)->first();
         }
-        \App\Models\ResultRouteFinalStage::update_final_route_results(
+        \App\Models\ResultRouteFinalStage::update_semi_or_final_route_results(
+            'final',
             owner_id: $result_reg->owner_id,
             event_id: $eventId,
             category_id: $result_reg->category_id ?? null,
