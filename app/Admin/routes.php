@@ -304,6 +304,7 @@ Route::group([
         $router->get('exports/events/csv/final/{id}', 'ResultRouteFinalStageController@exportFinalCsv')->name('exportFinalCsv');
         $router->get('exports/events/ods/final/{id}', 'ResultRouteFinalStageController@exportFinalOds')->name('exportFinalOds');
         $router->get('exports/events/excel/all/{id}', 'EventsController@exportAllExcel')->name('exportAllExcel');
+        $router->get('exports/events/excel/full/{id}', 'EventsController@exportFullExcel')->name('exportFullExcel');
         $router->get('exports/events/csv/all/{id}', 'EventsController@exportAllCsv')->name('exportAllCsv');
         $router->get('exports/events/ods/all/{id}', 'EventsController@exportAllOds')->name('exportAllOds');
         $router->get('reject/bill/event/{event_id}/participant/{id}', 'ResultQualificationController@rejectBill')->name('rejectBill');

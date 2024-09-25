@@ -6,11 +6,14 @@ use App\Models\Event;
 use App\Models\EventAndCoefficientRoute;
 use App\Models\Format;
 use App\Models\Grades;
+use App\Models\ResultFinalStage;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultQualificationClassic;
 use App\Models\ResultRouteQualificationClassic;
 use App\Models\ResultRouteFinalStage;
 use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\ResultRouteSemiFinalStage;
+use App\Models\ResultSemiFinalStage;
 use App\Models\Route;
 use App\Models\RoutesOutdoor;
 use App\Models\Set;
@@ -212,6 +215,54 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $france_system_qualification[] = 'Попытки на ZONE';
                 }
                 return $france_system_qualification;
+            case 'Full':
+                $france_system_qualification = [
+                    'Место',
+                    'Фамилия, Имя',
+                    'Г.р',
+                    'Разряд',
+                    'Команда',
+                ];
+                $count = ResultRouteFranceSystemQualification::count_route_in_qualification_final($this->event_id);
+                for($i = 1; $i <= $count; $i++){
+                    $france_system_qualification[] = 'T'.$i;
+                    $france_system_qualification[] = 'B'.$i;
+                }
+                $france_system_qualification = array_merge($france_system_qualification, [
+                    'T',
+                    'З',
+                    'ПТ',
+                    'ПЗ',
+                ]);
+                $event = Event::find($this->event_id);
+                if($event->is_semifinal){
+                    $count = $event->amount_routes_in_semifinal;
+                    for($i = 1; $i <= $count; $i++){
+                        $france_system_qualification[] = 'T'.$i;
+                        $france_system_qualification[] = 'B'.$i;
+                    }
+                    $france_system_qualification = array_merge($france_system_qualification, [
+                        'T',
+                        'З',
+                        'ПТ',
+                        'ПЗ',
+                    ]);
+                }
+                $final_final_result = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->first();
+                if($final_final_result){
+                    $count = $event->amount_routes_in_final;
+                    for($i = 1; $i <= $count; $i++){
+                        $france_system_qualification[] = 'T'.$i;
+                        $france_system_qualification[] = 'B'.$i;
+                    }
+                    $france_system_qualification = array_merge($france_system_qualification, [
+                        'T',
+                        'З',
+                        'ПТ',
+                        'ПЗ',
+                    ]);
+                }
+                return $france_system_qualification;
             case 'Qualification':
                 $event = Event::find($this->event_id);
                 $qualification[] = 'Место';
@@ -280,6 +331,9 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         }
         if($this->type == 'Team'){
             return self::get_team_qualification();
+        }
+        if($this->type == 'Full'){
+            return self::get_full_result('result_france_system_qualification');
         }
         return collect([]);
     }
@@ -521,13 +575,16 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $table.'.place',
                 'users.id',
                 'users.middlename',
-                $table.'.sport_category',
                 $table.'.category_id',
                 $table.'.amount_top',
                 $table.'.amount_try_top',
                 $table.'.amount_zone',
-                $table.'.amount_try_zone',
-            )->where($table.'.gender', '=', $this->gender);
+                $table.'.amount_try_zone'
+            )
+            ->when($table === 'result_france_system_qualification', function ($query) use ($table) {
+                $query->addSelect($table.'.sport_category');
+            })
+            ->where($table.'.gender', '=', $this->gender);
         if($this->category){
             $users = $users->where('category_id', '=', $this->category->id);
         }
@@ -554,11 +611,12 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $users[$index]['amount_try_top_'.$route_id] = $result->amount_try_top;
                 $users[$index]['amount_zone_'.$route_id] = $result->amount_zone;
                 $users[$index]['amount_try_zone_'.$route_id] = $result->amount_try_zone;
-                // Заполняем 0 для трасс, которые не были добавлены
                 for ($i = 1; $i <= $max_routes; $i++) {
                     if (!isset($users[$index]['amount_top_' . $i])) {
                         $users[$index]['amount_top_' . $i] = 0;
                         $users[$index]['amount_try_top_' . $i] = 0;
+                    }
+                    if (!isset($users[$index]['amount_zone_' . $i])) {
                         $users[$index]['amount_zone_' . $i] = 0;
                         $users[$index]['amount_try_zone_' . $i] = 0;
                     }
@@ -569,5 +627,113 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             $users[$index] = collect($users[$index])->except($except);
         }
         return collect($users);
+    }
+
+    public function get_full_result($table){
+        $event = Event::find($this->event_id);
+        $max_routes = Grades::where('event_id', $event->id)->first()->count_routes ?? 0;
+        $max_routes_semifinal = $event->amount_routes_in_semifinal;
+        $max_routes_final = $event->amount_routes_in_final;
+        $users = User::query()
+            ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+            ->where($table.'.event_id', '=', $this->event_id)
+            ->select(
+                $table.'.place',
+                'users.id',
+                'users.middlename',
+                'users.birthday',
+                'users.team',
+                $table.'.category_id',
+            )
+            ->when($table === 'result_france_system_qualification', function ($query) use ($table) {
+                $query->addSelect($table.'.sport_category');
+            })
+            ->where($table.'.gender', '=', $this->gender);
+        if($this->category){
+            $users = $users->where('category_id', '=', $this->category->id);
+        }
+
+        $users = $users->get()->sortBy('place')->toArray();
+        $export = [];
+        foreach ($users as $index => $user){
+            $export[$index]['place'] = $user['place'];
+            $export[$index]['middlename'] = $user['middlename'];
+            $export[$index]['birthday'] = $user['birthday'];
+            $export[$index]['sport_category'] = $user['sport_category'];
+            $export[$index]['team'] = $user['team'];
+            $final_result_sum = ResultFranceSystemQualification::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->first();
+            $final_final_result_sum = ResultFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->first();
+            $final_final_result = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+            $is_final = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->first();
+            $is_semifinal = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->first();
+            $final_semifinal_result_sum = ResultSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->first();
+            $final_semifinal_result = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+            $result = ResultRouteFranceSystemQualification::where('event_id', $this->event_id)
+                ->where('user_id', $user['id'])
+                ->get()
+                ->mapWithKeys(function ($item) {
+                    return [$item['route_id'] => $item];
+                })
+                ->toArray();
+            for($route = 1; $route <= $max_routes; $route++){
+                if (!isset($result[$route]['amount_try_top'])) {
+                    $export[$index]['amount_try_top_' . $route] = 0;
+                }
+                if (!isset($result[$route]['amount_try_zone'])) {
+                    $export[$index]['amount_try_zone_' . $route] = 0;
+                }
+                if(isset($result[$route]['amount_try_zone']) && isset($result[$route]['amount_try_top'])){
+                    $export[$index]['amount_try_top_'.$route] = $result[$route]['amount_try_top'];
+                    $export[$index]['amount_try_zone_'.$route] = $result[$route]['amount_try_zone'];
+                }
+            }
+            $export[$index]['amount_top'] = $final_result_sum->amount_top;
+            $export[$index]['amount_zone'] = $final_result_sum->amount_zone;
+            $export[$index]['amount_try_top'] = $final_result_sum->amount_try_top;
+            $export[$index]['amount_try_zone'] = $final_result_sum->amount_try_zone;
+            if($is_semifinal){
+                for($route = 1; $route <= $max_routes_semifinal; $route++){
+                    if (!isset($final_semifinal_result[$route]['amount_try_top'])) {
+                        $export[$index]['semifinal_amount_try_top_' . $route] = 0;
+                    }
+                    if (!isset($final_semifinal_result[$route]['amount_try_zone'])) {
+                        $export[$index]['semifinal_amount_try_zone_' . $route] = 0;
+                    }
+                    if(isset($final_semifinal_result[$route]['amount_try_zone']) && isset($final_semifinal_result[$route]['amount_try_top'])){
+                        $export[$index]['semifinal_amount_try_top_'.$route] = $final_semifinal_result[$route]['amount_try_top'];
+                        $export[$index]['semifinal_amount_try_zone_'.$route] = $final_semifinal_result[$route]['amount_try_zone'];
+                    }
+                }
+                if($final_semifinal_result_sum) {
+                    $export[$index]['semifinal_amount_top'] = $final_semifinal_result_sum->amount_top;
+                    $export[$index]['semifinal_amount_zone'] = $final_semifinal_result_sum->amount_zone;
+                    $export[$index]['semifinal_amount_try_top'] = $final_semifinal_result_sum->amount_try_top;
+                    $export[$index]['semifinal_amount_try_zone'] = $final_semifinal_result_sum->amount_try_zone;
+                }
+            }
+            if($is_final){
+                for($route = 1; $route <= $max_routes_final; $route++){
+                    if (!isset($final_final_result[$route]['amount_try_top'])) {
+                        $export[$index]['final_amount_try_top_' . $route] = 0;
+                    }
+                    if (!isset($final_final_result[$route]['amount_try_zone'])) {
+                        $export[$index]['final_amount_try_zone_' . $route] = 0;
+                    }
+                    if(isset($final_final_result[$route]['amount_try_top'])){
+                        $export[$index]['final_amount_try_top_'.$route] = $final_final_result[$route]['amount_try_top'];
+                    }
+                    if(isset($final_final_result[$route]['amount_try_zone'])){
+                        $export[$index]['final_amount_try_zone_'.$route] = $final_final_result[$route]['amount_try_zone'];
+                    }
+                }
+                if($final_final_result_sum){
+                    $export[$index]['final_amount_top'] = $final_final_result_sum->amount_top;
+                    $export[$index]['final_amount_zone'] = $final_final_result_sum->amount_zone;
+                    $export[$index]['final_amount_try_top'] = $final_final_result_sum->amount_try_top;
+                    $export[$index]['final_amount_try_zone'] = $final_final_result_sum->amount_try_zone;
+                }
+            }
+        }
+        return collect($export);
     }
 }

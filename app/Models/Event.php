@@ -655,6 +655,8 @@ class Event extends Model
                 if (!isset($users[$index]['amount_top_' . $i])) {
                     $users[$index]['amount_top_' . $i] = 0;
                     $users[$index]['amount_try_top_' . $i] = 0;
+                }
+                if (!isset($users[$index]['amount_zone_' . $i])) {
                     $users[$index]['amount_zone_' . $i] = 0;
                     $users[$index]['amount_try_zone_' . $i] = 0;
                 }

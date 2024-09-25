@@ -590,6 +590,34 @@ class ResultQualificationController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.participant');
         });
+        Admin::style("
+                @media only screen and (min-width: 1025px) {
+                    img {
+                        position: relative;
+                        transition: transform 0.25s ease;
+                        transform-origin: center center;
+                    }
+                    img:hover {
+                        -webkit-transform: scale(5.5);
+                        transform: scale(5.5);
+                        margin-top: -50px; /* половина высоты изображения */
+                        margin-left: -50px; /* половина ширины изображения */
+                        z-index: 9999;
+                        position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
+                        z-index: 9999;
+                    }
+                }
+            ");
+        Admin::script("
+                        $(document).ready(function() {
+                $('.ie-trigger-column-sport_category').each(function() {
+                    // Если внутри span нет текста, делаем иконку видимой
+                    if ($(this).find('.ie-display').text().trim() === '') {
+                        $(this).find('i.fa-edit').css('visibility', 'visible');
+                    }
+                });
+            });
+        ");
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $grid->selector(function (Grid\Tools\Selector $selector) use ($event) {
             $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
@@ -655,7 +683,7 @@ class ResultQualificationController extends Controller
             }
 
         })->select(User::sport_categories_select);
-        Admin::js('/resource_admin/js/sport_category_visible.js');
+
         if(!$event->is_open_main_rating){
             $grid->column('user.id', 'Лучшие трассы')->display(function ($id) use ($event) {
                 if($event){
@@ -803,7 +831,7 @@ class ResultQualificationController extends Controller
             ];
 
             $grid->column('is_paid', 'Оплата')->switch($states);
-            Admin::css('/admin/css/is_paid.css');
+
             $grid->column('bill', 'Чек участника')->image('', 100, 100);
             $grid->column('document', 'Документ участника')->image('', 100, 100);
             if ($event->setting_payment == OwnerPaymentOperations::DINAMIC) {
@@ -842,6 +870,34 @@ class ResultQualificationController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.result_france_system_qualification');
         });
+        Admin::style("
+                @media only screen and (min-width: 1025px) {
+                    img {
+                        position: relative;
+                        transition: transform 0.25s ease;
+                        transform-origin: center center;
+                    }
+                    img:hover {
+                        -webkit-transform: scale(5.5);
+                        transform: scale(5.5);
+                        margin-top: -50px; /* половина высоты изображения */
+                        margin-left: -50px; /* половина ширины изображения */
+                        z-index: 9999;
+                        position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
+                        z-index: 9999;
+                    }
+                }
+            ");
+        Admin::script("
+                        $(document).ready(function() {
+                $('.ie-trigger-column-sport_category').each(function() {
+                    // Если внутри span нет текста, делаем иконку видимой
+                    if ($(this).find('.ie-display').text().trim() === '') {
+                        $(this).find('i.fa-edit').css('visibility', 'visible');
+                    }
+                });
+            });
+        ");
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
@@ -899,7 +955,6 @@ class ResultQualificationController extends Controller
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-
         $grid->column('sport_category', 'Разряд')->display(function ($sport_category) use ($grid){
             if(!$sport_category){
                 return 'не установлен';
@@ -908,7 +963,7 @@ class ResultQualificationController extends Controller
             }
 
         })->select(User::sport_categories_select);
-        Admin::js('/resource_admin/js/sport_category_visible.js');
+
 
 
         $grid->column('user.birthday', __('Возраст'))->display(function ($birthday){
@@ -949,7 +1004,6 @@ class ResultQualificationController extends Controller
 
             }
             $grid->column('is_paid', 'Оплата')->switch($states);
-            Admin::css('/admin/css/is_paid2.css');
             $grid->column('bill', 'Чек участника')->image('', 100, 100);
             $grid->column('document', 'Документ участника')->image('', 100, 100);
         }
