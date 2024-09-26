@@ -180,6 +180,8 @@ class BatchResultFinalCustom extends CustomAction
         });
 
         ");
+        $result = $result->toArray();
+        asort($result);
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_final; $i++){

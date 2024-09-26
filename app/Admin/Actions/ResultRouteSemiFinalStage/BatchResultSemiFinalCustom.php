@@ -181,6 +181,8 @@ class BatchResultSemiFinalCustom extends CustomAction
         });
 
         ");
+        $result = $result->toArray();
+        asort($result);
         \Encore\Admin\Facades\Admin::script($this->script);
         $this->select('user_id', 'Участник')->options($result)->required();
         $this->hidden('event_id', '')->value($event->id);
