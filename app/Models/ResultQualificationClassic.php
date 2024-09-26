@@ -108,7 +108,7 @@ class ResultQualificationClassic extends Model
 
         if ($type == 'final') {
             if ($event->is_semifinal) {
-                $otherRoundResults = ResultSemiFinalStage::where('event_id', $event->id)->pluck('place', 'user_id')->all();
+                $otherRoundResults = ResultSemiFinalStage::where('event_id', $event->id)->get(['user_id', 'place']);
             } else {
                 $otherRoundResults = $event->is_france_system_qualification
                     ? ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->get(['user_id', $column_place_f])
