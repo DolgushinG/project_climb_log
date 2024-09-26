@@ -10,6 +10,7 @@ use App\Admin\CustomAction\ActionExportCardParticipantFranceSystem;
 use App\Admin\CustomAction\ActionExportCardParticipantFestival;
 use App\Admin\CustomAction\ActionExportList;
 use App\Exports\AllResultExport;
+use App\Exports\FullOfficialResultExport;
 use App\Helpers\Helpers;
 use App\Models\Color;
 use App\Models\Event;
@@ -258,6 +259,9 @@ class EventsController extends Controller
                 $grades = Grades::where('event_id', $event->id)->first();
                 if($grades){
                     $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
+                    if($event->is_france_system_qualification){
+                        $actions->append(new ActionExport($actions->getKey(), 'full', 'Полные офиц. протоколы','excel'));
+                    }
                     $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника (ФЕСТ)'));
                     $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника (ТОП БОНУС)'));
                 }
@@ -812,6 +816,14 @@ class EventsController extends Controller
     {
         $file_name = 'Полные результаты.xlsx';
         $result = Excel::download(new AllResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
+    }
+    public function exportFullExcel(Request $request)
+    {
+        $file_name = 'Полные офиц. результаты.xlsx';
+        $result = Excel::download(new FullOfficialResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);

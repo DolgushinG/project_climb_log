@@ -121,6 +121,16 @@ class ActionExport extends RowAction
                         });
                         SCRIPT;
                 }
+            case 'full':
+                switch ($format) {
+                    case 'excel':
+                        return <<<SCRIPT
+                        $('.full-excel').on('click', function () {
+                            let id = this.getAttribute('data-id');
+                            document.location = 'exports/events/excel/full/' + id
+                        });
+                    SCRIPT;
+                }
         }
     }
 
