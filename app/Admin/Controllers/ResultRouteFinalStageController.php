@@ -245,7 +245,7 @@ class ResultRouteFinalStageController extends Controller
                                     $('[data-final-user-id-$category->id=user_id]').val('');
                                 }
                             });
-                            $(document).on("change", '[data-user-id-$category->id=user_id]', function () {
+                            $(document).on("change", '[data-final-user-id-$category->id=user_id]', function () {
                                 var routeId = $('[data-final-route-id-$category->id=final_route_id]').val(); // ID выбранного маршрута
                                 var userId = $('[data-final-user-id-$category->id="user_id"]').select2('val')
                                 var eventId = $('[data-final-event-id-$category->id=event_id]').val(); // ID выбранного участника
