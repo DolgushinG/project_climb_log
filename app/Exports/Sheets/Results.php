@@ -18,6 +18,7 @@ use App\Models\Route;
 use App\Models\RoutesOutdoor;
 use App\Models\Set;
 use App\Models\User;
+use DateTime;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
@@ -27,6 +28,9 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Sheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use function Symfony\Component\String\s;
 
@@ -42,6 +46,22 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         $this->type = $type;
         $this->gender = $gender;
         $this->category = $category;
+    }
+
+    function getExcelCell($index, $row = 1, $digit=true)
+    {
+        $column = '';
+        $index++; // Увеличиваем на 1, так как индексация в Excel начинается с 1, а не с 0
+
+        while ($index > 0) {
+            $mod = ($index - 1) % 26;
+            $column = chr(65 + $mod) . $column;
+            $index = intval(($index - 1) / 26);
+        }
+        if($digit){
+            return $column . $row;
+        }
+        return $column;
     }
     public function styles(Worksheet $sheet)
     {
@@ -64,7 +84,8 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             case 'MergeQualification':
             case 'Qualification':
                 return 'A1';
-                break;
+            case 'Full':
+                return 'A7';
             default :
                 return 'A3';
         }
@@ -149,8 +170,198 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                             $sheet->getStyle($cell_title[$i])->applyFromArray($style);
                         }
                     }
+
+                    if($this->type == 'Full'){
+                        $styleTitle = [
+                            'font' => [
+                                'size' => 14,
+                            ],
+                            'alignment' => [
+                                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                                'wrapText' => true,
+                            ],
+                        ];
+                        $styleSubTitle = [
+                            'font' => [
+                                'size' => 10,
+                            ],
+                            'alignment' => [
+                                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                            ],
+                        ];
+                        $styleArray = [
+                            'font' => [
+                                'size' => 10,
+                            ],
+                            'alignment' => [
+                                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                                'wrapText' => true,
+                            ],
+                            'borders' => [
+                                'outline' => [
+                                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                    'color' => ['argb' => '000000'],
+                                ],
+                            ],
+                        ];
+                        $styleText = [
+                            'font' => [
+                                'size' => 9,
+                            ],
+                            'alignment' => [
+                                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                                'wrapText' => false,
+                            ],
+                            'borders' => [
+                                'outline' => [
+                                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                    'color' => ['argb' => '000000'],
+                                ],
+                            ],
+                        ];
+                        $stylePricePlaces = [
+                            'font' => [
+                                'size' => 10,
+                                'bold' => true
+                            ],
+                            'alignment' => [
+                                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                                'wrapText' => true,
+                            ],
+                            'borders' => [
+                                'outline' => [
+                                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                    'color' => ['argb' => '000000'],
+                                ],
+                            ],
+                        ];
+
+                        $styleArray_headers = [
+                            'fill' => [
+                                'fillType' => Fill::FILL_SOLID,
+                                'startColor' => [
+                                    'argb' => 'D3D3D3', // Серый цвет (Light Gray)
+                                ],
+                            ],
+                            'alignment' => [
+                                'horizontal' => Alignment::HORIZONTAL_CENTER, // Горизонтальное выравнивание
+                                'vertical' => Alignment::VERTICAL_CENTER,
+                                'wrapText' => true,// Вертикальное выравнивание
+                            ],
+                            'borders' => [
+                                'allBorders' => [
+                                    'borderStyle' => Border::BORDER_THIN, // Тонкие границы
+                                    'color' => ['argb' => '000000'],      // Цвет границ (черный)
+                                ],
+                            ],
+
+                        ];
+                        $event = Event::find($this->event_id);
+                        $routes = Grades::where('event_id', $this->event_id)->first()->count_routes;
+                        $count_cell_needs = 5;
+                        $amount_semi_final = 0;
+                        if($event->amount_routes_in_semifinal){
+                            $amount_semi_final = $event->amount_routes_in_semifinal * 2 + 4;
+                        }
+                        $amount_final = 0;
+                        if($event->amount_routes_in_final){
+                            $amount_final = $event->amount_routes_in_final * 2 + 4;
+                        }
+                        $sum = $count_cell_needs + ($routes * 2 + 4) + $amount_semi_final + $amount_final;
+                        $amount_sum_row_1 = $this->getExcelCell($sum);
+                        $cell_sport_category_done = $this->getExcelCell($sum, 6);
+                        $cell_sport_category_done_2 = $this->getExcelCell($sum, 7);
+                        $cell_with_title_route = $this->getExcelCell($sum-1, 7);
+                        $amount_sum_row_2 = $this->getExcelCell($sum, 2);
+                        $amount_sum_row_3 = $this->getExcelCell($sum, 3);
+                        $amount_sum_row_4 = $this->getExcelCell($sum, 4);
+                        $sheet->getStyle('A1')->getAlignment()->setIndent(1);
+                        $for_header_qualification = $count_cell_needs + $amount_final + 4;
+                        $for_header_final = $count_cell_needs + ($amount_final * 2) + 4;
+                        $count_participant_record = self::count_participant_category('result_france_system_qualification') + 8;
+                        $sheet->mergeCells($this->getExcelCell($for_header_qualification, 6).':'.$this->getExcelCell($for_header_qualification + 3, 6));
+                        $sheet->mergeCells($this->getExcelCell($for_header_final, 6).':'.$this->getExcelCell($for_header_final + 3, 6));
+                        $sheet->mergeCells('A6:A7');
+                        $sheet->mergeCells('B'.$count_participant_record.':E'.$count_participant_record);
+                        $sheet->mergeCells('B'.($count_participant_record + 2).':E'.($count_participant_record + 2));
+                        $sheet->mergeCells('B'.($count_participant_record + 4).':E'.($count_participant_record + 4));
+                        $sheet->mergeCells('A5:E5');
+                        $sheet->mergeCells('B6:B7');
+                        $sheet->mergeCells('C6:C7');
+                        $sheet->mergeCells('D6:D7');
+                        $sheet->mergeCells('E6:E7');
+                        $sheet->mergeCells($cell_sport_category_done.':'.$cell_sport_category_done_2);
+                        $sheet->mergeCells('A1:'.$amount_sum_row_1);
+                        $sheet->getStyle('A6:A7')->applyFromArray($styleArray);
+                        $sheet->getStyle('A5:E5')->applyFromArray($styleText);  # 'Зам. гл. судьи по виду - '
+                        $sheet->getStyle('B6:B7')->applyFromArray($styleArray);
+                        $sheet->getStyle('C6:C7')->applyFromArray($styleArray);
+                        $sheet->getStyle('D6:D7')->applyFromArray($styleArray);
+                        $sheet->getStyle('E6:E7')->applyFromArray($styleArray);
+                        $sheet->getStyle('F7:'.$cell_sport_category_done_2)->applyFromArray($styleArray);
+                        $sheet->getStyle('A6:'.$cell_sport_category_done)->applyFromArray($styleArray_headers);
+                        $sheet->getStyle('A7:'.$cell_with_title_route)->applyFromArray($styleArray_headers);
+                        $sheet->getStyle($cell_sport_category_done.':'.$cell_sport_category_done_2)->applyFromArray($styleArray_headers);
+                        $final_cell_records = self::getExcelCell($sum, $count_participant_record);
+                        $final_cell_records_8 = self::getExcelCell($sum, 8);
+                        $final_cell_records_9 = self::getExcelCell($sum, 9);
+                        $final_cell_records_10 = self::getExcelCell($sum, 10);
+                        $sheet->getStyle('A11:'.$final_cell_records)->applyFromArray($styleArray);
+                        $sheet->getStyle('A8:'.$final_cell_records_8)->applyFromArray($stylePricePlaces);
+                        $sheet->getStyle('A9:'.$final_cell_records_9)->applyFromArray($stylePricePlaces);
+                        $sheet->getStyle('A10:'.$final_cell_records_10)->applyFromArray($stylePricePlaces);
+                        $sheet->getStyle('B'.$count_participant_record)->applyFromArray($stylePricePlaces);
+
+                        $sheet->getStyle('A1:'.$amount_sum_row_1)->applyFromArray($styleTitle);
+                        # Ширина
+                        # Высота
+                        $sheet->getRowDimension('1')->setRowHeight(40);
+                        $sheet->getRowDimension('5')->setRowHeight(30);
+                        $sheet->getRowDimension($count_participant_record+2)->setRowHeight(30);
+                        $sheet->getRowDimension($count_participant_record+4)->setRowHeight(30);
+
+                        $sheet->mergeCells('A2:'.$amount_sum_row_2);
+                        $data_time_year = new DateTime($event->start_date);
+                        $sheet->setCellValue('A2', $event->address. '                       '.$data_time_year->format('d.m.Y'));
+                        $sheet->getStyle('A2:'.$amount_sum_row_2)->applyFromArray($styleSubTitle);
+                        $sheet->mergeCells('A3:'.$amount_sum_row_3);
+                        $sheet->getStyle('A3:'.$amount_sum_row_3)->applyFromArray($styleTitle);
+                        $sheet->mergeCells('A4:'.$amount_sum_row_4);
+                        $sheet->setCellValue('A4', $this->category->category);
+                        $sheet->getStyle('A4:'.$amount_sum_row_4)->applyFromArray($styleTitle);
+
+                        $sheet->setCellValue('A1', $event->title);
+                        $sheet->setCellValue('A'.$count_participant_record, '*');
+                        $sheet->setCellValue('B'.$count_participant_record, 'согласно действующим нормам, требованиям и условиям ЕВСК 1 и 2 сп.р. выполняется с 12 лет');
+                        $sheet->setCellValue('B'.$count_participant_record + 2, 'Гл.судья _________________________');
+                        $sheet->setCellValue('B'.$count_participant_record + 4, 'Гл.секретарь _____________________');
+                        $sheet->setCellValue('A5', 'Зам. гл. судьи по виду - ________________');
+                        $sheet->setCellValue('A6',  'Место');
+                        $sheet->setCellValue('B6',  'Фамилия, Имя');
+                        $sheet->setCellValue('C6',  'Г.р');
+                        $sheet->setCellValue('D6',  'Разряд');
+                        $sheet->setCellValue('E6',  'Команда');
+                        $sheet->setCellValue($cell_sport_category_done, 'Вып.разряд');
+                        $sheet->setCellValue('A4', 'ИТОГОВЫЙ ПРОТОКОЛ РЕЗУЛЬТАТОВ');
+                        $sheet->setCellValue($this->getExcelCell($for_header_final, 6) , 'Финал');
+                        $sheet->setCellValue($this->getExcelCell($for_header_qualification, 6) , 'Квалификация');
+
+                    }
                 },
             ];
+    }
+
+    public function count_participant_category($table)
+    {
+        return User::query()
+            ->leftJoin($table, 'users.id', '=', $table.'.user_id')
+            ->where($table.'.event_id', '=', $this->event_id)
+            ->where($table.'.gender', '=', $this->gender)
+            ->where($table.'.category_id', '=', $this->category->id)->get()->count();
     }
 
     public function headings(): array
@@ -226,7 +437,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 $count = ResultRouteFranceSystemQualification::count_route_in_qualification_final($this->event_id);
                 for($i = 1; $i <= $count; $i++){
                     $france_system_qualification[] = 'T'.$i;
-                    $france_system_qualification[] = 'B'.$i;
+                    $france_system_qualification[] = 'З'.$i;
                 }
                 $france_system_qualification = array_merge($france_system_qualification, [
                     'T',
@@ -239,7 +450,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $count = $event->amount_routes_in_semifinal;
                     for($i = 1; $i <= $count; $i++){
                         $france_system_qualification[] = 'T'.$i;
-                        $france_system_qualification[] = 'B'.$i;
+                        $france_system_qualification[] = 'З'.$i;
                     }
                     $france_system_qualification = array_merge($france_system_qualification, [
                         'T',
@@ -253,7 +464,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                     $count = $event->amount_routes_in_final;
                     for($i = 1; $i <= $count; $i++){
                         $france_system_qualification[] = 'T'.$i;
-                        $france_system_qualification[] = 'B'.$i;
+                        $france_system_qualification[] = 'З'.$i;
                     }
                     $france_system_qualification = array_merge($france_system_qualification, [
                         'T',
@@ -343,10 +554,14 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
      */
     public function title(): string
     {
+
         if($this->category){
             $category = $this->category->category;
         } else {
             $category = '';
+        }
+        if($this->type == 'Full'){
+            return $category;
         }
         if($this->category == '' && $this->gender == ''){
             return trans_choice('somewords.'.$this->type, 10);
@@ -677,10 +892,10 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
                 ->toArray();
             for($route = 1; $route <= $max_routes; $route++){
                 if (!isset($result[$route]['amount_try_top'])) {
-                    $export[$index]['amount_try_top_' . $route] = 0;
+                    $export[$index]['amount_try_top_' . $route] = '-';
                 }
                 if (!isset($result[$route]['amount_try_zone'])) {
-                    $export[$index]['amount_try_zone_' . $route] = 0;
+                    $export[$index]['amount_try_zone_' . $route] = '-';
                 }
                 if(isset($result[$route]['amount_try_zone']) && isset($result[$route]['amount_try_top'])){
                     $export[$index]['amount_try_top_'.$route] = $result[$route]['amount_try_top'];
@@ -694,10 +909,10 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             if($is_semifinal){
                 for($route = 1; $route <= $max_routes_semifinal; $route++){
                     if (!isset($final_semifinal_result[$route]['amount_try_top'])) {
-                        $export[$index]['semifinal_amount_try_top_' . $route] = 0;
+                        $export[$index]['semifinal_amount_try_top_' . $route] = '-';
                     }
                     if (!isset($final_semifinal_result[$route]['amount_try_zone'])) {
-                        $export[$index]['semifinal_amount_try_zone_' . $route] = 0;
+                        $export[$index]['semifinal_amount_try_zone_' . $route] = '-';
                     }
                     if(isset($final_semifinal_result[$route]['amount_try_zone']) && isset($final_semifinal_result[$route]['amount_try_top'])){
                         $export[$index]['semifinal_amount_try_top_'.$route] = $final_semifinal_result[$route]['amount_try_top'];
@@ -714,10 +929,10 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             if($is_final){
                 for($route = 1; $route <= $max_routes_final; $route++){
                     if (!isset($final_final_result[$route]['amount_try_top'])) {
-                        $export[$index]['final_amount_try_top_' . $route] = 0;
+                        $export[$index]['final_amount_try_top_' . $route] = '-';
                     }
                     if (!isset($final_final_result[$route]['amount_try_zone'])) {
-                        $export[$index]['final_amount_try_zone_' . $route] = 0;
+                        $export[$index]['final_amount_try_zone_' . $route] = '-';
                     }
                     if(isset($final_final_result[$route]['amount_try_top'])){
                         $export[$index]['final_amount_try_top_'.$route] = $final_final_result[$route]['amount_try_top'];
