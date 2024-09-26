@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultQualificationClassic;
@@ -186,6 +187,7 @@ Route::group([
             gender: $result_reg->gender,
             all_attempts: $attempt,
         );
+        Event::refresh_final_points_all_participant_in_final($eventId);
         $result = \App\Models\ResultRouteFinalStage::where('event_id', $eventId)->where('final_route_id', $routeId)->where('user_id', $userId)->first();
         $data = [
             'all_attempts' => $result->all_attempts,
@@ -231,6 +233,7 @@ Route::group([
             gender: $result_reg->gender,
             all_attempts: $attempt,
         );
+        Event::refresh_final_points_all_participant_in_semifinal($eventId);
         $result = \App\Models\ResultRouteSemiFinalStage::where('event_id', $eventId)->where('final_route_id', $routeId)->where('user_id', $userId)->first();
         $data = [
             'all_attempts' => $result->all_attempts,

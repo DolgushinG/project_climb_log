@@ -151,7 +151,6 @@ class ResultRouteFinalStage extends Model
         if($stage == 'semifinal'){
             $participant->result_for_edit_semifinal = $merged_result_for_edit;
         }
-
         $participant->save();
     }
 }
