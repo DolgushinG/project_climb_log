@@ -136,7 +136,7 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     protected function grid()
     {
-        $grid = new Grid(new ResultSemiFinalStage());
+        $grid = new Grid(new ResultSemiFinalStage);
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
@@ -158,6 +158,33 @@ class ResultRouteSemiFinalStageController extends Controller
                                 var attempt = $('[data-all-attempts-id-$category->id=all-attempts]').val();
                                 var amount_try_top = $('[id=amount_try_top_$category->id]').val();
                                 var amount_try_zone = $('[id=amount_try_zone_$category->id]').val();
+
+                                / Проверяем необходимые поля
+                                let missingFields = [];
+
+                                if (!attempt) {
+                                    missingFields.push('Попытки');
+                                }
+                                if (!userId) {
+                                    missingFields.push('Участник');
+                                }
+                                if (!eventId) {
+                                    missingFields.push('событие');
+                                }
+                                if (!routeId) {
+                                    missingFields.push('Маршрут');
+                                }
+
+                                // Если есть недостающие поля, формируем сообщение об ошибке
+                                if (missingFields.length > 0) {
+                                    $.admin.toastr.error(
+                                        'Не хватает данных для их отправки: ' + missingFields.join(', '),
+                                        '',
+                                        { positionClass: "toast-bottom-center", timeOut: 10000 }
+                                    ).css("width", "500px");
+                                }
+
+
                                 if(routeId){
                                     $.get("/admin/api/semifinal/set_attempts",
                                         {
@@ -299,6 +326,18 @@ class ResultRouteSemiFinalStageController extends Controller
                                         }
                                     );
                                 }
+                                if(userId){
+                                    $.get("/admin/api/get_user_info",
+                                        {
+                                            user_id: userId,
+                                            event_id: eventId
+                                        },
+                                        function (data) {
+                                            $('[id="semifinal_user_gender_$category->id"]').val(data.gender);
+                                            $('[id="semifinal_category_$category->id"]').val(data.category);
+                                        }
+                                    );
+                                }
                             });
                             $(document).on("change", '[data-semifinal-route-id-$category->id=final_route_id]', function () {
                                 var routeId = $(this).val(); // ID выбранного маршрута
@@ -365,6 +404,18 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->disablePagination();
         $grid->disablePerPageSelector();
         $grid->disableBatchActions();
+        Admin::script(<<<SCRIPT
+            $('body').on('shown.bs.modal', '.modal', function() {
+            $(this).find('select').each(function() {
+                var dropdownParent = $(document.body);
+                if ($(this).parents('.modal.in:first').length !== 0)
+                    dropdownParent = $(this).parents('.modal.in:first');
+                    $(this).select2({
+                        dropdownParent: dropdownParent
+                    });
+                });
+            });
+            SCRIPT);
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
@@ -415,8 +466,12 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     protected function form($type, $id = null)
     {
-        $form = new Form(new ResultSemiFinalStage());
+        $form = new Form(new ResultSemiFinalStage);
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        $user_id = ResultSemiFinalStage::find($id)->user_id;
+        $user = User::find($user_id);
+        $empty = '';
+        $form->html('<h1><b>'.$user->middlename ?? $empty.'</b></h1>');
         Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
                 display: None;
                 }

@@ -145,6 +145,8 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
         asort($result);
         $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-final-user-id-'.$this->category->id, 'user_id')->options($result)->required();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-final-event-id-'.$this->category->id, 'event_id')->value($event->id);
+        $this->text('final_user_gender_'.$this->category->id, 'Пол')->attribute('autocomplete', 'off')->readonly();
+        $this->text('final_category_'.$this->category->id, 'Группа')->attribute('autocomplete', 'off')->readonly();
         $this->select('final_route_id', 'Трасса')->attribute('autocomplete', 'off')->attribute('data-final-route-id-'.$this->category->id, 'final_route_id')->options($routes)->required();
         $this->integer('all_attempts', 'Все попытки')
             ->attribute('autocomplete', 'off')

@@ -115,6 +115,9 @@ Route::group([
         $userId = $request->get('user_id');
         $eventId = $request->get('event_id');
         $attempt = $request->get('attempt');
+        if(!$attempt){
+            return \App\Helpers\Helpers::custom_response('При внесение результата не может быть 0 попыток');
+        }
         $amount_try_top = intval($request->get('amount_try_top'));
         $amount_try_zone = intval($request->get('amount_try_zone'));
         if($amount_try_top > 0){
@@ -156,6 +159,9 @@ Route::group([
         $eventId = $request->get('event_id');
         $event = \App\Models\Event::find($eventId);
         $attempt = $request->get('attempt');
+        if(!$attempt){
+            return \App\Helpers\Helpers::custom_response('При внесение результата не может быть 0 попыток');
+        }
         $amount_try_top = intval($request->get('amount_try_top'));
         $amount_try_zone = intval($request->get('amount_try_zone'));
         if($amount_try_top > 0){
@@ -202,6 +208,9 @@ Route::group([
         $eventId = $request->get('event_id');
         $event = \App\Models\Event::find($eventId);
         $attempt = $request->get('attempt');
+        if(!$attempt){
+            return \App\Helpers\Helpers::custom_response('При внесение результата не может быть 0 попыток');
+        }
         $amount_try_top = intval($request->get('amount_try_top'));
         $amount_try_zone = intval($request->get('amount_try_zone'));
         if($amount_try_top > 0){

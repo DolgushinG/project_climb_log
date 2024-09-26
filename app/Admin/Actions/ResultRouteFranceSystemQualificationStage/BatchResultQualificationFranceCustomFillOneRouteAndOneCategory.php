@@ -182,6 +182,33 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
                         var attempt = $('[data-all-attempts-id=all-attempts]').val();
                         var amount_try_top = $('[id=amount_try_top_category]').val();
                         var amount_try_zone = $('[id=amount_try_zone_category]').val();
+
+                        / Проверяем необходимые поля
+                        let missingFields = [];
+
+                        if (!attempt) {
+                            missingFields.push('Попытки');
+                        }
+                        if (!userId) {
+                            missingFields.push('Участник');
+                        }
+                        if (!eventId) {
+                            missingFields.push('событие');
+                        }
+                        if (!routeId) {
+                            missingFields.push('Маршрут');
+                        }
+
+                        // Если есть недостающие поля, формируем сообщение об ошибке
+                        if (missingFields.length > 0) {
+                            $.admin.toastr.error(
+                                'Не хватает данных для их отправки: ' + missingFields.join(', '),
+                                '',
+                                { positionClass: "toast-bottom-center", timeOut: 10000 }
+                            ).css("width", "500px");
+                        }
+
+
                         if(routeId){
                             $.get("/admin/api/set_attempts",
                                 {

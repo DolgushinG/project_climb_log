@@ -718,7 +718,21 @@ class Event extends Model
             }
         }
 
-        $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result, $type);
+        $users_sorted_with_same_place = ResultQualificationClassic::counting_final_place($model->id, $users_with_result);
+        if($type == 'final' || $type == 'semifinal'){
+            $current_result = array_map(function ($participant) {
+                return [
+                    'user_id' => $participant->get('user_id'),
+                    'place' => $participant->get('place'),
+                ];
+            }, $users_sorted_with_same_place);
+            $pre_results = ResultQualificationClassic::getUserPlaces($model, $type);
+            $users_sorted_pre = ResultQualificationClassic::assign_dublicate_place($current_result, $pre_results);
+            $users_sorted = ResultQualificationClassic::set_new_places($users_sorted_with_same_place, $users_sorted_pre);
+        } else {
+            $users_sorted = $users_sorted_with_same_place;
+        }
+
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user) {

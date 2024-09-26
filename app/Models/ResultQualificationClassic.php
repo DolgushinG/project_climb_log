@@ -95,7 +95,7 @@ class ResultQualificationClassic extends Model
     {
         return Set::where('event_id', $event_id)->pluck('number_set', 'id')->toArray();
     }
-    public static function getRankFromOtherRound($userId, $event, $type) {
+    public static function getUserPlaces($event, $type) {
         // Определяем модель для получения результатов в зависимости от флага и этапа
 
         if($event->is_open_main_rating){
@@ -111,29 +111,34 @@ class ResultQualificationClassic extends Model
                 $otherRoundResults = ResultSemiFinalStage::where('event_id', $event->id)->pluck('place', 'user_id')->all();
             } else {
                 $otherRoundResults = $event->is_france_system_qualification
-                    ? ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->pluck($column_place_f, 'user_id')->all()
-                    : ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->pluck($column_place_q, 'user_id')->all();
+                    ? ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->get(['user_id', $column_place_f])
+                    : ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->get(['user_id', $column_place_q]);
             }
         } elseif ($type == 'semifinal') {
-
             $otherRoundResults = $event->is_france_system_qualification
-                ? ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->pluck($column_place_f, 'user_id')->all()
-                : ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->pluck($column_place_q, 'user_id')->all();
+                ? ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->get(['user_id', $column_place_f])
+                : ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->get(['user_id', $column_place_q]);
         } else {
             // Если это не финал и не полуфинал, используем текущий этап без изменений
             return null;
         }
-
+        $formattedResults = $otherRoundResults->map(function ($item) use ($column_place_q) {
+            return [
+                'user_id' => $item->user_id,
+                'place' => $item->{$column_place_q},
+            ];
+        })->toArray();
         // Возвращаем место (ранг) из другого раунда, если оно существует
-        return $otherRoundResults[$userId] ?? null;
+        return $formattedResults ?? null;
     }
 
-    public static function counting_final_place($event_id, $result_final, $type){
+    public static function counting_final_place($event_id, $result_final){
         // Сортировка по amount_top в убывающем порядке, затем по amount_try_top в возрастающем порядке,
         // затем по amount_zone в убывающем порядке, затем по amount_try_zone в возрастающем порядке
         $event = Event::find($event_id);
         $results = Event::get_type_counting_france_system($result_final, $event->type_counting_france_system);
         $rank = 1;
+        $previousRank = null;
         foreach ($results as $index => &$item) {
             if ($index > 0 && (
                     $item['amount_top'] === $results[$index - 1]['amount_top'] &&
@@ -141,21 +146,86 @@ class ResultQualificationClassic extends Model
                     $item['amount_try_top'] === $results[$index - 1]['amount_try_top'] &&
                     $item['amount_try_zone'] === $results[$index - 1]['amount_try_zone']
                 )) {
-                // Сравниваем с результатами из другого раунда
-                $rankFromOtherRound = self::getRankFromOtherRound($item['user_id'], $event, $type);
-                $previousRankFromOtherRound = self::getRankFromOtherRound($results[$index - 1]['user_id'], $event, $type);
-                if ($rankFromOtherRound && $previousRankFromOtherRound && $rankFromOtherRound !== $previousRankFromOtherRound) {
-                    $rank = $rankFromOtherRound < $previousRankFromOtherRound ? $index : $index + 1;
+                $item['place'] = $previousRank;
+            } else {
+                $item['place'] = $rank;
+                $previousRank = $rank;
+            }
+            $rank++;
+        }
+        return $results;
+    }
+
+    public static function set_new_places($participants, $places)
+    {
+        // Обновление мест по user_id
+        foreach ($places as $place) {
+            $userId = $place['user_id'];
+            $userPlace = $place['place'];
+
+            // Проходим по массиву участников
+            foreach ($participants as $participant) {
+                if ($participant['user_id'] === $userId) {
+                    $participant['place'] = $userPlace; // Устанавливаем новое место
+                    break; // Выходим из цикла, если нашли участника
+                }
+            }
+        }
+        return $participants;
+    }
+
+    public static function assign_dublicate_place($current_result, $previous_result)
+    {
+        $previous_places_map = [];
+        foreach ($previous_result as $result) {
+            $previous_places_map[$result['user_id']] = $result['place'];
+        }
+
+        $places_map = [];
+        foreach ($current_result as $result) {
+            $places_map[$result['place']][] = $result['user_id'];
+        }
+        $corrected_result = [];
+        ksort($places_map);
+
+        $assigned_places = []; // Массив для отслеживания уже присвоенных мест
+        $current_place = 1; // Начальное место
+
+        foreach ($places_map as $place => $user_ids) {
+            if (count($user_ids) > 1) {
+                $previous_places = [];
+                foreach ($user_ids as $user_id) {
+                    if (isset($previous_places_map[$user_id])) {
+                        $previous_places[$user_id] = $previous_places_map[$user_id];
+                    }
+                }
+
+                asort($previous_places);
+                foreach ($previous_places as $user_id => $prev_place) {
+                    while (in_array($current_place, $assigned_places)) {
+                        $current_place++;
+                    }
+                    $corrected_result[] = ['user_id' => $user_id, 'place' => $current_place];
+                    $assigned_places[] = $current_place; // Запоминаем присвоенное место
+                    $current_place++; // Увеличиваем текущее место
                 }
             } else {
-                $rank = $index + 1;
+                while (in_array($current_place, $assigned_places)) {
+                    $current_place++;
+                }
+                $corrected_result[] = ['user_id' => $user_ids[0], 'place' => $current_place];
+                $assigned_places[] = $current_place; // Запоминаем присвоенное место
+                $current_place++; // Увеличиваем текущее место
             }
-            $item['place'] = $rank;
         }
-        usort($results, function ($a, $b) {
-            return $a['place'] <=> $b['place'];
-        });
-       return $results;
+        $unique_result = [];
+        foreach ($corrected_result as $entry) {
+            while (in_array($entry['place'], array_column($unique_result, 'place'))) {
+                $entry['place']++;
+            }
+            $unique_result[] = $entry;
+        }
+        return $unique_result;
     }
     public static function findIndexBy($array, $element, $needle) {
         foreach ($array as $key => $item) {
