@@ -159,7 +159,7 @@ class ResultRouteSemiFinalStageController extends Controller
                                 var amount_try_top = $('[id=amount_try_top_$category->id]').val();
                                 var amount_try_zone = $('[id=amount_try_zone_$category->id]').val();
 
-                                / Проверяем необходимые поля
+
                                 let missingFields = [];
 
                                 if (!attempt) {

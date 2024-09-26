@@ -183,7 +183,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
                         var amount_try_top = $('[id=amount_try_top_category]').val();
                         var amount_try_zone = $('[id=amount_try_zone_category]').val();
 
-                        / Проверяем необходимые поля
+
                         let missingFields = [];
 
                         if (!attempt) {
