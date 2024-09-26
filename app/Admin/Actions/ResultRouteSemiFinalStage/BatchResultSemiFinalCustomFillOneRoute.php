@@ -144,6 +144,8 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
         for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
             $routes[$i] = $i;
         }
+        $result = $result->toArray();
+        asort($result);
         $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-semifinal-user-id-'.$this->category->id, 'user_id')->options($result)->required();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-semifinal-event-id-'.$this->category->id, 'event_id')->value($event->id);
         $this->select('final_route_id', 'Трасса')->attribute('autocomplete', 'off')->attribute('data-semifinal-route-id-'.$this->category->id, 'final_route_id')->options($routes)->required();
