@@ -145,235 +145,8 @@ class ResultRouteSemiFinalStageController extends Controller
         });
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultSemiFinal);
-            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-            if($event->is_sort_group_semifinal){
-                $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
-                foreach ($categories as $index => $category){
-                    $index = $index + 1;
-                    $script_one_route = <<<EOT
-                            function set_attempt_$category->id(){
-                                var routeId = $('[data-semifinal-route-id-$category->id=final_route_id]').val(); // ID выбранного маршрута
-                                var userId = $('[data-semifinal-user-id-$category->id="user_id"]').select2('val')
-                                var eventId = $('[data-semifinal-event-id-$category->id=event_id]').val(); // ID выбранного участника
-                                var attempt = $('[data-all-attempts-id-$category->id=all-attempts]').val();
-                                var amount_try_top = $('[id=amount_try_top_$category->id]').val();
-                                var amount_try_zone = $('[id=amount_try_zone_$category->id]').val();
-
-
-                                let missingFields = [];
-
-                                if (!attempt) {
-                                    missingFields.push('Попытки');
-                                }
-                                if (!userId) {
-                                    missingFields.push('Участник');
-                                }
-                                if (!eventId) {
-                                    missingFields.push('событие');
-                                }
-                                if (!routeId) {
-                                    missingFields.push('Маршрут');
-                                }
-
-                                // Если есть недостающие поля, формируем сообщение об ошибке
-                                if (missingFields.length > 0) {
-                                    $.admin.toastr.error(
-                                        'Не хватает данных для их отправки: ' + missingFields.join(', '),
-                                        '',
-                                        { positionClass: "toast-bottom-center", timeOut: 10000 }
-                                    ).css("width", "500px");
-                                }
-
-
-                                if(routeId){
-                                    $.get("/admin/api/semifinal/set_attempts",
-                                        {
-                                            route_id: routeId,
-                                            user_id: userId,
-                                            event_id: eventId,
-                                            attempt: attempt,
-                                            amount_try_top: amount_try_top,
-                                            amount_try_zone: amount_try_zone
-                                        },
-                                        function (data) {
-                                            $('[data-amount_try_top-$category->id=amount_try_top]').val(data.amount_try_top);
-                                            $('[data-amount_try_zone-$category->id=amount_try_zone]').val(data.amount_try_zone);
-                                            $('[data-all-attempts-id-$category->id=all-attempts]').val(data.all_attempts);
-                                        }
-                                    );
-                                }
-                            }
-                         $(document).on("click", '[modal="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute-$index"]', function () {
-                            const allAttemptsInput = document.getElementById('all_attempts-$category->id');
-                            const incrementBtn = document.getElementById('increment-btn-$category->id');
-                            const decrementBtn = document.getElementById('decrement-btn-$category->id');
-                            const topInput = document.getElementById('amount_try_top_$category->id');
-                            const zoneInput = document.getElementById('amount_try_zone_$category->id');
-                            const zoneBtn = document.getElementById('zone-btn-final-$category->id');
-                            const topBtn = document.getElementById('top-btn-final-$category->id');
-
-                                if (!incrementBtn && !decrementBtn && !zoneBtn && !topBtn) {
-                                    const inputGroupAppend = document.createElement('div');
-                                    const inputGroupAppend2 = document.createElement('div');
-                                    const inputGroupAppend3 = document.createElement('div');
-                                    inputGroupAppend.className = 'input-group-append';
-                                    inputGroupAppend2.className = 'input-group-append';
-                                    inputGroupAppend3.className = 'input-group-append';
-
-                                    // Создаем кнопку для увеличения
-                                    const newIncrementBtn = document.createElement('button');
-                                    newIncrementBtn.type = 'button';
-                                    newIncrementBtn.className = 'btn btn-warning';
-                                    newIncrementBtn.id = 'increment-btn-$category->id';
-
-                                    const newZoneBtn = document.createElement('button');
-                                    newZoneBtn.type = 'button';
-                                    newZoneBtn.className = 'btn btn-success';
-                                    newZoneBtn.id = 'zone-btn-final-$category->id';
-                                    const newTopBtn = document.createElement('button');
-                                    newTopBtn.type = 'button';
-                                    newTopBtn.className = 'btn btn-success';
-                                    newTopBtn.id = 'top-btn-final-$category->id';
-                                    // Создаем иконку для увеличения
-                                    const incrementIcon = document.createElement('i');
-                                    incrementIcon.className = 'fa fa-plus';
-
-                                    // Создаем текст для увеличения
-                                    const incrementText = document.createElement('span');
-                                    const zoneText = document.createElement('span');
-                                    const topText = document.createElement('span');
-                                    zoneText.textContent = 'Зона'; // Текст "Попытка"
-                                    incrementText.textContent = ' Попытка'; // Текст "Попытка"
-                                    topText.textContent = 'Топ'; // Текст "Попытка"
-
-                                    // Добавляем иконку и текст в кнопку увеличения
-                                    newIncrementBtn.appendChild(incrementIcon);
-                                    newIncrementBtn.appendChild(incrementText);
-                                    newZoneBtn.appendChild(zoneText);
-                                    newTopBtn.appendChild(topText);
-
-                                    // Создаем кнопку для удаления
-                                    const newDecrementBtn = document.createElement('button');
-                                    newDecrementBtn.type = 'button';
-                                    newDecrementBtn.className = 'btn btn-danger';
-                                    newDecrementBtn.id = 'decrement-btn-$category->id';
-
-                                    // Создаем иконку для удаления
-                                    const decrementIcon = document.createElement('i');
-                                    decrementIcon.className = 'fa fa-minus';
-
-                                    // Добавляем иконку в кнопку удаления
-                                    newDecrementBtn.appendChild(decrementIcon);
-
-                                    // Добавляем кнопки в группу ввода
-                                    inputGroupAppend.appendChild(newDecrementBtn);
-                                    inputGroupAppend.appendChild(newIncrementBtn);
-                                    inputGroupAppend2.appendChild(newZoneBtn);
-                                    inputGroupAppend3.appendChild(newTopBtn);
-
-                                    // Находим родительский элемент и добавляем группу ввода после поля
-                                    allAttemptsInput.parentNode.appendChild(inputGroupAppend);
-                                    zoneInput.parentNode.appendChild(inputGroupAppend2);
-                                    topInput.parentNode.appendChild(inputGroupAppend3);
-
-                                    newZoneBtn.addEventListener('click', function () {
-                                        let currentValue = parseInt(allAttemptsInput.value) || 0;
-                                         $('[data-amount-try-zone-$category->id=amount_try_zone]').val(currentValue);
-                                        set_attempt_$category->id()
-                                    });
-                                    newTopBtn.addEventListener('click', function () {
-                                        let currentValue = parseInt(allAttemptsInput.value) || 0;
-                                         $('[data-amount-try-top-$category->id=amount_try_top]').val(currentValue);
-                                        set_attempt_$category->id()
-                                    });
-                                    // Обработчик клика на кнопку увеличения
-                                    newIncrementBtn.addEventListener('click', function () {
-                                        let currentValue = parseInt(allAttemptsInput.value) || 0;
-                                        allAttemptsInput.value = currentValue + 1;
-                                        set_attempt_$category->id()
-                                    });
-
-                                    // Обработчик клика на кнопку удаления
-                                    newDecrementBtn.addEventListener('click', function () {
-                                        let currentValue = parseInt(allAttemptsInput.value) || 0;
-                                        if (currentValue > 0) {
-                                            allAttemptsInput.value = currentValue - 1;
-                                        }
-                                        set_attempt_$category->id()
-                                    });
-                                    $('[data-all-attempts-id-$category->id=all-attempts]').val('');
-                                    $('[data-amount-try-top-$category->id=amount_try_top]').val('');
-                                    $('[data-amount-try-zone-$category->id=amount_try_zone]').val('');
-                                    $('[data-semifinal-user-id-$category->id=user_id]').val('');
-                                }
-                            });
-                            $(document).on("change", '[data-semifinal-user-id-$category->id=user_id]', function () {
-                                var routeId = $('[data-semifinal-route-id-$category->id=final_route_id]').val(); // ID выбранного маршрута
-                                var userId = $('[data-semifinal-user-id-$category->id="user_id"]').select2('val')
-                                var eventId = $('[data-semifinal-event-id-$category->id=event_id]').val(); // ID выбранного участника
-                                if(routeId){
-                                    $.get("/admin/api/semifinal/get_attempts", // URL эндпоинта
-                                        {
-                                            route_id: routeId,
-                                            user_id: userId,
-                                            event_id: eventId
-                                        }, // Передаем ID маршрута и участника в запросе
-                                        function (data) {
-                                            // Обновляем поля с количеством попыток
-                                            $('[data-amount-try-top-$category->id=amount_try_top]').val(data.amount_try_top);
-                                            $('[data-amount-try-zone-$category->id=amount_try_zone]').val(data.amount_try_zone);
-                                            $('[data-all-attempts-id-$category->id=all-attempts]').val(data.all_attempts);
-                                        }
-                                    );
-                                }
-                                if(userId){
-                                    $.get("/admin/api/get_user_info",
-                                        {
-                                            user_id: userId,
-                                            event_id: eventId
-                                        },
-                                        function (data) {
-                                            $('[id="semifinal_user_gender_$category->id"]').val(data.gender);
-                                            $('[id="semifinal_category_$category->id"]').val(data.category);
-                                        }
-                                    );
-                                }
-                            });
-                            $(document).on("change", '[data-semifinal-route-id-$category->id=final_route_id]', function () {
-                                var routeId = $(this).val(); // ID выбранного маршрута
-                                var userId = $('[data-semifinal-user-id-$category->id="user_id"]').select2('val')
-                                var eventId = $('[data-semifinal-event-id-$category->id=event_id]').val(); // ID выбранного участника
-                                $.get("/admin/api/semifinal/get_attempts", // URL эндпоинта
-                                    {
-                                        route_id: routeId,
-                                        user_id: userId,
-                                        event_id: eventId
-                                    },
-                                    function (data) {
-                                        // Обновляем поля с количеством попыток
-                                        $('[data-all-attempts-id-$category->id=all-attempts]').val(data.all_attempts);
-                                        $('[data-amount-try-top-$category->id=amount_try_top]').val(data.amount_try_top);
-                                        $('[data-amount-try-zone-$category->id=amount_try_zone]').val(data.amount_try_zone);
-                                    }
-                                );
-                            });
-                            let btn_close_modal_one_route_$category->id = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute-$index"] [data-dismiss="modal"][class="btn btn-default"]'
-                            $(document).on("click", btn_close_modal_one_route_$category->id, function () {
-                                window.location.reload();
-                            });
-                        EOT;
-                    $script_custom = <<<EOT
-                        let btn_close_modal_custom{$category->id} = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustom-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-                        $(document).on("click", btn_close_modal_custom{$category->id}, function () {
-                            window.location.reload();
-                        });
-                    EOT;
-                    $tools->append(new BatchResultSemiFinalCustomFillOneRoute($category, $script_one_route));
-                    $tools->append(new BatchResultSemiFinalCustom($category, $script_custom));
-                }
-            } else {
-                $tools->append(new BatchResultSemiFinal);
-            }
+            $tools->append(new BatchResultSemiFinalCustomFillOneRoute);
+            $tools->append(new BatchResultSemiFinalCustom);
             $tools->append(new BatchForceRecoutingSemiFinalResultGroup);
             $tools->append(new BatchForceRecoutingSemiFinalResultGender);
             if(Admin::user()->username == "Tester2"){
@@ -404,18 +177,18 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->disablePagination();
         $grid->disablePerPageSelector();
         $grid->disableBatchActions();
-        Admin::script(<<<SCRIPT
-            $('body').on('shown.bs.modal', '.modal', function() {
-            $(this).find('select').each(function() {
-                var dropdownParent = $(document.body);
-                if ($(this).parents('.modal.in:first').length !== 0)
-                    dropdownParent = $(this).parents('.modal.in:first');
-                    $(this).select2({
-                        dropdownParent: dropdownParent
-                    });
-                });
-            });
-            SCRIPT);
+//        Admin::script(<<<SCRIPT
+//            $('body').on('shown.bs.modal', '.modal', function() {
+//            $(this).find('select').each(function() {
+//                var dropdownParent = $(document.body);
+//                if ($(this).parents('.modal.in:first').length !== 0)
+//                    dropdownParent = $(this).parents('.modal.in:first');
+//                    $(this).select2({
+//                        dropdownParent: dropdownParent
+//                    });
+//                });
+//            });
+//            SCRIPT);
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);

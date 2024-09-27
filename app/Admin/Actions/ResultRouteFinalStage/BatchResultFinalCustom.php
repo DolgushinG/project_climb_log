@@ -24,19 +24,15 @@ class BatchResultFinalCustom extends CustomAction
 {
     protected $selector = '.result-add';
 
-    public $category;
-    private mixed $script;
-
-    public function __construct(ParticipantCategory $category, $script = '')
+    public function __construct()
     {
         $this->initInteractor();
-        $this->category = $category;
-        $this->script = $script;
     }
     public function handle(Request $request)
     {
         $results = $request->toArray();
-        $event = Event::find($results['event_id']);
+        $event_id = intval($results['event_id']);
+        $event = Event::find($event_id);
         $data = array();
         $result_for_edit = array();
         for($i = 1; $i <= $event->amount_routes_in_final; $i++){
@@ -79,6 +75,7 @@ class BatchResultFinalCustom extends CustomAction
             $data[] = array('owner_id' => $owner_id,
                 'user_id' => intval($results['user_id']),
                 'event_id' => intval($results['event_id']),
+                'all_attempts' =>  Helpers::find_max_attempts(intval($results['amount_try_top_'.$i]), intval($results['amount_try_zone_'.$i])),
                 'final_route_id' => intval($results['final_route_id_'.$i]),
                 'category_id' => $category_id,
                 'amount_top' => $amount_top,
@@ -111,90 +108,74 @@ class BatchResultFinalCustom extends CustomAction
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
         if($event->is_open_main_rating && $event->is_auto_categories){
-            $merged_users = ResultFinalStage::get_final_global_participant($event, $this->category);
+            $merged_users = ResultFinalStage::get_final_global_participant($event);
         } else {
-            $merged_users = ResultFinalStage::get_final_participant($event, $this->category);
+            $merged_users = ResultFinalStage::get_final_participant($event);
         }
         $result = $merged_users->pluck( 'middlename','id');
         $result_final = ResultRouteFinalStage::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
+        $categories = ParticipantCategory::where('event_id', '=', $event->id)->pluck('category', 'id')->toArray();
         foreach ($result as $user_id => $middlename){
-            if($event->is_france_system_qualification) {
-                $category_id = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('user_id', '=', $user_id)->first()->category_id;
-            } else {
-                if($event->is_open_main_rating && $event->is_auto_categories){
-                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first()->global_category_id;
-                } else {
-                    $category_id = ResultQualificationClassic::where('event_id', $event->id)->where('user_id', $user_id)->first()->category_id;
-                }
-            }
-            $category = ParticipantCategory::find($category_id)->category;
-            $result[$user_id] = $middlename.' ['.$category.']';
+            $result[$user_id] = $middlename;
             if(in_array($user_id, $result_final)){
-                $result[$user_id] = $middlename.' ['.$category.']'.' [Уже добавлен]';
+                $result[$user_id] = $middlename.' [Уже добавлен]';
             }
         }
-        Admin::script("// Получаем все элементы с атрибутом modal
-        const elementsWithModalAttribute4 = document.querySelectorAll('[modal=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
-        const elementsWithIdAttribute4 = document.querySelectorAll('[id=\"app-admin-actions-resultroutefinalstage-batchresultfinalcustom\"]');
-
-        // Создаем объект для отслеживания счетчика для каждого modal
-        const modalCounters4 = {};
-        const idCounters4 = {};
-
-        // Перебираем найденные элементы
-        elementsWithModalAttribute4.forEach(element => {
-            const modalValue4 = element.getAttribute('modal');
-
-            // Проверяем, существует ли уже счетчик для данного modal
-            if (modalValue4 in modalCounters4) {
-                // Если счетчик уже существует, инкрементируем его значение
-                modalCounters4[modalValue4]++;
-            } else {
-                // Если счетчика еще нет, создаем его и устанавливаем значение 1
-                modalCounters4[modalValue4] = 1;
-            }
-
-            // Получаем номер элемента для данного modal
-            const elementNumber4 = modalCounters4[modalValue4];
-
-            // Устанавливаем новое значение modal
-            element.setAttribute('modal', `\${modalValue4}-\${elementNumber4}`);
-        });
-        elementsWithIdAttribute4.forEach(element => {
-            const idValue4 = element.getAttribute('id');
-
-            // Проверяем, существует ли уже счетчик для данного modal
-            if (idValue4 in idCounters4) {
-                // Если счетчик уже существует, инкрементируем его значение
-                idCounters4[idValue4]++;
-            } else {
-                // Если счетчика еще нет, создаем его и устанавливаем значение 1
-                idCounters4[idValue4] = 1;
-            }
-
-            // Получаем номер элемента для данного modal
-            const elementNumber4 = idCounters4[idValue4];
-
-            // Устанавливаем новое значение modal
-            element.setAttribute('id', `\${idValue4}-\${elementNumber4}`);
-        });
-
-        ");
         $result = $result->toArray();
         asort($result);
-        $this->select('user_id', 'Участник')->options($result)->required();
-        $this->hidden('event_id', '')->value($event->id);
+        $this->select('category_id', 'Категория')->attribute('autocomplete', 'off')->attribute('data-final-custom-category-id', 'category_id')->options($categories)->required();
+        $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-final-custom-user-id', 'user_id')->options($result)->required();
+        $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-final-custom-event-id', 'event_id')->value($event->id);
         for($i = 1; $i <= $event->amount_routes_in_final; $i++){
             $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
-            $this->integer('amount_try_top_'.$i, 'Попытки на топ');
-            $this->integer('amount_try_zone_'.$i, 'Попытки на зону');
+            $this->integer('amount_try_top_'.$i, 'Попытки на топ')->attribute('autocomplete', 'off');
+            $this->integer('amount_try_zone_'.$i, 'Попытки на зону')->attribute('autocomplete', 'off');
         }
-        \Encore\Admin\Facades\Admin::script($this->script);
+        $script_custom = <<<EOT
+                        $('body').on('shown.bs.modal', '.modal', function() {
+                        $(this).find('select').each(function() {
+                            var dropdownParent = $(document.body);
+                            if ($(this).parents('.modal.in:first').length !== 0)
+                                dropdownParent = $(this).parents('.modal.in:first');
+                                $(this).select2({
+                                    dropdownParent: dropdownParent
+                                });
+                            });
+                        });
+                        $(document).on("change", '[data-final-custom-category-id=category_id]', function () {
+                            var categoryId = $('[data-final-custom-category-id=category_id]').select2('val')
+                            var eventId = $('[data-final-custom-event-id=event_id]').val(); // ID выбранного участника
+                            $('[data-final-custom-user-id=user_id]').val('');
+                            $.get("/admin/api/get_users",
+                                {eventId: eventId, categoryId: categoryId, stage: 'final'},
+                                function (data) {
+                                    var model = $('[data-final-custom-user-id=user_id]');
+                                    model.empty();
+                                    model.append("<option>Выбрать</option>");
+                                    var sortedData = Object.entries(data).sort(function (a, b) {
+                                        return a[1].localeCompare(b[1]); // сортируем по значению (имя пользователя)
+                                    });
+                                    $.each(sortedData, function (i, item) {
+                                        var userId = item[0];
+                                        var userName = item[1];
+                                        model.append("<option data-final-custom-user-id='" + userId + "' value='" + userId + "'>" + userName + "</option>");
+                                    });
+                                }
+                            );
+
+                        });
+
+                        let btn_close_modal_custom = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustom"] [data-dismiss="modal"][class="btn btn-default"]'
+                        $(document).on("click", btn_close_modal_custom, function () {
+                            window.location.reload();
+                        });
+                    EOT;
+        \Encore\Admin\Facades\Admin::script($script_custom);
     }
 
     public function html()
     {
-       return "<a class='result-add btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category}</a>
+       return "<a class='result-add btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> Все трассы</a>
                  <style>
                  .result-add {margin-top:8px;}
                  @media screen and (max-width: 767px) {

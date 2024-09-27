@@ -511,6 +511,7 @@ class Event extends Model
                         }
 
                     }
+                    dd($all_group_participants);
                     foreach ($all_group_participants as $group_participants) {
                         foreach ($group_participants as $participants) {
                             Event::getUsersSorted($participants, $fields, $event, 'final', $event->owner_id);
@@ -700,7 +701,6 @@ class Event extends Model
                         ->where('user_id', '=', $user->id)
                         ->get();
             }
-
             $result = ResultRouteSemiFinalStage::merge_result_user_in_stage($result_user);
             if ($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null) {
                 $users_with_result[$index] = collect($user->toArray())->except($fields);
@@ -717,7 +717,7 @@ class Event extends Model
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
         }
-
+        dd($users_with_result);
         $users_sorted_with_same_place = ResultQualificationClassic::counting_final_place($model->id, $users_with_result);
         if($type == 'final' || $type == 'semifinal'){
             $current_result = array_map(function ($participant) {
@@ -732,7 +732,6 @@ class Event extends Model
         } else {
             $users_sorted = $users_sorted_with_same_place;
         }
-
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user) {

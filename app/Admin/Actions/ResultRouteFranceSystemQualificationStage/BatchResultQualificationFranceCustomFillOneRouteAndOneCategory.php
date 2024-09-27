@@ -175,6 +175,16 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
 
         ');
         $script = <<<EOT
+                    $('body').on('shown.bs.modal', '.modal', function() {
+                    $(this).find('select').each(function() {
+                        var dropdownParent = $(document.body);
+                        if ($(this).parents('.modal.in:first').length !== 0)
+                            dropdownParent = $(this).parents('.modal.in:first');
+                            $(this).select2({
+                                dropdownParent: dropdownParent
+                            });
+                        });
+                    });
                     function set_attempt(){
                         var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
                         var userId = $('[data-category-user-id="user_id"]').select2('val')
@@ -196,19 +206,22 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
                             missingFields.push('событие');
                         }
                         if (!routeId) {
-                            missingFields.push('Маршрут');
+                            missingFields.push('Трасса');
                         }
-
-                        // Если есть недостающие поля, формируем сообщение об ошибке
                         if (missingFields.length > 0) {
-                            $.admin.toastr.error(
+                            return $.admin.toastr.error(
                                 'Не хватает данных для их отправки: ' + missingFields.join(', '),
                                 '',
-                                { positionClass: "toast-bottom-center", timeOut: 10000 }
-                            ).css("width", "500px");
+                                { positionClass: "toast-bottom-center", timeOut: 1000 }
+                            ).css("width", "200px");
                         }
-
-
+                        if(Number(amount_try_top) == 1 && Number(amount_try_zone) == 0){
+                             return $.admin.toastr.error(
+                                'У трассы '+routeId+ ' отмечен ТОП, а зона 0 попыток' + missingFields.join(', '),
+                                '',
+                                { positionClass: "toast-bottom-center", timeOut: 2000 }
+                            ).css("width", "200px");
+                        }
                         if(routeId){
                             $.get("/admin/api/set_attempts",
                                 {
@@ -220,6 +233,10 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
                                     amount_try_zone: amount_try_zone
                                 },
                                 function (data) {
+                                    $.admin.toastr.success(
+                                                    'Сохранено',
+                                                    { positionClass: "toast-bottom-center", timeOut: 1000 }
+                                                ).css("width", "200px");
                                     $('[id=amount_try_top_category]').val(data.amount_try_top);
                                     $('[id=amount_try_zone_category]').val(data.amount_try_zone);
                                     $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
@@ -320,7 +337,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
                         var numberSetId = $('[data-category-number-set-id=number_set_id]').select2('val')
                         var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
                         $.get("/admin/api/get_users",
-                            {eventId: eventId, numberSetId: numberSetId},
+                            {eventId: eventId, numberSetId: numberSetId, stage: 'france_system_qualification'},
                             function (data) {
                                 var model = $('[data-category-user-id=user_id]');
                                 model.empty();
@@ -393,7 +410,7 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
     }
     public function html()
     {
-        return "<a id='result-all-user' class='result-add-qualification-france-one-route-one-category btn btn-sm btn-warning'><i class='fa fa-plus-circle'></i> Все участники по одной трассе </a>
+        return "<a id='result-all-user' class='result-add-qualification-france-one-route-one-category btn btn-sm btn-success'><i class='fa fa-plus-circle'></i> По одной трассе </a>
                  <style>
                  .result-add-qualification-france-one-route-one-category {margin-top:8px;}
                  @media screen and (max-width: 767px) {
