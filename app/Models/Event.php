@@ -700,7 +700,6 @@ class Event extends Model
                         ->where('user_id', '=', $user->id)
                         ->get();
             }
-
             $result = ResultRouteSemiFinalStage::merge_result_user_in_stage($result_user);
             if ($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null) {
                 $users_with_result[$index] = collect($user->toArray())->except($fields);
@@ -717,8 +716,21 @@ class Event extends Model
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
         }
+        $users_sorted_with_same_place = ResultQualificationClassic::counting_final_place($model->id, $users_with_result);
 
-        $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result, $type);
+        if($type == 'final' || $type == 'semifinal'){
+            $current_result = array_map(function ($participant) {
+                return [
+                    'user_id' => $participant->get('user_id'),
+                    'place' => $participant->get('place'),
+                ];
+            }, $users_sorted_with_same_place);
+            $pre_results = ResultQualificationClassic::getUserPlaces($model, $type);
+            $users_sorted_pre = ResultQualificationClassic::assign_dublicate_place($current_result, $pre_results);
+            $users_sorted = ResultQualificationClassic::set_new_places($users_sorted_with_same_place, $users_sorted_pre);
+        } else {
+            $users_sorted = $users_sorted_with_same_place;
+        }
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user) {

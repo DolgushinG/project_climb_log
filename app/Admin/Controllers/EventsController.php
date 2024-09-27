@@ -449,7 +449,7 @@ class EventsController extends Controller
                         })->when(3, function (Form $form) {
                             $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN);
                             $form->switch('is_flash_value', 'Флеши учитываются')->help('По умолчанию флэши учитываются')->states(self::STATES_BTN_FLASH_OPEN_AND_CLOSE)->default(1);
-                        });
+                        })->default(1);
                     $form->radio('is_semifinal','Настройка кол-ва стадий соревнований')
                         ->options([
                             1 =>'С полуфиналом',
@@ -588,6 +588,7 @@ class EventsController extends Controller
                 $form->climbing_gym_name_eng =  Helpers::formating_string($climbing_gym_name_eng);
                 $format_title_eng = Helpers::formating_string($title_eng);
                 $form->title_eng =  $format_title_eng;
+                $form->link = '';
             }
             if($form->type_event){
                 $form->is_access_user_edit_result = 1;

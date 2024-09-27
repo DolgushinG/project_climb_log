@@ -40,7 +40,7 @@ class ReverseNamesAllUsers extends Command
     {
         $users = User::all();
         foreach ($users as $user){
-            $user->middlename = implode(' ', array_reverse(explode(' ', $user->middlename, 2)));
+            $user->middlename = $user->lastname.' '.$user->firstname;
             $user->save();
         }
         return 'Переворот с имени фамилии на фамилию имя прошел успешно';

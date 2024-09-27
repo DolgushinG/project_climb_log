@@ -12,7 +12,6 @@ use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportProto
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportResultFranceSystemQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportStartProtocolParticipantsQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultFranceSystemQualification;
-use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRoute;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRouteAndOneCategory;
 use App\Exports\ExportCardParticipantFranceSystem;
 use App\Exports\ExportCardParticipantFestival;
@@ -870,6 +869,18 @@ class ResultQualificationController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.result_france_system_qualification');
         });
+        \Encore\Admin\Facades\Admin::script(<<<SCRIPT
+            $('body').on('shown.bs.modal', '.modal', function() {
+            $(this).find('select').each(function() {
+                var dropdownParent = $(document.body);
+                if ($(this).parents('.modal.in:first').length !== 0)
+                    dropdownParent = $(this).parents('.modal.in:first');
+                    $(this).select2({
+                        dropdownParent: dropdownParent
+                    });
+                });
+            });
+            SCRIPT);
         Admin::style("
                 @media only screen and (min-width: 1025px) {
                     img {
@@ -908,16 +919,7 @@ class ResultQualificationController extends Controller
             $tools->append(new BatchExportResultFranceSystemQualification);
             $tools->append(new BatchExportStartProtocolParticipantsQualification);
             $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
-            foreach ($categories as $index => $category) {
-                $index  = $index+1;
-                $script = <<<EOT
-                    let btn_close_modal_custom_{$category->id} = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultfrancesystemqualification-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-                    $(document).on("click", btn_close_modal_custom_{$category->id}, function () {
-                        window.location.reload();
-                    });
-                 EOT;
-                $tools->append(new BatchResultFranceSystemQualification($category, $script));
-            }
+            $tools->append(new BatchResultFranceSystemQualification);
             $tools->append(new BatchResultQualificationFranceCustomFillOneRouteAndOneCategory);
             $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
             $is_enabled = Grades::where('event_id', $event->id)->first();

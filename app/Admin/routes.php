@@ -1,10 +1,13 @@
 <?php
 
+use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\Grades;
+use App\Models\ResultFinalStage;
 use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultQualificationClassic;
 use App\Models\ResultRouteFranceSystemQualification;
+use App\Models\ResultSemiFinalStage;
 use App\Models\User;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
@@ -40,26 +43,79 @@ Route::group([
     $router->middleware(['throttle:get_users'])->get('/api/get_users', function(Request $request) {
         $eventId = $request->get('eventId');
         $numberSetId = $request->get('numberSetId');
-        if($numberSetId){
-            if(gettype($numberSetId) == 'array'){
-                $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->whereIn('number_set_id', $numberSetId)->pluck('user_id')->toArray();
+        $categoryId = $request->get('categoryId');
+        $stage = $request->get('stage');
+        $event = Event::find($eventId);
+        if($categoryId){
+            $category = \App\Models\ParticipantCategory::find($categoryId);
+        }
+        if($stage == 'final'){
+            if($event->is_open_main_rating && $event->is_auto_categories){
+                if ($categoryId){
+                    $participant_users_id = ResultFinalStage::get_final_global_participant($event, $category);
+                } else {
+                    $participant_users_id = ResultFinalStage::get_final_global_participant($event);
+                }
             } else {
-                $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->where('number_set_id', $numberSetId)->pluck('user_id')->toArray();
+                if ($categoryId){
+                    $participant_users_id = ResultFinalStage::get_final_participant($event, $category);
+                } else {
+                    $participant_users_id = ResultFinalStage::get_final_participant($event);
+                }
             }
-        } else {
-            $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->pluck('user_id')->toArray();
+            $result = $participant_users_id->pluck('middlename','id');
         }
-        $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
-        $amount_routes = Grades::where('event_id', $eventId)->first();
-        if($amount_routes){
-            $amount_routes = $amount_routes->count_routes;
-        } else {
-            $amount_routes = 0;
+        if($stage == 'semifinal'){
+            if($event->is_open_main_rating && $event->is_auto_categories){
+                if ($categoryId){
+                    $participant_users_id = ResultSemiFinalStage::get_global_participant_semifinal($event, $category);
+                } else {
+                    $participant_users_id = ResultSemiFinalStage::get_global_participant_semifinal($event);
+                }
+            } else {
+                if ($categoryId){
+                    $participant_users_id = ResultSemiFinalStage::get_participant_semifinal($event, $category);
+
+                } else {
+                    $participant_users_id = ResultSemiFinalStage::get_participant_semifinal($event);
+                }
+            }
+            $result = $participant_users_id->pluck('middlename','id');
         }
-        // Преобразуем формат и сортируем по алфавиту
-        $sortedUsers = $result->mapWithKeys(function ($middlename, $id) use($eventId, $amount_routes) {
-            $result_user = ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('user_id', $id);
-            $routes = $result_user->get()->sortBy('route_id')->pluck('route_id')->toArray();
+        if($stage == 'france_system_qualification'){
+            if($numberSetId){
+                if(gettype($numberSetId) == 'array'){
+                    $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->whereIn('number_set_id', $numberSetId)->pluck('user_id')->toArray();
+                } else {
+                    $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->where('number_set_id', $numberSetId)->pluck('user_id')->toArray();
+                }
+            } else {
+                $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->pluck('user_id')->toArray();
+            }
+            $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
+
+        }
+        $sortedUsers = $result->mapWithKeys(function ($middlename, $id) use($eventId, $event, $stage) {
+            if($stage == 'final'){
+                $amount_routes = $event->amount_routes_in_final;
+                $result_user = \App\Models\ResultRouteFinalStage::where('event_id', $eventId)->where('user_id', $id);
+                $routes = $result_user->get()->sortBy('final_route_id')->pluck('final_route_id')->toArray();
+            }
+            if($stage == 'semifinal'){
+                $amount_routes = $event->amount_routes_in_semifinal;
+                $result_user = \App\Models\ResultRouteSemiFinalStage::where('event_id', $eventId)->where('user_id', $id);
+                $routes = $result_user->get()->sortBy('final_route_id')->pluck('final_route_id')->toArray();
+            }
+            if($stage == 'france_system_qualification'){
+                $amount_routes = Grades::where('event_id', $eventId)->first();
+                if($amount_routes){
+                    $amount_routes = $amount_routes->count_routes;
+                } else {
+                    $amount_routes = 0;
+                }
+                $result_user = \App\Models\ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('user_id', $id);
+                $routes = $result_user->get()->sortBy('route_id')->pluck('route_id')->toArray();
+            }
             $string_version = '';
             foreach ($routes as $value) {
                 $string_version .= $value . ', ';
@@ -114,7 +170,11 @@ Route::group([
         $routeId = $request->get('route_id');
         $userId = $request->get('user_id');
         $eventId = $request->get('event_id');
+        $event = Event::find($eventId);
         $attempt = $request->get('attempt');
+        if(!$attempt){
+            return \App\Helpers\Helpers::custom_response('При внесение результата не может быть 0 попыток');
+        }
         $amount_try_top = intval($request->get('amount_try_top'));
         $amount_try_zone = intval($request->get('amount_try_zone'));
         if($amount_try_top > 0){
@@ -126,6 +186,10 @@ Route::group([
             $amount_zone  = 1;
         } else {
             $amount_zone  = 0;
+        }
+        # Если есть ТОП то зона не может быть 0
+        if(Helpers::validate_amount_top_and_zone($amount_top, $amount_zone)){
+            return \App\Helpers\Helpers::custom_response('У трассы'.$routeId.' отмечен ТОП, и получается зона не может быть 0', false);
         }
         $result_reg = ResultFranceSystemQualification::where('event_id', $eventId)->where('user_id', $userId)->first();
         ResultFranceSystemQualification::update_france_route_results(
@@ -142,6 +206,7 @@ Route::group([
             all_attempts: $attempt,
             number_set_id: $result_reg->number_set_id ?? null
         );
+        Event::refresh_france_system_qualification_counting($event);
         $result = \App\Models\ResultRouteFranceSystemQualification::where('event_id', $eventId)->where('route_id', $routeId)->where('user_id', $userId)->first();
         $data = [
             'all_attempts' => $result->all_attempts,
@@ -156,6 +221,9 @@ Route::group([
         $eventId = $request->get('event_id');
         $event = \App\Models\Event::find($eventId);
         $attempt = $request->get('attempt');
+        if(!$attempt){
+            return \App\Helpers\Helpers::custom_response('При внесение результата не может быть 0 попыток');
+        }
         $amount_try_top = intval($request->get('amount_try_top'));
         $amount_try_zone = intval($request->get('amount_try_zone'));
         if($amount_try_top > 0){
@@ -202,6 +270,9 @@ Route::group([
         $eventId = $request->get('event_id');
         $event = \App\Models\Event::find($eventId);
         $attempt = $request->get('attempt');
+        if(!$attempt){
+            return \App\Helpers\Helpers::custom_response('При внесение результата не может быть 0 попыток');
+        }
         $amount_try_top = intval($request->get('amount_try_top'));
         $amount_try_zone = intval($request->get('amount_try_zone'));
         if($amount_try_top > 0){
