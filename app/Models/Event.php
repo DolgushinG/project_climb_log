@@ -511,7 +511,6 @@ class Event extends Model
                         }
 
                     }
-                    dd($all_group_participants);
                     foreach ($all_group_participants as $group_participants) {
                         foreach ($group_participants as $participants) {
                             Event::getUsersSorted($participants, $fields, $event, 'final', $event->owner_id);
@@ -717,8 +716,8 @@ class Event extends Model
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
         }
-        dd($users_with_result);
         $users_sorted_with_same_place = ResultQualificationClassic::counting_final_place($model->id, $users_with_result);
+
         if($type == 'final' || $type == 'semifinal'){
             $current_result = array_map(function ($participant) {
                 return [

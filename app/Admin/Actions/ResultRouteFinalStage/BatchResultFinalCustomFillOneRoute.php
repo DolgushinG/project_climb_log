@@ -129,7 +129,7 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
         }
         $result = $result->toArray();
         asort($result);
-        $this->multipleSelect('category_id', 'Группа')->attribute('autocomplete', 'off')->attribute('data-final-category-id', 'category_id')->options($categories);
+        $this->select('category_id', 'Группа')->attribute('autocomplete', 'off')->attribute('data-final-category-id', 'category_id')->options($categories);
         $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-final-user-id', 'user_id')->options($result)->required();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-final-event-id', 'event_id')->value($event->id);
         $this->text('final_user_gender', 'Пол')->attribute('autocomplete', 'off')->readonly();
@@ -411,43 +411,17 @@ class BatchResultFinalCustomFillOneRoute extends CustomAction
                                 );
 
                             });
-
+                            let btn_close_icon_modal_one_route = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute"] [data-dismiss="modal"][class="close"]'
+                            $(document).on("click", btn_close_icon_modal_one_route, function () {
+                                window.location.reload();
+                            });
                             let btn_close_modal_one_route = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute"] [data-dismiss="modal"][class="btn btn-default"]'
                             $(document).on("click", btn_close_modal_one_route, function () {
                                 window.location.reload();
                             });
                         EOT;
         \Encore\Admin\Facades\Admin::script($script_one_route);
-        \Encore\Admin\Facades\Admin::script(<<<SCRIPT
-            $('body').on('shown.bs.modal', '.modal', function() {
-            $(this).find('select').each(function() {
-                var dropdownParent = $(document.body);
-                if ($(this).parents('.modal.in:first').length !== 0)
-                    dropdownParent = $(this).parents('.modal.in:first');
-                    $(this).select2({
-                        dropdownParent: dropdownParent
-                    });
-                });
-            });
-            const observer = new MutationObserver((mutationsList) => {
-                mutationsList.forEach((mutation) => {
-                    console.log('Изменение в DOM:', mutation);
-                });
-            });
 
-            observer.observe(document.body, {
-                attributes: true,
-                childList: true,
-                subtree: true
-            });
-            document.addEventListener('click', function(event) {
-                    console.log('Клик по элементу:', event.target);
-                });
-
-                document.addEventListener('change', function(event) {
-                    console.log('Изменение в элементе:', event.target);
-                });
-            SCRIPT);
     }
 
     public function html()

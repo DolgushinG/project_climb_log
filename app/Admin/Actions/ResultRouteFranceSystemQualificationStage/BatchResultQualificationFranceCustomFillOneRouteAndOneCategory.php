@@ -175,16 +175,6 @@ class BatchResultQualificationFranceCustomFillOneRouteAndOneCategory extends Cus
 
         ');
         $script = <<<EOT
-                    $('body').on('shown.bs.modal', '.modal', function() {
-                    $(this).find('select').each(function() {
-                        var dropdownParent = $(document.body);
-                        if ($(this).parents('.modal.in:first').length !== 0)
-                            dropdownParent = $(this).parents('.modal.in:first');
-                            $(this).select2({
-                                dropdownParent: dropdownParent
-                            });
-                        });
-                    });
                     function set_attempt(){
                         var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
                         var userId = $('[data-category-user-id="user_id"]').select2('val')

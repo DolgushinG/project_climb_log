@@ -63,7 +63,7 @@ class BatchResultFinalCustom extends CustomAction
                 $participant = ResultQualificationClassic::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
             }
             if(!$participant){
-                Log::error('Category id not found -event_id - '.$results['event_id'].'user_id'.$results['user_id']);
+                return $this->response()->error('Не найден участник');
             }
             if($event->is_open_main_rating){
                 $category_id = $participant->global_category_id;
@@ -132,17 +132,19 @@ class BatchResultFinalCustom extends CustomAction
             $this->integer('amount_try_zone_'.$i, 'Попытки на зону')->attribute('autocomplete', 'off');
         }
         $script_custom = <<<EOT
-                        $('body').on('shown.bs.modal', '.modal', function() {
-                        $(this).find('select').each(function() {
-                            var dropdownParent = $(document.body);
-                            if ($(this).parents('.modal.in:first').length !== 0)
-                                dropdownParent = $(this).parents('.modal.in:first');
-                                $(this).select2({
-                                    dropdownParent: dropdownParent
-                                });
-                            });
+                        $(document).on('change', '[data-final-custom-user-id=user_id]', function () {
+                            var amountRoutesInFinal = $event->amount_routes_in_final;
+                            for (var i = 1; i <= amountRoutesInFinal; i++) {
+                                $('#amount_try_top_' + i).val('');
+                                $('#amount_try_zone_' + i).val('');
+                            }
                         });
                         $(document).on("change", '[data-final-custom-category-id=category_id]', function () {
+                            var amountRoutesInFinal = $event->amount_routes_in_final;
+                            for (var i = 1; i <= amountRoutesInFinal; i++) {
+                                $('#amount_try_top_' + i).val('');
+                                $('#amount_try_zone_' + i).val('');
+                            }
                             var categoryId = $('[data-final-custom-category-id=category_id]').select2('val')
                             var eventId = $('[data-final-custom-event-id=event_id]').val(); // ID выбранного участника
                             $('[data-final-custom-user-id=user_id]').val('');
@@ -164,7 +166,10 @@ class BatchResultFinalCustom extends CustomAction
                             );
 
                         });
-
+                        let btn_close_icon_modal_custom_final = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustom"] [data-dismiss="modal"][class="close"]'
+                            $(document).on("click", btn_close_icon_modal_custom_final, function () {
+                                window.location.reload();
+                            });
                         let btn_close_modal_custom = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustom"] [data-dismiss="modal"][class="btn btn-default"]'
                         $(document).on("click", btn_close_modal_custom, function () {
                             window.location.reload();

@@ -110,6 +110,18 @@ class ResultRouteFinalStageController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.result_final_stage');
         });
+        \Encore\Admin\Facades\Admin::script(<<<SCRIPT
+            $('body').on('shown.bs.modal', '.modal', function() {
+            $(this).find('select').each(function() {
+                var dropdownParent = $(document.body);
+                if ($(this).parents('.modal.in:first').length !== 0)
+                    dropdownParent = $(this).parents('.modal.in:first');
+                    $(this).select2({
+                        dropdownParent: dropdownParent
+                    });
+                });
+            });
+            SCRIPT);
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultFinal);
             $tools->append(new BatchResultFinalCustomFillOneRoute);

@@ -123,18 +123,30 @@ class BatchResultSemiFinalCustom extends CustomAction
         }
         $result = $result->toArray();
         asort($result);
+
+        $this->select('category_id', 'Категория')->attribute('autocomplete', 'off')->attribute('data-semifinal-custom-category-id', 'category_id')->options($categories)->required();
+        $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-semifinal-custom-user-id', 'user_id')->options($result)->required();
+        $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-semifinal-custom-event-id', 'event_id')->value($event->id);
+        for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
+            $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
+            $this->integer('amount_try_top_'.$i, 'Попытки на топ')->attribute('autocomplete', 'off');
+            $this->integer('amount_try_zone_'.$i, 'Попытки на зону')->attribute('autocomplete', 'off');
+        }
         $script = <<<EOT
-            $('body').on('shown.bs.modal', '.modal', function() {
-            $(this).find('select').each(function() {
-                var dropdownParent = $(document.body);
-                if ($(this).parents('.modal.in:first').length !== 0)
-                    dropdownParent = $(this).parents('.modal.in:first');
-                    $(this).select2({
-                        dropdownParent: dropdownParent
-                    });
+
+           $(document).on('change', '[data-final-custom-user-id=user_id]', function () {
+                        var amountRoutesInFinal = $event->amount_routes_in_final;
+                        for (var i = 1; i <= amountRoutesInFinal; i++) {
+                            $('#amount_try_top_' + i).val('');
+                            $('#amount_try_zone_' + i).val('');
+                        }
                 });
-            });
             $(document).on("change", '[data-semifinal-custom-category-id=category_id]', function () {
+                var amountRoutesInFinal = $event->amount_routes_in_final;
+                for (var i = 1; i <= amountRoutesInFinal; i++) {
+                    $('#amount_try_top_' + i).val('');
+                    $('#amount_try_zone_' + i).val('');
+                }
                 var categoryId = $('[data-semifinal-custom-category-id=category_id]').select2('val')
                 var eventId = $('[data-semifinal-custom-event-id=event_id]').val(); // ID выбранного участника
                 $('[data-semifinal-custom-user-id=user_id]').val('');
@@ -156,22 +168,16 @@ class BatchResultSemiFinalCustom extends CustomAction
                 );
 
             });
-
+            let btn_close_icon_modal_custom_semifinal = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustom"] [data-dismiss="modal"][class="close"]'
+                $(document).on("click", btn_close_icon_modal_custom_semifinal, function () {
+                    window.location.reload();
+                });
             let btn_close_modal_custom_semifinal = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustom"] [data-dismiss="modal"][class="btn btn-default"]'
             $(document).on("click", btn_close_modal_custom_semifinal, function () {
                 window.location.reload();
             });
         EOT;
         \Encore\Admin\Facades\Admin::script($script);
-        $this->select('category_id', 'Категория')->attribute('autocomplete', 'off')->attribute('data-semifinal-custom-category-id', 'category_id')->options($categories)->required();
-        $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-semifinal-custom-category-id', 'category_id')->options($result)->required();
-        $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-semifinal-custom-category-id', 'category_id')->value($event->id);
-        for($i = 1; $i <= $event->amount_routes_in_semifinal; $i++){
-            $this->integer('final_route_id_'.$i, 'Трасса')->value($i)->readOnly();
-            $this->integer('amount_try_top_'.$i, 'Попытки на топ')->attribute('autocomplete', 'off');
-            $this->integer('amount_try_zone_'.$i, 'Попытки на зону')->attribute('autocomplete', 'off');
-        }
-
 
     }
 
@@ -180,7 +186,7 @@ class BatchResultSemiFinalCustom extends CustomAction
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
         if($event->is_semifinal && $event->amount_the_best_participant > 0){
-            return "<a class='result-add btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category}</a>
+            return "<a class='result-add btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> Все трассы </a>
                  <style>
                  .result-add {margin-top:8px;}
                  @media screen and (max-width: 767px) {

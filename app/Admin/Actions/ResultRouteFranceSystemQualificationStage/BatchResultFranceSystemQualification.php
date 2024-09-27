@@ -122,17 +122,19 @@ class BatchResultFranceSystemQualification extends CustomAction
             }
         }
         $script = <<<EOT
-                     $('body').on('shown.bs.modal', '.modal', function() {
-                        $(this).find('select').each(function() {
-                            var dropdownParent = $(document.body);
-                            if ($(this).parents('.modal.in:first').length !== 0)
-                                dropdownParent = $(this).parents('.modal.in:first');
-                                $(this).select2({
-                                    dropdownParent: dropdownParent
-                                });
-                            });
-                        });
+                        $(document).on('change', '[data-final-custom-user-id=user_id]', function () {
+                                var amountRoutesInFinal = $event->amount_routes_in_final;
+                                for (var i = 1; i <= amountRoutesInFinal; i++) {
+                                    $('#amount_try_top_' + i).val('');
+                                    $('#amount_try_zone_' + i).val('');
+                                }
+                          });
                         $(document).on("change", '[data-france-custom-category-id=category_id]', function () {
+                             var amountRoutesInFinal = $event->amount_routes_in_final;
+                            for (var i = 1; i <= amountRoutesInFinal; i++) {
+                                $('#amount_try_top_' + i).val('');
+                                $('#amount_try_zone_' + i).val('');
+                            }
                             var categoryId = $('[data-france-custom-category-id=category_id]').select2('val')
                             var eventId = $('[data-france-custom-event-id=event_id]').val(); // ID выбранного участника
                             $('[data-france-custom-user-id=user_id]').val('');
@@ -154,6 +156,10 @@ class BatchResultFranceSystemQualification extends CustomAction
                             );
 
                         });
+                     let btn_close_icon_modal_custom_france = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultfrancesystemqualification"] [data-dismiss="modal"][class="close"]'
+                            $(document).on("click", btn_close_icon_modal_custom_france, function () {
+                                window.location.reload();
+                            });
                     let btn_close_modal_custom_france = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultfrancesystemqualification"] [data-dismiss="modal"][class="btn btn-default"]'
                     $(document).on("click", btn_close_modal_custom_france, function () {
                         window.location.reload();

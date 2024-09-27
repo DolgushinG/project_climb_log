@@ -46,35 +46,41 @@ Route::group([
         $categoryId = $request->get('categoryId');
         $stage = $request->get('stage');
         $event = Event::find($eventId);
+        if($categoryId){
+            $category = \App\Models\ParticipantCategory::find($categoryId);
+        }
         if($stage == 'final'){
             if($event->is_open_main_rating && $event->is_auto_categories){
                 if ($categoryId){
-                    $participant_users_id = ResultFinalStage::get_final_global_participant($event, $categoryId);
+                    $participant_users_id = ResultFinalStage::get_final_global_participant($event, $category);
                 } else {
                     $participant_users_id = ResultFinalStage::get_final_global_participant($event);
                 }
             } else {
                 if ($categoryId){
-                    $participant_users_id = ResultFinalStage::get_final_participant($event, $categoryId);
+                    $participant_users_id = ResultFinalStage::get_final_participant($event, $category);
                 } else {
-                    $participant_users_id = ResultFinalStage::get_final_participant($event, $categoryId);
+                    $participant_users_id = ResultFinalStage::get_final_participant($event);
                 }
             }
+            $result = $participant_users_id->pluck('middlename','id');
         }
         if($stage == 'semifinal'){
             if($event->is_open_main_rating && $event->is_auto_categories){
                 if ($categoryId){
-                    $participant_users_id = ResultSemiFinalStage::get_global_participant_semifinal($event, $categoryId);
+                    $participant_users_id = ResultSemiFinalStage::get_global_participant_semifinal($event, $category);
                 } else {
                     $participant_users_id = ResultSemiFinalStage::get_global_participant_semifinal($event);
                 }
             } else {
                 if ($categoryId){
-                    $participant_users_id = ResultSemiFinalStage::get_participant_semifinal($event, $categoryId);
+                    $participant_users_id = ResultSemiFinalStage::get_participant_semifinal($event, $category);
+
                 } else {
                     $participant_users_id = ResultSemiFinalStage::get_participant_semifinal($event);
                 }
             }
+            $result = $participant_users_id->pluck('middlename','id');
         }
         if($stage == 'france_system_qualification'){
             if($numberSetId){
@@ -86,11 +92,9 @@ Route::group([
             } else {
                 $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->pluck('user_id')->toArray();
             }
+            $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
+
         }
-
-
-        $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
-
         $sortedUsers = $result->mapWithKeys(function ($middlename, $id) use($eventId, $event, $stage) {
             if($stage == 'final'){
                 $amount_routes = $event->amount_routes_in_final;

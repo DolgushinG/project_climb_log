@@ -105,27 +105,32 @@ class ResultQualificationClassic extends Model
             $column_place_q = 'user_place';
             $column_place_f = 'place';
         }
-
         if ($type == 'final') {
             if ($event->is_semifinal) {
                 $otherRoundResults = ResultSemiFinalStage::where('event_id', $event->id)->get(['user_id', 'place']);
+                $column_place = 'place';
             } else {
                 $otherRoundResults = $event->is_france_system_qualification
                     ? ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->get(['user_id', $column_place_f])
                     : ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->get(['user_id', $column_place_q]);
+                $column_place = $event->is_france_system_qualification
+                    ? $column_place_f
+                    : $column_place_q;
             }
         } elseif ($type == 'semifinal') {
+            $column_place = $event->is_france_system_qualification
+                ? $column_place_f
+                : $column_place_q;
             $otherRoundResults = $event->is_france_system_qualification
                 ? ResultFranceSystemQualification::where('event_id', $event->id)->where('active', 1)->get(['user_id', $column_place_f])
                 : ResultQualificationClassic::where('event_id', $event->id)->where('active', 1)->get(['user_id', $column_place_q]);
         } else {
-            // Если это не финал и не полуфинал, используем текущий этап без изменений
             return null;
         }
-        $formattedResults = $otherRoundResults->map(function ($item) use ($column_place_q) {
+        $formattedResults = $otherRoundResults->map(function ($item) use ($column_place) {
             return [
                 'user_id' => $item->user_id,
-                'place' => $item->{$column_place_q},
+                'place' => $item->{$column_place},
             ];
         })->toArray();
         // Возвращаем место (ранг) из другого раунда, если оно существует

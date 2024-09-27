@@ -131,7 +131,7 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
         }
         $result = $result->toArray();
         asort($result);
-        $this->multipleSelect('category_id', 'Группа')->attribute('autocomplete', 'off')->attribute('data-semifinal-category-id', 'category_id')->options($categories);
+        $this->select('category_id', 'Группа')->attribute('autocomplete', 'off')->attribute('data-semifinal-category-id', 'category_id')->options($categories);
         $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-semifinal-user-id', 'user_id')->options($result)->required();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-semifinal-event-id', 'event_id')->value($event->id);
         $this->text('semifinal_user_gender', 'Пол')->attribute('autocomplete', 'off')->readonly();
@@ -144,16 +144,6 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
         $this->integer('amount_try_zone', 'Попытки на зону')->attribute('id', 'amount_try_zone')->attribute('data-amount-try-zone', 'amount_try_zone');
         $this->integer('amount_try_top', 'Попытки на топ')->attribute('id', 'amount_try_top')->attribute('data-amount-try-top', 'amount_try_top');
         $script_one_route = <<<EOT
-                            $('body').on('shown.bs.modal', '.modal', function() {
-                                $(this).find('select').each(function() {
-                                    var dropdownParent = $(document.body);
-                                    if ($(this).parents('.modal.in:first').length !== 0)
-                                        dropdownParent = $(this).parents('.modal.in:first');
-                                        $(this).select2({
-                                            dropdownParent: dropdownParent
-                                        });
-                                    });
-                                });
                             function set_attempt_one(){
                                 var routeId = $('[data-semifinal-route-id=final_route_id]').val(); // ID выбранного маршрута
                                 var userId = $('[data-semifinal-user-id="user_id"]').select2('val')
@@ -358,8 +348,35 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
                                     }
                                 );
                             });
-                            let btn_close_modal_one_route = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute"] [data-dismiss="modal"][class="btn btn-default"]'
-                            $(document).on("click", btn_close_modal_one_route, function () {
+                            $(document).on("change", '[data-semifinal-category-id=category_id]', function () {
+                                var categoryId = $('[data-semifinal-category-id=category_id]').select2('val')
+                                var eventId = $('[data-semifinal-event-id=event_id]').val(); // ID выбранного участника
+                                $('[data-semifinal-user-id=user_id]').val(''); // ID выбранного участника
+
+                                $.get("/admin/api/get_users",
+                                    {eventId: eventId, categoryId: categoryId, stage: 'semifinal'},
+                                    function (data) {
+                                        var model = $('[data-semifinal-user-id=user_id]');
+                                        model.empty();
+                                        model.append("<option>Выбрать</option>");
+                                        var sortedData = Object.entries(data).sort(function (a, b) {
+                                            return a[1].localeCompare(b[1]); // сортируем по значению (имя пользователя)
+                                        });
+                                        $.each(sortedData, function (i, item) {
+                                            var userId = item[0];
+                                            var userName = item[1];
+                                            model.append("<option data-semifinal-user-id='" + userId + "' value='" + userId + "'>" + userName + "</option>");
+                                        });
+                                    }
+                                );
+
+                            });
+                            let btn_icon_modal_semifinal = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute"] [data-dismiss="modal"][class="close"]'
+                            $(document).on("click", btn_icon_modal_semifinal, function () {
+                                window.location.reload();
+                            });
+                            let btn_close_modal_semifinal = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute"] [data-dismiss="modal"][class="btn btn-default"]'
+                            $(document).on("click", btn_close_modal_semifinal, function () {
                                 window.location.reload();
                                 });
                         EOT;
@@ -403,7 +420,7 @@ class BatchResultSemiFinalCustomFillOneRoute extends CustomAction
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
         if($event->is_semifinal && $event->amount_the_best_participant > 0){
-            return "<a class='result-add-one-route btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> {$this->category->category} по одной трассе</a>
+            return "<a class='result-add-one-route btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> По одной трассе</a>
                  <style>
                   .result-add-one-route {margin-top:8px;}
                  @media screen and (max-width: 767px) {
