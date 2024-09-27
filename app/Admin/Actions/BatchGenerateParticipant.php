@@ -44,6 +44,7 @@ class BatchGenerateParticipant extends Action
         }
         $start_number_participant = User::first();
         if($event->is_auto_categories){
+            $count = $start_number_participant->id + $count;
             Generators::prepare_participant_with_owner($owner_id, $event->id, $count, $table_result, $start_number_participant->id);
         } else {
             $part_category = ParticipantCategory::where('event_id', $event->id)->get();
