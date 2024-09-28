@@ -79,7 +79,7 @@ class SocialiteController extends Controller
                 $avatar = null;
             }
             if(isset($socialite_user->user['last_name']) && $socialite_user->user['first_name']){
-                $middlename = $socialite_user->user['last_name'] + $socialite_user->user['first_name'];
+                $middlename = $socialite_user->user['last_name'].' '. $socialite_user->user['first_name'];
             } else {
                 $middlename = $socialite_user->getName();
             }
