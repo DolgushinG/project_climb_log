@@ -88,7 +88,7 @@ class SocialiteController extends Controller
             ], [
                 $socialite.'_id' => $socialite_user->getId(),
                 'nickname'.$socialite => $socialite_user->getNickname(),
-                'middlename' => $socialite_user->user['last_name'] + $socialite_user->user['first_name'],
+                'middlename' => $middlename,
                 'firstname' => $socialite_user->user['first_name'] ?? null,
                 'lastname' => $socialite_user->user['last_name'] ?? null,
                 'avatar' => $avatar,
