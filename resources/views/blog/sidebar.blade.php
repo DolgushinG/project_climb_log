@@ -23,13 +23,15 @@
 
         <h3 class="sidebar-title">Недавние статьи</h3>
         <div class="sidebar-item recent-posts">
-            @foreach($recentlyPost as $post)
-                <div class="post-item clearfix">
-                    <img src="{{asset('storage/'.$post->image)}}" alt="">
-                    <h4><a href="{{route('post', $post->id)}}">{{$post->title}}</a></h4>
-                    <time datetime="{{$post->created_at}}">{{$post->created_at}}</time>
-                </div>
-            @endforeach
+            @if($recentlyPost)
+                @foreach($recentlyPost as $post)
+                    <div class="post-item clearfix">
+                        <img src="{{asset('storage/'.$post->image)}}" alt="">
+                        <h4><a href="{{route('post', $post->id)}}">{{$post->title}}</a></h4>
+                        <time datetime="{{$post->created_at}}">{{$post->created_at}}</time>
+                    </div>
+                @endforeach
+            @endif
         </div><!-- End sidebar recent posts-->
 
 {{--        <h3 class="sidebar-title">Tags</h3>--}}

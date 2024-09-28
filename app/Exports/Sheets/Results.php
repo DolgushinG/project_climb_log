@@ -782,7 +782,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
 
     public function get_final($table){
         $event = Event::find($this->event_id);
-        $max_routes = Grades::where('event_id', $event->id)->first()->count_routes ?? 0;
+
         $users = User::query()
             ->leftJoin($table, 'users.id', '=', $table.'.user_id')
             ->where($table.'.event_id', '=', $this->event_id)
@@ -808,12 +808,15 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
         foreach ($users as $index => $user){
             if($table == 'result_final_stage'){
                 $final_result = ResultRouteFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+                $max_routes =  $event->amount_routes_in_final;
             }
             if($table === "result_france_system_qualification"){
                 $final_result = ResultRouteFranceSystemQualification::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+                $max_routes = Grades::where('event_id', $event->id)->first()->count_routes ?? 0;
             }
             if($table === "result_semifinal_stage"){
                 $final_result = ResultRouteSemiFinalStage::where('event_id', '=', $this->event_id)->where('user_id', '=', $user['id'])->get();
+                $max_routes =  $event->amount_routes_in_semifinal;
             }
             foreach ($final_result as $result){
                 if($table == 'result_final_stage' || $table === "result_semifinal_stage"){
@@ -841,6 +844,7 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             $except = $event->is_need_sport_category ? ['id', 'category_id'] : ['id', 'category_id', 'sport_category'];
             $users[$index] = collect($users[$index])->except($except);
         }
+        dd($users);
         return collect($users);
     }
 

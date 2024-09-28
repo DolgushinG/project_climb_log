@@ -253,13 +253,17 @@ class EventsController extends Controller
         if($event){
             $grid->actions(function ($actions) use ($event) {
                 $actions->disableView();
-
                 $actions->append(new ActionExportList($actions->getKey(), 'Список участников'));
                 $actions->append(new ActionCloneEvent($actions->getKey(), 'Клонировать'));
                 $grades = Grades::where('event_id', $event->id)->first();
                 if($grades){
-                    $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
-                    $actions->append(new ActionExport($actions->getKey(), 'full', 'Полные офиц. протоколы','excel'));
+                    $event_grid = Event::find($actions->getKey());
+                    if($event_grid->is_france_system_qualification){
+                        $actions->append(new ActionExport($actions->getKey(), 'full', 'Полные офиц. протоколы','excel'));
+                        $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
+                    } else {
+                        $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
+                    }
                     $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника (ФЕСТ)'));
                     $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника (ТОП БОНУС)'));
                 }

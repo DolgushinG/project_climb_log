@@ -134,7 +134,7 @@ class BatchResultSemiFinalCustom extends CustomAction
         }
         $script = <<<EOT
 
-           $(document).on('change', '[data-final-custom-user-id=user_id]', function () {
+           $(document).on('change', '[data-semifinal-custom-user-id=user_id]', function () {
                         var amountRoutesInFinal = $event->amount_routes_in_final;
                         for (var i = 1; i <= amountRoutesInFinal; i++) {
                             $('#amount_try_top_' + i).val('');

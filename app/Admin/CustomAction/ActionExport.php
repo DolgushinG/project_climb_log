@@ -138,13 +138,8 @@ class ActionExport extends RowAction
     public function render()
     {
         Admin::script($this->script($this->stage, $this->format));
-        $event = Event::find($this->id);
-        if($event->is_france_system_qualification){
-            return "<a class='btn {$this->stage}-{$this->format} btn-xs btn-success grid-check-row' data-id='{$this->id}'>$this->name_btn</a>";
-        } else {
-            return "<a style='display:none;' class='btn {$this->stage}-{$this->format} btn-xs btn-success grid-check-row' data-id='{$this->id}'>$this->name_btn</a>";
-        }
-        
+        return "<a class='btn {$this->stage}-{$this->format} btn-xs btn-success grid-check-row' data-id='{$this->id}'>$this->name_btn</a>";
+
     }
 
     public function href()
