@@ -82,7 +82,7 @@ Route::group([
             }
             $result = $participant_users_id->pluck('middlename','id');
         }
-        if($stage == 'france_system_qualification'){
+        if($stage == 'qualification'){
             if($numberSetId){
                 if(gettype($numberSetId) == 'array'){
                     $participant_users_id = ResultFranceSystemQualification::where('event_id', $eventId)->whereIn('number_set_id', $numberSetId)->pluck('user_id')->toArray();
@@ -106,7 +106,7 @@ Route::group([
                 $result_user = \App\Models\ResultRouteSemiFinalStage::where('event_id', $eventId)->where('user_id', $id);
                 $routes = $result_user->get()->sortBy('final_route_id')->pluck('final_route_id')->toArray();
             }
-            if($stage == 'france_system_qualification'){
+            if($stage == 'qualification'){
                 $amount_routes = Grades::where('event_id', $eventId)->first();
                 if($amount_routes){
                     $amount_routes = $amount_routes->count_routes;

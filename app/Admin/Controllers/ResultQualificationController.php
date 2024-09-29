@@ -8,6 +8,7 @@ use App\Admin\Actions\BatchForceRecoutingResultQualificationFranceGroup;
 use App\Admin\Actions\BatchGenerateParticipant;
 use App\Admin\Actions\BatchMergeResult;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
+use App\Admin\Actions\ResultRoute\BatchResultRouteUniversal;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportProtocolRouteParticipantsQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportResultFranceSystemQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportStartProtocolParticipantsQualification;
@@ -919,8 +920,9 @@ class ResultQualificationController extends Controller
             $tools->append(new BatchExportResultFranceSystemQualification);
             $tools->append(new BatchExportStartProtocolParticipantsQualification);
             $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
-            $tools->append(new BatchResultFranceSystemQualification);
-            $tools->append(new BatchResultQualificationFranceCustomFillOneRouteAndOneCategory);
+//            $tools->append(new BatchResultFranceSystemQualification);
+            $tools->append(new BatchResultRouteUniversal('qualification'));
+//            $tools->append(new BatchResultQualificationFranceCustomFillOneRouteAndOneCategory);
             $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
             $is_enabled = Grades::where('event_id', $event->id)->first();
             if ($is_enabled && Admin::user()->username == "Tester2") {
