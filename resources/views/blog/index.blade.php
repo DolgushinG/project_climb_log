@@ -14,7 +14,7 @@
             <div class="container" data-aos="fade-up">
                 <div class="row">
                     <div class="col-lg-8 entries">
-                        @if($posts)
+                        @if(isset($posts) && $posts->count() > 0)
                             @foreach($posts as $post)
                             <article class="entry">
 
