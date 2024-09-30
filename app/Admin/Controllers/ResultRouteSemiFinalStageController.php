@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGender;
 use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGroup;
 use App\Admin\Actions\BatchGenerateResultSemiFinalParticipant;
+use App\Admin\Actions\ResultRoute\BatchResultRouteUniversal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportProtocolRouteParticipantSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
@@ -157,7 +158,7 @@ class ResultRouteSemiFinalStageController extends Controller
             SCRIPT);
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultSemiFinal);
-            $tools->append(new BatchResultSemiFinalCustomFillOneRoute);
+            $tools->append(new BatchResultRouteUniversal('semifinal'));
             $tools->append(new BatchResultSemiFinalCustom);
             $tools->append(new BatchForceRecoutingSemiFinalResultGroup);
             $tools->append(new BatchForceRecoutingSemiFinalResultGender);

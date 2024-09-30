@@ -844,7 +844,6 @@ class Results implements FromCollection, WithTitle, WithCustomStartCell, WithHea
             $except = $event->is_need_sport_category ? ['id', 'category_id'] : ['id', 'category_id', 'sport_category'];
             $users[$index] = collect($users[$index])->except($except);
         }
-        dd($users);
         return collect($users);
     }
 

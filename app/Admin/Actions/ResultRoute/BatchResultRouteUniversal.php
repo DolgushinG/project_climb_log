@@ -223,7 +223,6 @@ class BatchResultRouteUniversal extends CustomAction
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-event-id', 'event_id')->value($event->id);
         $this->text('user_gender', 'Пол')->attribute('autocomplete', 'off')->readonly();
         $this->text('user_category', 'Группа')->attribute('autocomplete', 'off')->readonly();
-
         $this->select('route_id', 'Трасса')->attribute('autocomplete', 'off')->attribute('data-route-id', 'route_id')->options($routes)->required();
         $this->integer('all_attempts', 'Все попытки')
             ->attribute('autocomplete', 'off')
@@ -231,6 +230,7 @@ class BatchResultRouteUniversal extends CustomAction
             ->attribute('data-all-attempts-id', 'all-attempts');
         $this->integer('amount_try_zone', 'Попытки на зону')->attribute('id', 'amount_try_zone')->attribute('data-amount-try-zone', 'amount_try_zone');
         $this->integer('amount_try_top', 'Попытки на топ')->attribute('id', 'amount_try_top')->attribute('data-amount-try-top', 'amount_try_top');
+
         Admin::style('
             .input-group {
                 display: flex;

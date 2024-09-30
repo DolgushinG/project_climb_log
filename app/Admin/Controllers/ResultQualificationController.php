@@ -919,8 +919,7 @@ class ResultQualificationController extends Controller
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchExportResultFranceSystemQualification);
             $tools->append(new BatchExportStartProtocolParticipantsQualification);
-            $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
-//            $tools->append(new BatchResultFranceSystemQualification);
+            $tools->append(new BatchResultFranceSystemQualification);
             $tools->append(new BatchResultRouteUniversal('qualification'));
 //            $tools->append(new BatchResultQualificationFranceCustomFillOneRouteAndOneCategory);
             $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
