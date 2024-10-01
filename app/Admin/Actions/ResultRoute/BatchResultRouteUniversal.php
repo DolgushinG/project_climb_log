@@ -3,61 +3,31 @@
 namespace App\Admin\Actions\ResultRoute;
 
 use App\Admin\Extensions\CustomAction;
-use App\Helpers\Helpers;
 use App\Models\Event;
-use App\Models\Grades;
-use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
-use App\Models\ResultFinalStage;
-use App\Models\ResultFranceSystemQualification;
-use App\Models\ResultRouteFinalStage;
-use App\Models\ResultRouteFranceSystemQualification;
-use App\Models\ResultRouteSemiFinalStage;
-use App\Models\ResultSemiFinalStage;
-use App\Models\User;
+use App\Models\Set;
 use Encore\Admin\Admin;
 use Illuminate\Http\Request;
 
 class BatchResultRouteUniversal extends CustomAction
 {
-    private string $stage;
 
+    protected $selector = '.result-universal';
+    private mixed $stage;
+
+    /**
+     * @throws \Exception
+     */
     public function __construct($stage = '')
     {
         $this->initInteractor();
         $this->stage = $stage;
     }
-    protected $selector = '.result-universal';
-
-    /**
-     * @var mixed|string
-     */
-
-    const URLS_SET_ATTEMPTS = [
-      'final' => '/admin/api/final/set_attempts',
-      'semifinal' => '/admin/api/semifinal/set_attempts',
-      'qualification' => '/admin/api/set_attempts'
-    ];
-    const MODELS_ROUTE = [
-        'final' => ResultRouteFinalStage::class,
-        'semifinal' => ResultRouteSemiFinalStage::class,
-        'qualification' => ResultRouteFranceSystemQualification::class,
-    ];
-    const URLS_GET_ATTEMPTS = [
-        'final' => '/admin/api/final/get_attempts',
-        'semifinal' => '/admin/api/semifinal/get_attempts',
-        'qualification' => '/admin/api/get_attempts'
-    ];
-    const ROUTE = [
-        'final' => 'final_route_id',
-        'semifinal' => 'final_route_id',
-        'qualification' => 'route_id',
-        ];
 
     public function handle(Request $request)
     {
         $results = $request->toArray();
-
+        $stage = $results['stage'];
         $amount_try_top = intval($results['amount_try_top']);
         $amount_try_zone = intval($results['amount_try_zone']);
         $all_attempts = intval($results['all_attempts']);
@@ -75,163 +45,69 @@ class BatchResultRouteUniversal extends CustomAction
         } else {
             $amount_zone  = 0;
         }
-        if($route_id == 0){
-            return $this->response()->error('Вы не выбрали номер маршрута');
-        }
-        $max_attempts = Helpers::find_max_attempts($amount_try_top, $amount_try_zone);
-        if(Helpers::validate_amount_sum_top_and_zone_and_attempts($all_attempts, $amount_try_top, $amount_try_zone)){
-            return $this->response()->error(
-                'У трассы '.$route_id.' Максимальное кол-во попыток '.$max_attempts.' а в поле все попытки - '. $all_attempts);
-        }
-        # Если есть ТОП то зона не может быть 0
-        if(Helpers::validate_amount_top_and_zone($amount_top, $amount_zone)){
-            return $this->response()->error('У трассы '.$route_id.' отмечен ТОП, и получается зона не может быть 0');
-        }
+        $validate = BatchBaseRoute::validate(
+            route_id: $route_id,
+            amount_try_top: $amount_try_top,
+            amount_try_zone: $amount_try_zone,
+            amount_top: $amount_top,
+            amount_zone: $amount_zone,
+            all_attempts: $all_attempts);
 
-        # Кол-во попыток на зону не может быть меньше чем кол-во на ТОП
-        if(Helpers::validate_amount_try_top_and_zone($amount_try_top, $amount_try_zone)){
-            return $this->response()->error('Кол-во попыток на зону не может быть меньше, чем кол-во попыток на ТОП, трасса '.$route_id );
+        if($validate){
+            return $this->response()->error($validate);
         }
-
-        if($event->is_france_system_qualification){
-            $participant = ResultFranceSystemQualification::where('event_id', $event_id)->where('user_id', $user_id)->first();
-        } else {
-            $participant = ResultQualificationClassic::where('event_id', $event_id)->where('user_id', $user_id)->first();
-        }
-        if($event->is_open_main_rating && $event->is_auto_categories){
-            $category_id = $participant->global_category_id;
-        } else {
-            $category_id = $participant->category_id;
-        }
-        $gender = $participant->gender;
-        $owner_id = \Encore\Admin\Facades\Admin::user()->id;
-        if($this->stage == 'final' || $this->stage == 'semifinal'){
-            ResultRouteFinalStage::update_semi_or_final_route_results(
-                stage: $this->stage,
-                owner_id: $owner_id,
-                event_id: $event_id,
-                category_id: $category_id,
-                route_id: $route_id,
-                user_id: $user_id,
-                amount_try_top: $amount_try_top,
-                amount_try_zone: $amount_try_zone,
-                amount_top: $amount_top,
-                amount_zone: $amount_zone,
-                gender: $gender,
-                all_attempts: $all_attempts,
-            );
-        }
-        if($this->stage == 'qualification'){
-            $number_set_id = $participant->number_set_id;
-            ResultFranceSystemQualification::update_france_route_results(
-                owner_id: $owner_id,
-                event_id: $event_id,
-                category_id: $category_id,
-                route_id: $route_id,
-                user_id: $user_id,
-                amount_try_top: $amount_try_top,
-                amount_try_zone: $amount_try_zone,
-                amount_top: $amount_top,
-                amount_zone: $amount_zone,
-                gender: $gender,
-                all_attempts: $all_attempts,
-                number_set_id: $number_set_id
-            );
-        }
-
-        switch ($this->stage){
-            case 'final':
-                Event::refresh_final_points_all_participant_in_final($event_id);
-                break;
-            case 'semifinal':
-                Event::refresh_final_points_all_participant_in_semifinal($event_id);
-                break;
-            case 'qualification':
-                Event::refresh_france_system_qualification_counting($event);
-                break;
-        }
+        BatchBaseRoute::handle(
+            event: $event,
+            stage: $stage,
+            user_id: $user_id,
+            route_id: $route_id,
+            amount_try_top: $amount_try_top,
+            amount_try_zone: $amount_try_zone,
+            amount_top: $amount_top,
+            amount_zone: $amount_zone,
+            all_attempts: $all_attempts
+        );
         return $this->response()->success('Результат успешно внесен')->refresh();
     }
 
     public function custom_form()
     {
         $this->modalSmall();
-        $url_get_attempts = self::URLS_GET_ATTEMPTS[$this->stage];
-        $url_set_attempts = self::URLS_SET_ATTEMPTS[$this->stage];
+        $url_get_attempts = BatchBaseRoute::URLS_GET_ATTEMPTS[$this->stage];
+        $url_set_attempts = BatchBaseRoute::URLS_SET_ATTEMPTS[$this->stage];
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
-        $amount_routes = self::get_amount_routes($event, $this->stage);
-        if($event->is_open_main_rating){
-            switch ($this->stage){
-                case 'final':
-                    $merged_users = ResultFinalStage::get_final_global_participant($event);
-                    $result = $merged_users->pluck( 'middlename','id');
-                    break;
-                case 'semifinal':
-                    $merged_users = ResultSemiFinalStage::get_global_participant_semifinal($event);
-                    $result = $merged_users->pluck( 'middlename','id');
-                    break;
-                case 'qualification':
-                    $participant_users_id = ResultFranceSystemQualification::where('event_id', $event->id)->pluck('global_user_id')->toArray();
-                    $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
-                    break;
-            }
-        } else {
-            switch ($this->stage){
-                case 'final':
-                    $merged_users = ResultFinalStage::get_final_participant($event);
-                    $result = $merged_users->pluck( 'middlename','id');
-                    break;
-                case 'semifinal':
-                    $merged_users = ResultSemiFinalStage::get_participant_semifinal($event);
-                    $result = $merged_users->pluck( 'middlename','id');
-                    break;
-                case 'qualification':
-                    $participant_users_id = ResultFranceSystemQualification::where('event_id', $event->id)->pluck('user_id')->toArray();
-                    $result = User::whereIn('id', $participant_users_id)->pluck('middlename','id');
-                    break;
-            }
-        }
-        $modelClass = self::MODELS_ROUTE[$this->stage];
-        $result_final = $modelClass::where('event_id', '=', $event->id)->select('user_id')->distinct()->pluck('user_id')->toArray();
+        $amount_routes = BatchBaseRoute::get_amount_routes($event, $this->stage);
         $categories = ParticipantCategory::where('event_id', $event->id)->pluck('category', 'id')->toArray();
-        foreach ($result as $user_id => $middlename){
-            $result[$user_id] = $middlename;
-            if(in_array($user_id, $result_final)){
-                $result_user = $modelClass::where('event_id', $event->id)->where('user_id', $user_id);
-                $routes = $result_user->get()->sortBy(self::ROUTE[$this->stage])->pluck(self::ROUTE[$this->stage])->toArray();
-                $string_version = '';
-                foreach ($routes as $value) {
-                    $string_version .= $value . ', ';
-                }
-                if($result_user->get()->count() == $amount_routes){
-                    $result[$user_id] = $middlename.' [Добавлены все трассы]';
-                } else {
-                    $result[$user_id] = $middlename.' [Трассы: '.$string_version.']';
-                }
-            }
-        }
-        $routes = [];
-        for($i = 1; $i <= $amount_routes; $i++){
-            $routes[$i] = $i;
-        }
-        $result = $result->toArray();
-        asort($result);
-        $this->select('category_id', 'Группа')->attribute('autocomplete', 'off')->attribute('data-category-id', 'category_id')->options($categories);
-        $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-user-id', 'user_id')->options($result)->required();
+        $result = BatchBaseRoute::merged_users($event, $this->stage);
+        $routes = BatchBaseRoute::routes($amount_routes);
 
+        $this->select('category_id', 'Группа')->attribute('autocomplete', 'off')->attribute('data-category-id', 'category_id')->options($categories);
+        if ($this->stage == 'qualification'){
+            $sets = Set::where('event_id', $event->id)->pluck('number_set', 'id')->toArray();
+            $this->multipleSelect('number_set_id', 'Сеты')->attribute('autocomplete', 'off')->attribute('data-number-set-id', 'number_set_id')->options($sets);
+        }
+        $this->select('gender', 'Пол')->attribute('autocomplete', 'off')->attribute('data-gender-id', 'gender')->options(['male' => 'М', 'female' => 'Ж']);
+        $this->select('user_id', 'Участник')->attribute('autocomplete', 'off')->attribute('data-user-id', 'user_id')->options($result)->required();
         $this->hidden('event_id', '')->attribute('autocomplete', 'off')->attribute('data-event-id', 'event_id')->value($event->id);
-        $this->text('user_gender', 'Пол')->attribute('autocomplete', 'off')->readonly();
-        $this->text('user_category', 'Группа')->attribute('autocomplete', 'off')->readonly();
+        $this->hidden('stage', '')->attribute('autocomplete', 'off')->value($this->stage);
+        $this->text('user_gender_one', 'Пол')->placeholder('Пол')->attribute('autocomplete', 'off')->width('70px')->readonly();
         $this->select('route_id', 'Трасса')->attribute('autocomplete', 'off')->attribute('data-route-id', 'route_id')->options($routes)->required();
         $this->integer('all_attempts', 'Все попытки')
+            ->placeholder('...')
             ->attribute('autocomplete', 'off')
             ->attribute('id', 'all_attempts')
+            ->width('70px')
             ->attribute('data-all-attempts-id', 'all-attempts');
-        $this->integer('amount_try_zone', 'Попытки на зону')->attribute('id', 'amount_try_zone')->attribute('data-amount-try-zone', 'amount_try_zone');
-        $this->integer('amount_try_top', 'Попытки на топ')->attribute('id', 'amount_try_top')->attribute('data-amount-try-top', 'amount_try_top');
+        $this->integer('amount_try_zone', 'Попытки на зону')->placeholder('..')->width('70px')->attribute('id', 'amount_try_zone')->attribute('data-amount-try-zone', 'amount_try_zone');
+        $this->integer('amount_try_top', 'Попытки на топ')->placeholder('..')->width('70px')->attribute('id', 'amount_try_top')->attribute('data-amount-try-top', 'amount_try_top');
 
         Admin::style('
+                .input-group-append {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
             .input-group {
                 display: flex;
                 align-items: center;
@@ -251,11 +127,6 @@ class BatchResultRouteUniversal extends CustomAction
 
             .form-control {
                 margin-right: -1px; /* Небольшой выступ для кнопки */
-            }
-
-            .input-group-append {
-                margin-top: 10px;
-                margin-left: 5px; /* Убираем отступ слева */
             }
 
             .btn-warning {
@@ -289,13 +160,9 @@ class BatchResultRouteUniversal extends CustomAction
                                         { positionClass: "toast-bottom-center", timeOut: 1000 }
                                     ).css("width", "200px");
                                 }
-                                 if(Number(amount_try_top) == 1 && Number(amount_try_zone) == 0){
-                                         return $.admin.toastr.error(
-                                            'У трассы '+routeId+ ' отмечен ТОП, а зона 0 попыток' + missingFields.join(', '),
-                                            '',
-                                            { positionClass: "toast-bottom-center", timeOut: 2000 }
-                                        ).css("width", "200px");
-                                    }
+                                 if(Number(amount_try_top) > 0 && Number(amount_try_zone) == 0){
+                                        amount_try_zone = amount_try_top
+                                 }
                                 if(routeId){
                                     $.get("$url_set_attempts",
                                         {
@@ -311,8 +178,8 @@ class BatchResultRouteUniversal extends CustomAction
                                                 'Сохранено',
                                                 { positionClass: "toast-bottom-center", timeOut: 1000 }
                                             ).css("width", "200px");
-                                            $('[data-amount_try_top=amount_try_top]').val(data.amount_try_top);
-                                            $('[data-amount_try_zone=amount_try_zone]').val(data.amount_try_zone);
+                                            $('[data-amount-try-top=amount_try_top]').val(data.amount_try_top);
+                                            $('[data-amount-try-zone=amount_try_zone]').val(data.amount_try_zone);
                                             $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
                                         }
                                     );
@@ -326,6 +193,68 @@ class BatchResultRouteUniversal extends CustomAction
                             const zoneInput = document.getElementById('amount_try_zone');
                             const zoneBtn = document.getElementById('zone-btn');
                             const topBtn = document.getElementById('top-btn');
+                            const categoryText = document.getElementById('user_category_one');
+                            if(!categoryText){
+                                $(document).ready(function() {
+                                var genderInput = $('#user_gender_one');
+                                var formGroup = genderInput.closest('.form-group');
+
+                                var categoryLabel = $('<label>').text('Категория');
+                                var categoryInput = $('<input>').attr({
+                                    'autocomplete': 'off',
+                                    'style': 'width: 100%',
+                                    'readonly': '',
+                                    'type': 'text',
+                                    'id': 'user_category_one',
+                                    'name': 'user_category_one',
+                                    'value': '',
+                                    'class': 'form-control user_category_one action',
+                                    'placeholder': 'Группа'
+                                });
+                                genderInput.after(categoryLabel).after(categoryInput);
+
+                                // Находим родительский элемент с классом form-group
+                                var formGroup = genderInput.closest('.form-group');
+
+                                // Применяем стили для вертикального расположения label и input для gender
+                                formGroup.css({
+                                    'display': 'flex',
+                                    'gap': '20px', // Отступ между колонками gender и category
+                                    'align-items': 'flex-start' // Выравнивание по верхнему краю
+                                });
+
+                                // Применяем стили для меток и input внутри form-group, чтобы они располагались вертикально
+                                formGroup.find('label').css({
+                                    'display': 'block',
+                                    'margin-bottom': '5px'
+                                });
+
+                                // Создаем обертку для первой колонки (gender)
+                                var genderColumn = $('<div>').css({
+                                    'display': 'flex',
+                                    'flex-direction': 'column'
+                                });
+
+                                // Создаем обертку для второй колонки (category)
+                                var categoryColumn = $('<div>').css({
+                                    'display': 'flex',
+                                    'flex-direction': 'column'
+                                });
+
+                                // Перемещаем существующие элементы в их колонки
+                                var genderLabel = formGroup.find('label[for="user_gender_one"]');
+                                var categoryLabel = formGroup.find('label[for="user_category_one"]');
+                                var categoryInput = $('#user_category_one');
+
+                                genderColumn.append(genderLabel).append(genderInput); // Добавляем метку и поле gender в колонку
+                                categoryColumn.append(categoryLabel).append(categoryInput); // Добавляем метку и поле category в колонку
+
+                                // Очищаем содержимое form-group и добавляем обе колонки
+                                formGroup.empty().append(genderColumn).append(categoryColumn);
+
+                                });
+                            }
+
 
                                 if (!incrementBtn && !decrementBtn && !zoneBtn && !topBtn) {
                                     const inputGroupAppend = document.createElement('div');
@@ -378,9 +307,46 @@ class BatchResultRouteUniversal extends CustomAction
                                     inputGroupAppend2.appendChild(newZoneBtn);
                                     inputGroupAppend3.appendChild(newTopBtn);
 
-                                    allAttemptsInput.parentNode.appendChild(inputGroupAppend);
-                                    zoneInput.parentNode.appendChild(inputGroupAppend2);
-                                    topInput.parentNode.appendChild(inputGroupAppend3);
+                                    const formGroupAttempt = allAttemptsInput.closest('.form-group');
+                                    allAttemptsInput.style.height = '44px';
+                                    allAttemptsInput.style.marginBottom = '-10px';
+                                    allAttemptsInput.style.fontSize = '25px';
+                                    formGroupAttempt.insertBefore(inputGroupAppend, allAttemptsInput);
+                                    const labelAttempt = formGroupAttempt.querySelector('label');
+                                    if (labelAttempt) {
+                                        labelAttempt.remove();
+                                    }
+                                    formGroupAttempt.style.display = 'flex';
+                                    formGroupAttempt.style.alignItems = 'center';
+                                    formGroupAttempt.style.gap = '10px';
+
+
+                                    const formGroupZone = zoneInput.closest('.form-group');
+                                    zoneInput.style.height = '44px';
+                                    zoneInput.style.marginBottom = '-10px';
+                                    zoneInput.style.fontSize = '25px';
+                                    formGroupZone.insertBefore(inputGroupAppend2, zoneInput);
+                                    const labelZone = formGroupZone.querySelector('label');
+                                    if (labelZone) {
+                                        labelZone.remove();
+                                    }
+                                    formGroupZone.style.display = 'flex';
+                                    formGroupZone.style.alignItems = 'center';
+                                    formGroupZone.style.gap = '10px';
+
+                                    const formGroupTop = topInput.closest('.form-group');
+                                    topInput.style.height = '44px';
+                                    topInput.style.marginBottom = '-10px';
+                                    topInput.style.fontSize = '25px';
+                                    formGroupTop.insertBefore(inputGroupAppend3, topInput);
+                                    const labelTop = formGroupTop.querySelector('label');
+                                    if (labelTop) {
+                                        labelTop.remove();
+                                    }
+                                    formGroupTop.style.display = 'flex';
+                                    formGroupTop.style.alignItems = 'center';
+                                    formGroupTop.style.gap = '10px';
+
 
                                     newZoneBtn.addEventListener('click', function () {
                                         let currentValue = parseInt(allAttemptsInput.value) || 0;
@@ -436,8 +402,8 @@ class BatchResultRouteUniversal extends CustomAction
                                             event_id: eventId
                                         },
                                         function (data) {
-                                            $('[id="user_gender"]').val(data.gender);
-                                            $('[id="user_category"]').val(data.category);
+                                            $('[id="user_gender_one"]').val(data.gender);
+                                            $('[id="user_category_one"]').val(data.category);
                                         }
                                     );
                                 }
@@ -484,6 +450,51 @@ class BatchResultRouteUniversal extends CustomAction
                                 );
 
                             });
+                            $(document).on("change", '[data-gender-id=gender]', function () {
+                                var gender = $('[data-gender-id=gender]').select2('val')
+                                var numberSetId = $('[data-number-set-id=number_set_id]').select2('val')
+                                var categoryId = $('[data-category-id=category_id]').select2('val')
+                                var eventId = $('[data-event-id=event_id]').val();
+                                $.get("/admin/api/get_users",
+                                    {eventId: eventId, numberSetId: numberSetId, categoryId: categoryId, gender: gender, stage: '$this->stage'},
+                                    function (data) {
+                                        var model = $('[data-user-id=user_id]');
+                                        model.empty();
+                                        model.append("<option>Выбрать</option>");
+                                        var sortedData = Object.entries(data).sort(function (a, b) {
+                                            return a[1].localeCompare(b[1]);
+                                        });
+                                        $.each(sortedData, function (i, item) {
+                                            var userId = item[0];
+                                            var userName = item[1];
+                                            model.append("<option data-user-id='" + userId + "' value='" + userId + "'>" + userName + "</option>");
+                                        });
+                                    }
+                                );
+
+                            });
+                            $(document).on("change", '[data-number-set-id=number_set_id]', function () {
+                                var numberSetId = $('[data-number-set-id=number_set_id]').select2('val')
+                                var categoryId = $('[data-category-id=category_id]').select2('val')
+                                var eventId = $('[data-event-id=event_id]').val();
+                                $.get("/admin/api/get_users",
+                                    {eventId: eventId, numberSetId: numberSetId, categoryId: categoryId, stage: '$this->stage'},
+                                    function (data) {
+                                        var model = $('[data-user-id=user_id]');
+                                        model.empty();
+                                        model.append("<option>Выбрать</option>");
+                                        var sortedData = Object.entries(data).sort(function (a, b) {
+                                            return a[1].localeCompare(b[1]);
+                                        });
+                                        $.each(sortedData, function (i, item) {
+                                            var userId = item[0];
+                                            var userName = item[1];
+                                            model.append("<option data-user-id='" + userId + "' value='" + userId + "'>" + userName + "</option>");
+                                        });
+                                    }
+                                );
+
+                            });
                             let icon_close = '[id="app-admin-actions-resultroute-batchresultrouteuniversal"] [data-dismiss="modal"][class="close"]'
                             $(document).on("click", icon_close, function () {
                                 window.location.reload();
@@ -492,32 +503,16 @@ class BatchResultRouteUniversal extends CustomAction
                             $(document).on("click", btn_close, function () {
                                 window.location.reload();
                             });
+
                         EOT;
 
         \Encore\Admin\Facades\Admin::script($script_one_route);
-        $script_log = <<<EOT
-                            observer.observe(document.body, {
-                                attributes: true,
-                                childList: true,
-                                subtree: true
-                            });
-                            document.addEventListener('click', function(event) {
-                                console.log('Клик по элементу:', event.target);
-                            });
-
-                            document.addEventListener('change', function(event) {
-                                console.log('Изменение в элементе:', event.target);
-                            });
-                        EOT;
-//        \Encore\Admin\Facades\Admin::script($script_log);
 
     }
 
     public function html()
     {
-        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        if($event->amount_the_best_participant_to_go_final > 0){
-            return "<a id='universal-{$this->stage}' class='result-universal btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> По одной трассе</a>
+        return "<a id='universal-$this->stage' class='result-universal btn btn-sm btn-primary'><i class='fa fa-plus-circle'></i> По одной трассе</a>
                  <style>
                  .result-universal {margin-top:8px;}
                  @media screen and (max-width: 767px) {
@@ -525,28 +520,7 @@ class BatchResultRouteUniversal extends CustomAction
                     }
                 </style>
             ";
-        } else {
-            return "<a href='#' class='result-universal btn btn-sm btn-primary' disabled>Кол-во участников в финал 0</a>
-                 <style>
-                 .result-universal {margin-top:8px;}
-                 @media screen and (max-width: 767px) {
-                        .result-universal {margin-top:8px;}
-                    }
-                </style>
-            ";
-        }
 
-    }
-    public static function get_amount_routes($event, $stage)
-    {
-        switch ($stage){
-            case 'final':
-                return $event->amount_routes_in_final;
-            case 'semifinal':
-                return $event->amount_routes_in_semifinal;
-            case 'qualification':
-                return Grades::where('event_id', $event->id)->first()->count_routes ?? 0;
-        }
     }
 }
 

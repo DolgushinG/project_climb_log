@@ -763,7 +763,7 @@ class Event extends Model
             }
             $result->event_id = $users_sorted[$index]['event_id'];
             $result->user_id = $users_sorted[$index]['user_id'];
-//            $result->gender = trans_choice('somewords.' . $users_sorted[$index]['gender'], 10);
+            $result->gender = trans_choice('somewords.' . $users_sorted[$index]['gender'], 10);
             $result->owner_id = $users_sorted[$index]['owner_id'];
             $result->amount_top = $users_sorted[$index]['amount_top'];
             $result->amount_zone = $users_sorted[$index]['amount_zone'];
@@ -804,7 +804,6 @@ class Event extends Model
             $participant = new ResultFinalStage;
             $new_result_for_edit = $result_for_edit;
         } else {
-            // Сортируем массив по "Номеру маршрута"
             $new_result_for_edit = array_merge($participant->result_for_edit_final, $result_for_edit);
             usort($new_result_for_edit, function ($a, $b) {
                 return $a['Номер маршрута'] <=> $b['Номер маршрута'];

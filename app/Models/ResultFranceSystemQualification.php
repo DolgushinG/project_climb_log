@@ -45,56 +45,6 @@ class ResultFranceSystemQualification extends Model
         return User::whereIn('id', $after_slice_participant_final_sort_id)->get();
     }
 
-    public static function get_users_qualification_result($table, $event_id, $gender)
-    {
-        return User::query()
-            ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-            ->where($table.'.event_id', '=', $event_id)
-            ->select(
-                $table.'.place',
-                'users.id',
-                'users.middlename',
-                $table.'.category_id',
-                $table.'.amount_top',
-                $table.'.amount_try_top',
-                $table.'.amount_zone',
-                $table.'.amount_try_zone',
-            )->where($table.'.gender', '=', $gender)->get();
-    }
-
-    public static function get_qualification_france_global_participants($event, $one_group=null, $get_array=false)
-    {
-        $amount_participant = ResultFranceSystemQualification::where('event_id', '=', $event->id)->get()->count();
-        if($one_group){
-            $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_only_one_group($event, $amount_participant, $one_group);
-        } else {
-            $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_group($event, $amount_participant);
-        }
-
-        if($get_array){
-            return $merged_users->toArray();
-        } else {
-            return $merged_users;
-        }
-
-    }
-    public static function get_qualification_france_participants($event, $one_group=null, $get_array=false)
-    {
-        $amount_participant = ResultFranceSystemQualification::where('event_id', '=', $event->id)->get()->count();
-        if($one_group){
-            $merged_users = ResultRouteQualificationClassic::get_participant_qualification_only_one_group($event, $amount_participant, $one_group);
-        } else {
-            $merged_users = ResultRouteQualificationClassic::get_participant_qualification_group($event, $amount_participant);
-        }
-
-        if($get_array){
-            return $merged_users->toArray();
-        } else {
-            return $merged_users;
-        }
-
-    }
-
     public static function update_france_route_results(
         $owner_id,
         $event_id,
@@ -130,7 +80,6 @@ class ResultFranceSystemQualification extends Model
             $participant->save();
         }
         $existing_result_for_edit = $participant->result_for_edit_france_system_qualification ?? [];
-        # Если уже есть результат надо обновить его как в grid - $participant - json for edit так и в $result по трассам
         if($result_route){
             $result_route->all_attempts = $all_attempts;
             $result_route->amount_top = $amount_top;
@@ -172,7 +121,6 @@ class ResultFranceSystemQualification extends Model
     public static function create_results_fsq($participant, $results_old_for_edit, $result_for_edit)
     {
         $merged_result_for_edit = array_merge($results_old_for_edit, $result_for_edit);
-        // Сортируем массив по "Номеру маршрута"
         usort($merged_result_for_edit, function ($a, $b) {
             return $a['Номер маршрута'] <=> $b['Номер маршрута'];
         });

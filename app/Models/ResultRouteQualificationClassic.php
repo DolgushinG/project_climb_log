@@ -198,11 +198,20 @@ class ResultRouteQualificationClassic extends Model
         foreach ($event->categories as $category){
             $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
             if($event->is_france_system_qualification) {
-                $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'female', $amount, $category_id)->toArray();
-                $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'male', $amount, $category_id)->toArray();
+                if($gender){
+                    $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, $gender, $amount, $category_id)->toArray();
+                } else {
+                    $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'male', $amount, $category_id)->toArray();
+                    $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'female', $amount, $category_id)->toArray();
+                }
             } else {
-                $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'male', $amount, $category_id);
-                $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'female', $amount, $category_id);
+                if($gender){
+                    $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, $gender, $amount, $category_id);
+                } else {
+                    $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'male', $amount, $category_id);
+                    $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'female', $amount, $category_id);
+                }
+
             }
         }
         $merged_users = collect();
@@ -220,8 +229,13 @@ class ResultRouteQualificationClassic extends Model
         $all_group_participants = array();
         foreach ($event->categories as $category){
             $category_id = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first()->id;
-            $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount, $category_id);
-            $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount, $category_id);
+            if($gender){
+                $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, $gender, $amount, $category_id);
+            } else {
+                $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount, $category_id);
+                $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount, $category_id);
+            }
+
         }
 
         $merged_users = collect();
@@ -232,11 +246,16 @@ class ResultRouteQualificationClassic extends Model
         }
         return $merged_users;
     }
-    public static function get_global_participant_qualification_only_one_group($event, $amount, $group)
+    public static function get_global_participant_qualification_only_one_group($event, $amount, $group, $gender)
     {
         $all_group_participants = array();
-        $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount, $group->id);
-        $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount, $group->id);
+        if($gender){
+            $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, $gender, $amount, $group->id);
+        } else {
+            $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount, $group->id);
+            $all_group_participants[] = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount, $group->id);
+        }
+
         $merged_users = collect();
         foreach ($all_group_participants as $participant) {
             foreach ($participant as $a){
@@ -246,15 +265,23 @@ class ResultRouteQualificationClassic extends Model
         return $merged_users;
     }
 
-    public static function get_participant_qualification_only_one_group($event, $amount, $group)
+    public static function get_participant_qualification_only_one_group($event, $amount, $group, $gender)
     {
         $all_group_participants = array();
         if($event->is_france_system_qualification) {
-            $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'female', $amount, $group->id)->toArray();
-            $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'male', $amount, $group->id)->toArray();
+            if($gender){
+                $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, $gender, $amount, $group->id)->toArray();
+            } else {
+                $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'female', $amount, $group->id)->toArray();
+                $all_group_participants[] = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'male', $amount, $group->id)->toArray();
+            }
         } else {
-            $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'male', $amount, $group->id);
-            $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'female', $amount, $group->id);
+            if($gender){
+                $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, $gender, $amount, $group->id);
+            } else {
+                $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'male', $amount, $group->id);
+                $all_group_participants[] = ResultQualificationClassic::better_participants($event->id, 'female', $amount, $group->id);
+            }
         }
         $merged_users = collect();
         foreach ($all_group_participants as $participant) {
@@ -264,22 +291,35 @@ class ResultRouteQualificationClassic extends Model
         }
         return $merged_users;
     }
-    public static function get_participant_qualification_gender($event, $amount)
+    public static function get_participant_qualification_gender($event, $amount, $gender)
     {
         if($event->is_france_system_qualification) {
-            $users_female = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'female', $amount);
-            $users_male = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'male', $amount);
+            if($gender){
+                return ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, $gender, $amount);
+            } else {
+                $users_female = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'female', $amount);
+                $users_male = ResultFranceSystemQualification::better_of_participants_france_system_qualification($event->id, 'male', $amount);
+            }
         } else {
-            $users_female = ResultQualificationClassic::better_participants($event->id, 'female', $amount);
-            $users_male = ResultQualificationClassic::better_participants($event->id, 'male', $amount);
+            if($gender){
+                return ResultQualificationClassic::better_participants($event->id, $gender, $amount);
+            } else {
+                $users_female = ResultQualificationClassic::better_participants($event->id, 'female', $amount);
+                $users_male = ResultQualificationClassic::better_participants($event->id, 'male', $amount);
+            }
+
         }
         return $users_male->merge($users_female);
     }
-    public static function get_global_participant_qualification_gender($event, $amount)
+    public static function get_global_participant_qualification_gender($event, $amount, $gender)
     {
-        $users_female = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount);
-        $users_male = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount);
-        return $users_male->merge($users_female);
+        if($gender) {
+            return ResultQualificationClassic::better_global_participants($event->id, $gender, $amount);
+        } else {
+            $users_female = ResultQualificationClassic::better_global_participants($event->id, 'female', $amount);
+            $users_male = ResultQualificationClassic::better_global_participants($event->id, 'male', $amount);
+            return $users_male->merge($users_female);
+        }
     }
     public function event()
     {

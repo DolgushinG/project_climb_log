@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchForceRecoutingResultFinalGender;
 use App\Admin\Actions\BatchForceRecoutingResultFinalGroup;
 use App\Admin\Actions\BatchGenerateResultFinalParticipant;
+use App\Admin\Actions\ResultRoute\BatchResultCustomRouteUniversal;
 use App\Admin\Actions\ResultRoute\BatchResultRouteUniversal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchExportProtocolRouteParticipantFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultFinal;
@@ -126,7 +127,7 @@ class ResultRouteFinalStageController extends Controller
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultFinal);
             $tools->append(new BatchResultRouteUniversal('final'));
-            $tools->append(new BatchResultFinalCustom);
+            $tools->append(new BatchResultCustomRouteUniversal('final'));
             $tools->append(new BatchForceRecoutingResultFinalGender);
             $tools->append(new BatchForceRecoutingResultFinalGroup);
             if(Admin::user()->username == "Tester2"){
