@@ -109,10 +109,9 @@ class BatchResultCustomRouteUniversal extends CustomAction
             if($participant) {
                 return $this->response()->error('Результат уже есть по ' . $user);
             }
-
             DB::table('result_route_semifinal_stage')->insert($data);
-            Event::send_result_semifinal(intval($results['event_id']), $event->owner_id, intval($results['user_id']), $resultModelClass->catgory_id, $result_for_edit, $resultModelClass->gender);
-            Event::refresh_final_points_all_participant_in_semifinal($event);
+            Event::send_result_semifinal(intval($results['event_id']), $event->owner_id, intval($results['user_id']), $resultModelClass->category_id, $result_for_edit, $resultModelClass->gender);
+            Event::refresh_final_points_all_participant_in_semifinal($event->id);
         }
 
         return $this->response()->success('Результат успешно внесен')->refresh();

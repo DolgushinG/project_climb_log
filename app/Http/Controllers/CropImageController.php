@@ -6,12 +6,17 @@ use App\Models\Event;
 use App\Models\ResultQualificationClassic;
 use App\Models\ResultFranceSystemQualification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CropImageController extends Controller
 {
     public function uploadCropImage(Request $request)
     {
         $event = Event::find($request->event_id);
+        if(!$event){
+            Log::error('При загрузке картинки не найдено событие - '.$request->json() ?? '');
+            return response()->json(['success'=> false, 'message' => 'Что то пошло не так'],422);
+        }
         if($event->is_france_system_qualification){
             $participant = ResultFranceSystemQualification::where('user_id', Auth()->user()->id)->where('event_id', $request->event_id)->first();
         } else {
@@ -42,6 +47,10 @@ class CropImageController extends Controller
     public function uploadCropImageDocument(Request $request)
     {
         $event = Event::find($request->event_id);
+        if(!$event){
+            Log::error('При загрузке картинки не найдено событие - '.$request->json() ?? '');
+            return response()->json(['success'=> false, 'message' => 'Что то пошло не так'],422);
+        }
         if($event->is_france_system_qualification){
             $participant = ResultFranceSystemQualification::where('user_id', Auth()->user()->id)->where('event_id', $request->event_id)->first();
         } else {
