@@ -26,7 +26,8 @@
                                             <tr>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Место</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Фамилия Имя</th>
-                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>
+{{--                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>--}}
+                                                <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Попытки</th>
                                             </tr>
@@ -37,7 +38,7 @@
                                                     <tr>
                                                     <th scope="row">{{$res['place']}}</th>
                                                     <td>{{$res['middlename']}}</td>
-                                                    <td>{{$res['city']}}</td>
+{{--                                                    <td>{{$res['city']}}</td>--}}
                                                     <td>
                                                         @foreach($routes as $route)
                                                             @if(isset($res['amount_try_top_'.$route]) && isset($res['amount_try_zone_'.$route]))
@@ -102,7 +103,8 @@
                                             <tr>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Место</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Фамилия Имя</th>
-                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>
+{{--                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>--}}
+                                                <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Попытки</th>
                                             </tr>
@@ -113,7 +115,7 @@
                                                 <tr>
                                                     <th scope="row">{{$res['place'] ?? ''}}</th>
                                                     <td>{{$res['middlename']}}</td>
-                                                    <td>{{$res['city']}}</td>
+{{--                                                    <td>{{$res['city']}}</td>--}}
                                                     <td>
                                                         @foreach($routes as $route)
                                                             @if(isset($res['amount_try_top_'.$route]) && isset($res['amount_try_zone_'.$route]))
@@ -193,7 +195,8 @@
                                                 <tr>
                                                     <th scope="col" style="background-color:  #106eea; color: white">Место</th>
                                                     <th scope="col" style="background-color:  #106eea; color: white">Фамилия Имя</th>
-                                                    <th scope="col" style="background-color:  #106eea; color: white">Город</th>
+{{--                                                    <th scope="col" style="background-color:  #106eea; color: white">Город</th>--}}
+                                                    <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                                     <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                                     <th scope="col" style="background-color:  #106eea; color: white">Попытки</th>
                                                 </tr>
@@ -204,7 +207,7 @@
                                                         <tr>
                                                         <th scope="row">{{$res['place']}}</th>
                                                         <td>{{$res['middlename']}}</td>
-                                                        <td>{{$res['city']}}</td>
+{{--                                                        <td>{{$res['city']}}</td>--}}
                                                         <td>
                                                             @foreach($routes as $route)
                                                                 @if(isset($res['amount_try_top_'.$route]) && isset($res['amount_try_zone_'.$route]))
@@ -268,7 +271,8 @@
                                             <tr>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Место</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Фамилия Имя</th>
-                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>
+{{--                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>--}}
+                                                <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
                                                 <th scope="col" style="background-color:  #106eea; color: white">Попытки</th>
                                             </tr>
@@ -279,7 +283,7 @@
                                                 <tr>
                                                     <th scope="row">{{$res['place']}}</th>
                                                     <td>{{$res['middlename']}}</td>
-                                                    <td>{{$res['city']}}</td>
+{{--                                                    <td>{{$res['city']}}</td>--}}
                                                     <td>
                                                         @foreach($routes as $route)
                                                             @if(isset($res['amount_try_top_'.$route]) && isset($res['amount_try_zone_'.$route]))
