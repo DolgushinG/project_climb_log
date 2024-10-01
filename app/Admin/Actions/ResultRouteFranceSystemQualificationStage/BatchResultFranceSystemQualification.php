@@ -77,8 +77,7 @@ class BatchResultFranceSystemQualification extends CustomAction
             );
         }
         $participant = ResultFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
-        $result = ResultRouteFranceSystemQualification::where('event_id', $results['event_id']
-        )->where('user_id', $results['user_id'])->first();
+        $result = ResultRouteFranceSystemQualification::where('event_id', $results['event_id'])->where('user_id', $results['user_id'])->first();
         if(!$result){
             $participant->active = 1;
         }

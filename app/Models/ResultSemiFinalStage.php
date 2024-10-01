@@ -44,17 +44,19 @@ class ResultSemiFinalStage extends Model
     }
 
 
-    public static function get_participant_semifinal($event, $one_group=null, $get_array=false)
+    public static function get_participant_semifinal($event, $one_group=null, $get_array=false, $gender = false)
     {
         $amount_the_best_participant_to_go_semifinal = $event->amount_the_best_participant ?? 10;
         if($event->is_sort_group_semifinal){
             if($one_group){
-                $merged_users = ResultRouteQualificationClassic::get_participant_qualification_only_one_group($event, $amount_the_best_participant_to_go_semifinal, $one_group);
+                $merged_users = ResultRouteQualificationClassic::get_participant_qualification_only_one_group(
+                    $event, $amount_the_best_participant_to_go_semifinal, $one_group, $gender);
             } else {
-                $merged_users = ResultRouteQualificationClassic::get_participant_qualification_group($event, $amount_the_best_participant_to_go_semifinal);
+                $merged_users = ResultRouteQualificationClassic::get_participant_qualification_group(
+                    $event, $amount_the_best_participant_to_go_semifinal, $gender);
             }
         } else {
-            $merged_users = ResultRouteQualificationClassic::get_participant_qualification_gender($event, $amount_the_best_participant_to_go_semifinal);
+            $merged_users = ResultRouteQualificationClassic::get_participant_qualification_gender($event, $amount_the_best_participant_to_go_semifinal, $gender);
         }
         if($get_array){
             return $merged_users->toArray();
@@ -62,17 +64,17 @@ class ResultSemiFinalStage extends Model
             return $merged_users;
         }
     }
-    public static function get_global_participant_semifinal($event, $one_group=null, $get_array=false)
+    public static function get_global_participant_semifinal($event, $one_group=null, $get_array=false, $gender=false)
     {
         $amount_the_best_participant_to_go_semifinal = $event->amount_the_best_participant ?? 10;
         if($event->is_sort_group_semifinal){
             if($one_group){
-                $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_only_one_group($event, $amount_the_best_participant_to_go_semifinal, $one_group);
+                $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_only_one_group($event, $amount_the_best_participant_to_go_semifinal, $one_group, $gender);
             } else {
-                $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_group($event, $amount_the_best_participant_to_go_semifinal);
+                $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_group($event, $amount_the_best_participant_to_go_semifinal, $gender);
             }
         } else {
-            $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_gender($event, $amount_the_best_participant_to_go_semifinal);
+            $merged_users = ResultRouteQualificationClassic::get_global_participant_qualification_gender($event, $amount_the_best_participant_to_go_semifinal, $gender);
         }
         if($get_array){
             return $merged_users->toArray();

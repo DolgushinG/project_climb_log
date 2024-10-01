@@ -27,6 +27,8 @@
                                                 <th scope="col" style="background-color:  #106eea; color: white">Фамилия Имя</th>
 {{--                                                <th scope="col" style="background-color:  #106eea; color: white">Город</th>--}}
                                                 <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
+                                                <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
+                                                <th scope="col" style="background-color:  #106eea; color: white">Попытки</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -62,7 +64,14 @@
                                                                         @endif
                                                                     @endisset
                                                                 @endforeach
-                                                                {{$res['amount_top']}}T{{$res['amount_try_top']}}z {{$res['amount_zone']}} {{$res['amount_try_zone']}}
+                                                            </td>
+                                                            <td>
+                                                                <span class="bg-dark result-try" style="font-size: 14px; border-radius: 5px 0 0 0;">T</span><span class="bg-dark result-try" style="font-size: 14px; border-radius: 0 5px 0 0;">Z</span><br>
+                                                                <span class="bg-success result-try" style="font-size: 14px; border-radius: 0 0 0 5px;">{{$res['amount_top']}}</span><span class="bg-success result-try" style="font-size: 14px; border-radius: 0 0 5px 0;">{{$res['amount_zone']}}</span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="bg-dark result-try" style="font-size: 14px; border-radius: 5px 0 0 0;">T</span><span class="bg-dark result-try" style="font-size: 14px; border-radius: 0 5px 0 0;">Z</span><br>
+                                                                <span class="bg-secondary result-try" style="font-size: 14px; border-radius: 0 0 0 5px;">{{$res['amount_try_top']}}</span><span class="bg-secondary result-try" style="font-size: 14px; border-radius: 0 0 5px 0;">{{$res['amount_try_zone']}}</span>
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -106,6 +115,8 @@
                                                     <th scope="col" style="background-color:  #106eea; color: white">Фамилия Имя</th>
 {{--                                                    <th scope="col" style="background-color:  #106eea; color: white">Город</th>--}}
                                                     <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
+                                                    <th scope="col" style="background-color:  #106eea; color: white">Результат</th>
+                                                    <th scope="col" style="background-color:  #106eea; color: white">Попытки</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -141,7 +152,14 @@
                                                                             @endif
                                                                         @endisset
                                                                     @endforeach
-                                                                    {{$res['amount_top']}}T{{$res['amount_try_top']}}z {{$res['amount_zone']}} {{$res['amount_try_zone']}}
+                                                                </td>
+                                                                <td>
+                                                                    <span class="bg-dark result-try" style="font-size: 14px; border-radius: 5px 0 0 0;">T</span><span class="bg-dark result-try" style="font-size: 14px; border-radius: 0 5px 0 0;">Z</span><br>
+                                                                    <span class="bg-success result-try" style="font-size: 14px; border-radius: 0 0 0 5px;">{{$res['amount_top']}}</span><span class="bg-success result-try" style="font-size: 14px; border-radius: 0 0 5px 0;">{{$res['amount_zone']}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="bg-dark result-try" style="font-size: 14px; border-radius: 5px 0 0 0;">T</span><span class="bg-dark result-try" style="font-size: 14px; border-radius: 0 5px 0 0;">Z</span><br>
+                                                                    <span class="bg-secondary result-try" style="font-size: 14px; border-radius: 0 0 0 5px;">{{$res['amount_try_top']}}</span><span class="bg-secondary result-try" style="font-size: 14px; border-radius: 0 0 5px 0;">{{$res['amount_try_zone']}}</span>
                                                                 </td>
                                                             </tr>
                                                         @endforeach

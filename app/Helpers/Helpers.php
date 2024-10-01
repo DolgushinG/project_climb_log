@@ -172,7 +172,7 @@ class Helpers
         } else if ($amount_try_zone){
             $result_for_compare = $amount_try_zone;
         } else {
-            return false;
+            return 0;
         }
         return $result_for_compare;
     }
