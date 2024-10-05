@@ -40,7 +40,7 @@ class BatchAddRoute extends Action
             $grade = $request->input('grade');
             $owner_id = \Encore\Admin\Facades\Admin::user()->id;
             $event = Event::where('owner_id', '=', $owner_id)->where('active', 1)->first();
-            $route_id = RoutesOutdoor::where('event_id', $event->id)->get()->count() + 1;
+            $last_route = RoutesOutdoor::where('event_id', $event->id)->orderBy('id', 'desc')->first();
             $grades_event = Grades::where('event_id', $event->id)->first();
             $model = RoutesOutdoor::where('event_id', $event->id)->where('place_route_id', $id)->where('grade', $grade)->where('route_name', $route_name)->first();
             $model_for_guid = GuidRoutesOutdoor::where('place_id', $area->place_id)->where('area_id', $place_route->area_id)->where('place_route_id', $id)->where('grade', $grade)->where('route_name', $route_name)->first();
@@ -68,7 +68,7 @@ class BatchAddRoute extends Action
                 $model->route_name = $route_name;
                 $model->type = $type;
                 $model->image = $path;
-                $model->route_id = $route_id;
+                $model->route_id = $last_route->route_id + 1;
                 $grades_with_value_flash = Grades::outdoor_grades_with_value_flash(20);
                 $grades = Grades::outdoor_grades();
                 $index = array_search(strtoupper($grade), $grades);
@@ -78,7 +78,7 @@ class BatchAddRoute extends Action
                 $model->flash_value = $flash_value;
                 $model->save();
                 if($grades_event){
-                    $grades_event->count_routes = $route_id;
+                    $grades_event->count_routes = $last_route->route_id + 1;
                     $grades_event->save();
                 }
             }

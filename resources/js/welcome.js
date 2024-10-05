@@ -86,7 +86,7 @@ $(document).on('click','#btn-participant', function(e) {
     e.preventDefault()
     $.ajax({
         type: 'POST',
-        url: '/takePart',
+        url: '/take-part',
         data: {
             'number_set': setsValue,
             'event_id': event_id,
@@ -122,48 +122,6 @@ $(document).on('click','#btn-participant', function(e) {
 
     });
 });
-function getInfoPayment(event_id, id) {
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-    $.ajax({
-        type: 'GET',
-        url: 'getInfoPayment/' + event_id,
-        success: function (data) {
-            $(id).html(data);
-        },
-    });
-}
-function getInfoPay(event_id, id) {
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-    $.ajax({
-        type: 'GET',
-        url: 'getInfoPay/' + event_id,
-        success: function (data) {
-            $(id).html(data);
-        },
-    });
-}
-function getInfoPaymentDocument(event_id, id) {
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-    $.ajax({
-        type: 'GET',
-        url: 'getInfoPaymentDocument/' + event_id,
-        success: function (data) {
-            $(id).html(data);
-        },
-    });
-}
 $(document).on('click','#btn-participant-change-set', function(e) {
     $.ajaxSetup({
         headers: {
@@ -178,7 +136,7 @@ $(document).on('click','#btn-participant-change-set', function(e) {
     e.preventDefault()
     $.ajax({
         type: 'POST',
-        url: '/changeSet',
+        url: '/change-set',
         data: {
             'number_set': value,
             'event_id': event_id,
@@ -234,7 +192,7 @@ $(document).on('click','#save_products_discount', function(e) {
     e.preventDefault()
     $.ajax({
         type: 'POST',
-        url: '/sendProductsAndDiscount',
+        url: '/send-products-and-discount',
         data: {
             'event_id': event_id,
             'user_id': user_id,
@@ -343,7 +301,7 @@ $(document).on('click','#add-to-list-pending', function(e) {
     e.preventDefault()
     $.ajax({
         type: 'POST',
-        url: '/addToListPending',
+        url: '/add-to-list-pending',
         data: {
             'category': categoryValue,
             'number_sets': data,
@@ -393,7 +351,7 @@ $(document).on('click','#btn_cancel_take_part_participant', function(e) {
     e.preventDefault()
     $.ajax({
         type: 'POST',
-        url: '/cancelTakePartParticipant',
+        url: '/cancel-take-part-participant',
         data: {
             'event_id': event_id,
             'user_id': user_id
@@ -434,7 +392,7 @@ $(document).on('click','#add-to-list-pending-remove', function(e) {
     e.preventDefault()
     $.ajax({
         type: 'POST',
-        url: '/removeFromListPending',
+        url: '/remove-from-list-pending',
         data: {
             'event_id': event_id,
             'user_id': user_id
@@ -477,7 +435,7 @@ $(document).on('click','#send-all-result', function(e) {
     e.preventDefault()
     $.ajax({
         type: 'POST',
-        url: 'sendAllResult',
+        url: '/send-all-result',
         data: {
             'event_id': event_id,
             'email': email,
@@ -620,7 +578,7 @@ $("#crop").click(function () {
                 },
                 type: "POST",
                 dataType: "json",
-                url: "/cropimageupload",
+                url: "/crop-image-upload",
                 data: {'image': base64data , 'event_id': event_id},
                 success: function (data) {
                     $modal.modal('hide');
@@ -665,7 +623,7 @@ $("#crop-document").click(function () {
                 },
                 type: "POST",
                 dataType: "json",
-                url: "/cropdocumentupload",
+                url: "/crop-document-upload",
                 data: {'image': base64data , 'event_id': event_id},
                 success: function (data) {
                     $modal_document.modal('hide');

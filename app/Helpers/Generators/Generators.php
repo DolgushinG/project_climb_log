@@ -86,7 +86,7 @@ class Generators
         $genders = ['male','female'];
         if($category){
             $category_id = ParticipantCategory::where('category', $category)->where('owner_id', $owner_id)->where('event_id', $event_id)->first()->id;
-            for ($i = $start_user_id; $i <= $users + $start_user_id; $i++) {
+            for ($i = $start_user_id; $i <= $users; $i++) {
                 $user = User::find($i);
                 $user->category = $category_id;
                 $user->save();
@@ -94,7 +94,7 @@ class Generators
                 $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'category_id' => $category_id,'gender' => $user->gender ?? $genders[array_rand(['male','female'])], 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         } else {
-            for ($i = 1; $i <= $users + $start_user_id ; $i++) {
+            for ($i = $start_user_id; $i <= $users ; $i++) {
                 $user = User::find($i);
                 $sets = Set::where('event_id', $event_id)->pluck('id','number_set')->toArray();
                 $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'gender' => $user->gender ?? $genders[array_rand(['male','female'])], 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
@@ -103,7 +103,7 @@ class Generators
         DB::table($table)->insert($participants);
     }
 
-    public static function prepare_result_route_qualification_classic($owner_id, $event_id, $table, $count=30)
+    public static function prepare_result_route_qualification_classic($owner_id, $event_id, $table)
     {
         if($table === 'result_route_qualification_classic'){
             ResultRouteQualificationClassic::where('event_id', $event_id)->delete();
@@ -182,11 +182,10 @@ class Generators
         if($table === 'result_route_semifinal_stage') {
             ResultRouteSemiFinalStage::where('event_id', $event_id)->delete();
             $event = Event::find($event_id);
-            $amount_the_best_participant = $event->amount_the_best_participant ?? 10;
             if($event->is_open_main_rating){
-                $users = ResultSemiFinalStage::get_global_participant_semifinal($event, $amount_the_best_participant, null, true);
+                $users = ResultSemiFinalStage::get_global_participant_semifinal($event, null, true);
             } else {
-                $users = ResultSemiFinalStage::get_participant_semifinal($event, $amount_the_best_participant, null, true);
+                $users = ResultSemiFinalStage::get_participant_semifinal($event, null, true);
             }
             $result = array();
             foreach ($users as $user) {
@@ -221,7 +220,7 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'],'category_id' => $category_id,'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'] ?? 'male','category_id' => $category_id,'user_id' => $user['id'],'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
                     $result_for_edit[] = array(
                         'Номер маршрута' => $route,
                         'Попытки на топ' => $amount_try_top,
@@ -236,8 +235,9 @@ class Generators
                 $participant_semifinal->event_id = $event_id;
                 $participant_semifinal->user_id = $user['id'];
                 $participant_semifinal->category_id = $category_id;
-                $participant_semifinal->gender = $user['gender'];
+                $participant_semifinal->gender = $user['gender'] ?? 'male';
                 $participant_semifinal->result_for_edit_semifinal = $result_for_edit;
+
                 $participant_semifinal->save();
             }
             DB::table('result_route_semifinal_stage')->insert($result);
@@ -287,7 +287,7 @@ class Generators
                         $amount_top = 0;
                         $amount_try_top = 0;
                     }
-                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'], 'user_id' => $user['id'],'category_id' => $category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
+                    $result[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'gender' => $user['gender'] ?? 'male', 'user_id' => $user['id'],'category_id' => $category_id, 'final_route_id' => $route, 'amount_try_top' => $amount_try_top, 'amount_try_zone' => $amount_try_zone, 'amount_top' => $amount_top, 'amount_zone' => $amount_zone, 'created_at' => Carbon::now());
 
                     $result_for_edit[] = array(
                         'Номер маршрута' => $route,
@@ -302,9 +302,9 @@ class Generators
                 }
                 $participant_final->owner_id = $owner_id;
                 $participant_final->event_id = $event_id;
-                $participant_final->user_id = $user['id'];
+                $participant_final->user_id = $user['id'] ;
                 $participant_final->category_id = $category_id;
-                $participant_final->gender = $user['gender'];
+                $participant_final->gender = $user['gender'] ?? 'male';
                 $participant_final->result_for_edit_final = $result_for_edit;
                 $participant_final->save();
             }

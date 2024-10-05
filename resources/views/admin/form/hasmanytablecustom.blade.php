@@ -8,7 +8,6 @@
     <div class="{{$viewClass['label']}}"><h4 class="pull-right">{{ $label }}</h4></div>
     <div class="{{$viewClass['field']}}">
         <div class="col-sm-12">
-
             <label>Кол-во трасс в сумме</label>
             <label id="count_routes_label" class="form-control">30</label>
         </div>
@@ -62,62 +61,47 @@
                 </tbody>
             </table>
             <script>
-                var table = document.getElementById('has-many-grade_and_amount');
-                var label = document.getElementById('count_routes_label');
-                updateTotal()
-                $('a[data-toggle="tab"]').on('click', function() {
-                    // Проверяем, содержит ли ссылка атрибут href
-                    if ($(this).attr('href')) {
-                        updateTotal(); // Выполняем метод update с передачей ID вкладки
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Функция для обновления суммы всех инпутов
+                    function updateSum() {
+                        var inputs = document.querySelectorAll('input.Кол-во');
+                        var sum = 0;
+
+                        inputs.forEach(function(input) {
+                            var value = parseFloat(input.value) || 0;
+                            sum += value;
+                        });
+
+                        var label = document.getElementById('count_routes_label');
+                        if (label) {
+                            label.textContent = sum;
+                        }
                     }
+
+                    // Обрабатываем изменения значения напрямую в инпутах
+                    document.addEventListener('input', function(event) {
+                        if (event.target.classList.contains('Кол-во')) {
+                            updateSum();
+                        }
+                    });
+
+                    // Обрабатываем нажатия на кнопки + и -
+                    document.querySelectorAll('.input-group-btn button').forEach(function(button) {
+                        button.addEventListener('click', function() {
+                            updateSum(); // Обновляем сумму после изменения значения
+                        });
+                    });
                 });
-                // Функция для обновления суммы
-                function updateTotal() {
-                    // Проходим по всем элементам в таблице
-                    let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {
-                        return currentSum + currentNumber
-                    }, 0)
-                    document.getElementById('count_routes_label').textContent = results;
+
+
+                if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+                    $(document).ready(function () {
+                        {
+                            const breakdownButton = document.querySelector('.input-group-addon');
+                            breakdownButton.style.display = "None";
+                        }
+                    });
                 }
-
-                // Добавляем обработчики для кнопок и инпутов
-                table.addEventListener('click', function(event) {
-                    updateTotal();
-                });
-
-                table.addEventListener('input', function(event) {
-                    if (event.target.classList.contains('input')) {
-                        updateTotal();
-                    }
-                });
-                {{--const breakdownButton = document.querySelectorAll('.Кол-во');--}}
-                {{--breakdownButton.forEach(function (btn) {--}}
-                {{--    btn.addEventListener('input', function () {--}}
-                {{--        let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {--}}
-                {{--            return currentSum + currentNumber--}}
-                {{--        }, 0)--}}
-                {{--        document.getElementById('count_routes_label').textContent = results;--}}
-                {{--    });--}}
-                {{--});--}}
-                {{--const input_group_btn = document.querySelectorAll("//button[contains(@class, 'btn btn-primary')]");--}}
-                {{--input_group_btn.forEach(function (btn) {--}}
-                {{--    console.log(12)--}}
-                {{--    btn.addEventListener('click', function () {--}}
-                {{--        let results = [...document.querySelectorAll('.Кол-во')].map(input => Number(input.value)).reduce(function (currentSum, currentNumber) {--}}
-                {{--            return currentSum + currentNumber--}}
-                {{--        }, 0)--}}
-                {{--        document.getElementById('count_routes_label').textContent = results;--}}
-                {{--    });--}}
-                {{--});--}}
-
-                // if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-                //     $(document).ready(function () {
-                //         {
-                //             const breakdownButton = document.querySelector('.input-group-addon');
-                //             breakdownButton.style.display = "None";
-                //         }
-                //     });
-                // }
             </script>
             <template class="{{$column}}-tpl">
                 <tr class="has-many-{{$column}}-form fields-group">

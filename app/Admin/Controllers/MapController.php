@@ -2,6 +2,8 @@
 
 namespace App\Admin\Controllers;
 
+use App\Helpers\Helpers;
+use App\Models\Color;
 use App\Models\Event;
 use App\Models\Map;
 use App\Http\Controllers\Controller;
@@ -56,7 +58,7 @@ class MapController extends Controller
         // Добавляем или изменяем данные
         $data['created_at'] = now(); // Добавляем текущую дату и время
         $data['updated_at'] = now(); // Добавляем текущую дату и время
-        $event = Event::where('owner_id', '=', 2)->where('active', 1)->first();
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $route = Route::where('event_id', $event->id)->where('route_id', $data['route_id'])->first();
         // Вы можете добавить дополнительные данные
         // Например, если вам нужно установить ID пользователя:
@@ -115,7 +117,11 @@ class MapController extends Controller
         $points_exist = Point::where('event_id', $event->id)->pluck('route_id')->toArray();
         $routes = Route::where('event_id', $event->id)->get();
         $scheme_climbing_gym = '/storage/'.Admin::user()->map;
-        return Admin::component('admin::map', compact(['points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
+        foreach ($points as $index => $point){
+            $points[$index]['font_background'] = Helpers::getTextColorAndBorder($point->color ?? '');
+        }
+        $colors = Color::where('owner_id', Admin::user()->id)->get()->sortByDesc('color_name');
+        return Admin::component('admin::map', compact(['colors','points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
     }
 
     /**

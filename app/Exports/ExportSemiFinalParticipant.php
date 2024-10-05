@@ -97,7 +97,6 @@ class ExportSemiFinalParticipant implements WithCustomStartCell, ShouldAutoSize,
             ->select(
                 'users.middlename',
             )->pluck('middlename')->toArray();
-
     }
 
 }

@@ -18,7 +18,8 @@ class Event extends Model
 
     const DEFAULT_SEMIFINAL_PARTICIPANT = 20;
     const DEFAULT_FINAL_PARTICIPANT = 6;
-
+    const INTER = 0;
+    const LOCAL = 1;
     const COST_FOR_EACH_PARTICIPANT = 1;
 
     protected $casts = [
@@ -93,6 +94,10 @@ class Event extends Model
     public function routes()
     {
         return $this->hasOne(Grades::class);
+    }
+    public function colors()
+    {
+        return $this->hasOne(Color::class);
     }
 
     public function result_semifinal_stage()
@@ -348,15 +353,15 @@ class Event extends Model
                         ->where('category_id', $category->id)
                         ->where('event_id', $event_id)
                         ->where('gender', $gender)
-                        ->orderBy('points', 'DESC')
+                        ->orderByDesc('points')
                         ->get();
-                    ResultQualificationClassic::update_places_in_qualification_classic($event, $participants_for_update);
+                    ResultQualificationClassic::update_places_in_qualification_classic($participants_for_update);
                 }
             }
         } else {
             foreach (['female', 'male'] as $gender){
-                $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('gender', $gender)->orderBy('points', 'DESC')->get();
-                ResultQualificationClassic::update_places_in_qualification_classic($event, $participants_for_update);
+                $participants_for_update = ResultQualificationClassic::whereIn('user_id', $users_id)->where('event_id', '=', $event_id)->where('gender', $gender)->orderByDesc('points')->get();
+                ResultQualificationClassic::update_places_in_qualification_classic($participants_for_update);
             }
         }
     }
@@ -597,6 +602,8 @@ class Event extends Model
 
     public static function get_france_system_result($table, $event_id, $gender, $category = null)
     {
+        $event = Event::find($event_id);
+        $max_routes = Grades::where('event_id', $event->id)->first()->count_routes ?? 0;
         $users = User::query()
             ->leftJoin($table, 'users.id', '=', $table . '.user_id')
             ->where($table . '.event_id', '=', $event_id)
@@ -643,6 +650,17 @@ class Event extends Model
                 $users[$index]['amount_zone_' . $route_id] = $result->amount_zone;
                 $users[$index]['amount_try_zone_' . $route_id] = $result->amount_try_zone;
             }
+            // Заполняем 0 для трасс, которые не были добавлены
+            for ($i = 1; $i <= $max_routes; $i++) {
+                if (!isset($users[$index]['amount_top_' . $i])) {
+                    $users[$index]['amount_top_' . $i] = 0;
+                    $users[$index]['amount_try_top_' . $i] = 0;
+                }
+                if (!isset($users[$index]['amount_zone_' . $i])) {
+                    $users[$index]['amount_zone_' . $i] = 0;
+                    $users[$index]['amount_try_zone_' . $i] = 0;
+                }
+            }
             $users[$index] = collect($users[$index])->except('id');
         }
         return collect($users);
@@ -682,7 +700,6 @@ class Event extends Model
                         ->where('user_id', '=', $user->id)
                         ->get();
             }
-
             $result = ResultRouteSemiFinalStage::merge_result_user_in_stage($result_user);
             if ($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null) {
                 $users_with_result[$index] = collect($user->toArray())->except($fields);
@@ -699,8 +716,21 @@ class Event extends Model
                 $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
             }
         }
+        $users_sorted_with_same_place = ResultQualificationClassic::counting_final_place($model->id, $users_with_result);
 
-        $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result, $type);
+        if($type == 'final' || $type == 'semifinal'){
+            $current_result = array_map(function ($participant) {
+                return [
+                    'user_id' => $participant->get('user_id'),
+                    'place' => $participant->get('place'),
+                ];
+            }, $users_sorted_with_same_place);
+            $pre_results = ResultQualificationClassic::getUserPlaces($model, $type);
+            $users_sorted_pre = ResultQualificationClassic::assign_dublicate_place($current_result, $pre_results);
+            $users_sorted = ResultQualificationClassic::set_new_places($users_sorted_with_same_place, $users_sorted_pre);
+        } else {
+            $users_sorted = $users_sorted_with_same_place;
+        }
 //        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
         ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
         foreach ($users_sorted as $index => $user) {
@@ -775,6 +805,9 @@ class Event extends Model
             $new_result_for_edit = $result_for_edit;
         } else {
             $new_result_for_edit = array_merge($participant->result_for_edit_final, $result_for_edit);
+            usort($new_result_for_edit, function ($a, $b) {
+                return $a['Номер маршрута'] <=> $b['Номер маршрута'];
+            });
         }
         $participant->owner_id = $owner_id;
         $participant->event_id = $event_id;
@@ -792,7 +825,11 @@ class Event extends Model
             $new_result_for_edit = $result_for_edit;
         } else {
             $new_result_for_edit = array_merge($participant->result_for_edit_semifinal, $result_for_edit);
+            usort($new_result_for_edit, function ($a, $b) {
+                return $a['Номер маршрута'] <=> $b['Номер маршрута'];
+            });
         }
+
         $participant->owner_id = $owner_id;
         $participant->event_id = $event_id;
         $participant->user_id = $user_id;
@@ -1081,5 +1118,27 @@ class Event extends Model
             $participant->save();
         }
 
+    }
+
+    public static function get_type_counting_france_system(array $results, int $type)
+    {
+        switch ($type) {
+            case self::INTER:
+               usort($results, function ($a, $b) {
+                    return $b['amount_top'] <=> $a['amount_top']
+                        ?: $b['amount_zone'] <=> $a['amount_zone']
+                            ?: $a['amount_try_top'] <=> $b['amount_try_top']
+                                ?: $a['amount_try_zone'] <=> $b['amount_try_zone'];
+                });
+                break;
+            case self::LOCAL:
+                usort($results, function ($a, $b) {
+                    return $b['amount_top'] <=> $a['amount_top']
+                        ?: $a['amount_try_top'] <=> $b['amount_try_top']
+                            ?: $b['amount_zone'] <=> $a['amount_zone']
+                                ?: $a['amount_try_zone'] <=> $b['amount_try_zone'];
+                });
+        }
+        return $results;
     }
 }

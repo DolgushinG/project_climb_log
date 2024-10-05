@@ -5,6 +5,8 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchForceRecoutingResultFinalGender;
 use App\Admin\Actions\BatchForceRecoutingResultFinalGroup;
 use App\Admin\Actions\BatchGenerateResultFinalParticipant;
+use App\Admin\Actions\ResultRoute\BatchResultCustomRouteUniversal;
+use App\Admin\Actions\ResultRoute\BatchResultRouteUniversal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchExportProtocolRouteParticipantFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchExportResultFinal;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinal;
@@ -12,12 +14,15 @@ use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustomFillOneRoute;
 use App\Admin\Actions\ResultRouteFinalStage\BatchResultFinalCustom;
 use App\Exports\FinalProtocolCardsExport;
 use App\Exports\FinalResultExport;
+use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\Grades;
 use App\Models\ParticipantCategory;
 use App\Models\ResultFinalStage;
+use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFinalStage;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -107,31 +112,22 @@ class ResultRouteFinalStageController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.result_final_stage');
         });
+        \Encore\Admin\Facades\Admin::script(<<<SCRIPT
+            $('body').on('shown.bs.modal', '.modal', function() {
+            $(this).find('select').each(function() {
+                var dropdownParent = $(document.body);
+                if ($(this).parents('.modal.in:first').length !== 0)
+                    dropdownParent = $(this).parents('.modal.in:first');
+                    $(this).select2({
+                        dropdownParent: dropdownParent
+                    });
+                });
+            });
+            SCRIPT);
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultFinal);
-            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-            if($event->is_sort_group_final){
-                $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
-                foreach ($categories as $index => $category){
-                    $index = $index + 1;
-                    $script_one_route = <<<EOT
-                    let btn_close_modal_one_route{$category->id} = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-                    $(document).on("click", btn_close_modal_one_route{$category->id}, function () {
-                        window.location.reload();
-                    });
-                EOT;
-                    $script_custom = <<<EOT
-                        let btn_close_modal_custom{$category->id} = '[id="app-admin-actions-resultroutefinalstage-batchresultfinalcustom-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-                        $(document).on("click", btn_close_modal_custom{$category->id}, function () {
-                            window.location.reload();
-                        });
-                    EOT;
-                    $tools->append(new BatchResultFinalCustomFillOneRoute($category, $script_one_route));
-                    $tools->append(new BatchResultFinalCustom($category, $script_custom));
-                }
-            } else {
-                $tools->append(new BatchResultFinal);
-            }
+            $tools->append(new BatchResultRouteUniversal('final'));
+            $tools->append(new BatchResultCustomRouteUniversal('final'));
             $tools->append(new BatchForceRecoutingResultFinalGender);
             $tools->append(new BatchForceRecoutingResultFinalGroup);
             if(Admin::user()->username == "Tester2"){
@@ -148,6 +144,9 @@ class ResultRouteFinalStageController extends Controller
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
         });
         $grid->actions(function ($actions) {
+            if(Admin::user()->is_delete_result == 0){
+                $actions->disableDelete();
+            }
 //            $actions->disableEdit();
             $actions->disableView();
         });
@@ -158,6 +157,7 @@ class ResultRouteFinalStageController extends Controller
         $grid->disableColumnSelector();
         $grid->disablePagination();
         $grid->disablePerPageSelector();
+
         $grid->column('user.middlename', __('Участник'));
         $grid->column('user.gender', __('Пол'))->display(function ($gender) {
             return trans_choice('somewords.'.$gender, 10);
@@ -234,8 +234,12 @@ class ResultRouteFinalStageController extends Controller
      */
     protected function form($type, $id = null)
     {
-        $form = new Form(new ResultFinalStage());
+        $form = new Form(new ResultFinalStage);
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        $user_id = ResultFinalStage::find($id)->user_id;
+        $user = User::find($user_id);
+        $empty = '';
+        $form->html('<h1><b>'.$user->middlename ?? $empty.'</b></h1>');
         Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
                 display: None;
                 }
@@ -264,8 +268,8 @@ class ResultRouteFinalStageController extends Controller
         });
         $form->table('result_for_edit_final', 'Таблица результата', function ($table) use ($event){
             $table->text('Номер маршрута')->readonly();
-            $table->number('Попытки на топ');
-            $table->number('Попытки на зону');
+            $table->number('Попытки на топ')->required();
+            $table->number('Попытки на зону')->required();
         })->value($arr);
 
         $form->saving(function (Form $form) use ($type, $id) {
@@ -285,10 +289,10 @@ class ResultRouteFinalStageController extends Controller
                     } else {
                         $amount_zone = 0;
                     }
-                    $result->amount_try_top = $route['Попытки на топ'];
+                    $result->amount_try_top = intval($route['Попытки на топ']);
                     $result->amount_top = $amount_top;
                     $result->amount_zone = $amount_zone;
-                    $result->amount_try_zone = $route['Попытки на зону'];
+                    $result->amount_try_zone = intval($route['Попытки на зону']);
                     $result->save();
                 }
                 Event::refresh_final_points_all_participant_in_final($event_id);

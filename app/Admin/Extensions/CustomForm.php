@@ -383,10 +383,8 @@ class CustomForm extends Interactor
     public function addElementAttr($content, $selector)
     {
         $crawler = new Crawler($content);
-
         $node = $crawler->filter($selector)->getNode(0);
         $node->setAttribute('modal', $this->getModalId());
-
         return $crawler->children()->html();
     }
 

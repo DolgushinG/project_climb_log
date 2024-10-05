@@ -41,9 +41,14 @@ class EventsController extends Controller
     /**
      * @throws \Exception
      */
-    public function show(Request $request, $start_date, $climbing_gym, $title){
-        $event_public_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-        $event_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
+    public function show(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event_public_exist = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+            $event_exist = Event::find($request->event_id);
+        } else {
+            $event_public_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+            $event_exist = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->first();
+        }
         $pre_show = false;
         $user_id = Auth()->user()->id ?? null;
         if($event_public_exist){
@@ -100,7 +105,6 @@ class EventsController extends Controller
             $owner = DB::table('admin_users')->find($event->owner_id);
             $event['climbing_gym_name_image'] = $owner->avatar;
             $is_show_button_final = boolval(ResultFinalStage::where('event_id', $event->id)->first());
-
             $is_add_to_list_pending = boolval(ListOfPendingParticipant::where('event_id', $event->id)->where('user_id', $user_id)->first());
             $list_pending = ListOfPendingParticipant::where('event_id', $event->id)->where('user_id', $user_id)->first();
             $is_show_button_semifinal = boolval(ResultSemiFinalStage::where('event_id', $event->id)->first());
@@ -134,39 +138,33 @@ class EventsController extends Controller
         $current_amount_start_price = OwnerPaymentOperations::current_amount_start_price_before_date($event);
         return view('event.tab.payment', compact(['current_amount_start_price','participant_products_and_discounts','event']));
     }
-    public function get_participants(Request $request, $start_date, $climbing_gym, $title){
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function get_participants(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event) {
-            if($event->is_france_system_qualification){
-                $table = 'result_france_system_qualification';
-                $participants = User::query()
-                    ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-                    ->where($table.'.event_id', '=', $event->id)
-                    ->select(
-                        'users.id',
-                        'users.middlename',
-                        'users.city',
-                        'users.team',
-                        $table.'.gender',
-                        $table.'.number_set_id',
-                        $table.'.category_id',
-                    )->get()->toArray();
-            } else {
-                $table = 'result_qualification_classic';
-                $participants = User::query()
-                    ->leftJoin($table, 'users.id', '=', $table.'.user_id')
-                    ->where($table.'.event_id', '=', $event->id)
-                    ->where($table.'.is_other_event', '=', 0)
-                    ->select(
-                        'users.id',
-                        'users.middlename',
-                        'users.city',
-                        'users.team',
-                        $table.'.gender',
-                        $table.'.number_set_id',
-                        $table.'.category_id',
-                    )->get()->toArray();
+            $table = $event->is_france_system_qualification ? 'result_france_system_qualification' : 'result_qualification_classic';
+            $query = User::query()
+                ->leftJoin($table, 'users.id', '=', $table . '.user_id')
+                ->where($table . '.event_id', $event->id)
+                ->select(
+                    'users.id',
+                    'users.middlename',
+                    'users.city',
+                    'users.team',
+                    'users.birthday',
+                    $table . '.gender',
+                    $table . '.sport_category',
+                    $table . '.number_set_id',
+                    $table . '.category_id'
+                );
+            if (!$event->is_france_system_qualification) {
+                $query->where($table . '.is_other_event', 0);
             }
+
+            $participants = $query->get()->toArray();
             if($event->is_input_set != 1){
                 $days = Set::where('event_id', '=', $event->id)->select('day_of_week')->distinct()->get();
                 $sets = Set::where('event_id', '=', $event->id)->get();
@@ -222,14 +220,15 @@ class EventsController extends Controller
         } else {
             return view('errors.404');
         }
-//        dd($days, $participants, $sets);
         return view('event.participants', compact(['days', 'event', 'participants', 'sets']));
     }
 
-    public function get_qualification_classic_results(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
-//        $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
+    public function get_qualification_classic_results(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event){
             if(!$event->is_france_system_qualification){
 //                $final_results = Participant::where('event_id', '=', $event->id)->where('active', '=', 1)->orderBy('points', 'DESC')->get()->toArray();
@@ -249,27 +248,44 @@ class EventsController extends Controller
                 $result_male = array();
                 $result_female = array();
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
-                foreach ($categories as $category) {
+                if($event->is_sort_group_final){
+                    foreach ($categories as $category) {
+                        if($stats->male + $stats->female > 100){
+                            $result_male_cache = Cache::remember('result_male_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
+                                return ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                            });
+                            $result_female_cache = Cache::remember('result_female_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
+                                return ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                            });
+                        } else {
+                            $result_male_cache = ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                            $result_female_cache =  ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        }
+                        $result_male[] = $result_male_cache;
+                        $result_female[] = $result_female_cache;
+//                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+//                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
+                        $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
+                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
+                    }
+                } else {
                     if($stats->male + $stats->female > 100){
-                        $result_male_cache = Cache::remember('result_male_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
-                            return ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
+                        $result_male_cache = Cache::remember('result_male_cache_event_id_'.$event->id, 60 * 60, function () use ($event) {
+                            return ResultQualificationClassic::get_sorted_sex_participant($event->id, 'male')->toArray();
                         });
-                        $result_female_cache = Cache::remember('result_female_cache_'.$category->category.'_event_id_'.$event->id, 60 * 60, function () use ($event, $category) {
-                            return ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        $result_female_cache = Cache::remember('result_female_cache_event_id_'.$event->id, 60 * 60, function () use ($event) {
+                            return ResultQualificationClassic::get_sorted_sex_participant($event->id, 'female')->toArray();
                         });
                     } else {
-                        $result_male_cache = ResultQualificationClassic::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-                        $result_female_cache =  ResultQualificationClassic::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        $result_male_cache = ResultQualificationClassic::get_sorted_sex_participant($event->id, 'male')->toArray();
+                        $result_female_cache =  ResultQualificationClassic::get_sorted_sex_participant($event->id, 'female')->toArray();
                     }
                     $result_male[] = $result_male_cache;
                     $result_female[] = $result_female_cache;
-//                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-//                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
-                    $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
-                    $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
-                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
-                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('category_id', '=', $category->id)->get()->count();
                 }
+
                 if($event->is_open_team_result){
                     foreach ($teams as $team){
                         $result_team_cache = ResultQualificationClassic::get_list_team_and_points_participant($event->id, $team);
@@ -293,9 +309,12 @@ class EventsController extends Controller
         return view('event.qualification_classic_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats']));
     }
 
-    public function get_qualification_classic_global_results(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function get_qualification_classic_global_results(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event){
             if(!$event->is_france_system_qualification){
                 $user_male_ids = ResultQualificationClassic::where(function($query) {
@@ -322,7 +341,6 @@ class EventsController extends Controller
                     ->where('global_category_id', '!=', 0)
                     ->pluck('user_id')
                     ->toArray();
-
                 $stats = new stdClass();
                 if($event->is_open_team_result){
                     $user_team_ids = ResultQualificationClassic::where('event_id', '=', $event->id)->where('active','=', 1)->pluck('user_id')->toArray();
@@ -337,28 +355,33 @@ class EventsController extends Controller
                 $result_male = array();
                 $result_female = array();
                 $categories = ParticipantCategory::where('event_id', $event->id)->get();
-                foreach ($categories as $category) {
-                    if($stats->male + $stats->female > 100){
+                if($event->is_sort_group_final){
+                    foreach ($categories as $category) {
                         $result_male_cache = Cache::rememberForever('global_result_male_cache_'.$category->category.'_event_id_'.$event->id, function () use ($event, $category) {
                             return ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'male', $category->id)->toArray();
                         });
                         $result_female_cache = Cache::rememberForever('global_result_female_cache_'.$category->category.'_event_id_'.$event->id, function () use ($event, $category) {
                             return ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'female', $category->id)->toArray();
                         });
-                    } else {
-                        $result_male_cache = ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-                        $result_female_cache =  ResultQualificationClassic::get_global_sorted_group_participant($event->id, 'female', $category->id)->toArray();
+                        $result_male[] = $result_male_cache;
+                        $result_female[] = $result_female_cache;
+                        $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
+                        $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
+
+                        $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
+                        $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
                     }
+                } else {
+                    $result_male_cache = Cache::rememberForever('global_result_male_cache_event_id_'.$event->id, function () use ($event) {
+                        return ResultQualificationClassic::get_global_sorted_sex_participant($event->id, 'male')->toArray();
+                    });
+                    $result_female_cache = Cache::rememberForever('global_result_female_cache_event_id_'.$event->id, function () use ($event) {
+                        return ResultQualificationClassic::get_global_sorted_sex_participant($event->id, 'female')->toArray();
+                    });
                     $result_male[] = $result_male_cache;
                     $result_female[] = $result_female_cache;
-//                    $result_male[] = Participant::get_sorted_group_participant($event->id, 'male', $category->id)->toArray();
-//                    $result_female[] = Participant::get_sorted_group_participant($event->id, 'female', $category->id)->toArray();
-                    $user_female = User::whereIn('id', $user_female_ids)->pluck('id');
-                    $user_male = User::whereIn('id', $user_male_ids)->pluck('id');
-
-                    $female_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_female)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
-                    $male_categories[$category->id] = ResultQualificationClassic::whereIn('user_id', $user_male)->where('event_id', '=', $event->id)->where('global_category_id', '=', $category->id)->get()->count();
                 }
+
                 if($event->is_open_team_result){
                     foreach ($teams as $team){
                         $result_team_cache = ResultQualificationClassic::get_global_list_team_and_points_participant($event->id, $team);
@@ -382,9 +405,12 @@ class EventsController extends Controller
         return view('event.qualification_classic_global_results', compact(['event', 'result','teams', 'result_team',  'categories', 'stats']));
     }
 
-    public function get_qualification_france_system_results(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function get_qualification_france_system_results(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event){
             $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
             $routes_amount = Grades::where('event_id', $event->id)->first()->count_routes;
@@ -397,7 +423,6 @@ class EventsController extends Controller
                 foreach ($event->categories as $category) {
                     $category = ParticipantCategory::where('category', $category)->where('event_id', $event->id)->first();
                     $users_female2 = Event::get_france_system_result('result_france_system_qualification', $event->id, 'female', $category)->toArray();
-
                     $users_male2 = Event::get_france_system_result('result_france_system_qualification', $event->id, 'male', $category)->toArray();
                     $result_each_routes['female'][$category->id] = $users_female2;
                     $result_each_routes['male'][$category->id] = $users_male2;
@@ -409,9 +434,12 @@ class EventsController extends Controller
         return view('event.france_system_qualification_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
 
-    public function get_semifinal_france_system_results(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function get_semifinal_france_system_results(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event){
             $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
             $routes = array();
@@ -439,9 +467,12 @@ class EventsController extends Controller
         return view('event.france_system_semifinal_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
 
-    public function get_final_france_system_results(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function get_final_france_system_results(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if($event){
             $categories = ParticipantCategory::where('event_id', $event->id)->get()->toArray();
             $routes = array();
@@ -466,7 +497,6 @@ class EventsController extends Controller
         } else {
             return view('errors.404');
         }
-//        dd($result_each_routes, $routes);
         return view('event.france_system_final_results', compact(['event', 'categories', 'result_each_routes', 'routes']));
     }
 
@@ -518,11 +548,8 @@ class EventsController extends Controller
         }
 
         $participant->event_id = $request->event_id;
-        if($request->gender){
-            $participant->gender = $request->gender;
-        } else {
-            $participant->gender = $user->gender;
-        }
+        $participant->gender = $request->gender ?? $user->gender;
+        $participant->sport_category = $request->sport_category ?? $user->sport_category;
         $participant->user_id = $request->user_id;
         $participant->owner_id = $event->owner_id;
         if(!$event->type_event && !$event->is_france_system_qualification){
@@ -650,26 +677,43 @@ class EventsController extends Controller
         $gender = User::find($user_id)->gender;
         $data = array();
         foreach ($request->result as $result) {
-            $status = $result[0]; # "failed-17-Боулдер"
+            $status = $result[0] ; # "failed-17-Боулдер"
             $bool = $result[1]; # "false"
             $grade = $result[2];  # "6C"
             $status_route_id_route_name = explode('-', $status); # ["failed", "17","Боулдер"]
             $route_id = $status_route_id_route_name[1];
+            $route_name = $status_route_id_route_name[2] ?? null;
             if (str_contains($status, 'flash') && $bool == "true") {
                 $attempt = 1;
-                $data[] = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
+                $prepare_data = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id,'route_id' => $route_id, 'attempt'=> $attempt);
+                if($event->type_event){
+                    $prepare_data['route_name'] = $route_name;
+                }
+                $data[] = $prepare_data;
             }
             if (str_contains($status, 'redpoint') && $bool == "true") {
                 $attempt = 2;
-                $data[] = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $prepare_data = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                if($event->type_event){
+                    $prepare_data['route_name'] = $route_name;
+                }
+                $data[] = $prepare_data;
             }
             if (str_contains($status, 'zone') && $bool == "true") {
                 $attempt = 3;
-                $data[] = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $prepare_data = array('grade' => $grade, 'gender'=> $gender,'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                if($event->type_event){
+                    $prepare_data['route_name'] = $route_name;
+                }
+                $data[] = $prepare_data;
             }
             if (str_contains($status, 'failed') && $bool == "true") {
                 $attempt = 0;
-                $data[] = array('grade' => $grade, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                $prepare_data = array('grade' => $grade, 'gender'=> $gender, 'points' => 0, 'user_id'=> $user_id, 'event_id'=> $event_id, 'owner_id'=> $owner_id, 'route_id' => $route_id, 'attempt'=> $attempt);
+                if($event->type_event){
+                    $prepare_data['route_name'] = $route_name;
+                }
+                $data[] = $prepare_data;
             }
         }
         $final_data = array();
@@ -770,15 +814,15 @@ class EventsController extends Controller
                             ->where('category_id', $category->id)
                             ->where('event_id', $event_id)
                             ->where('gender', $gender)
-                            ->orderBy('points', 'DESC')
+                            ->orderByDesc('points')
                             ->get();
-                        ResultQualificationClassic::update_places_in_qualification_classic($event, $participants_for_update);
+                        ResultQualificationClassic::update_places_in_qualification_classic($participants_for_update);
                     }
                 }
             } else {
                 foreach (['female', 'male'] as $gender){
-                    $participants_for_update = ResultQualificationClassic::whereIn('user_id', $participants)->where('event_id', '=', $event_id)->where('gender', $gender)->orderBy('points', 'DESC')->get();
-                    ResultQualificationClassic::update_places_in_qualification_classic($event, $participants_for_update);
+                    $participants_for_update = ResultQualificationClassic::whereIn('user_id', $participants)->where('event_id', '=', $event_id)->where('gender', $gender)->orderByDesc('points')->get();
+                    ResultQualificationClassic::update_places_in_qualification_classic($participants_for_update);
                 }
             }
 //            foreach ($participants as $participant) {
@@ -790,14 +834,18 @@ class EventsController extends Controller
         UpdateResultParticipants::dispatch($event_id);
         Helpers::clear_cache($event);
         if ($result) {
-            return response()->json(['success' => true, 'message' => 'Успешное внесение результатов', 'link' => $event->link], 201);
+            return response()->json(['success' => true, 'message' => 'Успешное внесение результатов', 'link' => $event->new_link ?? $event->link], 201);
         } else {
             return response()->json(['success' => false, 'message' => 'Ошибка внесение результатов'], 422);
         }
     }
 
-    public function listRoutesEvent(Request $request, $start_date, $climbing_gym, $title) {
-        $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+    public function listRoutesEvent(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if(!$event){
             return view('errors.404');
         }
@@ -870,12 +918,11 @@ class EventsController extends Controller
             $details = array();
             $details['title'] = $event->title;
             $details['event_start_date'] = $event->start_date;
-            $details['event_url'] = env('APP_URL').$event->link;
+            $details['event_url'] = env('APP_URL').$event->new_link ?? $event->link;
             $details['event_id'] = $event->id;
             if(env('APP_ENV') == 'prod'){
                 Mail::to($request->email)->queue(new \App\Mail\AllResultExcelFIle($details));
             }
-
             return response()->json(['success' => true, 'message' => 'Успешная отправка'], 200);
         } catch (Exception $e) {
             Log::error($e->getMessage());
@@ -1007,13 +1054,12 @@ class EventsController extends Controller
 
 
     }
-    public function index_analytics(Request $request, $start_date, $climbing_gym, $title)
-    {
-        $event = Event::where('start_date', $start_date)
-            ->where('title_eng', '=', $title)
-            ->where('climbing_gym_name_eng', '=', $climbing_gym)
-            ->where('is_public', 1)
-            ->first();
+    public function index_analytics(Request $request, $start_date = null, $climbing_gym = null, $title = null){
+        if($request->event_id){
+            $event = Event::where('id', $request->event_id)->where('is_public', 1)->first();
+        } else {
+            $event = Event::where('start_date', $start_date)->where('title_eng', '=', $title)->where('climbing_gym_name_eng', '=', $climbing_gym)->where('is_public', 1)->first();
+        }
         if(!$event) {
             if (!$event->is_open_public_analytics) {
                 return view('errors.404');
@@ -1038,5 +1084,19 @@ class EventsController extends Controller
         return response()->json([
             'routes' => $stats,
         ]);
+    }
+
+    public function getAvailableSets(Request $request)
+    {
+        $event_id = $request->event_id;
+        $dob = $request->dob;
+        $available_sets = [];
+        $sets = Set::where('event_id', $event_id)->get();
+        foreach ($sets as $set){
+            if(Helpers::is_valid_year_for_event($event_id, $set->number_set, $dob)){
+                $available_sets[] = $set;
+            }
+        }
+        return response()->json(['availableSets' => $available_sets]);
     }
 }

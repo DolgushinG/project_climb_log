@@ -78,15 +78,19 @@ class SocialiteController extends Controller
             } else {
                 $avatar = null;
             }
-
+            if(isset($socialite_user->user['last_name']) && $socialite_user->user['first_name']){
+                $middlename = $socialite_user->user['last_name'].' '. $socialite_user->user['first_name'];
+            } else {
+                $middlename = $socialite_user->getName();
+            }
             $user = \App\Models\User::updateOrCreate([
                 $socialite.'_id' => $socialite_user->getId()
             ], [
                 $socialite.'_id' => $socialite_user->getId(),
                 'nickname'.$socialite => $socialite_user->getNickname(),
-                'middlename' => $socialite_user->getName(),
+                'middlename' => $middlename,
                 'firstname' => $socialite_user->user['first_name'] ?? null,
-                'lastname' =>$socialite_user->user['last_name'] ?? null,
+                'lastname' => $socialite_user->user['last_name'] ?? null,
                 'avatar' => $avatar,
                 'email' => $email,
                 $socialite.'_token' => $socialite_user->token,

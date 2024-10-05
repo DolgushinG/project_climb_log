@@ -1,5 +1,7 @@
 /node_modules
 /public/hot
+/public/js/*.js
+/public/mix-manifest.json
 /public/storage
 /storage/*.key
 /vendor
@@ -14,17 +16,8 @@ yarn-error.log
 /.idea
 /.vscode
 /resources/views/NiceAdmin/
-/public/js/app.js
-/public/js/main.js
-/public/js/ddata.js
-/public/js/profile.js
-/public/js/welcome.js
 /public/css/*
 /public/vendor/bootstrap
 
 /public/js/app.js.LICENSE.txt
 /public/js/datepicker.js
-/public/js/ddata.js
-/public/js/main.js
-/public/js/profile.js
-/public/js/welcome.js

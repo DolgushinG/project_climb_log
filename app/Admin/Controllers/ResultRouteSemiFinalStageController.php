@@ -5,6 +5,8 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGender;
 use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGroup;
 use App\Admin\Actions\BatchGenerateResultSemiFinalParticipant;
+use App\Admin\Actions\ResultRoute\BatchResultCustomRouteUniversal;
+use App\Admin\Actions\ResultRoute\BatchResultRouteUniversal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportProtocolRouteParticipantSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportResultSemiFinal;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinal;
@@ -12,6 +14,7 @@ use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustom;
 use App\Admin\Actions\ResultRouteSemiFinalStage\BatchResultSemiFinalCustomFillOneRoute;
 use App\Exports\SemiFinalProtocolCardsExport;
 use App\Exports\SemiFinalResultExport;
+use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\ResultQualificationClassic;
 use App\Models\ParticipantCategory;
@@ -135,38 +138,29 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     protected function grid()
     {
-        $grid = new Grid(new ResultSemiFinalStage());
+        $grid = new Grid(new ResultSemiFinalStage);
         if (!Admin::user()->isAdministrator()){
             $grid->model()->where('owner_id', '=', Admin::user()->id);
         }
         $grid->model()->where(function ($query) {
             $query->has('event.result_semifinal_stage');
         });
+        \Encore\Admin\Facades\Admin::script(<<<SCRIPT
+            $('body').on('shown.bs.modal', '.modal', function() {
+            $(this).find('select').each(function() {
+                var dropdownParent = $(document.body);
+                if ($(this).parents('.modal.in:first').length !== 0)
+                    dropdownParent = $(this).parents('.modal.in:first');
+                    $(this).select2({
+                        dropdownParent: dropdownParent
+                    });
+                });
+            });
+            SCRIPT);
         $grid->tools(function (Grid\Tools $tools) {
             $tools->append(new BatchExportResultSemiFinal);
-            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
-            if($event->is_sort_group_semifinal){
-                $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
-                foreach ($categories as $index => $category){
-                    $index = $index + 1;
-                    $script_one_route = <<<EOT
-                    let btn_close_modal_one_route{$category->id} = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-                    $(document).on("click", btn_close_modal_one_route{$category->id}, function () {
-                        window.location.reload();
-                    });
-                EOT;
-                    $script_custom = <<<EOT
-                        let btn_close_modal_custom{$category->id} = '[id="app-admin-actions-resultroutesemifinalstage-batchresultsemifinalcustom-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-                        $(document).on("click", btn_close_modal_custom{$category->id}, function () {
-                            window.location.reload();
-                        });
-                    EOT;
-                    $tools->append(new BatchResultSemiFinalCustomFillOneRoute($category, $script_one_route));
-                    $tools->append(new BatchResultSemiFinalCustom($category, $script_custom));
-                }
-            } else {
-                $tools->append(new BatchResultSemiFinal);
-            }
+            $tools->append(new BatchResultRouteUniversal('semifinal'));
+            $tools->append(new BatchResultCustomRouteUniversal('semifinal'));
             $tools->append(new BatchForceRecoutingSemiFinalResultGroup);
             $tools->append(new BatchForceRecoutingSemiFinalResultGender);
             if(Admin::user()->username == "Tester2"){
@@ -185,6 +179,9 @@ class ResultRouteSemiFinalStageController extends Controller
 //            $actions->disableEdit();
 //            $actions->disableDelete();
             $actions->disableView();
+            if(Admin::user()->is_delete_result == 0){
+                $actions->disableDelete();
+            }
         });
 
         $grid->disableFilter();
@@ -244,8 +241,12 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     protected function form($type, $id = null)
     {
-        $form = new Form(new ResultSemiFinalStage());
+        $form = new Form(new ResultSemiFinalStage);
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        $user_id = ResultSemiFinalStage::find($id)->user_id;
+        $user = User::find($user_id);
+        $empty = '';
+        $form->html('<h1><b>'.$user->middlename ?? $empty.'</b></h1>');
         Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
                 display: None;
                 }
@@ -294,10 +295,11 @@ class ResultRouteSemiFinalStageController extends Controller
                     } else {
                         $amount_zone = 0;
                     }
-                    $result->amount_try_top = $route['Попытки на топ'];
+
+                    $result->amount_try_top = intval($route['Попытки на топ']);
                     $result->amount_top = $amount_top;
                     $result->amount_zone = $amount_zone;
-                    $result->amount_try_zone = $route['Попытки на зону'];
+                    $result->amount_try_zone = intval($route['Попытки на зону']);
                     $result->save();
                 }
               Event::refresh_final_points_all_participant_in_semifinal($event_id);
@@ -316,102 +318,6 @@ class ResultRouteSemiFinalStageController extends Controller
             ->where('active', '=', 1)
             ->pluck('user_id')->toArray();
         return User::whereIn('id', $participant)->pluck('middlename', 'id');
-    }
-
-    /**
-     * @param $users
-     * @param $fields
-     * @param $model
-     * @param $type
-     * @return array
-     */
-    public static function getUsersSorted($users, $fields, $model, $type, $owner_id): array
-    {
-        if (count($users->toArray()) == 0){
-            return [];
-        }
-        $users_with_result = [];
-        foreach ($users as $index => $user){
-            switch ($type) {
-                case 'final':
-                    $result_user = ResultRouteFinalStage::where('owner_id', '=', $owner_id)
-                        ->where('event_id', '=', $model->id)
-                        ->where('user_id', '=', $user->id)
-                        ->get();
-                    break;
-                case 'france_system_qualification':
-                    $result_user = ResultRouteFranceSystemQualification::where('owner_id', '=', $owner_id)
-                        ->where('event_id', '=', $model->id)
-                        ->where('user_id', '=', $user->id)
-                        ->get();
-                    break;
-                case 'semifinal':
-                    $result_user = ResultRouteSemiFinalStage::where('owner_id', '=', $owner_id)
-                        ->where('event_id', '=', $model->id)
-                        ->where('user_id', '=', $user->id)
-                        ->get();
-            }
-            $result = ResultRouteSemiFinalStage::merge_result_user_in_stage($result_user);
-            if($result['amount_top'] !== null && $result['amount_try_top'] !== null && $result['amount_zone'] !== null && $result['amount_try_zone'] !== null){
-                $users_with_result[$index] = collect($user->toArray())->except($fields);
-                $users_with_result[$index]['result'] = $result;
-                $users_with_result[$index]['place'] = null;
-                $users_with_result[$index]['category_id'] = $result['category_id'];
-                $users_with_result[$index]['owner_id'] = $owner_id;
-                $users_with_result[$index]['user_id'] = $user->id;
-                $users_with_result[$index]['event_id'] = $model->id;
-                $users_with_result[$index]['gender'] = trans_choice('somewords.'.$user->gender, 10);
-                $users_with_result[$index]['amount_top'] = $result['amount_top'];
-                $users_with_result[$index]['amount_zone'] = $result['amount_zone'];
-                $users_with_result[$index]['amount_try_top'] = $result['amount_try_top'];
-                $users_with_result[$index]['amount_try_zone'] = $result['amount_try_zone'];
-            }
-        }
-        $users_sorted = ResultQualificationClassic::counting_final_place($model->id, $users_with_result, $type);
-//        $users_sorted = Participant::counting_final_place($model->id, $users_sorted, 'qualification');
-        ### ПРОВЕРИТЬ НЕ СОХРАНЯЕМ ЛИ МЫ ДВА РАЗА ЗДЕСЬ И ПОСЛЕ КУДА ВОЗРАЩАЕТ $users_sorted
-        foreach ($users_sorted as $index => $user){
-            $fields = ['result'];
-            $users_sorted[$index] = collect($user)->except($fields)->toArray();
-            if($type == 'final' || $type == 'france_system_qualification'){
-                if($type == 'france_system_qualification'){
-                    $result = ResultFranceSystemQualification::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
-                    if (!$result){
-                        $result = new ResultFranceSystemQualification;
-                    }
-                } else {
-                    $result = ResultFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
-                    if (!$result){
-                        $result = new ResultFinalStage;
-                    }
-                }
-            } else {
-                $result = ResultSemiFinalStage::where('user_id', '=', $users_sorted[$index]['user_id'])->where('event_id', '=', $model->id)->first();
-                if (!$result){
-                    $result = new ResultSemiFinalStage;
-                }
-            }
-            $category_id = ParticipantCategory::where('id', $users_sorted[$index]['category_id'])->where('event_id', $model->id)->first();
-            if($category_id){
-                $category_id = $category_id->id;
-                $result->category_id = $category_id;
-            } else {
-                Log::error('It has not found category_id '.$users_sorted[$index]['category_id'].' '.$model->id, ['file' => __FILE__, 'line' => __LINE__]);
-            }
-            $result->event_id = $users_sorted[$index]['event_id'];
-            $result->user_id = $users_sorted[$index]['user_id'];
-            $result->gender = trans_choice('somewords.'.$users_sorted[$index]['gender'], 10);
-            $result->owner_id = $users_sorted[$index]['owner_id'];
-            $result->amount_top = $users_sorted[$index]['amount_top'];
-            $result->amount_zone = $users_sorted[$index]['amount_zone'];
-            $result->amount_try_top = $users_sorted[$index]['amount_try_top'];
-            $result->amount_try_zone = $users_sorted[$index]['amount_try_zone'];
-            $result->place = $users_sorted[$index]['place'];
-
-
-            $result->save();
-        }
-        return $users_sorted;
     }
 
     public function exportSemiFinalExcel(Request $request)

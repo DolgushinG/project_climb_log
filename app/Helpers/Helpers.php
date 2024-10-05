@@ -5,12 +5,15 @@ namespace App\Helpers;
 use App\Models\Event;
 use App\Models\ParticipantCategory;
 use App\Models\Set;
+use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
 use DateTime;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use function Symfony\Component\String\s;
+
 class Helpers
 {
 
@@ -73,6 +76,7 @@ class Helpers
         $set = Set::where('event_id', $event_id)->where('number_set', $number_set)->first();
         $event = Event::find($event_id);
         if($set && $event->is_input_birthday){
+
             $allow_years = $set->allow_years;
             $birthYear = (int)date('Y', strtotime($in_year));
             // Проверяем, есть ли год в массиве
@@ -93,6 +97,9 @@ class Helpers
         if(str_contains($email, 'vkontakte')){
             return false;
         }
+        if(str_contains($email, 'group')){
+            return false;
+        }
         return true;
     }
 
@@ -105,8 +112,21 @@ class Helpers
         return $array;
     }
 
+    public static function get_year($year)
+    {
+        if(!$year){
+            return '';
+        }
+        $data_time_year = new DateTime($year);
+        return $data_time_year->format('Y');
+
+
+    }
     public static function calculate_age($birthdate_str) {
         // Преобразуем строку в объект даты
+        if(!$birthdate_str){
+            return '';
+        }
         $birthdate = new DateTime($birthdate_str);
 
         // Текущая дата
@@ -145,6 +165,26 @@ class Helpers
         }
         return intval($percent);
     }
+    public static function find_max_attempts($amount_try_top, $amount_try_zone)
+    {
+        if($amount_try_top){
+            $result_for_compare = $amount_try_top;
+        } else if ($amount_try_zone){
+            $result_for_compare = $amount_try_zone;
+        } else {
+            return 0;
+        }
+        return $result_for_compare;
+    }
+
+    public static function validate_amount_sum_top_and_zone_and_attempts($all_attempts, $amount_try_top, $amount_try_zone)
+    {
+        if($amount_try_top == 0 && $amount_try_zone >= 0){
+            return false;
+        }
+
+        return intval($all_attempts) != self::find_max_attempts($amount_try_top, $amount_try_zone);
+    }
     public static function validate_amount_top_and_zone($amount_top, $amount_zone)
     {
         return $amount_top == 1 && $amount_zone == 0;
@@ -159,13 +199,26 @@ class Helpers
     }
     public static function save_qr_code($event)
     {
-        $link = $event->link.'/routes';
+        $link = route('listRoutesEvent', [$event->id]);
         $image = QrCode::format('png')
             ->size(150)
             ->generate($link);
         $output_file = '/img/qr-code/img-' . time() . '.png';
         Storage::disk('admin')->put($output_file, $image); //storage/app/public/img/qr-code/img-1557309130.png
         return 'storage'.$output_file;
+    }
+
+    public static function isRussianOnly($string, $event) {
+
+        if(!$string){
+            return false;
+        }
+        if($event->is_need_to_russian_names){
+            // Регулярное выражение для проверки на русские символы и пробелы
+            return preg_match('/^[а-яА-ЯёЁ\s]+$/u', $string);
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -266,5 +319,66 @@ class Helpers
             return false;
         }
 
+    }
+
+    public static function hexToRgb($hex) {
+        if(!$hex){
+            return '';
+        }
+        $hex = str_replace("#", "", $hex);
+
+        if(strlen($hex) == 3) {
+            $r = hexdec(str_repeat(substr($hex, 0, 1), 2));
+            $g = hexdec(str_repeat(substr($hex, 1, 1), 2));
+            $b = hexdec(str_repeat(substr($hex, 2, 1), 2));
+        } else {
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+        }
+
+        return array($r, $g, $b);
+    }
+
+    public static function getBrightness($r, $g, $b) {
+        return (0.299 * $r + 0.587 * $g + 0.114 * $b);
+    }
+    public static function getTextColorAndBorder($backgroundColor) {
+        if(!$backgroundColor){
+            return '';
+        }
+        // Преобразуем HEX цвет в RGB
+        list($r, $g, $b) = self::hexToRgb($backgroundColor);
+
+        // Вычисляем яркость
+        $brightness = self::getBrightness($r, $g, $b);
+
+        // Устанавливаем цвет текста и границу на основе яркости
+        if ($brightness > 186) {
+            $textColor = "black";  // Светлый фон, делаем текст черным
+            $border = "1px solid black"; // Добавляем черную границу
+        } else {
+            $textColor = "white";  // Темный фон, делаем текст белым
+            $border = "none"; // Убираем границу
+        }
+
+        return array($textColor, $border);
+    }
+
+    public static function is_valid_date_for_delete($startDateString)
+    {
+        // Преобразуйте строку в объект Carbon
+        $startDate = Carbon::createFromFormat('Y-m-d', $startDateString);
+
+        // Получите текущую дату
+        $currentDate = Carbon::now()->startOfDay(); // Убедитесь, что сравнение происходит на уровне дней
+
+        // Сравните текущую дату с датой старта
+        dd($currentDate->greaterThanOrEqualTo($startDate));
+        if ($currentDate->greaterThanOrEqualTo($startDate)) {
+            return false;
+        }
+
+        return true;
     }
 }

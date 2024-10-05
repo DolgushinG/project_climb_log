@@ -17,9 +17,7 @@
     @endisset
     @isset($details['info_payment'])
         <h2>Информация об оплате:</h2><br>
-    @endisset
-    @isset($details['link_payment'])
-        <h3>{{ $details['info_payment'] }}</h3> <br>
+        <h3>{!! $details['info_payment'] !!}</h3> <br>
     @endisset
     @isset($details['link_payment'])
         <a class="btn btn-primary mt-2 mb-2" href="{{ $details['link_payment'] }}">Оплатить</a><br>

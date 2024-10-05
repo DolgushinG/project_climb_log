@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function loadChart() {
         let gender = document.getElementById('genderSelect').value;
         let event_id = document.getElementById('myChart').getAttribute('data-id');
-        let url = `/get_analytics`;
+        let url = `/get-analytics`;
 
         $.ajax({
             url: url,

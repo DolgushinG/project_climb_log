@@ -1,0 +1,16 @@
+@media only screen and (min-width: 1025px) {
+    img {
+        position: relative;
+        transition: transform 0.25s ease;
+        transform-origin: center center;
+    }
+    img:hover {
+        -webkit-transform: scale(5.5);
+        transform: scale(5.5);
+        margin-top: -50px; /* половина высоты изображения */
+        margin-left: -50px; /* половина ширины изображения */
+        z-index: 9999;
+        position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
+        z-index: 9999;
+    }
+}

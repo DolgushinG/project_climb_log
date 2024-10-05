@@ -97,7 +97,6 @@ class ExportFinalParticipant implements WithCustomStartCell, ShouldAutoSize, Wit
             ->select(
                 'users.middlename',
             )->pluck('middlename')->toArray();
-
     }
 
 }

@@ -10,7 +10,9 @@ use App\Admin\CustomAction\ActionExportCardParticipantFranceSystem;
 use App\Admin\CustomAction\ActionExportCardParticipantFestival;
 use App\Admin\CustomAction\ActionExportList;
 use App\Exports\AllResultExport;
+use App\Exports\FullOfficialResultExport;
 use App\Helpers\Helpers;
+use App\Models\Color;
 use App\Models\Event;
 use App\Http\Controllers\Controller;
 use App\Models\EventAndCoefficientRoute;
@@ -251,14 +253,19 @@ class EventsController extends Controller
         if($event){
             $grid->actions(function ($actions) use ($event) {
                 $actions->disableView();
-
                 $actions->append(new ActionExportList($actions->getKey(), 'Список участников'));
                 $actions->append(new ActionCloneEvent($actions->getKey(), 'Клонировать'));
                 $grades = Grades::where('event_id', $event->id)->first();
                 if($grades){
-                    $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
-                    $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника'));
-                    $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника'));
+                    $event_grid = Event::find($actions->getKey());
+                    if($event_grid->is_france_system_qualification){
+                        $actions->append(new ActionExport($actions->getKey(), 'full', 'Полные офиц. протоколы','excel'));
+                        $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
+                    } else {
+                        $actions->append(new ActionExport($actions->getKey(), 'all', 'Полные результаты','excel'));
+                    }
+                    $actions->append(new ActionExportCardParticipantFestival($actions->getKey(), 'Карточка участника (ФЕСТ)'));
+                    $actions->append(new ActionExportCardParticipantFranceSystem($actions->getKey(), 'Карточка участника (ТОП БОНУС)'));
                 }
 
             });
@@ -272,6 +279,8 @@ class EventsController extends Controller
         $grid->column('title', 'Название');
         $grid->column('link', 'Ссылка для всех')->link();
         $grid->column('admin_link', 'Ссылка на предпросмотр')->link();
+        $grid->column('new_link', 'Ссылка для всех(короче)')->link();
+        $grid->column('new_admin_link', 'Ссылка на предпросмотр(короче)')->link();
         $grid->column('is_registration_state', 'Регистрация')->using([0 => 'Закрыта', 1 => 'Открыта'])->display(function ($title, $column) {
             If ($this->is_registration_state == 0) {
                 return $column->label('default');
@@ -418,6 +427,15 @@ class EventsController extends Controller
                 })->default(0);
             $form->summernote('info_payment', 'Доп инфа об оплате')->placeholder('Инфа...');
         })->tab('Параметры соревнования', function ($form) use ($id) {
+            $form->html('<h4 style="color: black" >Результаты участников после каждого раунда определяются по
+                следующим критериям:<br>
+                1. число пройденных трасс;<br>
+                2. число достигнутых зон;<br>
+                3. число попыток на пройденных трассах;<br>
+                4. число попыток для достижения зон.</h4>');
+            $form->radio('type_counting_france_system','Настройка критерий для подсчета по французской системе')
+                ->options([0 => '1-2-3-4', 1 => '1-3-2-4'])
+                ->required();
             $form->radio('is_france_system_qualification','Настройка подсчета квалификации')
                 ->options([
                     0 =>'Фестивальная система(Баллы и коэффициенты)',
@@ -435,7 +453,7 @@ class EventsController extends Controller
                         })->when(3, function (Form $form) {
                             $form->switch('is_zone_show', 'С зонами на трассах')->help('При внесение результатах появятся зоны и на самих трассах на скалодроме нужно будет указать зоны')->states(self::STATES_BTN);
                             $form->switch('is_flash_value', 'Флеши учитываются')->help('По умолчанию флэши учитываются')->states(self::STATES_BTN_FLASH_OPEN_AND_CLOSE)->default(1);
-                        });
+                        })->default(1);
                     $form->radio('is_semifinal','Настройка кол-ва стадий соревнований')
                         ->options([
                             1 =>'С полуфиналом',
@@ -496,10 +514,13 @@ class EventsController extends Controller
             }
             $form->switch('is_input_birthday', 'Обязательное наличие возраста участника')->states(self::STATES_BTN);
             $form->switch('is_need_sport_category', 'Обязательное наличие разряда')->states(self::STATES_BTN);
+            $form->switch('is_need_to_russian_names', 'Регистрация участников только с русскими(кириллицей) Имя И Фамилия')->states(self::STATES_BTN);
 
         })->tab('Управление соревнованием', function ($form) use ($id){
             $form->switch('is_registration_state', 'Регистрация ')->help('Закрыть вручную')->states(self::STATES_BTN_OPEN_AND_CLOSE);
-
+            if(env('IS_TESTING') === true) {
+                $form->switch('is_group_registration', 'Возможность регистрировать группу')->help('У зарегистрированного пользователя появляется возможность регистрировать группу')->states(self::STATES_BTN_OPEN_AND_CLOSE);
+            }
             $form->switch('is_need_pay_for_reg', 'Включить оплату для регистрации')
                 ->help('Например оплата будет происходит в другом месте или оплачивается только вход')
                 ->states(self::STATES_BTN)->default(1);
@@ -571,8 +592,7 @@ class EventsController extends Controller
                 $form->climbing_gym_name_eng =  Helpers::formating_string($climbing_gym_name_eng);
                 $format_title_eng = Helpers::formating_string($title_eng);
                 $form->title_eng =  $format_title_eng;
-                $form->link = '/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$format_title_eng;
-                $form->admin_link = '/admin/event/'.$form->start_date.'/'.$climbing_gym_name_eng.'/'.$format_title_eng;
+                $form->link = '';
             }
             if($form->type_event){
                 $form->is_access_user_edit_result = 1;
@@ -658,6 +678,24 @@ class EventsController extends Controller
         });
         $form->saved(function (Form $form)  use ($type, $id){
             if($type != 'active') {
+                // После сохранения у нас есть ID, можно теперь сгенерировать ссылку с ID
+                $event = \App\Models\Event::find($form->model()->id);
+
+                if ($event) {
+                    $climbing_gym_name_eng = $event->climbing_gym_name_eng;
+                    $format_title_eng = $event->title_eng;
+
+                    // Создаем ссылку с ID
+                    $event->new_link = '/event/'.$event->id;
+                    $event->new_admin_link = '/admin/event/'.$event->id;
+
+                    // Старый формат тоже оставляем
+                    $event->link = '/event/'.$event->start_date.'/'.$climbing_gym_name_eng.'/'.$format_title_eng;
+                    $event->admin_link = '/admin/event/'.$event->start_date.'/'.$climbing_gym_name_eng.'/'.$format_title_eng;
+
+                    // Сохраняем обновленную модель
+                    $event->save();
+                }
 //                if(!$form->options_amount_price){
 //                    $event = $form->model()->find($id);
 //                    $event_amount = $event->options_amount_price ?? null;
@@ -712,6 +750,10 @@ class EventsController extends Controller
                     $exist_sets = Set::where('event_id', '=', $form->model()->id)->first();
                     if (!$exist_sets) {
                         $this->install_set(Admin::user()->id, $form->model()->id);
+                    }
+                    $exist_colors = Color::where('owner_id', '=', Admin::user()->id)->first();
+                    if (!$exist_colors) {
+                        $this->install_colors(Admin::user()->id);
                     }
                     return back()->isRedirect('events');
                 }
@@ -781,6 +823,14 @@ class EventsController extends Controller
             'Content-Type' => 'application/xlsx',
         ]);
     }
+    public function exportFullExcel(Request $request)
+    {
+        $file_name = 'Полные офиц. результаты.xlsx';
+        $result = Excel::download(new FullOfficialResultExport($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
+    }
     public function exportAllnCsv(Request $request)
     {
         $file_name = 'Полные результаты.csv';
@@ -821,6 +871,21 @@ class EventsController extends Controller
             ['event_id' => $event_id, 'owner_id' => $owner_id, 'time' => '10:00-12:00','max_participants' => 35, 'day_of_week' => 'Saturday','number_set' => 5],
         );
         DB::table('sets')->insert($sets);
+    }
+    public function install_colors($owner_id)
+    {
+        $colors = [];
+        $colorData = Color::colors;
+        ksort($colorData);
+        foreach ($colorData as $color => $name) {
+            $colors[] = [
+                'owner_id' => $owner_id,
+                'color' => $color,
+                'color_name' => $name
+            ];
+        }
+
+        DB::table('colors')->insert($colors);
     }
 
     public function install_admin_script()

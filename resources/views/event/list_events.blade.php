@@ -33,11 +33,11 @@
 
                     @foreach($events as $index => $event)
                         <tr>
-                            <td><a href="{{$event->link}}"><img width="100px" height="80px" class="img-thumbnail" src="storage/{{$event->image}}" alt="image"></a></td>
+                            <td><a href="{{$event->new_link ?? $event->link}}"><img width="100px" height="80px" class="img-thumbnail" src="storage/{{$event->image}}" alt="image"></a></td>
                             @if(\App\Models\Event::event_is_open($event))
-                                <td><a href="{{$event->link}}">{{$event->title}}</a> <br>Регистрация {{($event->is_registration_state ? 'открыта' : 'закрыта')}}<br>Участников {{$amount_participant[$event->id]}}</td>
+                                <td><a href="{{$event->new_link ?? $event->link}}">{{$event->title}}</a> <br>Регистрация {{($event->is_registration_state ? 'открыта' : 'закрыта')}}<br>Участников {{$amount_participant[$event->id]}}</td>
                             @else
-                                <td><a href="{{$event->link}}">{{$event->title}}</a> <br>Соревнование завершено<br>Участников {{$amount_participant[$event->id]}}</td>
+                                <td><a href="{{$event->new_link ?? $event->link}}">{{$event->title}}</a> <br>Соревнование завершено<br>Участников {{$amount_participant[$event->id]}}</td>
                             @endif
                             <td>{{$event->climbing_gym_name}}</td>
                             <td>{{$event->city}}</td>

@@ -1,12 +1,12 @@
 $('#tab-overview').addClass('show active');
-getProfile('Overview');
+getProfile('overview');
 $(document).on('click', '#overview', function () {
     deactivateAllTabs();
     let overview = $('#overview')
     overview.addClass('active');
     overview.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
         '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
-    getProfile('Overview', '#tabContent','#overview', 'Профиль');
+    getProfile('overview', '#tabContent','#overview', 'Профиль');
 });
 $(document).on('click', '#edit', function () {
     deactivateAllTabs();
@@ -14,7 +14,7 @@ $(document).on('click', '#edit', function () {
     edit.addClass('active');
     edit.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
         '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
-    getProfile('Edit','#tabContent','#edit','Изменить');
+    getProfile('edit','#tabContent','#edit','Изменить');
 });
 $(document).on('click', '#events', function () {
     deactivateAllTabs();
@@ -22,7 +22,7 @@ $(document).on('click', '#events', function () {
     events.addClass('active');
     events.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
         '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
-    getProfile('Events','#tabContent','#events','Соревнования');
+    getProfile('events','#tabContent','#events','Соревнования');
 });
 $(document).on('click', '#analytics', function () {
     deactivateAllTabs();
@@ -30,7 +30,7 @@ $(document).on('click', '#analytics', function () {
     analytics.addClass('active');
     analytics.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
         '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
-    getProfile('Analytics','#tabContent','#analytics','Аналитика');
+    getProfile('analytics','#tabContent','#analytics','Аналитика');
 });
 $(document).on('click', '#setting', function () {
     deactivateAllTabs();
@@ -38,7 +38,7 @@ $(document).on('click', '#setting', function () {
     setting.addClass('active');
     setting.text('').append('<i id="spinner" style="margin-left: -12px;\n' +
         '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> загрузка...')
-    getProfile('Setting', '#tabContent','#setting','Пароль');
+    getProfile('setting', '#tabContent','#setting','Пароль');
 });
 function deactivateAllTabs() {
     $('#overview, #edit, #setting, #events, #analytics').removeClass('show active');
@@ -51,7 +51,7 @@ function getProfile(tab, id='#tabContent', itab='',text='') {
     });
     $.ajax({
         type: 'GET',
-        url: 'getProfile' + tab,
+        url: 'get-profile-' + tab,
         success: function (data) {
             let spinner = $('#spinner')
             spinner.remove()
@@ -73,10 +73,10 @@ $(document).ready(function () {
         let btn_saveChanges = $('#saveChanges')
         let data = $("#editForm").serialize();
         e.preventDefault();
-        let tab = 'Edit';
+        let tab = 'edit';
         $.ajax({
             type: 'POST',
-            url: 'editChanges',
+            url: 'edit-changes',
             data: data,
             success: function (data) {
                 btn_saveChanges.removeClass('btn-save-change')
@@ -87,7 +87,7 @@ $(document).ready(function () {
                     btn_saveChanges.text(data.message)
                 }, 3000);
                 setTimeout(function () {
-                    getProfile('Card', '#profileCard');
+                    getProfile('card', '#profileCard');
                     getProfile(tab);
                 }, 4000);
             },
@@ -155,7 +155,7 @@ $(document).on('click', '#changePassword', function(e){
                 btn_change_password.text(data.message)
             }, 3000);
             setTimeout(function () {
-                getProfile('Setting');
+                getProfile('setting');
             }, 6000);
 
         }, error: function (xhr, status, error){

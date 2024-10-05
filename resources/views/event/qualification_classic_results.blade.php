@@ -13,6 +13,7 @@
                                 <label class="m-1 bold" for="search-men"> Поиск тут </label>
                                 <input id="search-men" type="text" class="search-men form-control" placeholder="Что ищем?">
                             </div>
+                            @if($event->is_sort_group_final)
                             <!-- Bordered Tabs Justified -->
                             <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
                                 @foreach($categories as $index => $category)
@@ -68,6 +69,44 @@
                                         </div>
                                 @endforeach
                             </div><!-- End Bordered Tabs Justified -->
+                                @else
+                                <div class="tab-content pt-2" id="borderedTabJustifiedContent">
+                                    <div class="tab-pane fade show active" id="bordered-justified-male"
+                                             role="tabpanel" aria-labelledby="male-tab">
+                                            <table class="table table-auto font-size table-striped results-men">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">
+                                                        <b>Место
+                                                    </th>
+                                                    <th scope="col">
+                                                        <b>Имя
+                                                    </th>
+                                                    {{--                                                    <th scope="col">Город</th>--}}
+                                                    <th scope="col">Суммарные баллы</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                @foreach($result as $res)
+                                                    @if($res['gender'] == "male")
+                                                        <tr>
+                                                            <td>{{$res['user_place']}}</td>
+                                                            <td>{{$res['middlename']}}</td>
+                                                            <td>{{$res['points']}}</td>
+                                                        </tr>
+                                                    @endif
+                                                @endforeach
+                                                <tr class="warning no-result-men">
+                                                    <td colspan="6"><i class="fa fa-warning"></i> Нет результата</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                            @if(!$result)
+                                                <p>Результатов пока нет</p>
+                                            @endif
+                                        </div>
+                                </div><!-- End Bordered Tabs Justified -->
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -83,65 +122,102 @@
                                 <label class="m-1 bold" for="search-women"> Поиск тут </label>
                                 <input id="search-women" type="text" class="search-women form-control" placeholder="Что ищем?">
                             </div>
-                            <!-- Bordered Tabs Justified -->
-                            <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified"
-                                role="tablist">
-                                @foreach($categories as $index => $category)
-                                    <li class="nav-item flex-fill" role="presentation" style="margin-right: 8px!important;">
-                                        <button class="nav-link mr-2 w-100 {{ $index == 0 ? 'active' : '' }}" id="tab-women-{{$category['id']}}"
-                                                data-bs-toggle="tab"
-                                                data-bs-target="#bordered-justified-women-{{$category['id']}}"
-                                                type="button" role="tab" aria-controls="women-{{$category['id']}}"
-                                                aria-selected="true">{{$category['category']}} <span
-                                                class="badge bg-primary text-light">{{$stats->female_categories[$category['id']]}}</span>
-                                        </button>
-                                    </li>
-                                @endforeach
-                            </ul>
-                            <div class="tab-content pt-2" id="borderedTabJustifiedContent">
-                                @foreach($categories as $index => $category)
-                                    <div class="tab-pane fade show {{ $index == 0 ? 'active' : '' }}" id="bordered-justified-women-{{$category['id']}}" role="tabpanel" aria-labelledby="tab-women-{{$category['id']}}">
-                                        <table class="table table-sm table-striped results-women">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">
-                                                    <b>Место
-                                                </th>
-                                                <th scope="col">
-                                                    <b>Имя
-                                                </th>
-{{--                                                <th scope="col">Город</th>--}}
-                                                <th scope="col">Суммарные баллы</th>
-                                            </tr>
-                                        </thead>
-                                            <tbody>
-                                            @foreach($result as $res)
-                                                @if($res['gender'] == "female")
-                                                    @if($res['category_id'] == $category['id'])
+                            @if($event->is_sort_group_final)
+                                <!-- Bordered Tabs Justified -->
+                                <ul class="nav nav-pills nav-tabs-bordered d-flex" id="borderedTabJustified"
+                                    role="tablist">
+                                    @foreach($categories as $index => $category)
+                                        <li class="nav-item flex-fill" role="presentation" style="margin-right: 8px!important;">
+                                            <button class="nav-link mr-2 w-100 {{ $index == 0 ? 'active' : '' }}" id="tab-women-{{$category['id']}}"
+                                                    data-bs-toggle="tab"
+                                                    data-bs-target="#bordered-justified-women-{{$category['id']}}"
+                                                    type="button" role="tab" aria-controls="women-{{$category['id']}}"
+                                                    aria-selected="true">{{$category['category']}} <span
+                                                    class="badge bg-primary text-light">{{$stats->female_categories[$category['id']]}}</span>
+                                            </button>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                                <div class="tab-content pt-2" id="borderedTabJustifiedContent">
+                                    @foreach($categories as $index => $category)
+                                        <div class="tab-pane fade show {{ $index == 0 ? 'active' : '' }}" id="bordered-justified-women-{{$category['id']}}" role="tabpanel" aria-labelledby="tab-women-{{$category['id']}}">
+                                            <table class="table table-sm table-striped results-women">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">
+                                                        <b>Место
+                                                    </th>
+                                                    <th scope="col">
+                                                        <b>Имя
+                                                    </th>
+                                                    {{--                                                <th scope="col">Город</th>--}}
+                                                    <th scope="col">Суммарные баллы</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                @foreach($result as $res)
+                                                    @if($res['gender'] == "female")
+                                                        @if($res['category_id'] == $category['id'])
+                                                            <tr>
+                                                                <td>{{$res['user_place']}}</td>
+                                                                <td>{{$res['middlename']}}</td>
+                                                                <td>{{$res['points']}}</td>
+                                                            </tr>
+                                                        @endif
+                                                    @endif
+                                                @endforeach
+                                                <tr class="warning no-result-women">
+                                                    <td colspan="6"><i class="fa fa-warning"></i> Нет результата</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                            @if($stats->female_categories[$category['id']] == 0)
+                                                <p>Результатов пока нет</p>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div><!-- End Bordered Tabs Justified -->
+                                @else
+                                <div class="tab-content pt-2" id="borderedTabJustifiedContent">
+                                    <div class="tab-pane fade show active" id="bordered-justified-women-female" role="tabpanel" aria-labelledby="tab-women-female">
+                                            <table class="table table-sm table-striped results-women">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">
+                                                        <b>Место
+                                                    </th>
+                                                    <th scope="col">
+                                                        <b>Имя
+                                                    </th>
+                                                    {{--                                                <th scope="col">Город</th>--}}
+                                                    <th scope="col">Суммарные баллы</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                @foreach($result as $res)
+                                                    @if($res['gender'] == "female")
                                                         <tr>
                                                             <td>{{$res['user_place']}}</td>
                                                             <td>{{$res['middlename']}}</td>
                                                             <td>{{$res['points']}}</td>
                                                         </tr>
                                                     @endif
-                                                @endif
-                                            @endforeach
-                                            <tr class="warning no-result-women">
-                                                <td colspan="6"><i class="fa fa-warning"></i> Нет результата</td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                            @if($stats->female_categories[$category['id']] == 0)
+                                                @endforeach
+                                                <tr class="warning no-result-women">
+                                                    <td colspan="6"><i class="fa fa-warning"></i> Нет результата</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                            @if(!$result)
                                                 <p>Результатов пока нет</p>
                                             @endif
                                         </div>
-                                @endforeach
-                            </div><!-- End Bordered Tabs Justified -->
+                                </div><!-- End Bordered Tabs Justified -->
+                            @endif
                         </div>
                     </div>
                 </div>
                 <div class="col-md-2"></div>
-
                 @if($result_team && $event->is_open_team_result)
                     <div class="col-md-2"></div>
                     <div class="col-md-8 mb-3">

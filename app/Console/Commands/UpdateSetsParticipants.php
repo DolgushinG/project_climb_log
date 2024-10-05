@@ -45,7 +45,7 @@ class UpdateSetsParticipants extends Command
     {
         $events = Event::where('is_input_set', 0)->where('active', 1)->where('is_registration_state', 1)->where('is_public', 1)->get();
         foreach ($events as $event){
-            $list = ListOfPendingParticipant::where('event_id', '=', $event->id)->get();
+            $list = ListOfPendingParticipant::where('event_id', '=', $event->id)->orderBy('created_at', 'asc')->get();
             foreach ($list as $job){
                 $number_set = $this->get_free_set($event, $job->number_sets);
                 if($number_set){
@@ -67,6 +67,7 @@ class UpdateSetsParticipants extends Command
                     $participants_event->owner_id = $event->owner_id;
                     $participants_event->event_id = $job->event_id;
                     $participants_event->gender = $user->gender;
+                    $participants_event->sport_category = $user->sport_category;
                     $participants_event->number_set_id = $number_set->id;
                     $participants_event->active = 0;
                     $participants_event->is_paid = 0;
@@ -87,9 +88,9 @@ class UpdateSetsParticipants extends Command
         $sets = Set::whereIn('number_set', $number_sets)->where('owner_id', '=', $event->owner_id)->get();
         foreach ($sets as $set) {
             if ($event->is_france_system_qualification) {
-                $participants_event = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('owner_id', '=', $event->owner_id)->where('number_set_id', '=', $set->id)->count();
+                $participants_event = ResultFranceSystemQualification::where('event_id', '=', $event->id)->where('number_set_id', '=', $set->id)->count();
             } else {
-                $participants_event = ResultQualificationClassic::where('event_id', '=', $event->id)->where('owner_id', '=', $event->owner_id)->where('number_set_id', '=', $set->id)->count();
+                $participants_event = ResultQualificationClassic::where('event_id', '=', $event->id)->where('number_set_id', '=', $set->id)->count();
             }
             $free = $set->max_participants - $participants_event;
             if($free > 0){

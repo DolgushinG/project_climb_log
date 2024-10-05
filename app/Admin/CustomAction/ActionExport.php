@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Admin\CustomAction;
+use App\Models\Event;
 use Encore\Admin\Actions\RowAction;
 use Encore\Admin\Facades\Admin;
 
@@ -121,6 +122,16 @@ class ActionExport extends RowAction
                         });
                         SCRIPT;
                 }
+            case 'full':
+                switch ($format) {
+                    case 'excel':
+                        return <<<SCRIPT
+                        $('.full-excel').on('click', function () {
+                            let id = this.getAttribute('data-id');
+                            document.location = 'exports/events/excel/full/' + id
+                        });
+                    SCRIPT;
+                }
         }
     }
 
@@ -128,6 +139,7 @@ class ActionExport extends RowAction
     {
         Admin::script($this->script($this->stage, $this->format));
         return "<a class='btn {$this->stage}-{$this->format} btn-xs btn-success grid-check-row' data-id='{$this->id}'>$this->name_btn</a>";
+
     }
 
     public function href()

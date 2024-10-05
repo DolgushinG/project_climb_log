@@ -8,18 +8,22 @@ use App\Admin\Actions\BatchForceRecoutingResultQualificationFranceGroup;
 use App\Admin\Actions\BatchGenerateParticipant;
 use App\Admin\Actions\BatchMergeResult;
 use App\Admin\Actions\ResultQualification\BatchResultQualification;
+use App\Admin\Actions\ResultRoute\BatchResultCustomRouteUniversal;
+use App\Admin\Actions\ResultRoute\BatchResultRouteUniversal;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportProtocolRouteParticipantsQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportResultFranceSystemQualification;
+use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchExportStartProtocolParticipantsQualification;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultFranceSystemQualification;
-use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRoute;
 use App\Admin\Actions\ResultRouteFranceSystemQualificationStage\BatchResultQualificationFranceCustomFillOneRouteAndOneCategory;
 use App\Exports\ExportCardParticipantFranceSystem;
 use App\Exports\ExportCardParticipantFestival;
 use App\Exports\ExportListParticipant;
 use App\Exports\ExportProtocolRouteParticipant;
+use App\Exports\ExportStartProtocolParticipant;
 use App\Exports\FranceSystemQualificationResultExport;
 use App\Exports\QualificationResultExport;
 use App\Helpers\Helpers;
+use App\Jobs\UpdateGradeInResultAllParticipant;
 use App\Jobs\UpdateResultParticipants;
 use App\Models\Event;
 use App\Models\Grades;
@@ -32,6 +36,7 @@ use App\Models\ResultFranceSystemQualification;
 use App\Models\ResultRouteFranceSystemQualification;
 use App\Models\Route;
 use App\Models\Set;
+use App\Models\UpdateParticipantResult;
 use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
@@ -395,14 +400,6 @@ class ResultQualificationController extends Controller
                 })->unescape();
         }
 
-
-
-
-
-
-
-
-
         return $show;
     }
 
@@ -429,9 +426,13 @@ class ResultQualificationController extends Controller
      */
     public function update($id, Request $request)
     {
-
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $type = 'edit';
         if ($request->category_id) {
+            $type = 'update';
+            return $this->form($type, $id)->update($id);
+        }
+        if ($request->sport_category) {
             $type = 'update';
             return $this->form($type, $id)->update($id);
         }
@@ -457,7 +458,25 @@ class ResultQualificationController extends Controller
         }
         if ($request->gender) {
             $type = 'update';
-            return $this->form($type, $id)->update($id);
+            if (!$event->is_france_system_qualification) {
+                $result = ResultQualificationClassic::find($id);
+                if($result){
+                    $res = ResultRouteQualificationClassic::where('event_id', $event->id)->where('user_id', $result->user_id)->get();
+                    foreach ($res as $result_route_qualification){
+                        $result_route_qualification->gender = $request->gender;
+                        $result_route_qualification->save();
+                    }
+                }
+            } else {
+                $result = ResultFranceSystemQualification::find($id);
+                if($result){
+                    $res = ResultRouteFranceSystemQualification::where('event_id', $event->id)->where('user_id', $result->user_id)->get();
+                    foreach ($res as $result_route_qualification){
+                        $result_route_qualification->gender = $request->gender;
+                        $result_route_qualification->save();
+                    }
+                }
+            }
         }
         return $this->form($type, $id)->update($id);
     }
@@ -491,33 +510,68 @@ class ResultQualificationController extends Controller
             $result = ResultFranceSystemQualification::find($id);
             $result_route = ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
             if ($result_route) {
-                ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
                 $model = ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
                 $model->amount_top = null;
                 $model->amount_try_top = null;
                 $model->amount_zone = null;
                 $model->amount_try_zone = null;
                 $model->place = null;
-                $model->save();
-
                 $result->result_for_edit_france_system_qualification = null;
-                $result->save();
+                if(UpdateParticipantResult::is_validate_access_delete($model, $result->user_id, $result->event_id)){
+                    ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+                    $model->save();
+                    $result->save();
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => "Удаление результата или регистрации участника невозможна так как есть оплата и внесенный результат",
+                    ];
+                    return response()->json($response);
+                }
             } else {
-                ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+                $model = ResultFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+                if(UpdateParticipantResult::is_validate_access_delete($model, $result->user_id, $result->event_id)){
+                    $model->delete();
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => "Удаление регистрации участника невозможна так как есть оплата",
+                    ];
+                    return response()->json($response);
+                }
             }
         } else {
             $result = ResultQualificationClassic::find($id);
             $result_route = ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
             if ($result_route) {
-                ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
                 $participant = ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
                 $participant->result_for_edit = ResultQualificationClassic::generate_empty_json_result($result->event_id);
                 $participant->active = 0;
                 $participant->points = null;
                 $participant->user_place = null;
-                $participant->save();
+                if(UpdateParticipantResult::is_validate_access_delete($participant, $result->user_id, $result->event_id)){
+                    ResultRouteQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+                    $participant->save();
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => "Удаление результата или регистрации участника невозможна так как есть оплата и внесенный результат",
+                    ];
+                    return response()->json($response);
+                }
+
             } else {
-                ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
+                $model = ResultQualificationClassic::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
+                if(UpdateParticipantResult::is_validate_access_delete($model, $result->user_id, $result->event_id)){
+                    $model->delete();
+                } else {
+                    $response = [
+                        'status' => false,
+                        'message' => "Удаление регистрации участника невозможна так как есть оплата",
+                    ];
+                    return response()->json($response);
+                }
+
             }
 
         }
@@ -537,6 +591,34 @@ class ResultQualificationController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.participant');
         });
+        Admin::style("
+                @media only screen and (min-width: 1025px) {
+                    img {
+                        position: relative;
+                        transition: transform 0.25s ease;
+                        transform-origin: center center;
+                    }
+                    img:hover {
+                        -webkit-transform: scale(5.5);
+                        transform: scale(5.5);
+                        margin-top: -50px; /* половина высоты изображения */
+                        margin-left: -50px; /* половина ширины изображения */
+                        z-index: 9999;
+                        position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
+                        z-index: 9999;
+                    }
+                }
+            ");
+        Admin::script("
+                        $(document).ready(function() {
+                $('.ie-trigger-column-sport_category').each(function() {
+                    // Если внутри span нет текста, делаем иконку видимой
+                    if ($(this).find('.ie-display').text().trim() === '') {
+                        $(this).find('i.fa-edit').css('visibility', 'visible');
+                    }
+                });
+            });
+        ");
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $grid->selector(function (Grid\Tools\Selector $selector) use ($event) {
             $category = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->pluck('id')->toArray();
@@ -559,6 +641,7 @@ class ResultQualificationController extends Controller
         $grid->disableColumnSelector();
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchResultQualification);
+            $tools->append(new BatchExportStartProtocolParticipantsQualification);
             if (!$event->is_registration_state && !$event->is_france_system_qualification) {
                 $tools->append(new BatchMergeResult);
             }
@@ -573,7 +656,9 @@ class ResultQualificationController extends Controller
 //            $actions->disableEdit();
 //            $actions->append(new ActionRejectBill($actions->getKey(), $event->id));
 //            $actions->disableView();
-//            $actions->disableDelete();
+            if(Admin::user()->is_delete_result == 0){
+              $actions->disableDelete();
+            }
         });
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -591,6 +676,15 @@ class ResultQualificationController extends Controller
                 ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
                 ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
         }
+        $grid->column('sport_category', 'Разряд')->display(function ($sport_category) use ($grid){
+            if(!$sport_category){
+                return 'не установлен';
+            } else {
+                return $sport_category;
+            }
+
+        })->select(User::sport_categories_select);
+
         if(!$event->is_open_main_rating){
             $grid->column('user.id', 'Лучшие трассы')->display(function ($id) use ($event) {
                 if($event){
@@ -738,25 +832,7 @@ class ResultQualificationController extends Controller
             ];
 
             $grid->column('is_paid', 'Оплата')->switch($states);
-            \Encore\Admin\Admin::style('
-                        @media only screen and (min-width: 1025px) {
-                                         img {
-                                        position: relative;
-                                        transition: transform 0.25s ease;
-        //                             transform-origin: center center;
-                                }
-                                img:hover {
-                                    -webkit-transform: scale(5.5);
-                                    transform: scale(5.5);
-                                    margin-top: -50px; /* половина высоты изображения */
-                                    margin-left: -50px; /* половина ширины изображения */
-                                    z-index: 9999;
-                                    position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
-                                    z-index: 9999;
-                                }
-                        }
 
-            ');
             $grid->column('bill', 'Чек участника')->image('', 100, 100);
             $grid->column('document', 'Документ участника')->image('', 100, 100);
             if ($event->setting_payment == OwnerPaymentOperations::DINAMIC) {
@@ -795,6 +871,46 @@ class ResultQualificationController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.result_france_system_qualification');
         });
+        \Encore\Admin\Facades\Admin::script(<<<SCRIPT
+            $('body').on('shown.bs.modal', '.modal', function() {
+            $(this).find('select').each(function() {
+                var dropdownParent = $(document.body);
+                if ($(this).parents('.modal.in:first').length !== 0)
+                    dropdownParent = $(this).parents('.modal.in:first');
+                    $(this).select2({
+                        dropdownParent: dropdownParent
+                    });
+                });
+            });
+            SCRIPT);
+        Admin::style("
+                @media only screen and (min-width: 1025px) {
+                    img {
+                        position: relative;
+                        transition: transform 0.25s ease;
+                        transform-origin: center center;
+                    }
+                    img:hover {
+                        -webkit-transform: scale(5.5);
+                        transform: scale(5.5);
+                        margin-top: -50px; /* половина высоты изображения */
+                        margin-left: -50px; /* половина ширины изображения */
+                        z-index: 9999;
+                        position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
+                        z-index: 9999;
+                    }
+                }
+            ");
+        Admin::script("
+                        $(document).ready(function() {
+                $('.ie-trigger-column-sport_category').each(function() {
+                    // Если внутри span нет текста, делаем иконку видимой
+                    if ($(this).find('.ie-display').text().trim() === '') {
+                        $(this).find('i.fa-edit').css('visibility', 'visible');
+                    }
+                });
+            });
+        ");
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $grid->selector(function (Grid\Tools\Selector $selector) {
             $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
@@ -803,127 +919,9 @@ class ResultQualificationController extends Controller
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             $tools->append(new BatchExportResultFranceSystemQualification);
-            $categories = ParticipantCategory::whereIn('category', $event->categories)->where('event_id', $event->id)->get();
-            foreach ($categories as $index => $category) {
-                $index  = $index+1;
-                $script = <<<EOT
-                $(document).on("change", '[data-user-id-{$category->id}="user_id"]', function () {
-                    $('[id=amount_try_top]').val('');
-                    $('[id=amount_try_zone]').val('');
-                });
-                let btn_close_modal{$category->id} = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfilloneroute-{$index}"] [data-dismiss="modal"][class="btn btn-default"]'
-                $(document).on("click", btn_close_modal{$category->id}, function () {
-                    window.location.reload();
-                });
-                $(document).on("change", '[data-user-id-{$category->id}=user_id]', function () {
-                    var routeId = $('[data-route-id-{$category->id}=route_id]').val(); // ID выбранного маршрута
-                    var userId = $('[data-user-id-{$category->id}="user_id"]').select2('val')
-                    var eventId = $('[id=event_id]').val(); // ID выбранного участника
-                    if(routeId){
-                        $.get("/admin/api/get_attempts", // URL эндпоинта
-                            {
-                                route_id: routeId,
-                                user_id: userId,
-                                event_id: eventId
-                            }, // Передаем ID маршрута и участника в запросе
-                            function (data) {
-                                // Обновляем поля с количеством попыток
-                                $('[id=amount_try_top]').val(data.amount_try_top);
-                                $('[id=amount_try_zone]').val(data.amount_try_zone);
-                            }
-                        );
-                    }
-
-                });
-                // Подобный код для обновления попыток на основе выбранного участника и трассы
-                $(document).on("change", '[data-route-id-{$category->id}=route_id]', function () {
-                    var routeId = $(this).val(); // ID выбранного маршрута
-                    var userId = $('[data-user-id-{$category->id}="user_id"]').select2('val')
-                    var eventId = $('[id=event_id]').val(); // ID выбранного участника
-
-                    // Выполняем AJAX-запрос к эндпоинту для получения данных о попытках
-                    $.get("/admin/api/get_attempts", // URL эндпоинта
-                        {
-                            route_id: routeId,
-                            user_id: userId,
-                            event_id: eventId
-                        }, // Передаем ID маршрута и участника в запросе
-                        function (data) {
-                            // Обновляем поля с количеством попыток
-                            $('[id=amount_try_top]').val(data.amount_try_top);
-                            $('[id=amount_try_zone]').val(data.amount_try_zone);
-                        }
-                    );
-                });
-
-        EOT;
-                $tools->append(new BatchResultFranceSystemQualification($category, $script));
-                $tools->append(new BatchResultQualificationFranceCustomFillOneRoute($category, $script));
-            }
-            $script = <<<EOT
-                $(document).on("change", '[data-category-id="user_id"]', function () {
-                    $('[id=amount_try_top]').val('');
-                    $('[data-user-id=user_id]').val('');
-                    $('[id=amount_try_zone]').val('');
-                    $.get("/admin/api/get_users_category",
-                            {categoryId: $(this).val(), eventId: $('[data-category-event-id=event_id]').val()},
-                            function (data) {
-                                var model = $('[data-category-user-id=user_id]');
-                                model.empty();
-                                model.append("<option>Выбрать</option>");
-                                $.each(data, function (index, element) {
-                                    model.append("<option data-category-user-id='" + index + "' value='" + index + "'>" + element + "</option>");
-                                });
-                            }
-                    );
-                });
-                let btn_close_modal_category = '[id="app-admin-actions-resultroutefrancesystemqualificationstage-batchresultqualificationfrancecustomfillonerouteandonecategory"] [data-dismiss="modal"][class="btn btn-default"]'
-                $(document).on("click", btn_close_modal_category, function () {
-                    window.location.reload();
-                });
-                $(document).on("change", '[data-category-user-id=user_id]', function () {
-                    var routeId = $('[data-category-route-id=route_id]').val(); // ID выбранного маршрута
-                    var userId = $('[data-category-user-id="user_id"]').select2('val')
-                    var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
-                    if(routeId){
-                        $.get("/admin/api/get_attempts", // URL эндпоинта
-                            {
-                                route_id: routeId,
-                                user_id: userId,
-                                event_id: eventId
-                            }, // Передаем ID маршрута и участника в запросе
-                            function (data) {
-                                // Обновляем поля с количеством попыток
-                                $('[id=amount_try_top]').val(data.amount_try_top);
-                                $('[id=amount_try_zone]').val(data.amount_try_zone);
-                            }
-                        );
-                    }
-
-                });
-                // Подобный код для обновления попыток на основе выбранного участника и трассы
-                $(document).on("change", '[data-category-route-id=route_id]', function () {
-                    var routeId = $(this).val(); // ID выбранного маршрута
-                    var userId = $('[data-category-user-id="user_id"]').select2('val')
-                    var eventId = $('[data-category-event-id=event_id]').val(); // ID выбранного участника
-
-                    // Выполняем AJAX-запрос к эндпоинту для получения данных о попытках
-                    $.get("/admin/api/get_attempts", // URL эндпоинта
-                        {
-                            route_id: routeId,
-                            user_id: userId,
-                            event_id: eventId
-                        }, // Передаем ID маршрута и участника в запросе
-                        function (data) {
-                            // Обновляем поля с количеством попыток
-                            $('[id=amount_try_top]').val(data.amount_try_top);
-                            $('[id=amount_try_zone]').val(data.amount_try_zone);
-                        }
-                    );
-                });
-
-        EOT;
-            $tools->append(new BatchResultQualificationFranceCustomFillOneRouteAndOneCategory($script));
+            $tools->append(new BatchExportStartProtocolParticipantsQualification);
+            $tools->append(new BatchResultRouteUniversal('qualification'));
+            $tools->append(new BatchResultCustomRouteUniversal('qualification'));
             $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
             $is_enabled = Grades::where('event_id', $event->id)->first();
             if ($is_enabled && Admin::user()->username == "Tester2") {
@@ -932,18 +930,24 @@ class ResultQualificationController extends Controller
             $tools->append(new BatchForceRecoutingResultQualificationFranceGender);
             $tools->append(new BatchForceRecoutingResultQualificationFranceGroup);
             $tools->append(new BatchExportProtocolRouteParticipantsQualification);
+
         });
         $grid->actions(function ($actions) {
 //            $actions->disableEdit();
 //            $actions->disableDelete();
+            if(Admin::user()->is_delete_result == 0){
+                $actions->disableDelete();
+            }
 //            $actions->disableView();
         });
-
+        if(Admin::user()->is_delete_result == 0){
+            $grid->disableBatchActions();
+        }
         $grid->disableExport();
         $grid->disableFilter();
-
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
+        $grid->column('user.id', __('ID'));
         $grid->column('user.middlename', __('Участник'));
         $grid->column('gender', __('Пол'))
             ->help('Если случается перенос, из одного пола в другой, необходимо обязательно пересчитать результаты')
@@ -954,14 +958,24 @@ class ResultQualificationController extends Controller
         $grid->column('category_id', 'Категория')
             ->help('Если случается перенос, из одной категории в другую, необходимо обязательно пересчитать результаты')
             ->select((new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
-        $grid->column('user.sport_category', __('Разряд'));
+        $grid->column('sport_category', 'Разряд')->display(function ($sport_category) use ($grid){
+            if(!$sport_category){
+                return 'не установлен';
+            } else {
+                return $sport_category;
+            }
+
+        })->select(User::sport_categories_select);
+
+
+
         $grid->column('user.birthday', __('Возраст'))->display(function ($birthday){
             return Helpers::calculate_age($birthday);
         });
         $grid->column('place', __('Место'))->sortable();
         $grid->column('amount_top', __('Кол-во топов'));
-        $grid->column('amount_try_top', __('Кол-во попыток на топ'));
         $grid->column('amount_zone', __('Кол-во зон'));
+        $grid->column('amount_try_top', __('Кол-во попыток на топ'));
         $grid->column('amount_try_zone', __('Кол-во попыток на зону'));
         $states = [
             'on' => ['value' => 1, 'text' => 'Да', 'color' => 'success'],
@@ -993,25 +1007,6 @@ class ResultQualificationController extends Controller
 
             }
             $grid->column('is_paid', 'Оплата')->switch($states);
-            \Encore\Admin\Admin::style('
-                    @media only screen and (min-width: 1025px) {
-                                     img {
-                                    position: relative;
-                                    transition: transform 0.25s ease;
-    //                             transform-origin: center center;
-                            }
-                            img:hover {
-                                -webkit-transform: scale(5.5);
-                                transform: scale(5.5);
-                                margin-top: -50px; /* половина высоты изображения */
-                                margin-left: -50px; /* половина ширины изображения */
-                                z-index: 9999;
-                                position: absolute; /* или position: fixed; в зависимости от вашего предпочтения */
-                                z-index: 9999;
-                            }
-                    }
-
-            ');
             $grid->column('bill', 'Чек участника')->image('', 100, 100);
             $grid->column('document', 'Документ участника')->image('', 100, 100);
         }
@@ -1026,8 +1021,13 @@ class ResultQualificationController extends Controller
     protected function form($type, $id = null)
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+
         if ($event->is_france_system_qualification) {
             $form = new Form(new ResultFranceSystemQualification);
+            $user_id = ResultFranceSystemQualification::find($id)->user_id;
+            $user = User::find($user_id);
+            $empty = '';
+            $form->html('<h1><b>'.$user->middlename ?? $empty.'</b></h1>');
             Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
                 display: None;
                 }
@@ -1061,6 +1061,9 @@ class ResultQualificationController extends Controller
             })->value($arr);
         } else {
             $form = new Form(new ResultQualificationClassic);
+            $user_id = ResultQualificationClassic::find($id)->user_id;
+            $user = User::find($user_id);
+            $form->html('<h1><b>'.$user->middlename.'</b></h1>');
             Admin::style(".remove.btn.btn-warning.btn-sm.pull-right {
                 display: None;
                 }
@@ -1086,6 +1089,9 @@ class ResultQualificationController extends Controller
             $form->hidden('gender', 'gender');
             $form->table('result_for_edit', 'Таблица результата', function ($table) use ($event) {
                 $table->text('route_id', 'Номер маршрут')->readonly();
+                if($event->type_event){
+                    $table->text('route_name', 'Название')->readonly();
+                }
                 $table->text('grade', 'Категория')->readonly();
                 if($event->is_zone_show){
                     $attempts = [1 => 'FLASH', 2 => 'REDPOINT', 3 => 'ZONE', 0 => 'Не пролез'];
@@ -1117,7 +1123,13 @@ class ResultQualificationController extends Controller
                     $result->gender = $form->input('gender');
                     $result->save();
                 }
+                if ($form->input('sport_category')) {
+                    $result = $form->model()->find($id);
+                    $result->sport_category = $form->input('sport_category');
+                    $result->save();
+                }
                 if ($form->result_for_edit) {
+
                     $routes = $form->result_for_edit;
                     foreach ($routes as $route) {
                         $result = ResultRouteQualificationClassic::where('user_id', $user_id)->where('event_id', $event_id)->where('route_id', $route['route_id'])->first();
@@ -1162,10 +1174,10 @@ class ResultQualificationController extends Controller
                         } else {
                             $amount_zone = 0;
                         }
-                        $result->amount_try_top = $route['Попытки на топ'];
+                        $result->amount_try_top = intval($route['Попытки на топ']);
                         $result->amount_top = $amount_top;
                         $result->amount_zone = $amount_zone;
-                        $result->amount_try_zone = $route['Попытки на зону'];
+                        $result->amount_try_zone = intval($route['Попытки на зону']);
                         $result->save();
                     }
                     Event::refresh_france_system_qualification_counting($event);
@@ -1309,6 +1321,15 @@ class ResultQualificationController extends Controller
     {
         $file_name = 'Полный список участников.xlsx';
         $result = Excel::download(new ExportListParticipant($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
+    }
+
+    public function startProtocolParticipantExcel(Request $request)
+    {
+        $file_name = 'Стартовый протокол участников.xlsx';
+        $result = Excel::download(new ExportStartProtocolParticipant($request->event_id, $request->category_id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
         return response()->download($result->getFile(), $file_name, [
             'Content-Type' => 'application/xlsx',
         ]);

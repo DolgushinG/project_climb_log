@@ -28,7 +28,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 14,
+                    "order" => 15,
                     "title" => "Admin",
                     "icon" => "fa-tasks",
                     "uri" => "",
@@ -36,7 +36,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 2,
-                    "order" => 15,
+                    "order" => 16,
                     "title" => "Users",
                     "icon" => "fa-users",
                     "uri" => "auth/users",
@@ -44,7 +44,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 2,
-                    "order" => 16,
+                    "order" => 17,
                     "title" => "Roles",
                     "icon" => "fa-user",
                     "uri" => "auth/roles",
@@ -52,7 +52,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 2,
-                    "order" => 17,
+                    "order" => 18,
                     "title" => "Permission",
                     "icon" => "fa-ban",
                     "uri" => "auth/permissions",
@@ -60,7 +60,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 2,
-                    "order" => 18,
+                    "order" => 19,
                     "title" => "Menu",
                     "icon" => "fa-bars",
                     "uri" => "auth/menu",
@@ -68,7 +68,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 2,
-                    "order" => 19,
+                    "order" => 20,
                     "title" => "Operation log",
                     "icon" => "fa-history",
                     "uri" => "auth/logs",
@@ -92,7 +92,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 20,
+                    "order" => 21,
                     "title" => "Helpers",
                     "icon" => "fa-gears",
                     "uri" => NULL,
@@ -100,7 +100,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 10,
-                    "order" => 21,
+                    "order" => 22,
                     "title" => "Scaffold",
                     "icon" => "fa-keyboard-o",
                     "uri" => "helpers/scaffold",
@@ -108,7 +108,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 10,
-                    "order" => 22,
+                    "order" => 23,
                     "title" => "Database terminal",
                     "icon" => "fa-database",
                     "uri" => "helpers/terminal/database",
@@ -116,7 +116,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 10,
-                    "order" => 23,
+                    "order" => 24,
                     "title" => "Laravel artisan",
                     "icon" => "fa-terminal",
                     "uri" => "helpers/terminal/artisan",
@@ -124,7 +124,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 10,
-                    "order" => 24,
+                    "order" => 25,
                     "title" => "Routes",
                     "icon" => "fa-list-alt",
                     "uri" => "helpers/routes",
@@ -148,7 +148,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 7,
+                    "order" => 8,
                     "title" => "Форматы",
                     "icon" => "fa-align-center",
                     "uri" => "formats",
@@ -156,7 +156,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 9,
+                    "order" => 10,
                     "title" => "Сеты",
                     "icon" => "fa-adjust",
                     "uri" => "sets",
@@ -164,7 +164,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 11,
+                    "order" => 12,
                     "title" => "Финал",
                     "icon" => "fa-cogs",
                     "uri" => "final-stage",
@@ -172,7 +172,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 13,
+                    "order" => 14,
                     "title" => "Логи",
                     "icon" => "fa-bars",
                     "uri" => "logs",
@@ -180,7 +180,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 12,
+                    "order" => 13,
                     "title" => "Оплата за сервис",
                     "icon" => "fa-money",
                     "uri" => "owner-payments",
@@ -196,7 +196,7 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 8,
+                    "order" => 9,
                     "title" => "Схема",
                     "icon" => "fa-bars",
                     "uri" => "/map",
@@ -204,11 +204,19 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "parent_id" => 0,
-                    "order" => 10,
+                    "order" => 11,
                     "title" => "Посты",
                     "icon" => "fa-bars",
                     "uri" => "/posts",
                     "permission" => NULL
+                ],
+                [
+                    "parent_id" => 0,
+                    "order" => 7,
+                    "title" => "Настройка цветов трасс",
+                    "icon" => "fa-eyedropper",
+                    "uri" => "/colors",
+                    "permission" => "colors"
                 ]
             ]
         );
@@ -370,7 +378,49 @@ class AdminTablesSeeder extends Seeder
                     "name" => "get_users_category",
                     "slug" => "get_users_category",
                     "http_method" => "",
-                    "http_path" => "/api/get_users_category*"
+                    "http_path" => "/api/get_users*"
+                ],
+                [
+                    "name" => "get_attempts_final",
+                    "slug" => "get_attempts_final",
+                    "http_method" => "",
+                    "http_path" => "/api/final/get_attempts*"
+                ],
+                [
+                    "name" => "get_attempts_semifinal",
+                    "slug" => "get_attempts_semifinal",
+                    "http_method" => "",
+                    "http_path" => "/api/semifinal/get_attempts*"
+                ],
+                [
+                    "name" => "colors",
+                    "slug" => "colors",
+                    "http_method" => "",
+                    "http_path" => "/colors*"
+                ],
+                [
+                    "name" => "set_attempts",
+                    "slug" => "set_attempts",
+                    "http_method" => "",
+                    "http_path" => "/api/set_attempts*"
+                ],
+                [
+                    "name" => "get_user_info",
+                    "slug" => "get_user_info",
+                    "http_method" => "",
+                    "http_path" => "/api/get_user_info*"
+                ],
+                [
+                    "name" => "final_set_attempt",
+                    "slug" => "final_set_attempt",
+                    "http_method" => "",
+                    "http_path" => "/api/final/set_attempt*"
+                ],
+                [
+                    "name" => "semifinal_set_attempt",
+                    "slug" => "semifinal_set_attempt",
+                    "http_method" => "",
+                    "http_path" => "/api/semifinal/set_attempt*"
                 ]
             ]
         );
@@ -438,6 +488,10 @@ class AdminTablesSeeder extends Seeder
                     "menu_id" => 24
                 ],
                 [
+                    "role_id" => 1,
+                    "menu_id" => 25
+                ],
+                [
                     "role_id" => 2,
                     "menu_id" => 8
                 ],
@@ -472,6 +526,10 @@ class AdminTablesSeeder extends Seeder
                 [
                     "role_id" => 2,
                     "menu_id" => 23
+                ],
+                [
+                    "role_id" => 2,
+                    "menu_id" => 25
                 ]
             ]
         );

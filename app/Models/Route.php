@@ -58,6 +58,7 @@ class Route extends Model
     public static function generation_outdoor_route($event_id, $place_id, $area_id, $rock_id, $routes){
         $event = Event::find($event_id);
         $record_outdoor_routes = [];
+        $route_id = 1;
         if($rock_id){
             foreach ($rock_id as $id){
                 if($id){
@@ -88,7 +89,7 @@ class Route extends Model
                                 $record_outdoor_routes[] = array(
                                     'owner_id' => $event->owner_id,
                                     'event_id' => $event_id,
-                                    'route_id' => $route['route_id'],
+                                    'route_id' => $route_id,
                                     'country_id' => $place->country_id,
                                     'type' => $route['type'],
                                     'place_id' => $place_id,
@@ -102,6 +103,7 @@ class Route extends Model
                                     'value' => $value,
                                     'flash_value' => $flash_value,
                                 );
+                                $route_id++;
                             }
 
                         }

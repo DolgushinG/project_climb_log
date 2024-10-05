@@ -91,13 +91,14 @@ class ExportListParticipant implements WithCustomStartCell, ShouldAutoSize, With
         } else {
             $table = 'result_qualification_classic';
         }
-        return User::query()
+        $users = User::query()
             ->leftJoin($table, 'users.id', '=', $table.'.user_id')
             ->where($table.'.event_id', '=', $this->event->id)
             ->select(
                 'users.middlename',
             )->pluck('middlename')->toArray();
-
+        asort($users);
+        return $users;
     }
 
 }

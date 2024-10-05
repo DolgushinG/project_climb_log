@@ -36,106 +36,113 @@
                             @endguest
                             @auth
                                 @if(\App\Helpers\Helpers::valid_email(\Illuminate\Support\Facades\Auth::user()->email))
-                                    @if(\App\Models\Event::event_is_open($event))
-                                        @if(\App\Models\User::user_participant($event->id))
-                                            {{--                                            Открыто/Закрыто изменение участия в сетах--}}
-                                            @if(!$event->is_input_set && $event->is_registration_state && !\App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))
-                                                @include('event.selects.sets_participant')
-                                            @endif
-                                            @if(\App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))
-                                                @if($event->is_france_system_qualification)
-                                                    @include('event.buttons.participant_already')
-                                                @else
-                                                    @if($event->is_access_user_edit_result)
-                                                        @include('event.buttons.send_result')
-                                                        @include('event.buttons.participant_already')
-                                                        @include('event.buttons.results_have_been_sent_already')
-                                                    @else
-                                                        @include('event.buttons.show_sent_result')
-                                                        @include('event.buttons.participant_already')
-                                                        @include('event.buttons.results_have_been_sent_already')
-                                                    @endif
+                                    @if(\App\Helpers\Helpers::isRussianOnly(\Illuminate\Support\Facades\Auth::user()->middlename, $event))
+                                        @if(\App\Models\Event::event_is_open($event))
+                                            @if(\App\Models\User::user_participant($event->id))
+                                                {{--                                            Открыто/Закрыто изменение участия в сетах--}}
+                                                @if(!$event->is_input_set && $event->is_registration_state && !\App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))
+                                                    @include('event.selects.sets_participant')
                                                 @endif
-                                            @else
-                                                {{--Нужна оплата?--}}
-                                                @if($event->is_need_pay_for_reg)
-                                                    @if(\App\Models\ResultRouteQualificationClassic::is_pay_participant(Auth()->user()->id, $event->id))
-                                                        @if($event->is_france_system_qualification)
+                                                @if(\App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))
+                                                    @if($event->is_france_system_qualification)
+                                                        @include('event.buttons.participant_already')
+                                                    @else
+                                                        @if($event->is_access_user_edit_result)
+                                                            @include('event.buttons.send_result')
                                                             @include('event.buttons.participant_already')
+                                                            @include('event.buttons.results_have_been_sent_already')
                                                         @else
-                                                            @if($event->is_send_result_state)
-                                                                @include('event.buttons.send_result')
+                                                            @include('event.buttons.show_sent_result')
+                                                            @include('event.buttons.participant_already')
+                                                            @include('event.buttons.results_have_been_sent_already')
+                                                        @endif
+                                                    @endif
+                                                @else
+                                                    {{--Нужна оплата?--}}
+                                                    @if($event->is_need_pay_for_reg)
+                                                        @if(\App\Models\ResultRouteQualificationClassic::is_pay_participant(Auth()->user()->id, $event->id))
+                                                            @if($event->is_france_system_qualification)
+                                                                @include('event.buttons.participant_already')
+                                                            @else
+                                                                @if($event->is_send_result_state)
+                                                                    @include('event.buttons.send_result')
+                                                                @endif
+                                                            @endif
+                                                        @else
+                                                            @if($event->is_registration_state)
+                                                                @include('event.buttons.cancel_take_part')
+                                                                @include('event.buttons.pay')
                                                             @endif
                                                         @endif
                                                     @else
-                                                        @if($event->is_registration_state)
+                                                        {{-- Француская система в ней результаты вносят судьи--}}
+                                                        @if($event->is_france_system_qualification)
                                                             @include('event.buttons.cancel_take_part')
-                                                            @include('event.buttons.pay')
+                                                            @include('event.buttons.participant_already')
+                                                        @else
+                                                            @if($event->is_send_result_state)
+                                                                {{-- Фестивальная система вносят результаты сами участники--}}
+                                                                @include('event.buttons.send_result')
+                                                            @else
+                                                                @include('event.buttons.send_result_is_close')
+                                                            @endif
+                                                            {{--                                                 Регистрация открыта/закрыта--}}
+                                                            @if($event->is_registration_state)
+                                                                @include('event.buttons.cancel_take_part')
+                                                            @endif
                                                         @endif
+                                                    @endif
+                                                @endif
+                                            @else
+                                                @if($event->is_registration_state)
+                                                    @include('event.selects.birthday')
+                                                    @include('event.selects.genders')
+                                                    @include('event.selects.sport_categories')
+                                                    @include('event.selects.categories')
+                                                    @if(!$event->is_input_set)
+                                                        @include('event.selects.sets_take_part')
+                                                    @endif
+                                                    @include('event.buttons.take_part')
+                                                    @if($event->is_group_registration)
+                                                        @include('event.buttons.take_part_group')
                                                     @endif
                                                 @else
-                                                    {{-- Француская система в ней результаты вносят судьи--}}
-                                                    @if($event->is_france_system_qualification)
-                                                        @include('event.buttons.cancel_take_part')
-                                                        @include('event.buttons.participant_already')
-                                                    @else
-                                                        @if($event->is_send_result_state)
-                                                            {{-- Фестивальная система вносят результаты сами участники--}}
-                                                            @include('event.buttons.send_result')
-                                                        @else
-                                                            @include('event.buttons.send_result_is_close')
-                                                        @endif
-                                                        {{--                                                 Регистрация открыта/закрыта--}}
-                                                        @if($event->is_registration_state)
-                                                            @include('event.buttons.cancel_take_part')
-                                                        @endif
-                                                    @endif
+                                                    @include('event.buttons.reg-close')
                                                 @endif
+                                                <div style="display:none;" id="error-message"
+                                                     class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                            aria-label="Close"></button>
+                                                </div>
+                                                <div style="display:none;" id="warning-message"
+                                                     class="alert alert-warning alert-dismissible fade show" role="alert">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                            aria-label="Close"></button>
+                                                </div>
                                             @endif
-                                        @else
-                                            @if($event->is_registration_state)
-                                                @include('event.selects.birthday')
-                                                @include('event.selects.genders')
-                                                @include('event.selects.sport_categories')
-                                                @include('event.selects.categories')
-                                                @if(!$event->is_input_set)
-                                                    @include('event.selects.sets_take_part')
-                                                @endif
-                                                @include('event.buttons.take_part')
-                                            @else
-                                                @include('event.buttons.reg-close')
-                                            @endif
-                                            <div style="display:none;" id="error-message"
-                                                 class="alert alert-danger alert-dismissible fade show" role="alert">
-                                                <i class="bi bi-exclamation-triangle me-1"></i>
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                        aria-label="Close"></button>
-                                            </div>
-                                            <div style="display:none;" id="warning-message"
-                                                 class="alert alert-warning alert-dismissible fade show" role="alert">
-                                                <i class="bi bi-exclamation-triangle me-1"></i>
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                        aria-label="Close"></button>
-                                            </div>
-                                        @endif
-                                        <div class="modal fade" id="scrollingModal" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                                aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body" id="payment">
-                                                        @include('event.tab.payment_without_bill')
+                                            <div class="modal fade" id="scrollingModal" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                    aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body" id="payment">
+                                                            @include('event.tab.payment_without_bill')
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @else
-                                        @include('event.buttons.event-close')
-                                        @if(\App\Models\User::user_participant($event->id) && \App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))
-                                            @include('event.buttons.show_sent_result')
+                                        @else
+                                            @include('event.buttons.event-close')
+                                            @if(\App\Models\User::user_participant($event->id) && \App\Models\ResultRouteQualificationClassic::participant_with_result(Auth()->user()->id, $event->id))
+                                                @include('event.buttons.show_sent_result')
+                                            @endif
                                         @endif
+                                    @else
+                                        <a href="{{route('profile')}}" class="btn btn-secondary rounded-pill">Перейти в профиль (требуется Имя и Фамилия рус. буквами (кириллицей) без цифр и спец символов)</a>
                                     @endif
                                 @else
                                     <a href="{{route('profile')}}" class="btn btn-secondary rounded-pill">Заполните
@@ -143,33 +150,33 @@
                                 @endif
 
                             @endif
-                            <a href="{{route('participants', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                            <a href="{{route('participants', [$event->id])}}"
                                class="btn btn-primary rounded-pill">Список участников</a>
 
                             @if(!$event->is_france_system_qualification)
-                                <a href="{{route('get_qualification_classic_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('get_qualification_classic_results',[$event->id])}}"
                                    class="btn btn-primary rounded-pill">Предварительные результаты</a>
                                 @if($event->is_open_main_rating)
-                                    <a href="{{route('get_qualification_classic_global_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                    <a href="{{route('get_qualification_classic_global_results',[$event->id])}}"
                                        class="btn btn-dark rounded-pill">Совмещенные результаты</a>
                                 @endif
                             @else
-                                <a href="{{route('get_qualification_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('get_qualification_france_system_results',[$event->id])}}"
                                    class="btn btn-primary rounded-pill">Предварительные результаты</a>
                             @endif
                             @if($event->is_semifinal && $is_show_button_semifinal)
-                                <a href="{{route('get_semifinal_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('get_semifinal_france_system_results',[$event->id])}}"
                                    class="btn btn-success rounded-pill">Результаты полуфинала</a>
                             @endif
                             @if($is_show_button_final)
-                                <a href="{{route('get_final_france_system_results',[$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('get_final_france_system_results',[$event->id])}}"
                                    class="btn btn-success rounded-pill">Результаты финала</a>
                             @endif
                             @if(!$event->is_send_result_state && $event->is_open_send_result_state)
                                 @include('event.get_all_result_to_email')
                             @endif
                             @if(!$event->is_send_result_state && $event->is_open_public_analytics)
-                                <a href="{{route('index_analytics', [$event->start_date, $event->climbing_gym_name_eng, $event->title_eng])}}"
+                                <a href="{{route('index_analytics', [$event->id])}}"
                                    class="btn btn-warning rounded-pill">Статистика</a>
                             @endif
                         </div>
@@ -244,7 +251,7 @@
                                             <div class="col-lg-4">
                                                 <div class="section-title">
                                                     <h2>Контакты</h2>
-                                                    <p>{{$event->contact}}</p>
+                                                    <p style="white-space: nowrap; font-size: 13px;">{!! $event->contact !!}</p>
                                                 </div>
                                             </div>
                                             <div class="col-lg-4">
