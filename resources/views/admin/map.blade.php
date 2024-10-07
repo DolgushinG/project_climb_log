@@ -58,7 +58,11 @@
     <form id="point-form">
         <input type="hidden" id="point-id" name="id">
         <label for="author">Автор:</label>
-        <input class="form-control" type="text" id="author" name="author"><br>
+        <select id="author" name="author" class="form-select" autocomplete="off">
+            @foreach($authors as $author)
+                <option data-author="{{$author}}" value="{{$author}}">{{$author}}</option>
+            @endforeach
+        </select><br>
         <label for="route_id">Маршрут:</label>
         <select id="route_id" name="route_id" class="form-select" autocomplete="off">
             @foreach($routes as $route)

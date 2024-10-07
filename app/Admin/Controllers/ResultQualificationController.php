@@ -591,6 +591,7 @@ class ResultQualificationController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.participant');
         });
+        $grid->model()->orderBy('user_place', 'asc');
         Admin::style("
                 @media only screen and (min-width: 1025px) {
                     img {
@@ -871,6 +872,7 @@ class ResultQualificationController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.result_france_system_qualification');
         });
+        $grid->model()->orderBy('place', 'asc');
         \Encore\Admin\Facades\Admin::script(<<<SCRIPT
             $('body').on('shown.bs.modal', '.modal', function() {
             $(this).find('select').each(function() {
