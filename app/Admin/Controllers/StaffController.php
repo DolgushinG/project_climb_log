@@ -81,23 +81,7 @@ class StaffController extends Controller
             $filter->in('type', 'Роль')->checkbox(Staff::SHOW_TYPES);
         });
         $grid->disableExport();
-        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        if($event){
-            if($event->is_input_birthday){
-                $grid->column('allow_years', 'Возраста для сета')->multipleSelect(User::ages);
-                Admin::script(<<<EOT
-                $(document).ready(function() {
-                    $('.ie-trigger-column-allow_years').each(function() {
-                        if ($(this).find('.ie-display').text().trim() === '') {
-                            $(this).find('i.fa-edit').css('visibility', 'visible');
-                        }
-                    });
-                });
-        EOT
-                );
-            }
-        }
-        $grid->quickCreate(function (Grid\Tools\QuickCreate $create) use ($event) {
+        $grid->quickCreate(function (Grid\Tools\QuickCreate $create){
             $admin_id = \Encore\Admin\Facades\Admin::user()->id;
             $create->integer('owner_id', $admin_id)->default($admin_id)->style('display', 'None');
             $create->text('middlename', 'Фамилия Имя')->required();
