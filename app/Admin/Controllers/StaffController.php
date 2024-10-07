@@ -82,7 +82,6 @@ class StaffController extends Controller
         });
         $grid->disableExport();
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        $events = Event::where('owner_id', Admin::user()->id)->pluck('id')->toArray();
         if($event){
             if($event->is_input_birthday){
                 $grid->column('allow_years', 'Возраста для сета')->multipleSelect(User::ages);
@@ -98,7 +97,7 @@ class StaffController extends Controller
                 );
             }
         }
-        $grid->quickCreate(function (Grid\Tools\QuickCreate $create) use ($event, $events) {
+        $grid->quickCreate(function (Grid\Tools\QuickCreate $create) use ($event) {
             $admin_id = \Encore\Admin\Facades\Admin::user()->id;
             $create->integer('owner_id', $admin_id)->default($admin_id)->style('display', 'None');
             $create->text('middlename', 'Фамилия Имя')->required();
@@ -134,7 +133,6 @@ class StaffController extends Controller
     {
         $form = new Form(new Staff);
         $form->hidden('owner_id', 'owner_id')->default(Admin::user()->id);
-        $form->hidden('events_id', 'events_id');
         $form->text('middlename', 'Фамилия Имя');
         $events = Event::where('owner_id', Admin::user()->id)->pluck('title', 'id')->toArray();
         $form->multipleSelect('events_id', 'Соревы')->options($events);
