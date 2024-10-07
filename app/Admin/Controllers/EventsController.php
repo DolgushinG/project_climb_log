@@ -276,6 +276,7 @@ class EventsController extends Controller
         }
         $grid->disableFilter();
         $grid->disableExport();
+        $grid->column('id', 'ID');
         $grid->column('title', 'Название');
         $grid->column('link', 'Ссылка для всех')->link();
         $grid->column('admin_link', 'Ссылка на предпросмотр')->link();

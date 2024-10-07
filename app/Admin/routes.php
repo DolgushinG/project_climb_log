@@ -353,6 +353,7 @@ Route::group([
         $router->get('events/clone/{id}', 'EventsController@cloneEvent')->name('cloneEvent');
         $router->resource('result-qualification', ResultQualificationController::class);
         $router->resource('map', MapController::class);
+        $router->resource('staff', StaffController::class);
         $router->resource('analytics', AnalyticsController::class);
         $router->resource('grades', GradesController::class);
         $router->resource('formats', FormatsController::class);
