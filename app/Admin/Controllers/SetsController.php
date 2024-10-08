@@ -71,10 +71,37 @@ class SetsController extends Controller
      */
     public function edit($id, Content $content)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         return $content
             ->header(trans('admin.edit'))
             ->description(trans('admin.description'))
             ->body($this->form()->edit($id));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param int $id
+     *
+     */
+    public function update($id)
+    {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
+        return $this->form()->update($id);
     }
 
     /**
@@ -85,6 +112,14 @@ class SetsController extends Controller
      */
     public function create(Content $content)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         return $content
             ->header(trans('admin.create'))
             ->description(trans('admin.description'))
@@ -112,41 +147,43 @@ class SetsController extends Controller
         $grid->disableCreateButton();
         $grid->disableColumnSelector();
         $grid->disableFilter();
-        $grid->actions(function ($actions) {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $grid->disableBatchActions();
+        } else {
+            $grid->tools(function (Grid\Tools $tools) {
+                $tools->append(new BatchDisableSets);
+            });
+            $grid->quickCreate(function (Grid\Tools\QuickCreate $create) use ($event) {
+                $admin_id = \Encore\Admin\Facades\Admin::user()->id;
+                $event_id = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first()->id;
+                $create->integer('event_id', $admin_id)->default($event_id)->style('display', 'None');
+                $create->integer('owner_id', $admin_id)->default($admin_id)->style('display', 'None');
+                $create->text('time', 'Время слота')->placeholder('например 10:00 - 12:00');
+                if($event) {
+                    if ($event->is_input_birthday) {
+                        $create->multipleSelect('allow_years', 'Возраста для регистрации')->options(User::ages);
+                    }
+                }
+                $create->integer('max_participants', 'Максимальное число участников')->placeholder('введите число');
+                $create->select('day_of_week', 'День слота')->options(self::DAYS);
+                $create->integer('number_set', 'Номер сета')->placeholder('введите номер сета');;
+            });
+        }
+        $grid->actions(function ($actions) use ($event) {
             $actions->disableEdit();
             $actions->disableView();
-            if(Admin::user()->is_delete_result == 0){
+            if(!Event::event_is_open($event)){
                 $actions->disableDelete();
-            }
-        });
-        $grid->tools(function (Grid\Tools $tools) {
-            $tools->append(new BatchDisableSets);
-        });
-//        $grid->id('ID');
-//        $grid->filter(function($filter){
-//            $filter->disableIdFilter();
-//            $filter->in('day_of_week', 'День слота')->checkbox(self::DAYS);
-//        });
-
-        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        $grid->quickCreate(function (Grid\Tools\QuickCreate $create) use ($event) {
-            $admin_id = \Encore\Admin\Facades\Admin::user()->id;
-            $event_id = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first()->id;
-            $create->integer('event_id', $admin_id)->default($event_id)->style('display', 'None');
-            $create->integer('owner_id', $admin_id)->default($admin_id)->style('display', 'None');
-            $create->text('time', 'Время слота')->placeholder('например 10:00 - 12:00');
-            if($event) {
-                if ($event->is_input_birthday) {
-                    $create->multipleSelect('allow_years', 'Возраста для регистрации')->options(User::ages);
+            } else {
+                if(Admin::user()->is_delete_result == 0){
+                    $actions->disableDelete();
                 }
             }
-            $create->integer('max_participants', 'Максимальное число участников')->placeholder('введите число');
-            $create->select('day_of_week', 'День слота')->options(self::DAYS);
-            $create->integer('number_set', 'Номер сета')->placeholder('введите номер сета');;
         });
+        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
         $grid->column('time', 'Время слота')->editable();
         $grid->column('max_participants', 'Макс. число участников')->editable();
-
         if($event){
             if($event->is_input_birthday){
                 $grid->column('allow_years', 'Возраста для сета')->multipleSelect(User::ages);
