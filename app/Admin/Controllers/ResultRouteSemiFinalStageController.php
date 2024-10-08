@@ -71,6 +71,14 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     public function destroy($id)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         $result = ResultSemiFinalStage::find($id);
         ResultRouteSemiFinalStage::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
         ResultSemiFinalStage::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
@@ -100,6 +108,14 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     public function edit($id, Content $content)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         return $content
             ->header(trans('admin.edit'))
             ->description(trans('admin.description'))
@@ -115,6 +131,14 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     public function update($id)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         return $this->form('update', $id)->update($id);
     }
     /**
@@ -125,6 +149,14 @@ class ResultRouteSemiFinalStageController extends Controller
      */
     public function create(Content $content)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         return $content
             ->header(trans('admin.create'))
             ->description(trans('admin.description'))
@@ -157,19 +189,21 @@ class ResultRouteSemiFinalStageController extends Controller
                 });
             });
             SCRIPT);
-        $grid->tools(function (Grid\Tools $tools) {
-            $tools->append(new BatchExportResultSemiFinal);
-            $tools->append(new BatchResultRouteUniversal('semifinal'));
-            $tools->append(new BatchResultCustomRouteUniversal('semifinal'));
-            $tools->append(new BatchForceRecoutingSemiFinalResultGroup);
-            $tools->append(new BatchForceRecoutingSemiFinalResultGender);
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        $grid->tools(function (Grid\Tools $tools) use ($event) {
+            if(Event::event_is_open($event)){
+                $tools->append(new BatchExportResultSemiFinal);
+                $tools->append(new BatchResultRouteUniversal('semifinal'));
+                $tools->append(new BatchResultCustomRouteUniversal('semifinal'));
+                $tools->append(new BatchForceRecoutingSemiFinalResultGroup);
+                $tools->append(new BatchForceRecoutingSemiFinalResultGender);
+            }
             if(Admin::user()->username == "Tester2"){
                 $tools->append(new BatchGenerateResultSemiFinalParticipant);
             }
             $tools->append(new BatchExportProtocolRouteParticipantSemiFinal);
         });
-        $grid->selector(function (Grid\Tools\Selector $selector) {
-            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        $grid->selector(function (Grid\Tools\Selector $selector) use ($event){
             if($event->is_sort_group_semifinal) {
                 $selector->select('category_id', 'Категория', (new \App\Models\ParticipantCategory)->getUserCategory(Admin::user()->id));
             }
@@ -178,10 +212,16 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->actions(function ($actions) {
 //            $actions->disableEdit();
 //            $actions->disableDelete();
-            $actions->disableView();
-            if(Admin::user()->is_delete_result == 0){
+            $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+            if(!Event::event_is_open($event)){
+                $actions->disableEdit();
                 $actions->disableDelete();
+            } else {
+                if(Admin::user()->is_delete_result == 0){
+                    $actions->disableDelete();
+                }
             }
+            $actions->disableView();
         });
 
         $grid->disableFilter();

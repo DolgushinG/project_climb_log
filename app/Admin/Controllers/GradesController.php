@@ -120,6 +120,14 @@ class GradesController extends Controller
      */
     public function edit($id, Content $content, Request $request)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         return $content
             ->header(trans('admin.edit'))
             ->description(trans('admin.description'))
@@ -134,6 +142,14 @@ class GradesController extends Controller
      */
     public function create(Content $content)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         return $content
             ->header(trans('admin.create'))
             ->description(trans('admin.description'))
@@ -151,6 +167,13 @@ class GradesController extends Controller
     public function update($id, Request $request)
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         if($event->type_event){
             $route = RoutesOutdoor::find($id);
             $route_pk = RoutesOutdoor::find($request->pk);
@@ -239,6 +262,14 @@ class GradesController extends Controller
      */
     public function store(Request $request)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         if($request->input('route_id')){
             $route = new Route;
             $route->event_id =  $request->input('event_id');
@@ -267,6 +298,13 @@ class GradesController extends Controller
     public function destroy($id, Request $request)
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         $model = explode('-', $id);
         if(isset($model[0]) && isset($model[1])){
             if($model[0] == 'route'){

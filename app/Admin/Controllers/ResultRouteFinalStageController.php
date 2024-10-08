@@ -124,12 +124,16 @@ class ResultRouteFinalStageController extends Controller
                 });
             });
             SCRIPT);
-        $grid->tools(function (Grid\Tools $tools) {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        $grid->tools(function (Grid\Tools $tools) use ($event){
+            if(Event::event_is_open($event)){
+                $tools->append(new BatchResultRouteUniversal('final'));
+                $tools->append(new BatchResultCustomRouteUniversal('final'));
+                $tools->append(new BatchForceRecoutingResultFinalGender);
+                $tools->append(new BatchForceRecoutingResultFinalGroup);
+            }
             $tools->append(new BatchExportResultFinal);
-            $tools->append(new BatchResultRouteUniversal('final'));
-            $tools->append(new BatchResultCustomRouteUniversal('final'));
-            $tools->append(new BatchForceRecoutingResultFinalGender);
-            $tools->append(new BatchForceRecoutingResultFinalGroup);
+
             if(Admin::user()->username == "Tester2"){
                 $tools->append(new BatchGenerateResultFinalParticipant);
             }
@@ -143,9 +147,14 @@ class ResultRouteFinalStageController extends Controller
             }
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
         });
-        $grid->actions(function ($actions) {
-            if(Admin::user()->is_delete_result == 0){
+        $grid->actions(function ($actions) use ($event) {
+            if(!Event::event_is_open($event)){
+                $actions->disableEdit();
                 $actions->disableDelete();
+            } else {
+                if(Admin::user()->is_delete_result == 0){
+                    $actions->disableDelete();
+                }
             }
 //            $actions->disableEdit();
             $actions->disableView();
@@ -184,10 +193,17 @@ class ResultRouteFinalStageController extends Controller
      *
      * @param int $id
      *
-     * @return \Illuminate\Http\Response
      */
     public function update($id)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         return $this->form('update', $id)->update($id);
     }
     /**
@@ -221,6 +237,14 @@ class ResultRouteFinalStageController extends Controller
      */
     public function destroy($id)
     {
+        $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение данных недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         $result = ResultFinalStage::find($id);
         ResultRouteFinalStage::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();
         ResultFinalStage::where('user_id', $result->user_id)->where('event_id', $result->event_id)->delete();

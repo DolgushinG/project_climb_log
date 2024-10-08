@@ -152,7 +152,6 @@ class EventsController extends Controller
                 }
             }
         }
-
         return $this->form($type, $id)->update($id);
     }
 
@@ -194,7 +193,6 @@ class EventsController extends Controller
     public function destroy($id)
     {
         $event = Event::find($id);
-
         if ($event->is_france_system_qualification) {
             $allow_delete = ResultFranceSystemQualification::where('event_id', $event->id)->first();
         } else {
