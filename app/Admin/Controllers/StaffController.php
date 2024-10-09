@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Exports\ExportDocumentJudges;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Staff;
@@ -11,6 +12,8 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StaffController extends Controller
 {
@@ -135,5 +138,14 @@ class StaffController extends Controller
             $tools->disableView();
         });
         return $form;
+    }
+
+    public function getJudgesExcel(Request $request)
+    {
+        $file_name = 'Полный список участников.xlsx';
+        $result = Excel::download(new ExportDocumentJudges($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
     }
 }
