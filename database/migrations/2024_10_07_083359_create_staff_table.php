@@ -17,7 +17,7 @@ class CreateStaffTable extends Migration
             $table->increments('id');
             $table->string('owner_id');
             $table->json('events_id')->nullable();
-            $table->enum('type', \App\Models\Staff::TYPES);
+            $table->string('type');
             $table->string('middlename');
             $table->string('cost')->nullable();
             $table->string('contact')->nullable();

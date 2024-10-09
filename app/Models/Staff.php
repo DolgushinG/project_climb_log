@@ -9,16 +9,20 @@ class Staff extends Model
     protected $casts = [
         'events_id' =>'json',
     ];
-    const TYPES = ['judge', 'helper_judge','main_judge','routesetter', 'helper', 'administrator', 'cleaner', 'tester', 'other'];
     const SHOW_TYPES = [
-        'judge' => 'Судья',
-        'helper_judge' => 'Помощник судьи',
-        'main_judge' => 'Главный судьи',
-        'routesetter' => 'Подготовщик',
-        'helper' => 'Волонтер',
-        'administrator' => 'Админ',
-        'cleaner' => 'Клинер',
-        'tester'=> 'Тестер',
-        'other'=> 'Другой'
+        'Судья на трассе',
+        'Зам. Главного судьи',
+        'Зам. Главного судьи по виду',
+        'Зам. Главного судьи по безопасности',
+        'Главный секретарь',
+        'Помощник судьи',
+        'Главный судья',
+        'Председатель',
+        'Подготовщик',
+        'Волонтер',
+        'Админ',
+        'Клинер',
+        'Тестер',
+        'Другой'
     ];
 }
