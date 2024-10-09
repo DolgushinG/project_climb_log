@@ -118,7 +118,6 @@ return [
 
     'middleware' => [
         'web',
-        Authorize::class,
         'view.pulse',
     ],
 

@@ -179,7 +179,7 @@ class BatchResultCustomRouteUniversal extends CustomAction
                                     $.each(sortedData, function (i, item) {
                                         var userId = item[0];
                                         var userName = item[1];
-                                        model.append("<option data-final-custom-user-id='" + userId + "' value='" + userId + "'>" + userName + "</option>");
+                                        model.append("<option data-custom-user-id='" + userId + "' value='" + userId + "'>" + userName + "</option>");
                                     });
                                 }
                             );
