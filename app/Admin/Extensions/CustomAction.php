@@ -336,7 +336,7 @@ SCRIPT;
     public function handleActionPromise()
     {
         $resolve = <<<'SCRIPT'
-var actionResolver = function (data) {
+var actionResolverCustom = function (data) {
 
             var response = data[0];
             var target   = data[1];
@@ -380,7 +380,7 @@ var actionResolver = function (data) {
             }
         };
 
-        var actionCatcher = function (request) {
+        var actionCatcherCustom = function (request) {
             if (request && typeof request.responseJSON === 'object') {
                 $.admin.toastr.error(request.responseJSON.message, '', {positionClass:"toast-bottom-center", timeOut: 10000}).css("width","500px")
             }
@@ -390,7 +390,7 @@ SCRIPT;
         Admin::script($resolve);
 
         return <<<'SCRIPT'
-process.then(actionResolver).catch(actionCatcher);
+process.then(actionResolverCustom).catch(actionCatcher);
 SCRIPT;
     }
 
