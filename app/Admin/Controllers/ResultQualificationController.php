@@ -422,11 +422,17 @@ class ResultQualificationController extends Controller
      *
      * @param int $id
      *
-     * @return \Illuminate\Http\Response
      */
     public function update($id, Request $request)
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'status' => false,
+                'message' => "Изменение результатов недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response);
+        }
         $type = 'edit';
         if ($request->category_id) {
             $type = 'update';
@@ -506,6 +512,12 @@ class ResultQualificationController extends Controller
     public function destroy($id, Request $request)
     {
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', '=', 1)->first();
+        if(!Event::event_is_open($event)){
+            $response = [
+                'errors' => "Изменение результатов недоступно, так как соревнование завершено",
+            ];
+            return response()->json($response, 422);
+        }
         if ($event->is_france_system_qualification) {
             $result = ResultFranceSystemQualification::find($id);
             $result_route = ResultRouteFranceSystemQualification::where('user_id', $result->user_id)->where('event_id', $result->event_id)->first();
@@ -591,6 +603,7 @@ class ResultQualificationController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.participant');
         });
+        $grid->model()->orderBy('user_place', 'asc');
         Admin::style("
                 @media only screen and (min-width: 1025px) {
                     img {
@@ -653,12 +666,17 @@ class ResultQualificationController extends Controller
             $tools->append(new BatchForceRecouting);
         });
         $grid->actions(function ($actions) use ($event) {
-//            $actions->disableEdit();
 //            $actions->append(new ActionRejectBill($actions->getKey(), $event->id));
 //            $actions->disableView();
-            if(Admin::user()->is_delete_result == 0){
-              $actions->disableDelete();
+            if(!Event::event_is_open($event)){
+                $actions->disableEdit();
+                $actions->disableDelete();
+            } else {
+                if(Admin::user()->is_delete_result == 0){
+                    $actions->disableDelete();
+                }
             }
+
         });
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -871,6 +889,7 @@ class ResultQualificationController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.result_france_system_qualification');
         });
+        $grid->model()->orderBy('place', 'asc');
         \Encore\Admin\Facades\Admin::script(<<<SCRIPT
             $('body').on('shown.bs.modal', '.modal', function() {
             $(this).find('select').each(function() {
@@ -918,17 +937,18 @@ class ResultQualificationController extends Controller
             $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
         $grid->tools(function (Grid\Tools $tools) use ($event) {
-            $tools->append(new BatchExportResultFranceSystemQualification);
-            $tools->append(new BatchExportStartProtocolParticipantsQualification);
-            $tools->append(new BatchResultRouteUniversal('qualification'));
-            $tools->append(new BatchResultCustomRouteUniversal('qualification'));
-            $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
+            if(Event::event_is_open($event)){
+                $tools->append(new BatchExportResultFranceSystemQualification);
+                $tools->append(new BatchExportStartProtocolParticipantsQualification);
+                $tools->append(new BatchResultRouteUniversal('qualification'));
+                $tools->append(new BatchResultCustomRouteUniversal('qualification'));
+                $tools->append(new BatchForceRecoutingResultQualificationFranceGender);
+                $tools->append(new BatchForceRecoutingResultQualificationFranceGroup);
+            }
             $is_enabled = Grades::where('event_id', $event->id)->first();
             if ($is_enabled && Admin::user()->username == "Tester2") {
                 $tools->append(new BatchGenerateParticipant);
             }
-            $tools->append(new BatchForceRecoutingResultQualificationFranceGender);
-            $tools->append(new BatchForceRecoutingResultQualificationFranceGroup);
             $tools->append(new BatchExportProtocolRouteParticipantsQualification);
 
         });

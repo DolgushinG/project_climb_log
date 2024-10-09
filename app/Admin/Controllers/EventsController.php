@@ -152,7 +152,6 @@ class EventsController extends Controller
                 }
             }
         }
-
         return $this->form($type, $id)->update($id);
     }
 
@@ -194,7 +193,6 @@ class EventsController extends Controller
     public function destroy($id)
     {
         $event = Event::find($id);
-
         if ($event->is_france_system_qualification) {
             $allow_delete = ResultFranceSystemQualification::where('event_id', $event->id)->first();
         } else {
@@ -276,6 +274,7 @@ class EventsController extends Controller
         }
         $grid->disableFilter();
         $grid->disableExport();
+        $grid->column('id', 'ID');
         $grid->column('title', 'Название');
         $grid->column('link', 'Ссылка для всех')->link();
         $grid->column('admin_link', 'Ссылка на предпросмотр')->link();

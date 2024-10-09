@@ -2,6 +2,15 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\BatchAddMap;
+use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGender;
+use App\Admin\Actions\BatchForceRecoutingSemiFinalResultGroup;
+use App\Admin\Actions\BatchGenerateResultSemiFinalParticipant;
+use App\Admin\Actions\BatchRemoveMap;
+use App\Admin\Actions\ResultRoute\BatchResultCustomRouteUniversal;
+use App\Admin\Actions\ResultRoute\BatchResultRouteUniversal;
+use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportProtocolRouteParticipantSemiFinal;
+use App\Admin\Actions\ResultRouteSemiFinalStage\BatchExportResultSemiFinal;
 use App\Helpers\Helpers;
 use App\Models\Color;
 use App\Models\Event;
@@ -9,6 +18,7 @@ use App\Models\Map;
 use App\Http\Controllers\Controller;
 use App\Models\Point;
 use App\Models\Route;
+use App\Models\Staff;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -38,9 +48,9 @@ class MapController extends Controller
                             $column->row($this->grid());
 
                         });
-//                        $row->column(10, function (Column $column) use ($event) {
-//                            $column->row($this->list_points());
-//                        });
+                        $row->column(10, function (Column $column) use ($event) {
+                            $column->row($this->list_points());
+                        });
                     }
                 }
             });
@@ -97,6 +107,10 @@ class MapController extends Controller
         $grid->column('color', __('Цвет'))->display(function ($color) {
             return "<div style='width: 50px; height: 20px; background-color: {$color}; border: 1px solid #ddd;'></div>";
         });
+        $grid->tools(function (Grid\Tools $tools) {
+            $tools->append(new BatchAddMap);
+            $tools->append(new BatchRemoveMap);
+        });
         $grid->disableFilter();
 //        $grid->disableBatchActions();
         $grid->disableColumnSelector();
@@ -120,8 +134,9 @@ class MapController extends Controller
         foreach ($points as $index => $point){
             $points[$index]['font_background'] = Helpers::getTextColorAndBorder($point->color ?? '');
         }
-        $colors = Color::where('owner_id', Admin::user()->id)->get()->sortByDesc('color_name');
-        return Admin::component('admin::map', compact(['colors','points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
+        $authors = Staff::where('owner_id', $owner_id)->where('type', 'routesetter')->pluck('middlename','id')->toArray();
+        $colors = Color::where('owner_id', $owner_id)->get()->sortByDesc('color_name');
+        return Admin::component('admin::map', compact(['colors','authors','points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
     }
 
     /**
