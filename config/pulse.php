@@ -139,6 +139,9 @@ return [
             'ignore' => [
                 ...Pulse::defaultVendorCacheKeys(),
             ],
+            'groups' => [
+                // '/:\d+/' => ':*',
+            ],
         ],
 
 
