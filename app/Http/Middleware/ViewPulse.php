@@ -18,9 +18,11 @@ class ViewPulse
     {
         $allowedIds = [302, 303, 305, 306];
 
-        if (auth()->check() && !in_array(auth()->user()->id, $allowedIds)) {
+        if (auth()->check() && in_array(auth()->user()->id, $allowedIds)) {
+            return $next($request);
+        } else {
             return redirect(RouteServiceProvider::HOME);
-        }
-        return $next($request);
+         }
+        
     }
 }
