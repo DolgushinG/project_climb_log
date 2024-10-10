@@ -91,7 +91,7 @@ class StaffController extends Controller
             $create->text('middlename', 'Фамилия Имя')->required();
             $create->select('type', 'Роль')->options(Staff::SHOW_TYPES)->required();
             $create->select('judge_category', 'Судейская категория')->options(Staff::JUDGE_CATEGORY)->required();
-            $create->select('area', 'Территория');
+            $create->text('area', 'Территория');
             $create->integer('cost', 'Оплата в час');
             $create->text('contact', 'Контакты');
         });
