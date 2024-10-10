@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Exports\ExportDocumentJudges;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Staff;
@@ -11,6 +12,8 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StaffController extends Controller
 {
@@ -79,6 +82,7 @@ class StaffController extends Controller
         $grid->filter(function($filter){
             $filter->disableIdFilter();
             $filter->in('type', 'Роль')->checkbox(Staff::SHOW_TYPES);
+            $filter->in('judge_category', 'Судейская категория')->checkbox(Staff::JUDGE_CATEGORY);
         });
         $grid->disableExport();
         $grid->quickCreate(function (Grid\Tools\QuickCreate $create){
@@ -86,12 +90,16 @@ class StaffController extends Controller
             $create->integer('owner_id', $admin_id)->default($admin_id)->style('display', 'None');
             $create->text('middlename', 'Фамилия Имя')->required();
             $create->select('type', 'Роль')->options(Staff::SHOW_TYPES)->required();
+            $create->select('judge_category', 'Судейская категория')->options(Staff::JUDGE_CATEGORY)->required();
+            $create->select('area', 'Территория');
             $create->integer('cost', 'Оплата в час');
             $create->text('contact', 'Контакты');
         });
 
         $grid->column('middlename', 'Фамилия Имя')->editable();
         $grid->column('type', 'Роль')->select(Staff::SHOW_TYPES)->sortable();
+        $grid->column('judge_category', 'Судейская категория')->select(Staff::JUDGE_CATEGORY)->sortable();
+        $grid->column('area', 'Территория')->editable();
         Admin::script(<<<EOT
                 $(document).ready(function() {
                     $('.ie-trigger-column-events_id').each(function() {
@@ -121,6 +129,8 @@ class StaffController extends Controller
         $events = Event::where('owner_id', Admin::user()->id)->pluck('title', 'id')->toArray();
         $form->multipleSelect('events_id', 'Соревы')->options($events);
         $form->select('type', 'Роль')->options(Staff::SHOW_TYPES);
+        $form->select('judge_category', 'Судейская категория')->options(Staff::JUDGE_CATEGORY);
+        $form->text('area', 'Территория');
         $form->text('cost', 'Оплата');
         $form->text('contact', 'Контакты');
         $form->footer(function ($footer) {
@@ -135,5 +145,14 @@ class StaffController extends Controller
             $tools->disableView();
         });
         return $form;
+    }
+
+    public function getJudgesExcel(Request $request)
+    {
+        $file_name = 'Справка о судьях.xlsx';
+        $result = Excel::download(new ExportDocumentJudges($request->id), $file_name, \Maatwebsite\Excel\Excel::XLSX);
+        return response()->download($result->getFile(), $file_name, [
+            'Content-Type' => 'application/xlsx',
+        ]);
     }
 }

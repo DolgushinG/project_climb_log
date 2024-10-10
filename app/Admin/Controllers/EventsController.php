@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\ActionExportDocumentJudges;
 use App\Admin\Actions\BatchMessageForParticipant;
 use App\Admin\Actions\BatchNotificationOfParticipant;
 use App\Admin\CustomAction\ActionCloneEvent;
@@ -252,6 +253,7 @@ class EventsController extends Controller
             $grid->actions(function ($actions) use ($event) {
                 $actions->disableView();
                 $actions->append(new ActionExportList($actions->getKey(), 'Список участников'));
+                $actions->append(new ActionExportDocumentJudges($actions->getKey(), 'Справка о судьях'));
                 $actions->append(new ActionCloneEvent($actions->getKey(), 'Клонировать'));
                 $grades = Grades::where('event_id', $event->id)->first();
                 if($grades){

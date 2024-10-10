@@ -18,6 +18,8 @@ class CreateStaffTable extends Migration
             $table->string('owner_id');
             $table->json('events_id')->nullable();
             $table->string('type');
+            $table->string('judge_category');
+            $table->string('area');
             $table->string('middlename');
             $table->string('cost')->nullable();
             $table->string('contact')->nullable();
