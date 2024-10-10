@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\OwnerEventIsValid;
+use App\Http\Middleware\ViewPulse;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -67,6 +68,7 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'basicAuth' => \App\Http\Middleware\BasicAuth::class
+        'basicAuth' => \App\Http\Middleware\BasicAuth::class,
+        'view.pulse' => ViewPulse::class
     ];
 }
