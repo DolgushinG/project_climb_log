@@ -9,6 +9,11 @@ class Staff extends Model
     protected $casts = [
         'events_id' =>'json',
     ];
+    const JUDGE_CATEGORY = [
+        "СС1К" =>"СС1К",
+        "СС2К" =>"СС2К",
+        "СС3К" =>"СС3К",
+    ];
     const SHOW_TYPES = [
         'Судья на трассе' => 'Судья на трассе',
         'Зам. Главного судьи' => 'Зам. Главного судьи',
