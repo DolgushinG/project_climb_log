@@ -134,7 +134,7 @@ class MapController extends Controller
         foreach ($points as $index => $point){
             $points[$index]['font_background'] = Helpers::getTextColorAndBorder($point->color ?? '');
         }
-        $authors = Staff::where('owner_id', $owner_id)->where('type', 'routesetter')->pluck('middlename','id')->toArray();
+        $authors = Staff::where('owner_id', $owner_id)->where('type', 'Подготовщик')->pluck('middlename','id')->toArray();
         $colors = Color::where('owner_id', $owner_id)->get()->sortByDesc('color_name');
         return Admin::component('admin::map', compact(['colors','authors','points', 'event', 'routes', 'points_exist','scheme_climbing_gym']));
     }
