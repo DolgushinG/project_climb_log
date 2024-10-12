@@ -38,7 +38,7 @@ class UpdateOwnerOperations extends Command
             $participants = ResultQualificationClassic::where('event_id', $event->id)->where('is_other_event', 0)->where('is_paid', 1)->get();
         }
         foreach ($participants as $participant){
-            OwnerPaymentOperations::execute_payment_operations($participant, $participant->owner_id, $participant->amount_start_price);
+            OwnerPaymentOperations::execute_payment_operations($participant, $participant->owner_id, $participant->amount_start_price, 'Стартовый взнос');
             # Пересчитываем оплату за соревы
             OwnerPaymentOperations::execute_payment($participant, $participant->owner_id, $event, $participants->count());
         }
