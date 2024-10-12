@@ -49,6 +49,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use Maatwebsite\Excel\Facades\Excel;
+use function Livewire\invade;
 
 class ResultQualificationController extends Controller
 {
@@ -821,7 +822,6 @@ class ResultQualificationController extends Controller
         if ($event->is_need_pay_for_reg) {
             $amounts = [];
             $count = 1;
-//            dd($event->options_amount_price);
             if ($event->options_amount_price) {
                 foreach ($event->options_amount_price as $amount) {
                     $amounts[$count] = $amount['Сумма'];
@@ -831,7 +831,7 @@ class ResultQualificationController extends Controller
                 $grid->column('amount_start_price', 'Сумма оплаты')->editable('select', $amounts);
             } else {
                 if ($event->setting_payment == OwnerPaymentOperations::DINAMIC) {
-                    $grid->column('amount_start_price', 'Сумма оплаты');
+                    $grid->column('amount_start_price', 'Сумма оплаты')->editable();
                 } else {
                     $grid->column('amount_start_price', 'Сумма оплаты')->display(function ($amount_start_price) use ($event) {
                         if (!$event->amount_start_price) {
@@ -1227,15 +1227,26 @@ class ResultQualificationController extends Controller
 
     public function execute_is_paid($form, $id)
     {
-        $admin = Admin::user();
+        $owner_id = Admin::user()->id;
         $participant = $form->model()->find($id);
         $event = Event::find($participant->event_id);
-        if (!$participant->amount_start_price && !$event->amount_start_price && $event->options_amount_price) {
-            $response = [
-                'status' => false,
-                'message' => "Перед оплатой надо выбрать сумму оплаты",
-            ];
-            return response()->json($response);
+        if ($event->setting_payment == OwnerPaymentOperations::DINAMIC or $event->setting_payment == OwnerPaymentOperations::EASY) {
+            if (!$participant->amount_start_price or !$event->amount_start_price) {
+                $response = [
+                    'status' => false,
+                    'message' => "Перед оплатой надо указать сумму оплаты",
+                ];
+                return response()->json($response);
+            }
+        }
+        if ($event->setting_payment == OwnerPaymentOperations::HARD) {
+            if (!$participant->amount_start_price && !$event->amount_start_price && $event->options_amount_price) {
+                $response = [
+                    'status' => false,
+                    'message' => "Перед оплатой надо указать сумму оплаты",
+                ];
+                return response()->json($response);
+            }
         }
         $amount_participant = $form->model()->where('event_id', $participant->event_id)->get()->count();
         if ($form->input('is_paid') === "1") {
@@ -1262,10 +1273,14 @@ class ResultQualificationController extends Controller
                 $amount_start_price = $amounts[$index];
                 $amount_name = $names[$index];
             } else {
-                $amount_start_price = $event->amount_start_price;
+                if($event->setting_payment == OwnerPaymentOperations::DINAMIC && intval($participant->amount_start_price) > 0){
+                    $amount_start_price = $participant->amount_start_price;
+                } else {
+                    $amount_start_price = $event->amount_start_price;
+                }
                 $amount_name = 'Стартовый взнос';
             }
-            if (!$amount_start_price || $amount_start_price < 0) {
+            if (intval($amount_start_price) < 0) {
                 $response = [
                     'status' => false,
                     'message' => "Сумма для оплаты не может быть 0",
@@ -1274,9 +1289,9 @@ class ResultQualificationController extends Controller
             } else {
                 $participant->is_paid = $form->input('is_paid');
                 $participant->save();
-                OwnerPaymentOperations::execute_payment_operations($participant, $admin, $amount_start_price, $amount_name);
+                OwnerPaymentOperations::execute_payment_operations($participant, $owner_id, $amount_start_price, $amount_name);
                 # Пересчитываем оплату за соревы
-                OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
+                OwnerPaymentOperations::execute_payment($participant, $owner_id, $event, $amount_participant);
 
                 $user = User::find($participant->user_id);
                 ResultQualificationClassic::send_confirm_bill($event, $user);
@@ -1293,12 +1308,12 @@ class ResultQualificationController extends Controller
             if (!$allow_delete) {
                 $transaction = OwnerPaymentOperations::where('event_id', $participant->event_id)
                     ->where('user_id', $participant->user_id)->first();
-                if ($admin && $transaction) {
+                if ($owner_id && $transaction) {
                     $transaction->delete();
                     $participant->is_paid = $form->input('is_paid');
                     $participant->save();
                     # Пересчитываем оплату за соревы
-                    OwnerPaymentOperations::execute_payment($participant, $admin, $event, $amount_participant);
+                    OwnerPaymentOperations::execute_payment($participant, $owner_id, $event, $amount_participant);
                 }
             } else {
                 $response = [
