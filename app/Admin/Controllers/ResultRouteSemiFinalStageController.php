@@ -177,18 +177,6 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->model()->where(function ($query) {
             $query->has('event.result_semifinal_stage');
         });
-        \Encore\Admin\Facades\Admin::script(<<<SCRIPT
-            $('body').on('shown.bs.modal', '.modal', function() {
-            $(this).find('select').each(function() {
-                var dropdownParent = $(document.body);
-                if ($(this).parents('.modal.in:first').length !== 0)
-                    dropdownParent = $(this).parents('.modal.in:first');
-                    $(this).select2({
-                        dropdownParent: dropdownParent
-                    });
-                });
-            });
-            SCRIPT);
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             if(Event::event_is_open($event)){

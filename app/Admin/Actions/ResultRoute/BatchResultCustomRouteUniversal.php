@@ -120,6 +120,7 @@ class BatchResultCustomRouteUniversal extends CustomAction
     public function custom_form()
     {
         $this->modalSmall();
+
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)
             ->where('active', '=', 1)->first();
         $amount_routes = BatchBaseRoute::get_amount_routes($event, $this->stage);
@@ -194,6 +195,18 @@ class BatchResultCustomRouteUniversal extends CustomAction
                             window.location.reload();
                         });
                     EOT;
+        \Encore\Admin\Facades\Admin::script(<<<SCRIPT
+            $('body').on('shown.bs.modal', '.modal', function() {
+            $(this).find('select').each(function() {
+                var dropdownParent = $(document.body);
+                if ($(this).parents('.modal.in:first').length !== 0)
+                    dropdownParent = $(this).parents('.modal.in:first');
+                    $(this).select2({
+                        dropdownParent: dropdownParent
+                    });
+                });
+            });
+            SCRIPT);
         \Encore\Admin\Facades\Admin::script($script_custom);
         Admin::style('
             .input-group {

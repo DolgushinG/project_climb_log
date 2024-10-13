@@ -185,7 +185,14 @@ class BatchResultRouteUniversal extends CustomAction
                                     );
                                 }
                             }
+
+
                          $(document).on("click", '#universal-$this->stage', function () {
+                                setTimeout(function() {
+                                    $('[data-user-id="user_id"]').select2({
+                                        dropdownParent: $('[id="app-admin-actions-resultroute-batchresultrouteuniversal"]')
+                                    });
+                                }, 1);
                             const allAttemptsInput = document.getElementById('all_attempts');
                             const incrementBtn = document.getElementById('increment-btn');
                             const decrementBtn = document.getElementById('decrement-btn');
@@ -503,7 +510,18 @@ class BatchResultRouteUniversal extends CustomAction
                             $(document).on("click", btn_close, function () {
                                 window.location.reload();
                             });
+                            $('[id="app-admin-actions-resultroute-batchresultrouteuniversal"]').on('hide.bs.modal', function (e) {
+                                var triggerElement = $(document.activeElement);
 
+                                // Если модал закрывается из-за клика по Select2 или как-то связан с ним
+                                if (triggerElement.hasClass('select2')) {
+                                    e.preventDefault(); // Блокируем закрытие
+                                    console.log('Modal close prevented due to Select2 interaction');
+                                }
+                            });
+                            $('[id="app-admin-actions-resultroute-batchresultrouteuniversal"]').on('hide.bs.modal', function (e) {
+                                console.log('Modal is about to close. Element triggering close:', $(document.activeElement));
+                            });
                         EOT;
 
         \Encore\Admin\Facades\Admin::script($script_one_route);

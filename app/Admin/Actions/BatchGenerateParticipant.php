@@ -52,7 +52,6 @@ class BatchGenerateParticipant extends Action
             $parts = intval($count / $amount_categories);
             $next = $parts;
             $start = $start_number_participant->id;
-
             foreach($part_category as $category){
                 Generators::prepare_participant_with_owner($owner_id, $event->id, $next, $table_result, $start, $category->category);
                 $next = $next+$parts;
@@ -61,7 +60,7 @@ class BatchGenerateParticipant extends Action
             }
         }
 
-        Generators::prepare_result_route_qualification_classic($owner_id, $event->id, $table_result_routes, $count);
+        Generators::prepare_result_route_qualification_classic($owner_id, $event->id, $table_result_routes);
         if($event->is_france_system_qualification){
             Event::refresh_france_system_qualification_counting($event);
 

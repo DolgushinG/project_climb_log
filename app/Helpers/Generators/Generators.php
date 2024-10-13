@@ -84,9 +84,14 @@ class Generators
     {
         $participants = array();
         $genders = ['male','female'];
+        if($start_user_id > $users){
+            $end = $start_user_id + $users;
+        } else {
+            $end = $users;
+        }
         if($category){
             $category_id = ParticipantCategory::where('category', $category)->where('owner_id', $owner_id)->where('event_id', $event_id)->first()->id;
-            for ($i = $start_user_id; $i <= $users; $i++) {
+            for ($i = $start_user_id; $i <= $end; $i++) {
                 $user = User::find($i);
                 $user->category = $category_id;
                 $user->save();
@@ -94,12 +99,13 @@ class Generators
                 $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'category_id' => $category_id,'gender' => $user->gender ?? $genders[array_rand(['male','female'])], 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         } else {
-            for ($i = $start_user_id; $i <= $users ; $i++) {
+            for ($i = $start_user_id; $i <= $end ; $i++) {
                 $user = User::find($i);
                 $sets = Set::where('event_id', $event_id)->pluck('id','number_set')->toArray();
                 $participants[] = array('owner_id' => $owner_id, 'event_id' => $event_id, 'is_paid' => 0,'gender' => $user->gender ?? $genders[array_rand(['male','female'])], 'user_id' => $i, 'number_set_id' => $sets[array_rand($sets)], 'active' => 1, 'created_at' => Carbon::now());
             }
         }
+
         DB::table($table)->insert($participants);
     }
 

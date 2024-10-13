@@ -890,18 +890,6 @@ class ResultQualificationController extends Controller
             $query->has('event.result_france_system_qualification');
         });
         $grid->model()->orderBy('place', 'asc');
-        \Encore\Admin\Facades\Admin::script(<<<SCRIPT
-            $('body').on('shown.bs.modal', '.modal', function() {
-            $(this).find('select').each(function() {
-                var dropdownParent = $(document.body);
-                if ($(this).parents('.modal.in:first').length !== 0)
-                    dropdownParent = $(this).parents('.modal.in:first');
-                    $(this).select2({
-                        dropdownParent: dropdownParent
-                    });
-                });
-            });
-            SCRIPT);
         Admin::style("
                 @media only screen and (min-width: 1025px) {
                     img {
