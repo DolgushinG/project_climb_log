@@ -213,15 +213,12 @@ class BatchResultCustomRouteUniversal extends CustomAction
                 display: flex;
                 align-items: center;
             }
-
             #increment-btn {
                 font-size: 20px;
             }
-
             #zone-btn {
                 font-size: 20px;
             }
-
             #top-btn {
                 font-size: 20px;
             }
