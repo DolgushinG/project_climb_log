@@ -113,6 +113,7 @@ class ResultRouteFinalStageController extends Controller
             $query->has('event.result_final_stage');
         });
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
+        Admin::script("$.fn.modal.Constructor.prototype.enforceFocus = function() {};");
         $grid->tools(function (Grid\Tools $tools) use ($event){
             if(Event::event_is_open($event)){
                 $tools->append(new BatchResultRouteUniversal('final'));

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Points</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #mapContainer {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            border: 1px solid #000;
+            margin: 20px auto;
+        }
+        .point {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">Add Points</h1>
+    <div id="mapContainer">
+        <img id="mapImage" src="map.png" alt="Map" style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+    <button id="savePoints" class="btn btn-primary">Save Points</button>
+
+    <!-- Modal для ввода информации о точке -->
+    <div class="modal fade" id="pointModal" tabindex="-1" role="dialog" aria-labelledby="pointModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pointModalLabel">Point Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="pointForm">
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <input type="text" class="form-control" id="category" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="color">Color</label>
+                            <input type="color" class="form-control" id="color" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="author">Author</label>
+                            <input type="text" class="form-control" id="author" required>
+                        </div>
+                        <input type="hidden" id="pointX">
+                        <input type="hidden" id="pointY">
+                        <input type="hidden" id="pointIndex">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="savePoint">Save Point</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal для просмотра и удаления точки -->
+    <div class="modal fade" id="viewPointModal" tabindex="-1" role="dialog" aria-labelledby="viewPointModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewPointModalLabel">View Point</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Category:</strong> <span id="viewCategory"></span></p>
+                    <p><strong>Color:</strong> <span id="viewColor"></span></p>
+                    <p><strong>Author:</strong> <span id="viewAuthor"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="deletePoint">Delete Point</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    let points = [];
+    let selectedPointIndex = null;
+
+    // Добавление точки
+    function addPoint(x, y, category, color, author) {
+        const pointElement = document.createElement('div');
+        pointElement.className = 'point';
+        pointElement.style.left = `${x}px`;
+        pointElement.style.top = `${y}px`;
+        pointElement.style.backgroundColor = color;
+        document.getElementById('mapContainer').appendChild(pointElement);
+
+        pointElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectedPointIndex = Array.from(document.querySelectorAll('.point')).indexOf(pointElement);
+            const point = points[selectedPointIndex];
+            document.getElementById('viewCategory').textContent = point.category;
+            document.getElementById('viewColor').textContent = point.color;
+            document.getElementById('viewAuthor').textContent = point.author;
+            $('#viewPointModal').modal('show');
+        });
+
+        pointElement.addEventListener('click', (e) => {
+            e.preventDefault();
+            const offsetX = e.clientX - pointElement.getBoundingClientRect().left;
+            const offsetY = e.clientY - pointElement.getBoundingClientRect().top;
+            function movePoint(e) {
+                if (selectedPointIndex !== null) {
+                    const containerRect = document.getElementById('mapContainer').getBoundingClientRect();
+                    const newX = e.clientX - containerRect.left - offsetX;
+                    const newY = e.clientY - containerRect.top - offsetY;
+                    pointElement.style.left = `${newX}px`;
+                    pointElement.style.top = `${newY}px`;
+                    points[selectedPointIndex].x = newX;
+                    points[selectedPointIndex].y = newY;
+                }
+            }
+            function stopMove() {
+                document.removeEventListener('mousemove', movePoint);
+                document.removeEventListener('mouseup', stopMove);
+            }
+            document.addEventListener('mousemove', movePoint);
+            document.addEventListener('mouseup', stopMove);
+        });
+    }
+
+    // Сохранение точки
+    document.getElementById('savePoint').addEventListener('click', () => {
+        const category = document.getElementById('category').value;
+        const color = document.getElementById('color').value;
+        const author = document.getElementById('author').value;
+        const x = parseFloat(document.getElementById('pointX').value);
+        const y = parseFloat(document.getElementById('pointY').value);
+        const index = parseInt(document.getElementById('pointIndex').value);
+
+        if (index >= 0) {
+            points[index] = { category, color, author, x, y };
+            const pointElement = document.querySelectorAll('.point')[index];
+            pointElement.style.backgroundColor = color;
+            pointElement.style.left = `${x}px`;
+            pointElement.style.top = `${y}px`;
+        } else {
+            points.push({ category, color, author, x, y });
+            addPoint(x, y, category, color, author);
+        }
+
+        $('#pointModal').modal('hide');
+        document.getElementById('pointForm').reset();
+    });
+
+    // Сохранение точек в файл
+    document.getElementById('savePoints').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(points)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'points.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // Обработка клика на карте для создания точки
+    document.getElementById('mapContainer').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            document.getElementById('pointForm').reset();
+            document.getElementById('pointIndex').value = -1; // Новый ввод точки
+            $('#pointModal').modal('show');
+        }
+    });
+
+    // Удаление точки
+    document.getElementById('deletePoint').addEventListener('click', () => {
+        if (selectedPointIndex !== null) {
+            const pointElement = document.querySelectorAll('.point')[selectedPointIndex];
+            pointElement.remove();
+            points.splice(selectedPointIndex, 1);
+            selectedPointIndex = null;
+            $('#viewPointModal').modal('hide');
+        }
+    });
+</script>
+</body>
+</html>

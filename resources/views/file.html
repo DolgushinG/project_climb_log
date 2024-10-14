@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw Map</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #mapCanvas {
+            border: 1px solid #000;
+            display: block;
+            margin: 20px auto;
+        }
+        .tool-button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">Draw Map</h1>
+    <div class="text-center">
+        <button id="pencil" class="btn btn-secondary tool-button">Pencil</button>
+        <button id="line" class="btn btn-secondary tool-button">Line</button>
+        <button id="eraser" class="btn btn-secondary tool-button">Eraser</button>
+        <button id="undo" class="btn btn-warning tool-button">Undo</button>
+        <button id="clear" class="btn btn-danger tool-button">Clear Canvas</button>
+        <button id="saveMap" class="btn btn-primary tool-button">Save Map (JSON)</button>
+        <button id="saveImage" class="btn btn-success tool-button">Save Map (PNG)</button>
+    </div>
+    <canvas id="mapCanvas" width="800" height="600"></canvas>
+</div>
+
+<!-- jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    const canvas = document.getElementById('mapCanvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let tool = 'pencil';
+    let startX, startY;
+    let history = []; // Список для хранения истории рисования
+    let currentHistoryIndex = -1; // Индекс текущего состояния в истории
+
+    function setTool(selectedTool) {
+        tool = selectedTool;
+        document.querySelectorAll('.tool-button').forEach(button => button.classList.remove('btn-primary'));
+        document.getElementById(selectedTool).classList.add('btn-primary');
+    }
+
+    function saveHistory() {
+        if (currentHistoryIndex < history.length - 1) {
+            history = history.slice(0, currentHistoryIndex + 1);
+        }
+        history.push(canvas.toDataURL());
+        currentHistoryIndex++;
+    }
+
+    document.getElementById('pencil').addEventListener('click', () => setTool('pencil'));
+    document.getElementById('line').addEventListener('click', () => setTool('line'));
+    document.getElementById('eraser').addEventListener('click', () => setTool('eraser'));
+    document.getElementById('undo').addEventListener('click', () => {
+        if (currentHistoryIndex > 0) {
+            currentHistoryIndex--;
+            const img = new Image();
+            img.src = history[currentHistoryIndex];
+            img.onload = () => ctx.drawImage(img, 0, 0);
+        }
+    });
+    document.getElementById('clear').addEventListener('click', () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        history = [];
+        currentHistoryIndex = -1;
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+        if (tool !== 'eraser') {
+            drawing = true;
+            startX = e.offsetX;
+            startY = e.offsetY;
+            ctx.beginPath();
+            if (tool === 'line') {
+                ctx.moveTo(startX, startY);
+            } else if (tool === 'pencil') {
+                ctx.moveTo(startX, startY);
+            }
+            saveHistory(); // Сохранение состояния перед началом рисования
+        }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (drawing) {
+            if (tool === 'line') {
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+            } else if (tool === 'pencil') {
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+            } else if (tool === 'eraser') {
+                ctx.clearRect(e.offsetX - 10, e.offsetY - 10, 20, 20);
+            }
+        }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        if (tool === 'line') {
+            ctx.stroke();
+            ctx.closePath();
+        }
+        drawing = false;
+    });
+
+    document.getElementById('saveMap').addEventListener('click', () => {
+        const mapData = {
+            width: canvas.width,
+            height: canvas.height,
+            image: canvas.toDataURL('image/png')
+        };
+
+        const blob = new Blob([JSON.stringify(mapData)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'map.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('saveImage').addEventListener('click', () => {
+        const img = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = img;
+        a.download = 'map.png';
+        a.click();
+    });
+</script>
+</body>
+</html>
