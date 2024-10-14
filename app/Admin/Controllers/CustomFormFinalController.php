@@ -66,8 +66,7 @@ class CustomFormFinalController extends Controller
         $form->text('user_category_one', 'Группа')
             ->placeholder('Группа')
             ->withoutIcon()
-            ->readonly()
-            ->width('70px');
+            ->readonly();
 
         $form->select('route_id', 'Трасса')
             ->attribute('autocomplete', 'off')
