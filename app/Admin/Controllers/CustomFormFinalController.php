@@ -79,21 +79,30 @@ class CustomFormFinalController extends Controller
             ->placeholder('...')
             ->attribute('autocomplete', 'off')
             ->attribute('id', 'all_attempts')
-            ->attribute('data-all-attempts-id', 'all-attempts');
+            ->attribute('data-all-attempts-id', 'all-attempts')
+            ->readonly();
 
         $form->number('amount_try_zone', 'Попытки на зону')
             ->placeholder('..')
+            ->attribute('autocomplete', 'off')
             ->attribute('id', 'amount_try_zone')
-            ->attribute('data-amount-try-zone', 'amount_try_zone');
+            ->attribute('data-amount-try-zone', 'amount_try_zone')
+            ->readonly();
 
         $form->number('amount_try_top', 'Попытки на топ')
             ->placeholder('..')
+            ->attribute('autocomplete', 'off')
             ->attribute('id', 'amount_try_top')
-            ->attribute('data-amount-try-top', 'amount_try_top');
+            ->attribute('data-amount-try-top', 'amount_try_top')
+            ->readonly();
 
         $form->disableSubmit();
         $form->disableReset();
         $script_custom = <<<EOT
+                             const inputField = document.getElementById('all_attempts');
+                                inputField.addEventListener('focus', function() {
+                                    this.blur(); // Убираем фокус при попытке сфокусироваться
+                                });
                             async function set_attempt() {
                                 const routeId = $('[data-route-id=route_id]').val(); // ID выбранного маршрута
                                 const userId = $('[data-user-id=user_id]').select2('val'); // ID выбранного участника
