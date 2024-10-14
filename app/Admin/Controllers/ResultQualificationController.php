@@ -924,6 +924,7 @@ class ResultQualificationController extends Controller
             $selector->select('gender', 'Пол', ['male' => 'Муж', 'female' => 'Жен']);
             $selector->select('is_paid', 'Есть оплата', [1 => 'Да', 0 => 'Нет']);
         });
+        Admin::script("$.fn.modal.Constructor.prototype.enforceFocus = function() {};");
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             if(Event::event_is_open($event)){
                 $tools->append(new BatchExportResultFranceSystemQualification);
