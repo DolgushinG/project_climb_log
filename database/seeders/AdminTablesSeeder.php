@@ -427,6 +427,24 @@ class AdminTablesSeeder extends Seeder
                     "slug" => "staff",
                     "http_method" => "",
                     "http_path" => "/staff*"
+                ],
+                [
+                    "name" => "add-form-final",
+                    "slug" => "add-form-final",
+                    "http_method" => "",
+                    "http_path" => "/add-form-final*"
+                ],
+                [
+                    "name" => "add-form-semifinal",
+                    "slug" => "add-form-semifinal",
+                    "http_method" => "",
+                    "http_path" => "/add-form-semifinal*"
+                ],
+                [
+                    "name" => "add-form-qualification",
+                    "slug" => "add-form-qualification",
+                    "http_method" => "",
+                    "http_path" => "/add-form-qualification*"
                 ]
             ]
         );

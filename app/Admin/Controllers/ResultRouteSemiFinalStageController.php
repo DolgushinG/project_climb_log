@@ -181,8 +181,8 @@ class ResultRouteSemiFinalStageController extends Controller
         Admin::script("$.fn.modal.Constructor.prototype.enforceFocus = function() {};");
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             if(Event::event_is_open($event)){
+                $tools->append('<a href="/admin/add-form-semifinal" class="btn btn-primary">По одной трассе</a>');
                 $tools->append(new BatchExportResultSemiFinal);
-                $tools->append(new BatchResultRouteUniversal('semifinal'));
                 $tools->append(new BatchResultCustomRouteUniversal('semifinal'));
                 $tools->append(new BatchForceRecoutingSemiFinalResultGroup);
                 $tools->append(new BatchForceRecoutingSemiFinalResultGender);

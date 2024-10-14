@@ -135,9 +135,9 @@ class BatchResultRouteUniversal extends CustomAction
 
         ');
         $script_one_route = <<<EOT
-                            function set_attempt(){
+                            async function set_attempt() {
                                 var routeId = $('[data-route-id=route_id]').val(); // ID выбранного маршрута
-                                var userId = $('[data-user-id=user_id]').select2('val')
+                                var userId = $('[data-user-id=user_id]').select2('val');
                                 var eventId = $('[data-event-id=event_id]').val(); // ID выбранного участника
                                 var attempt = $('[data-all-attempts-id=all-attempts]').val();
                                 var amount_try_top = $('[id=amount_try_top]').val();
@@ -154,38 +154,41 @@ class BatchResultRouteUniversal extends CustomAction
                                     missingFields.push('Трасса');
                                 }
                                 if (missingFields.length > 0) {
-                                   return  $.admin.toastr.error(
+                                    return $.admin.toastr.error(
                                         'Не хватает данных для их отправки: ' + missingFields.join(', '),
                                         '',
                                         { positionClass: "toast-bottom-center", timeOut: 1000 }
                                     ).css("width", "200px");
                                 }
-                                 if(Number(amount_try_top) > 0 && Number(amount_try_zone) == 0){
-                                        amount_try_zone = amount_try_top
-                                 }
-                                if(routeId){
-                                    $.get("$url_set_attempts",
-                                        {
+
+                                if (Number(amount_try_top) > 0 && Number(amount_try_zone) == 0) {
+                                    amount_try_zone = amount_try_top;
+                                }
+
+                                if (routeId) {
+                                    try {
+                                        const response = await $.get("$url_set_attempts", {
                                             route_id: routeId,
                                             user_id: userId,
                                             event_id: eventId,
                                             attempt: attempt,
                                             amount_try_top: amount_try_top,
                                             amount_try_zone: amount_try_zone
-                                        },
-                                        function (data) {
-                                            $.admin.toastr.success(
-                                                'Сохранено',
-                                                { positionClass: "toast-bottom-center", timeOut: 1000 }
-                                            ).css("width", "200px");
-                                            $('[data-amount-try-top=amount_try_top]').val(data.amount_try_top);
-                                            $('[data-amount-try-zone=amount_try_zone]').val(data.amount_try_zone);
-                                            $('[data-all-attempts-id=all-attempts]').val(data.all_attempts);
-                                        }
-                                    );
+                                        });
+
+                                        $.admin.toastr.success('Сохранено', { positionClass: "toast-bottom-center", timeOut: 1000 })
+                                            .css("width", "200px");
+
+                                        $('[data-amount-try-top=amount_try_top]').val(response.amount_try_top);
+                                        $('[data-amount-try-zone=amount_try_zone]').val(response.amount_try_zone);
+                                        $('[data-all-attempts-id=all-attempts]').val(response.all_attempts);
+
+                                    } catch (error) {
+                                        console.error("Ошибка при выполнении запроса:", error);
+                                        $.admin.toastr.error('Ошибка при сохранении данных', '', { positionClass: "toast-bottom-center", timeOut: 1000 });
+                                    }
                                 }
                             }
-
 
                          $(document).on("click", '#universal-$this->stage', function () {
                                 setTimeout(function() {
@@ -513,11 +516,6 @@ class BatchResultRouteUniversal extends CustomAction
                             $('[id="app-admin-actions-resultroute-batchresultrouteuniversal"]').on('hide.bs.modal', function (e) {
                                 var triggerElement = $(document.activeElement);
 
-                                // Если модал закрывается из-за клика по Select2 или как-то связан с ним
-                                if (triggerElement.hasClass('select2')) {
-                                    e.preventDefault(); // Блокируем закрытие
-                                    console.log('Modal close prevented due to Select2 interaction');
-                                }
                             });
                             $('[id="app-admin-actions-resultroute-batchresultrouteuniversal"]').on('hide.bs.modal', function (e) {
                                 console.log('Modal is about to close. Element triggering close:', $(document.activeElement));

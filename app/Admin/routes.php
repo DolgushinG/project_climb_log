@@ -1,5 +1,6 @@
 <?php
 
+use App\Admin\Controllers\CustomFormController;
 use App\Helpers\Helpers;
 use App\Models\Event;
 use App\Models\Grades;
@@ -23,6 +24,7 @@ Route::group([
     'middleware'    => config('admin.route.middleware'),
     'as'            => config('admin.route.prefix') . '.',
 ], function (Router $router) {
+
     $router->resource('/auth/users', UserController::class);
     $router->get('/grades/api/get_places', function(Request $request) {
         $country_id = $request->get('option');
@@ -348,6 +350,9 @@ Route::group([
     });
     $router->get('/', 'HomeController@index')->name('home');
     Route::middleware(['owner'])->group(function ($router) {
+        $router->get('add-form-final', [\App\Admin\Controllers\CustomFormFinalController::class, 'index']);
+        $router->get('add-form-semifinal', [\App\Admin\Controllers\CustomFormSemiFinalController::class, 'index']);
+        $router->get('add-form-qualification', [\App\Admin\Controllers\CustomFormQualificationController::class, 'index']);
         $router->resource('events', EventsController::class);
         $router->resource('/posts', PostsController::class);
         $router->get('events/clone/{id}', 'EventsController@cloneEvent')->name('cloneEvent');
