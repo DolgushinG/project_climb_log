@@ -18,12 +18,7 @@ class BatchExportProtocolRouteParticipantsQualification extends Action
     public function handle(Request $request)
     {
         $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        if($request->category_id){
-            $category_id = $request->category_id;
-        } else {
-            $category_id = 'not_category';
-        }
-        return $this->response()->download('exports/events/'.$event->id.'/qualification/'.$request->set_id.'/'.$request->gender.'/'.$category_id)->success('Успешно');
+        return $this->response()->download('exports/events/'.$event->id.'/qualification/'.$request->set_id)->success('Успешно');
     }
 
     public function form()
@@ -36,10 +31,6 @@ class BatchExportProtocolRouteParticipantsQualification extends Action
             $sets_for[$set->id] = $set->number_set.' ['.$set->time.']['.trans_choice('somewords.' . $set->day_of_week, 10).']';
         }
         $this->select('set_id', 'Из какого сета брать список участников?')->options($sets_for)->required();
-        $this->select('gender', 'Пол')->options(['male' => 'Муж', 'female' => 'Жен'])->required();
-        $event = Event::where('owner_id', '=', \Encore\Admin\Facades\Admin::user()->id)->where('active', 1)->first();
-        $categories = ParticipantCategory::where('event_id', $event->id)->pluck('category', 'id');
-        $this->select('category_id', 'Категория')->options($categories);
     }
     public function html()
     {

@@ -91,6 +91,7 @@ class User extends Authenticatable
         'telegram_id',
         'yandex_id',
         'vkontakte_id',
+        'related_user_id',
     ];
     /**
      * The attributes that should be hidden for serialization.
@@ -109,6 +110,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'related_user_id' => 'json',
     ];
 
     public static function user_participant($event_id){

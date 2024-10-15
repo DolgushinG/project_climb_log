@@ -108,11 +108,12 @@ class RegisteredUserController extends Controller
             $set->date = Helpers::getDatesByDayOfWeek($event->start_date, $event->end_date);
         }
         $sport_categories = User::sport_categories;
-        return view('auth.group-register', compact(['event', 'sets', 'sport_categories']));
+        $related_users = User::whereIn('id', Auth::user()->related_user_id ?? [])->get();
+        return view('auth.group-register', compact(['related_users','event', 'sets', 'sport_categories']));
     }
     public function group_registration(Request $request)
     {
-
+        dd($request);
         $new_users = $request->participants;
         $event_id = $request->event_id;
         $event = Event::find($event_id);
@@ -141,6 +142,7 @@ class RegisteredUserController extends Controller
             return response()->json(['error' => true,'message'=> $validator->errors()->all()],422);
         }
         $created_users = [];
+        $related_user_id = [];
         foreach ($new_users as $index => $user){
             $new_user = User::create([
                 'firstname' => $user['firstname'],
@@ -155,6 +157,7 @@ class RegisteredUserController extends Controller
                 'email' => $user['email'] ?? (new \App\Models\Event)->translate_to_eng($user['firstname']).'-group-'.$person->email,
                 'password' => Auth::user()->getAuthPassword() ?? Hash::make(Auth::user()->lastname),
             ]);
+
             $user_id = $new_user->id;
             $created_users[] = $new_user;
             $number_sets = [];
@@ -211,8 +214,11 @@ class RegisteredUserController extends Controller
             }
         }
         foreach ($created_users as $index => $user){
+            $related_user_id[] = $user->id;
             $created_users[$index]['number_set'] = $number_sets[$user->id] ?? '-';
         }
+        $person->related_user_id = $related_user_id;
+        $person->save();
         ResultQualificationClassic::send_main_about_group_take_part($event, $person, $created_users);
         return response()->json(['success' => true, 'message' => 'Группа успешно создана и зарегистрирована на соревнование в письме все подробности']);
     }

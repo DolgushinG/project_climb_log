@@ -14,67 +14,59 @@
                         <section class="section-title">
                             <h1> Оформление заявки для группы</h1>
                         </section>
-                            @auth
-                                <h3>Данные заявителя</h3>
-                                <div class="row" style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
-                                    <!-- Фамилия -->
-                                    <div class="form-group col-md-4 col-12">
-                                        <label for="firstname">Фамилия</label>
-                                        <p>{{ auth()->user()->firstname }}</p>
-                                    </div>
-                                    <!-- Имя -->
-                                    <div class="form-group col-md-4 col-12">
-                                        <label for="lastname">Имя</label>
-                                        <p>{{ auth()->user()->lastname }}</p>
-                                    </div>
-                                    <!-- Email -->
-                                    <div class="form-group col-md-4 col-12">
-                                        <label for="email">Email</label>
-                                        <p>{{ auth()->user()->email }}</p>
-                                    </div>
-                                    <div class="form-group col-md-4 col-12">
-                                        <label for="email">Контактные данные</label>
-                                        <p>{{ auth()->user()->contact ?? "Не заполнены заполните у себя в личном кабинете" }} </p>
-                                    </div>
-                                    <p> Если у участников не заполнены поля Email, то они будут сгенерированы автоматически </p>
-                                    <p> Контактные данные участников будут заполнены контактными данными заявителя </p>
-                                    <p> В письме после отправки,  будут все данные для входа в личный кабинет заявленных участников</p>
+                        @auth
+                            <h3>Данные заявителя</h3>
+                            <div class="row" style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
+                                <!-- Фамилия -->
+                                <div class="form-group col-md-4 col-12">
+                                    <label for="firstname">Фамилия</label>
+                                    <p>{{ auth()->user()->firstname }}</p>
                                 </div>
-                            <form id="group-registration-form" method="POST" action="{{route('group_registration', [$event->id])}}">
+                                <!-- Имя -->
+                                <div class="form-group col-md-4 col-12">
+                                    <label for="lastname">Имя</label>
+                                    <p>{{ auth()->user()->lastname }}</p>
+                                </div>
+                                <!-- Email -->
+                                <div class="form-group col-md-4 col-12">
+                                    <label for="email">Email</label>
+                                    <p>{{ auth()->user()->email }}</p>
+                                </div>
+                                <div class="form-group col-md-4 col-12">
+                                    <label for="contact">Контактные данные</label>
+                                    <p>{{ auth()->user()->contact ?? "Не заполнены, заполните у себя в личном кабинете" }} </p>
+                                </div>
+                                <p> Если у участников не заполнены поля Email, то они будут сгенерированы автоматически </p>
+                                <p> Контактные данные участников будут заполнены контактными данными заявителя </p>
+                                <p> В письме после отправки будут все данные для входа в личный кабинет заявленных участников</p>
+                            </div>
+                            <form id="group-registration-form" method="POST" action="{{ route('group_registration', [$event->id]) }}">
                                 @csrf
                                 <div id="participants">
+                                    <!-- Чекбоксы, если есть данные в $related_users -->
+                                    @if(!empty($related_users))
+                                        <div class="mb-3">
+                                            <label>Ранее заявленные участники:</label>
+                                            @foreach($related_users as $user)
+                                                <input type="checkbox" class="btn-check" name="related_users[]" id="user-{{ $user->id }}" value="{{ $user->id }}" autocomplete="off">
+                                                <label class="btn btn-outline-primary" for="user-{{ $user->id }}">
+                                                    {{ $user->middlename }}
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
                                 @if(\Illuminate\Support\Facades\Auth::user()->contact)
                                     <button type="button" id="add-participant" class="btn btn-primary m-3">Добавить участника</button>
                                     <button type="submit" id="btn-send" class="btn btn-success" disabled>Отправить</button>
                                 @else
-                                    <div
-                                         class="alert alert-danger alert-dismissible fade show"
-                                         role="alert">
-                                        <p> Для регистрации группы на соревнование, необходимы контакты для быстрой связи</a></p>
-                                        <p> Добавьте контактные данные для быстрой связи в вашем <a href="{{route('profile')}}">профиле</a></p>
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <p> Для регистрации группы на соревнование, необходимы контакты для быстрой связи</p>
+                                        <p> Добавьте контактные данные для быстрой связи в вашем <a href="{{ route('profile') }}">профиле</a></p>
                                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                     </div>
                                 @endif
                             </form>
-
-                            <div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="responseModalLabel">Результат регистрации</h5>
-                                            <button type="button" class="btn-close" aria-label="Close" onclick="closeModal()"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p id="response-message"></p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" onclick="closeModal()">Закрыть</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                         @endauth
                     </div>
                 </div>
@@ -82,6 +74,17 @@
         </div>
     </main>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkboxes = document.querySelectorAll('#related_users .btn-check');
+            const sendButton = document.getElementById('btn-send');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+                    sendButton.disabled = !anyChecked;
+                });
+            });
+        });
         document.getElementById('add-participant').addEventListener('click', function () {
             const participantCount = document.querySelectorAll('.participant-form').length + 1 ;
             if(participantCount >= 1){
@@ -265,52 +268,6 @@
             }
 
         });
-        function openModal() {
-            const responseModal = document.getElementById('responseModal');
-
-            // Добавляем классы для отображения модального окна
-            responseModal.classList.add('show');
-            responseModal.style.display = 'block';
-            responseModal.setAttribute('aria-modal', 'true');
-            responseModal.removeAttribute('aria-hidden');
-
-            // Блокируем прокрутку страницы
-            document.body.classList.add('modal-open');
-            const backdrop = document.createElement('div');
-            backdrop.classList.add('modal-backdrop', 'fade', 'show');
-            document.body.appendChild(backdrop);
-        }
-
-        function closeModal() {
-            const responseModal = document.getElementById('responseModal');
-
-            // Убираем классы для закрытия модального окна
-            responseModal.classList.remove('show');
-            responseModal.style.display = 'none';
-            responseModal.setAttribute('aria-hidden', 'true');
-            responseModal.removeAttribute('aria-modal');
-
-            // Убираем блокировку прокрутки и фон
-            document.body.classList.remove('modal-open');
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.remove();
-            }
-        }
-        function clear_form() {
-            const participantForms = document.querySelectorAll('.participant-form');
-            participantForms.forEach(function (form, index) {
-                form.remove();
-            });
-
-            // Очищаем все поля первой формы
-            const initialForm = document.querySelector('.participant-form');
-            initialForm.querySelectorAll('input').forEach(function (input) {
-                if (input.type !== 'hidden' && input.type !== 'email') { // Не трогаем read-only поля
-                    input.value = ''; // Сброс значений
-                }
-            });
-        }
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('group-registration-form');
 

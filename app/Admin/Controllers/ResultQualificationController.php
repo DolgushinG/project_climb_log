@@ -439,6 +439,10 @@ class ResultQualificationController extends Controller
             $type = 'update';
             return $this->form($type, $id)->update($id);
         }
+        if ($request->comment) {
+            $type = 'update';
+            return $this->form($type, $id)->update($id);
+        }
         if ($request->sport_category) {
             $type = 'update';
             return $this->form($type, $id)->update($id);
@@ -453,6 +457,10 @@ class ResultQualificationController extends Controller
         }
         if ($request['name'] == 'amount_start_price') {
             $type = 'amount_start_price';
+            return $this->form($type, $id)->update($id);
+        }
+        if ($request['name'] == 'comment') {
+            $type = 'comment';
             return $this->form($type, $id)->update($id);
         }
         if ($request->result_for_edit_france_system_qualification) {
@@ -871,6 +879,7 @@ class ResultQualificationController extends Controller
                 });
             }
         }
+        $grid->column('comment', 'Комментарий')->editable();
         return $grid;
     }
 
@@ -1019,6 +1028,7 @@ class ResultQualificationController extends Controller
             $grid->column('bill', 'Чек участника')->image('', 100, 100);
             $grid->column('document', 'Документ участника')->image('', 100, 100);
         }
+        $grid->column('comment', 'Комментарий')->editable();
         return $grid;
     }
 
@@ -1199,6 +1209,11 @@ class ResultQualificationController extends Controller
             if (intval($form->input('amount_start_price')) > 0) {
                 $result = $form->model()->find($id);
                 $result->amount_start_price = $form->input('amount_start_price');
+                $result->save();
+            }
+            if ($form->input('comment')) {
+                $result = $form->model()->find($id);
+                $result->comment = $form->input('comment');
                 $result->save();
             }
             if($form->input('is_paid') != null){
