@@ -182,8 +182,8 @@ class ResultRouteSemiFinalStageController extends Controller
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             if(Event::event_is_open($event)){
                 $tools->append(new BatchExportResultSemiFinal);
-                $tools->append(new BatchResultRouteUniversal('semifinal'));
                 $tools->append(new BatchResultCustomRouteUniversal('semifinal'));
+                $tools->append('<a href="/admin/add-form-semifinal" class="btn btn-warning" style="font-size: 12px;margin-top: 10px"><i class="fa fa-plus-circle"></i> По одной трассе</a>');
                 $tools->append(new BatchForceRecoutingSemiFinalResultGroup);
                 $tools->append(new BatchForceRecoutingSemiFinalResultGender);
             }

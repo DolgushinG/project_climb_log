@@ -115,9 +115,10 @@ class ResultRouteFinalStageController extends Controller
         $event = Event::where('owner_id', '=', Admin::user()->id)->where('active', 1)->first();
         Admin::script("$.fn.modal.Constructor.prototype.enforceFocus = function() {};");
         $grid->tools(function (Grid\Tools $tools) use ($event){
+
             if(Event::event_is_open($event)){
-                $tools->append(new BatchResultRouteUniversal('final'));
                 $tools->append(new BatchResultCustomRouteUniversal('final'));
+                $tools->append('<a href="/admin/add-form-final" class="btn btn-warning" style="font-size: 12px;margin-top: 10px"><i class="fa fa-plus-circle"></i> По одной трассе</a>');
                 $tools->append(new BatchForceRecoutingResultFinalGender);
                 $tools->append(new BatchForceRecoutingResultFinalGroup);
             }
