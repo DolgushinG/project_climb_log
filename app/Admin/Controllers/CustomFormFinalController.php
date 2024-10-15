@@ -361,6 +361,7 @@ class CustomFormFinalController extends Controller
 
                     EOT;
         Admin::script($script_custom);
+
         return $form;
     }
 }

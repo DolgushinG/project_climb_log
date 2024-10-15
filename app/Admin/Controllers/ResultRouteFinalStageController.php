@@ -117,9 +117,8 @@ class ResultRouteFinalStageController extends Controller
         $grid->tools(function (Grid\Tools $tools) use ($event){
 
             if(Event::event_is_open($event)){
-
-                $tools->append('<a href="/admin/add-form-final" class="btn btn-primary">По одной трассе</a>');
                 $tools->append(new BatchResultCustomRouteUniversal('final'));
+                $tools->append('<a href="/admin/add-form-final" class="btn btn-warning" style="font-size: 12px;margin-top: 10px"><i class="fa fa-plus-circle"></i> По одной трассе</a>');
                 $tools->append(new BatchForceRecoutingResultFinalGender);
                 $tools->append(new BatchForceRecoutingResultFinalGroup);
             }

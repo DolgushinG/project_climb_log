@@ -927,8 +927,9 @@ class ResultQualificationController extends Controller
         Admin::script("$.fn.modal.Constructor.prototype.enforceFocus = function() {};");
         $grid->tools(function (Grid\Tools $tools) use ($event) {
             if(Event::event_is_open($event)){
-                $tools->append('<a href="/admin/add-form-qualification" class="btn btn-primary">По одной трассе</a>');
                 $tools->append(new BatchExportResultFranceSystemQualification);
+                $tools->append('<a href="/admin/add-form-qualification" class="btn btn-warning" style="font-size: 12px;margin-top: 10px"><i class="fa fa-plus-circle"></i> По одной трассе</a>');
+                $tools->append(new BatchResultCustomRouteUniversal('qualification'));
                 $tools->append(new BatchExportStartProtocolParticipantsQualification);
                 $tools->append(new BatchForceRecoutingResultQualificationFranceGender);
                 $tools->append(new BatchForceRecoutingResultQualificationFranceGroup);
