@@ -59,16 +59,22 @@
                                                            name="related_users[{{ $user->id }}][user_id]"
                                                            id="user-{{ $user->id }}" value="{{ $user->id }}"
                                                            autocomplete="off">
-                                                    <label class="btn btn-outline-primary" for="user-{{ $user->id }}">
-                                                        {{ $user->middlename }}
-                                                    </label>
+                                                    @if(\App\Models\User::user_participant($event->id, $user->id))
+                                                        <label class="btn btn-secondary" disabled="">
+                                                            {{ $user->middlename }} (Уже принимимает участие)
+                                                        </label>
+                                                    @else
+                                                        <label class="btn btn-outline-primary" for="user-{{ $user->id }}">
+                                                            {{ $user->middlename }}
+                                                        </label>
+                                                    @endif
                                                 </div>
 
                                                 <div class="participant-details" id="details-{{ $user->id }}"
                                                      style="display: none;">
                                                     @if($event->is_need_sport_category)
                                                         <div class="form-group col-md-3 col-12 m-1">
-                                                            <label for="sport_categories">Разряд</label>
+                                                            <label for="sport_categories_{{ $user->id }}">Разряд</label>
                                                             <select class="form-select"
                                                                     name="related_users[{{ $user->id }}][sport_categories]"
                                                                     id="sport_categories_{{ $user->id }}"
@@ -84,7 +90,7 @@
                                                     @endif
                                                     @if(!$event->is_auto_categories)
                                                         <div class="form-group col-md-3 col-12 m-1">
-                                                            <label for="category_id">Категория участника</label>
+                                                            <label for="category_{{ $user->id }}">Категория участника</label>
                                                             <select class="form-select" id="category_{{ $user->id }}"
                                                                     name="related_users[{{ $user->id }}][category]"
                                                                     autocomplete="off" required disabled>
@@ -168,7 +174,7 @@
                                     <button type="button" id="add-participant" class="btn btn-primary m-3">Добавить
                                         участника
                                     </button>
-                                    <button type="submit" id="btn-send" class="btn btn-success" disabled>Отправить
+                                    <button type="submit" id="btn-send" class="btn btn-success">Отправить
                                     </button>
                                 @else
                                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -189,6 +195,7 @@
     </main>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('btn-send').disabled = true
             document.querySelectorAll('.btn-check').forEach(function (checkbox) {
                 checkbox.addEventListener('change', function () {
                     var userId = this.value;
@@ -342,17 +349,20 @@
             </div>
         </div>
     `;
-            document.querySelectorAll('.russian-only').forEach(function (inputField) {
-                inputField.addEventListener('input', function () {
-                    const russianRegex = /^[А-Яа-яЁё\s-]+$/;
-                    if (!russianRegex.test(this.value)) {
-                        this.classList.add('is-invalid');  // Добавляем класс ошибки
-                    } else {
-                        this.classList.remove('is-invalid');  // Убираем класс ошибки
-                    }
-                });
-            });
             document.getElementById('participants').insertAdjacentHTML('beforeend', participantForm);
+            if({{$event->is_need_to_russian_names}}){
+                document.querySelectorAll('.russian-only').forEach(function (inputField) {
+                    inputField.addEventListener('input', function () {
+                        const russianRegex = /^[А-Яа-яЁё\s-]+$/;
+                        if (!russianRegex.test(this.value)) {
+                            this.classList.add('is-invalid');  // Добавляем класс ошибки
+                        } else {
+                            this.classList.remove('is-invalid');  // Убираем класс ошибки
+                        }
+                    });
+                });
+            }
+
             let selector = '[id=dob' + participantCount + ']'
             const dob = document.querySelector(selector);
 
@@ -428,22 +438,6 @@
             const form = document.getElementById('group-registration-form');
 
             form.addEventListener('submit', function (event) {
-                let isValid = true;
-
-                document.querySelectorAll('.russian-only').forEach(function (inputField) {
-                    const russianRegex = /^[А-Яа-яЁё\s-]+$/;
-
-                    if (!russianRegex.test(inputField.value)) {
-                        inputField.classList.add('is-invalid');
-                        isValid = false;
-                    } else {
-                        inputField.classList.remove('is-invalid');
-                    }
-                });
-
-                if (!isValid) {
-                    return // Предотвращаем отправку формы, если есть ошибки
-                }
                 event.preventDefault(); // Отменить стандартное поведение формы (перенаправление)
 
                 const formData = new FormData(form);
@@ -465,12 +459,9 @@
                                 btn.text(data.message)
                             }, 2000);
                             setTimeout(function () {
-                                btn.text('Отправить')
-                                clear_form();
+                                location.reload()
                             }, 5000);
-
                         } else {
-                            // Если ошибка, показать соответствующее сообщение
                             let btn = $('#btn-send');
                             btn.text('').append('<i id="spinner" style="margin-left: 10px;\n' +
                                 '    margin-right: 8px;" class="fa fa-spinner fa-spin"></i> Обработка...')

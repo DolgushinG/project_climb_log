@@ -113,9 +113,11 @@ class User extends Authenticatable
         'related_user_id' => 'json',
     ];
 
-    public static function user_participant($event_id){
+    public static function user_participant($event_id, $user_id = null){
         $event = Event::find($event_id);
-        $user_id = Auth()->user()->id;
+        if(!$user_id){
+            $user_id = Auth()->user()->id;
+        }
         if($event->is_france_system_qualification){
             $participant = ResultFranceSystemQualification::where('user_id',  $user_id)->where('event_id', $event_id)->first();
         } else {
