@@ -262,7 +262,7 @@
                 @if($event->is_input_birthday)
             <input type="date" id="dob${participantCount}" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]" required>
                 @else
-            <input type="date" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]" required>
+            <input type="date" id="birthday" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]" required>
                 @endif
             </div>
             <div class="form-group col-md-3 col-12 m-1">
