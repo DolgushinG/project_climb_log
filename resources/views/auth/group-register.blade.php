@@ -45,15 +45,85 @@
                                 <div id="participants">
                                     <!-- Чекбоксы, если есть данные в $related_users -->
                                     @if(!empty($related_users))
-                                        <div class="mb-3">
                                             <label>Ранее заявленные участники:</label>
                                             @foreach($related_users as $user)
-                                                <input type="checkbox" class="btn-check" name="related_users[]" id="user-{{ $user->id }}" value="{{ $user->id }}" autocomplete="off">
-                                                <label class="btn btn-outline-primary" for="user-{{ $user->id }}">
-                                                    {{ $user->middlename }}
-                                                </label>
-                                            @endforeach
-                                        </div>
+                                            <div class="row" style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
+                                                <div class="form-group col-md-4 col-12">
+                                                    <input type="checkbox" class="btn-check" name="related_users[{{ $user->id }}][user_id]" id="user-{{ $user->id }}" value="{{ $user->id }}" autocomplete="off">
+                                                    <label class="btn btn-outline-primary" for="user-{{ $user->id }}">
+                                                        {{ $user->middlename }}
+                                                    </label>
+                                                </div>
+
+                                                <div class="participant-details" id="details-{{ $user->id }}" style="display: none;">
+                                                    <div class="form-group col-md-3 col-12 m-1">
+                                                        <label for="dob">Дата рождения (опционально)</label>
+                                                        @if($event->is_input_birthday)
+                                                            <input type="date" id="related_dob" data-event-id="{{$event->id}}" data-user-id="{{$user->id}}" class="form-control" name="related_users[{{$user->id}}][dob]">
+                                                        @else
+                                                            <input type="date" id="related_dob" data-event-id="{{$event->id}}" data-user-id="{{$user->id}}" class="form-control" name="related_users[{{$user->id}}][dob]">
+                                                        @endif
+                                                    </div>
+                                                    @if($event->is_need_sport_category)
+                                                        <div class="form-group col-md-3 col-12 m-1">
+                                                            <label for="sport_categories">Разряд</label>
+                                                            <select class="form-select" name="related_users[{{ $user->id }}][sport_categories]" id="sport_categories_{{ $user->id }}" autocomplete="off" disabled>
+                                                                <option selected disabled value="">Открыть для выбора разряда</option>
+                                                                @foreach($sport_categories as $category)
+                                                                    <option value="{{$category}}">{{$category}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    @endif
+                                                    @if(!$event->is_auto_categories)
+                                                        <div class="form-group col-md-3 col-12 m-1">
+                                                            <label for="category_id">Категория участника</label>
+                                                            <select class="form-select" id="category_{{ $user->id }}" name="related_users[{{ $user->id }}][category]" autocomplete="off" required disabled>
+                                                                <option selected disabled value="">Открыть для выбора категории</option>
+                                                                @foreach($event->categories as $category)
+                                                                    <option value="{{$category}}">{{$category}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    @endif
+                                                        @if(!$event->is_input_set)
+                                                            <div class="form-group col-md-3 col-12 m-1">
+                                                                <label for="sets">Выбрать время для сета</label>
+                                                                <select class="form-select" id="sets_{{ $user->id }}" name="related_users[{{ $user->id }}][sets]"
+                                                                        aria-label="Floating label select example" required disabled>
+                                                                    @if($event->is_input_birthday)
+                                                                        <option selected disabled value="">Установите дату рождения</option>
+                                                                    @else
+                                                                        <option selected disabled value="">Выберите сет</option>
+                                                                        @foreach($sets as $set)
+                                                                            @if($set->free > 0)
+                                                                                <option data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
+                                                                                    @lang('somewords.'.$set->day_of_week)
+                                                                                    @isset($set->date[$set->day_of_week])
+                                                                                        {{$set->date[$set->day_of_week]}}
+                                                                                    @endisset
+                                                                                    {{$set->time}} (еще
+                                                                                    мест {{$set->free}})
+                                                                                </option>
+                                                                            @else
+                                                                                <option disabled data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
+                                                                                    @lang('somewords.'.$set->day_of_week)
+                                                                                    @isset($set->date[$set->day_of_week])
+                                                                                        {{$set->date[$set->day_of_week]}}
+                                                                                    @endisset
+                                                                                    {{$set->time}} (мест нет)
+                                                                                </option>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </select>
+                                                            </div>
+                                                        @endif
+                                                </div>
+                                            </div>
+
+                                        @endforeach
+
                                     @endif
                                 </div>
                                 @if(\Illuminate\Support\Facades\Auth::user()->contact)
@@ -75,7 +145,99 @@
     </main>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const checkboxes = document.querySelectorAll('#related_users .btn-check');
+            // Найдем все элементы с классом dob-input
+            document.querySelectorAll('#related_dob').forEach(function (dobInput) {
+                let debounceTimeout;
+                let lastController = null; // Для хранения текущего AbortController
+
+                // Добавляем обработчик изменения для каждого поля dob
+                dobInput.addEventListener('input', function () {
+                    clearTimeout(debounceTimeout); // Сброс предыдущего таймера
+
+                    // Получаем ID участника и события из data-атрибутов
+                    const userId = this.getAttribute('data-user-id');
+                    const eventId = this.getAttribute('data-event-id');
+                    const dobValue = this.value;
+
+                    debounceTimeout = setTimeout(function () {
+                        // Отмена предыдущего запроса
+                        if (lastController) {
+                            lastController.abort();
+                        }
+
+                        // Создаем новый контроллер для нового запроса
+                        lastController = new AbortController();
+                        const signal = lastController.signal;
+
+                        if (dobValue) {
+                            // Делаем запрос на сервер для получения доступных сетов
+                            fetch(`/get-available-sets?dob=${dobValue}&event_id=${eventId}`, { signal })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Ошибка сети');
+                                    }
+                                    return response.json(); // Преобразуем ответ в JSON
+                                })
+                                .then(data => {
+                                    const setsSelect = document.getElementById(`sets_${userId}`);
+                                    setsSelect.innerHTML = '<option value="">Выберите сет</option>';
+
+                                    // Если есть доступные сеты, добавляем их в список
+                                    if (data.availableSets && data.availableSets.length > 0) {
+                                        data.availableSets.forEach(set => {
+                                            const option = document.createElement('option');
+                                            option.value = set.number_set;
+                                            option.textContent = `${set.time} (еще мест ${set.free})`;
+                                            setsSelect.appendChild(option);
+                                        });
+                                    } else {
+                                        const option = document.createElement('option');
+                                        option.value = '';
+                                        option.textContent = 'Нет доступных сетов';
+                                        setsSelect.appendChild(option);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Ошибка при запросе сетов:', error);
+                                });
+                        }
+                    }, 500); // Задержка в 500 мс перед выполнением запроса
+                });
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.btn-check').forEach(function (checkbox) {
+                checkbox.addEventListener('change', function () {
+                    var userId = this.value;
+                    var categorySelect = document.getElementById('category_' + userId);
+                    var sportCategoriesSelect = document.getElementById('sport_categories_' + userId);
+                    var setsSelect = document.getElementById('sets_' + userId);
+                    if (this.checked) {
+                        // Активируем селекты, если чекбокс выбран
+                        if (categorySelect) categorySelect.removeAttribute('disabled');
+                        if (sportCategoriesSelect) sportCategoriesSelect.removeAttribute('disabled');
+                        if (setsSelect) setsSelect.removeAttribute('disabled');
+                    } else {
+                        // Отключаем селекты, если чекбокс не выбран
+                        if (categorySelect) categorySelect.setAttribute('disabled', 'disabled');
+                        if (sportCategoriesSelect) sportCategoriesSelect.setAttribute('disabled', 'disabled');
+                        if (setsSelect) setsSelect.setAttribute('disabled', 'disabled');
+                    }
+                });
+            });
+        });
+        document.querySelectorAll('#participants .btn-check').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                let details = document.getElementById('details-' + this.value);
+                if (this.checked) {
+                    details.style.display = 'block';
+                } else {
+                    details.style.display = 'none';
+                }
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkboxes = document.querySelectorAll('#participants .btn-check');
             const sendButton = document.getElementById('btn-send');
 
             checkboxes.forEach(checkbox => {
@@ -97,12 +259,14 @@
 
             <div class="form-group col-md-3 col-12 m-1">
                   <label for="firstname">Фамилия</label>
-                <input type="text" class="form-control" name="participants[${participantCount}][firstname]" required>
+                <input type="text" class="form-control russian-only" name="participants[${participantCount}][firstname]" required>
+                <div class="invalid-feedback">Введите только русские буквы.</div>
             </div>
 
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="lastname">Имя</label>
-                <input type="text" class="form-control" name="participants[${participantCount}][lastname]" required>
+                <input type="text" class="form-control russian-only" name="participants[${participantCount}][lastname]" required>
+                <div class="invalid-feedback">Введите только русские буквы.</div>
             </div>
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="dob">Дата рождения (опционально)</label>
@@ -196,10 +360,20 @@
             </div>
         </div>
     `;
-
+            document.querySelectorAll('.russian-only').forEach(function (inputField) {
+                inputField.addEventListener('input', function () {
+                    const russianRegex = /^[А-Яа-яЁё\s-]+$/;
+                    if (!russianRegex.test(this.value)) {
+                        this.classList.add('is-invalid');  // Добавляем класс ошибки
+                    } else {
+                        this.classList.remove('is-invalid');  // Убираем класс ошибки
+                    }
+                });
+            });
             document.getElementById('participants').insertAdjacentHTML('beforeend', participantForm);
             let selector = '[id=dob'+participantCount + ']'
             const dob = document.querySelector(selector);
+
             let debounceTimeout;
             let lastController = null; // Для хранения текущего AbortController
 
@@ -272,6 +446,22 @@
             const form = document.getElementById('group-registration-form');
 
             form.addEventListener('submit', function(event) {
+                let isValid = true;
+
+                document.querySelectorAll('.russian-only').forEach(function (inputField) {
+                    const russianRegex = /^[А-Яа-яЁё\s-]+$/;
+
+                    if (!russianRegex.test(inputField.value)) {
+                        inputField.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        inputField.classList.remove('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                   return // Предотвращаем отправку формы, если есть ошибки
+                }
                 event.preventDefault(); // Отменить стандартное поведение формы (перенаправление)
 
                 const formData = new FormData(form);
