@@ -1,6 +1,6 @@
 @extends('layouts.main_page.app')
 @section('content')
-    <link href="{{asset('vendor/helpers/css_suggestions.css')}}" rel="stylesheet" />
+    <link href="{{asset('vendor/helpers/css_suggestions.css')}}" rel="stylesheet"/>
     <script src="{{asset('vendor/helpers/jquery.suggestions.js')}}"></script>
     <section class="d-flex align-items-center">
         <div class="container" data-aos="zoom-out" data-aos-delay="100">
@@ -8,7 +8,8 @@
     </section><!-- End Hero -->
     <main id="main">
         <div class="container">
-            <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+            <section
+                class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
                 <div class="container">
                     <div class="row justify-content-center">
                         <section class="section-title">
@@ -16,7 +17,8 @@
                         </section>
                         @auth
                             <h3>Данные заявителя</h3>
-                            <div class="row" style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
+                            <div class="row"
+                                 style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
                                 <!-- Фамилия -->
                                 <div class="form-group col-md-4 col-12">
                                     <label for="firstname">Фамилия</label>
@@ -36,39 +38,44 @@
                                     <label for="contact">Контактные данные</label>
                                     <p>{{ auth()->user()->contact ?? "Не заполнены, заполните у себя в личном кабинете" }} </p>
                                 </div>
-                                <p> Если у участников не заполнены поля Email, то они будут сгенерированы автоматически </p>
+                                <p> Если у участников не заполнены поля Email, то они будут сгенерированы
+                                    автоматически </p>
                                 <p> Контактные данные участников будут заполнены контактными данными заявителя </p>
-                                <p> В письме после отправки будут все данные для входа в личный кабинет заявленных участников</p>
+                                <p> В письме после отправки будут все данные для входа в личный кабинет заявленных
+                                    участников</p>
                             </div>
-                            <form id="group-registration-form" method="POST" action="{{ route('group_registration', [$event->id]) }}">
+                            <form id="group-registration-form" method="POST"
+                                  action="{{ route('group_registration', [$event->id]) }}">
                                 @csrf
                                 <div id="participants">
                                     <!-- Чекбоксы, если есть данные в $related_users -->
                                     @if(!empty($related_users))
-                                            <label>Ранее заявленные участники:</label>
-                                            @foreach($related_users as $user)
-                                            <div class="row" style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
+                                        <label>Ранее заявленные участники:</label>
+                                        @foreach($related_users as $user)
+                                            <div class="row"
+                                                 style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
                                                 <div class="form-group col-md-4 col-12">
-                                                    <input type="checkbox" class="btn-check" name="related_users[{{ $user->id }}][user_id]" id="user-{{ $user->id }}" value="{{ $user->id }}" autocomplete="off">
+                                                    <input type="checkbox" class="btn-check"
+                                                           name="related_users[{{ $user->id }}][user_id]"
+                                                           id="user-{{ $user->id }}" value="{{ $user->id }}"
+                                                           autocomplete="off">
                                                     <label class="btn btn-outline-primary" for="user-{{ $user->id }}">
                                                         {{ $user->middlename }}
                                                     </label>
                                                 </div>
 
-                                                <div class="participant-details" id="details-{{ $user->id }}" style="display: none;">
-                                                    <div class="form-group col-md-3 col-12 m-1">
-                                                        <label for="dob">Дата рождения (опционально)</label>
-                                                        @if($event->is_input_birthday)
-                                                            <input type="date" id="related_dob" data-event-id="{{$event->id}}" data-user-id="{{$user->id}}" class="form-control" name="related_users[{{$user->id}}][dob]">
-                                                        @else
-                                                            <input type="date" id="related_dob" data-event-id="{{$event->id}}" data-user-id="{{$user->id}}" class="form-control" name="related_users[{{$user->id}}][dob]">
-                                                        @endif
-                                                    </div>
+                                                <div class="participant-details" id="details-{{ $user->id }}"
+                                                     style="display: none;">
                                                     @if($event->is_need_sport_category)
                                                         <div class="form-group col-md-3 col-12 m-1">
                                                             <label for="sport_categories">Разряд</label>
-                                                            <select class="form-select" name="related_users[{{ $user->id }}][sport_categories]" id="sport_categories_{{ $user->id }}" autocomplete="off" disabled>
-                                                                <option selected disabled value="">Открыть для выбора разряда</option>
+                                                            <select class="form-select"
+                                                                    name="related_users[{{ $user->id }}][sport_categories]"
+                                                                    id="sport_categories_{{ $user->id }}"
+                                                                    autocomplete="off" disabled>
+                                                                <option selected disabled value="">Открыть для выбора
+                                                                    разряда
+                                                                </option>
                                                                 @foreach($sport_categories as $category)
                                                                     <option value="{{$category}}">{{$category}}</option>
                                                                 @endforeach
@@ -78,26 +85,57 @@
                                                     @if(!$event->is_auto_categories)
                                                         <div class="form-group col-md-3 col-12 m-1">
                                                             <label for="category_id">Категория участника</label>
-                                                            <select class="form-select" id="category_{{ $user->id }}" name="related_users[{{ $user->id }}][category]" autocomplete="off" required disabled>
-                                                                <option selected disabled value="">Открыть для выбора категории</option>
+                                                            <select class="form-select" id="category_{{ $user->id }}"
+                                                                    name="related_users[{{ $user->id }}][category]"
+                                                                    autocomplete="off" required disabled>
+                                                                <option selected disabled value="">Открыть для выбора
+                                                                    категории
+                                                                </option>
                                                                 @foreach($event->categories as $category)
                                                                     <option value="{{$category}}">{{$category}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
                                                     @endif
-                                                        @if(!$event->is_input_set)
-                                                            <div class="form-group col-md-3 col-12 m-1">
-                                                                <label for="sets">Выбрать время для сета</label>
-                                                                <select class="form-select" id="sets_{{ $user->id }}" name="related_users[{{ $user->id }}][sets]"
-                                                                        aria-label="Floating label select example" required disabled>
-                                                                    @if($event->is_input_birthday)
-                                                                        <option selected disabled value="">Установите дату рождения</option>
-                                                                    @else
-                                                                        <option selected disabled value="">Выберите сет</option>
-                                                                        @foreach($sets as $set)
+                                                    @if(!$event->is_input_set)
+                                                        <div class="form-group col-md-3 col-12 m-1">
+                                                            <label for="sets">Выбрать время для сета</label>
+                                                            <select class="form-select" id="sets_{{ $user->id }}"
+                                                                    name="related_users[{{ $user->id }}][sets]"
+                                                                    aria-label="Floating label select example" autocomplete="off" disabled required>
+                                                                    @foreach($sets as $set)
+                                                                        @if($event->is_input_birthday)
+                                                                            @if(App\Helpers\Helpers::is_valid_year_for_event($event->id, $set->number_set, $user->birthday))
+                                                                                @if($set->free > 0)
+                                                                                    <option data-set=""
+                                                                                            data-free="{{$set->free}}"
+                                                                                            value="{{$set->number_set}}">
+                                                                                        Сет {{$set->number_set}}
+                                                                                        @lang('somewords.'.$set->day_of_week)
+                                                                                        @isset($set->date[$set->day_of_week])
+                                                                                            {{$set->date[$set->day_of_week]}}
+                                                                                        @endisset
+                                                                                        {{$set->time}} (еще
+                                                                                        мест {{$set->free}})
+                                                                                    </option>
+                                                                                @else
+                                                                                    <option data-set=""
+                                                                                            data-free="{{$set->free}}"
+                                                                                            value="{{$set->number_set}}">
+                                                                                        Сет {{$set->number_set}}
+                                                                                        @lang('somewords.'.$set->day_of_week)
+                                                                                        @isset($set->date[$set->day_of_week])
+                                                                                            {{$set->date[$set->day_of_week]}}
+                                                                                        @endisset
+                                                                                        {{$set->time}} (мест нет)
+                                                                                    </option>
+                                                                                @endif
+                                                                            @endif
+                                                                        @else
                                                                             @if($set->free > 0)
-                                                                                <option data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
+                                                                                <option data-free="{{$set->free}}"
+                                                                                        value="{{$set->number_set}}">
+                                                                                    Сет {{$set->number_set}}
                                                                                     @lang('somewords.'.$set->day_of_week)
                                                                                     @isset($set->date[$set->day_of_week])
                                                                                         {{$set->date[$set->day_of_week]}}
@@ -106,7 +144,9 @@
                                                                                     мест {{$set->free}})
                                                                                 </option>
                                                                             @else
-                                                                                <option disabled data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
+                                                                                <option disabled data-free="{{$set->free}}"
+                                                                                        value="{{$set->number_set}}">
+                                                                                    Сет {{$set->number_set}}
                                                                                     @lang('somewords.'.$set->day_of_week)
                                                                                     @isset($set->date[$set->day_of_week])
                                                                                         {{$set->date[$set->day_of_week]}}
@@ -114,97 +154,40 @@
                                                                                     {{$set->time}} (мест нет)
                                                                                 </option>
                                                                             @endif
-                                                                        @endforeach
-                                                                    @endif
-                                                                </select>
-                                                            </div>
-                                                        @endif
+                                                                        @endif
+                                                                    @endforeach
+                                                            </select>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             </div>
-
                                         @endforeach
-
                                     @endif
                                 </div>
                                 @if(\Illuminate\Support\Facades\Auth::user()->contact)
-                                    <button type="button" id="add-participant" class="btn btn-primary m-3">Добавить участника</button>
-                                    <button type="submit" id="btn-send" class="btn btn-success" disabled>Отправить</button>
+                                    <button type="button" id="add-participant" class="btn btn-primary m-3">Добавить
+                                        участника
+                                    </button>
+                                    <button type="submit" id="btn-send" class="btn btn-success" disabled>Отправить
+                                    </button>
                                 @else
                                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        <p> Для регистрации группы на соревнование, необходимы контакты для быстрой связи</p>
-                                        <p> Добавьте контактные данные для быстрой связи в вашем <a href="{{ route('profile') }}">профиле</a></p>
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        <p> Для регистрации группы на соревнование, необходимы контакты для быстрой
+                                            связи</p>
+                                        <p> Добавьте контактные данные для быстрой связи в вашем <a
+                                                href="{{ route('profile') }}">профиле</a></p>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Close"></button>
                                     </div>
                                 @endif
                             </form>
                         @endauth
                     </div>
                 </div>
-        </section>
+            </section>
         </div>
     </main>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Найдем все элементы с классом dob-input
-            document.querySelectorAll('#related_dob').forEach(function (dobInput) {
-                let debounceTimeout;
-                let lastController = null; // Для хранения текущего AbortController
-
-                // Добавляем обработчик изменения для каждого поля dob
-                dobInput.addEventListener('input', function () {
-                    clearTimeout(debounceTimeout); // Сброс предыдущего таймера
-
-                    // Получаем ID участника и события из data-атрибутов
-                    const userId = this.getAttribute('data-user-id');
-                    const eventId = this.getAttribute('data-event-id');
-                    const dobValue = this.value;
-
-                    debounceTimeout = setTimeout(function () {
-                        // Отмена предыдущего запроса
-                        if (lastController) {
-                            lastController.abort();
-                        }
-
-                        // Создаем новый контроллер для нового запроса
-                        lastController = new AbortController();
-                        const signal = lastController.signal;
-
-                        if (dobValue) {
-                            // Делаем запрос на сервер для получения доступных сетов
-                            fetch(`/get-available-sets?dob=${dobValue}&event_id=${eventId}`, { signal })
-                                .then(response => {
-                                    if (!response.ok) {
-                                        throw new Error('Ошибка сети');
-                                    }
-                                    return response.json(); // Преобразуем ответ в JSON
-                                })
-                                .then(data => {
-                                    const setsSelect = document.getElementById(`sets_${userId}`);
-                                    setsSelect.innerHTML = '<option value="">Выберите сет</option>';
-
-                                    // Если есть доступные сеты, добавляем их в список
-                                    if (data.availableSets && data.availableSets.length > 0) {
-                                        data.availableSets.forEach(set => {
-                                            const option = document.createElement('option');
-                                            option.value = set.number_set;
-                                            option.textContent = `${set.time} (еще мест ${set.free})`;
-                                            setsSelect.appendChild(option);
-                                        });
-                                    } else {
-                                        const option = document.createElement('option');
-                                        option.value = '';
-                                        option.textContent = 'Нет доступных сетов';
-                                        setsSelect.appendChild(option);
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Ошибка при запросе сетов:', error);
-                                });
-                        }
-                    }, 500); // Задержка в 500 мс перед выполнением запроса
-                });
-            });
-        });
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.btn-check').forEach(function (checkbox) {
                 checkbox.addEventListener('change', function () {
@@ -226,8 +209,8 @@
                 });
             });
         });
-        document.querySelectorAll('#participants .btn-check').forEach(function(checkbox) {
-            checkbox.addEventListener('change', function() {
+        document.querySelectorAll('#participants .btn-check').forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
                 let details = document.getElementById('details-' + this.value);
                 if (this.checked) {
                     details.style.display = 'block';
@@ -248,11 +231,10 @@
             });
         });
         document.getElementById('add-participant').addEventListener('click', function () {
-            const participantCount = document.querySelectorAll('.participant-form').length + 1 ;
-            if(participantCount >= 1){
+            const participantCount = document.querySelectorAll('.participant-form').length + 1;
+            if (participantCount >= 1) {
                 document.getElementById('btn-send').disabled = false
             }
-            // Структура формы с использованием Bootstrap Grid
             let participantForm = `
         <div class="participant-form row" style="border: 1px solid #ddd; background-color: #f9f9f9; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); padding: 15px; margin-bottom: 20px;">
             <h5 class="col-12">Участник ${participantCount}</h5>
@@ -269,11 +251,11 @@
                 <div class="invalid-feedback">Введите только русские буквы.</div>
             </div>
             <div class="form-group col-md-3 col-12 m-1">
-                <label for="dob">Дата рождения (опционально)</label>
+                <label for="dob">Дата рождения</label>
                 @if($event->is_input_birthday)
-                    <input type="date" id="dob${participantCount}" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]">
+            <input type="date" id="dob${participantCount}" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]" required>
                 @else
-                    <input type="date" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]">
+            <input type="date" data-event-id${participantCount}="{{$event->id}}" class="form-control" name="participants[${participantCount}][dob]" required>
                 @endif
             </div>
             <div class="form-group col-md-3 col-12 m-1">
@@ -296,11 +278,11 @@
                      <option selected disabled value="">Открыть для выбора категории
                      </option>
                     @foreach($event->categories as $category)
-                        <option value="{{$category}}">{{$category}}</option>
+            <option value="{{$category}}">{{$category}}</option>
                     @endforeach
-                </select>
-            </div>
-            @endif
+            </select>
+        </div>
+@endif
             @if($event->is_need_sport_category)
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="sport_categories">Разряд</label>
@@ -309,48 +291,48 @@
                     <option selected disabled value="">Открыть для выбора разряда
                     </option>
                     @foreach ($sport_categories as $category)
-                <option value="{{$category}}">{{$category}}</option>
+            <option value="{{$category}}">{{$category}}</option>
                     @endforeach
-                </select>
-            </div>
-            @endif
+            </select>
+        </div>
+@endif
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="team">Команда/Тренер (опционально)</label>
                 <input type="text" class="form-control" name="participants[${participantCount}][team]">
             </div>
             @if(!$event->is_input_set)
-                <div class="form-group col-md-3 col-12 m-1">
-                        <label for="sets">Выбрать время для сета</label>
-                    <select class="form-select" id="sets${participantCount}" name="participants[${participantCount}][sets]"
+            <div class="form-group col-md-3 col-12 m-1">
+                    <label for="sets">Выбрать время для сета</label>
+                <select class="form-select" id="sets${participantCount}" name="participants[${participantCount}][sets]"
                         aria-label="Floating label select example" required>
                         @if($event->is_input_birthday)
-                            <option selected disabled value="">Установите дату рождения</option>
-                        @else
-                             <option selected disabled value="">Выберите сет</option>
-                             @foreach($sets as $set)
-                                @if($set->free > 0)
-                                     <option data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
-                                         @lang('somewords.'.$set->day_of_week)
-                                    @isset($set->date[$set->day_of_week])
-                                        {{$set->date[$set->day_of_week]}}
-                                    @endisset
-                                    {{$set->time}} (еще
+            <option selected disabled value="">Установите дату рождения</option>
+@else
+            <option selected disabled value="">Выберите сет</option>
+@foreach($sets as $set)
+            @if($set->free > 0)
+            <option data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
+            @lang('somewords.'.$set->day_of_week)
+            @isset($set->date[$set->day_of_week])
+            {{$set->date[$set->day_of_week]}}
+            @endisset
+            {{$set->time}} (еще
                                         мест {{$set->free}})
                                        </option>
                                 @else
-                                    <option disabled data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
-                                    @lang('somewords.'.$set->day_of_week)
-                                    @isset($set->date[$set->day_of_week])
-                                    {{$set->date[$set->day_of_week]}}
-                                    @endisset
-                                    {{$set->time}} (мест нет)
+            <option disabled data-free="{{$set->free}}" value="{{$set->number_set}}">Сет {{$set->number_set}}
+            @lang('somewords.'.$set->day_of_week)
+            @isset($set->date[$set->day_of_week])
+            {{$set->date[$set->day_of_week]}}
+            @endisset
+            {{$set->time}} (мест нет)
                                                 </option>
                                 @endif
-                            @endforeach
-                        @endif
-                    </select>
-                </div>
+            @endforeach
             @endif
+            </select>
+        </div>
+@endif
             <div class="form-group col-md-3 col-12 m-1">
                 <label for="email">Email (опционально)</label>
                 <input type="email" class="form-control" name="participants[${participantCount}][email]">
@@ -371,7 +353,7 @@
                 });
             });
             document.getElementById('participants').insertAdjacentHTML('beforeend', participantForm);
-            let selector = '[id=dob'+participantCount + ']'
+            let selector = '[id=dob' + participantCount + ']'
             const dob = document.querySelector(selector);
 
             let debounceTimeout;
@@ -396,7 +378,7 @@
                         const signal = lastController.signal;
 
                         if (dob_send) {
-                            fetch(`/get-available-sets?dob=${dob_send}&event_id=${eventId}`, { signal })
+                            fetch(`/get-available-sets?dob=${dob_send}&event_id=${eventId}`, {signal})
                                 .then(response => {
                                     if (!response.ok) {
                                         throw new Error('Ошибка сети');
@@ -404,7 +386,7 @@
                                     return response.json(); // Первый вызов .then()
                                 })
                                 .then(data => {
-                                    let sets_id = '[id=sets'+participantCount+']'
+                                    let sets_id = '[id=sets' + participantCount + ']'
                                     const setsSelect = document.querySelector(sets_id);
                                     setsSelect.innerHTML = '<option value="">Выберите сет</option>';
 
@@ -436,16 +418,16 @@
             if (event.target.classList.contains('remove-participant')) {
                 event.target.closest('.participant-form').remove();
 
-                if(document.querySelectorAll('.participant-form').length < 1){
+                if (document.querySelectorAll('.participant-form').length < 1) {
                     document.getElementById('btn-send').disabled = true
                 }
             }
 
         });
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('group-registration-form');
 
-            form.addEventListener('submit', function(event) {
+            form.addEventListener('submit', function (event) {
                 let isValid = true;
 
                 document.querySelectorAll('.russian-only').forEach(function (inputField) {
@@ -460,7 +442,7 @@
                 });
 
                 if (!isValid) {
-                   return // Предотвращаем отправку формы, если есть ошибки
+                    return // Предотвращаем отправку формы, если есть ошибки
                 }
                 event.preventDefault(); // Отменить стандартное поведение формы (перенаправление)
 
