@@ -187,7 +187,7 @@ class RegisteredUserController extends Controller
                 $related_user_id[] = $user->id;
                 $created_users[$index]['number_set'] = $number_sets[$user->id] ?? '-';
             }
-            $merged_result_for_edit = array_merge($person->related_user_id, $related_user_id);
+            $merged_result_for_edit = array_merge($person->related_user_id ?? [], $related_user_id);
             $person->related_user_id = $merged_result_for_edit;
             $person->save();
         }
