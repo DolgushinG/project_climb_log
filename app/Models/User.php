@@ -91,6 +91,7 @@ class User extends Authenticatable
         'telegram_id',
         'yandex_id',
         'vkontakte_id',
+        'related_user_id',
     ];
     /**
      * The attributes that should be hidden for serialization.
@@ -109,11 +110,14 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'related_user_id' => 'json',
     ];
 
-    public static function user_participant($event_id){
+    public static function user_participant($event_id, $user_id = null){
         $event = Event::find($event_id);
-        $user_id = Auth()->user()->id;
+        if(!$user_id){
+            $user_id = Auth()->user()->id;
+        }
         if($event->is_france_system_qualification){
             $participant = ResultFranceSystemQualification::where('user_id',  $user_id)->where('event_id', $event_id)->first();
         } else {
