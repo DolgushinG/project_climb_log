@@ -25,8 +25,8 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
     public $route_id;
     public $category_id;
 
-    function __construct($event, $stage, $number_set_id, $gender, $category_id) {
-        $this->event = Event::find($event);
+    function __construct($event_id, $stage, $number_set_id, $gender, $category_id) {
+        $this->event = Event::find($event_id);
         $this->stage = $stage;
         $this->number_set_id = $number_set_id;
         $this->gender = $gender;
