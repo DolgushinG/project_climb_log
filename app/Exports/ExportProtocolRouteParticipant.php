@@ -106,7 +106,7 @@ class ExportProtocolRouteParticipant implements WithCustomStartCell, ShouldAutoS
      */
     public function event_title(): string
     {
-        return $this->event->title;
+        return $this->event->title ?? '';
     }
 
     /**
